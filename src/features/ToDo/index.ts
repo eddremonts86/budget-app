@@ -1,4 +1,4 @@
-// Public API for the example-todo feature
+// Public API for the ToDo feature
 // Only export what should be used outside this feature
 
 // API Hooks

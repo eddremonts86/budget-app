@@ -34,9 +34,9 @@ export const TodoItem = memo(function TodoItem({
   return (
     <div
       className={cn(
-        'group relative rounded-lg border p-4 transition-all',
-        'hover:shadow-md hover:border-primary/50',
-        'animate-in fade-in slide-in-from-bottom-2 duration-300',
+        'group relative border-b p-4 transition-all',
+        'hover:bg-secondary/20',
+        'animate-in fade-in duration-200',
         todo.status === 'completed' && 'opacity-60',
       )}
     >

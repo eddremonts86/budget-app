@@ -53,7 +53,7 @@ export function TodoEditForm({ todo, onSuccess, onCancel }: TodoEditFormProps) {
         e.stopPropagation()
         form.handleSubmit()
       }}
-      className="rounded-lg border p-4 bg-card space-y-3 animate-in fade-in slide-in-from-top-2 duration-200"
+      className="border-b p-6 bg-muted/30 space-y-4 animate-in fade-in duration-200"
     >
       <div className="flex items-center justify-between mb-2">
         <h4 className="text-sm font-semibold">{t('todo.editTodo')}</h4>

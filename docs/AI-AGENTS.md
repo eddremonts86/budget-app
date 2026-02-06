@@ -36,7 +36,7 @@ Follow these patterns:
 - Use @/shared/lib/utils for utilities
 - Always use useTranslation() for text
 - Validate forms with Zod + TanStack Form
-- Follow the example-todo feature as reference
+- Follow the `ToDo` feature as reference
 ```
 
 #### 2. Component Generator Agent
@@ -144,7 +144,7 @@ Pattern:
 4. Handle submit with mutation
 5. Show validation errors with i18n
 
-Follow example-todo/ui/TodoForm.tsx as reference.
+Follow `ToDo/ui/TodoForm.tsx` as reference.
 
 ```
 
@@ -204,17 +204,16 @@ When working with any AI assistant, provide this context:
 - **Linting**: Biome (strict config)
 
 ### Key Files to Reference
-- `src/features/example-todo/` - Feature module example
+- `src/features/ToDo/` - Functional features like todo management
 - `src/shared/lib/query/` - Query wrapper implementations
 - `src/shared/lib/api/` - Axios client setup
-- `src/app/providers/` - React context providers
+- `src/shared/providers/` - React context providers
 - `biome.json` - Code style rules
 
 ### Import Aliases
 - `@/` → `src/`
 - `@/shared/` → `src/shared/`
 - `@/features/` → `src/features/`
-- `@/app/` → `src/app/`
 
 ## Useful Skills (skills.sh)
 
@@ -240,7 +239,7 @@ npx skills add anthropics/skills/frontend-design
 ## Tips for Best Results
 
 1. **Be specific**: Mention the exact file paths and patterns to follow
-2. **Reference examples**: Point to `example-todo` feature as template
+2. **Reference examples**: Point to `ToDo` feature as template
 3. **Include constraints**: Mention Biome rules, TypeScript strict mode
 4. **Specify i18n**: Always ask for translations in all three languages
 5. **Request tests**: Include E2E test requests with feature creation

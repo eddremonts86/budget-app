@@ -12,6 +12,7 @@ export default tseslint.config(
       'dist/**',
       'node_modules/**',
       '.tanstack/**',
+      '.netlify/**',
       'src/routeTree.gen.ts',
       'playwright-report/**',
       'test-results/**',

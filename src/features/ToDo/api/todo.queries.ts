@@ -36,12 +36,20 @@ export function useTodosInfinite(filters?: TodoFilters, pageSize = 10) {
       cache: 'standard',
       initialPageParam: 1,
       getNextPageParam: (lastPage) => {
-        const loaded = lastPage.page * lastPage.limit
-        const hasMore = lastPage.total
-          ? loaded < lastPage.total
-          : lastPage.items.length === lastPage.limit
+        // If the current page returned no items, we reached the end
+        if (!lastPage.items || lastPage.items.length === 0) return undefined
 
-        return hasMore ? lastPage.page + 1 : undefined
+        // If we got fewer items than the limit, we reached the end
+        if (lastPage.items.length < lastPage.limit) return undefined
+
+        // Otherwise, try to calculate if there's more based on total
+        const loaded = lastPage.page * lastPage.limit
+        if (lastPage.total && loaded >= lastPage.total) return undefined
+
+        // Safety check: don't allow page numbers to explode
+        if (lastPage.page >= 1000) return undefined
+
+        return lastPage.page + 1
       },
     },
   )

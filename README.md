@@ -25,9 +25,24 @@ This project uses [Vitest](https://vitest.dev/) for testing. You can run the tes
 npm run test
 ```
 
+## Project Structure
+
+This project follows a feature-based architecture:
+
+- `src/features/`: Functional features (e.g., `src/features/ToDo`).
+- `src/shared/`: Shared components, hooks, libs, and providers.
+  - `src/shared/components/ui/`: Reusable UI components.
+  - `src/shared/lib/`: Core libraries (API client, i18n, Query).
+  - `src/shared/providers/`: Global React context providers.
+- `src/routes/`: File-based routing with TanStack Router.
+
+## Localization
+
+Translations are managed in `src/shared/lib/i18n/locales`. Supported languages: English, Spanish, and Danish.
+
 ## Styling
 
-This project uses CSS for styling.
+This project uses Tailwind CSS 4 for styling, located in `src/shared/styles/globals.css`.
 
 ## Routing
 

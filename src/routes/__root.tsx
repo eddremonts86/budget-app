@@ -2,8 +2,8 @@ import * as Sentry from '@sentry/react'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { createRootRoute, HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
-import { AppProviders } from '@/app/providers'
-import appCss from '@/app/styles/globals.css?url'
+import { AppProviders } from '@/shared/providers'
+import appCss from '@/shared/styles/globals.css?url'
 import { initSentry } from '@/shared/lib/sentry'
 
 // Initialize Sentry

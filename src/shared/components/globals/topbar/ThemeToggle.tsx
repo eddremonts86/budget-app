@@ -1,9 +1,17 @@
 import { Monitor, Moon, Sun } from 'lucide-react'
-import { useTheme } from '@/app/providers'
+import { useEffect, useState } from 'react'
 import { cn } from '@/shared/lib/utils'
+import { useTheme } from '@/shared/providers'
 
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  // Avoid hydration mismatch by only rendering theme-specific classes after mount
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setMounted(true)
+  }, [])
 
   return (
     <div className="flex items-center gap-1 rounded-lg border p-1">
@@ -12,7 +20,7 @@ export function ThemeToggle() {
         onClick={() => setTheme('light')}
         className={cn(
           'p-2 rounded-md transition-colors',
-          theme === 'light' ? 'bg-secondary' : 'hover:bg-secondary/50',
+          mounted && theme === 'light' ? 'bg-secondary' : 'hover:bg-secondary/50',
         )}
         aria-label="Light theme"
       >
@@ -23,7 +31,7 @@ export function ThemeToggle() {
         onClick={() => setTheme('dark')}
         className={cn(
           'p-2 rounded-md transition-colors',
-          theme === 'dark' ? 'bg-secondary' : 'hover:bg-secondary/50',
+          mounted && theme === 'dark' ? 'bg-secondary' : 'hover:bg-secondary/50',
         )}
         aria-label="Dark theme"
       >
@@ -34,7 +42,7 @@ export function ThemeToggle() {
         onClick={() => setTheme('system')}
         className={cn(
           'p-2 rounded-md transition-colors',
-          theme === 'system' ? 'bg-secondary' : 'hover:bg-secondary/50',
+          mounted && theme === 'system' ? 'bg-secondary' : 'hover:bg-secondary/50',
         )}
         aria-label="System theme"
       >

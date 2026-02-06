@@ -1,0 +1,7 @@
+export { GlowyWavesHero } from './GlowyWavesHero'
+export { FeatureCardsBlock } from './FeatureCardsBlock'
+export { NewHeroSection } from './NewHeroSection'
+export { OurServicesSection } from './OurServicesSection'
+export { TimelineBlock } from './TimelineBlock'
+export { ContactBlock } from './ContactBlock'
+export { FooterBlock } from './FooterBlock'
