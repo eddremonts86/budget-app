@@ -1,0 +1,21 @@
+{
+  "api": {
+    "badRequest": "Datos inválidos en la solicitud",
+    "unauthorized": "Sesión expirada. Por favor inicia sesión nuevamente",
+    "forbidden": "No tienes permisos para esta acción",
+    "notFound": "Recurso no encontrado",
+    "conflict": "Conflicto con el estado actual del recurso",
+    "validation": "Error de validación en los datos enviados",
+    "tooManyRequests": "Demasiadas solicitudes. Intenta más tarde",
+    "serverError": "Error interno del servidor. Intenta más tarde",
+    "unavailable": "Servicio temporalmente no disponible",
+    "maintenance": "Servicio en mantenimiento. Intenta más tarde",
+    "networkError": "Error de red. Verifica tu conexión"
+  },
+  "form": {
+    "required": "Este campo es obligatorio",
+    "invalid": "Valor inválido",
+    "tooShort": "El valor es muy corto",
+    "tooLong": "El valor es muy largo"
+  }
+}

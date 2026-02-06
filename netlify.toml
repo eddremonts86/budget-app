@@ -1,0 +1,15 @@
+[build]
+  command = "pnpm build"
+  publish = ".netlify/output/static"
+
+[dev]
+  command = "pnpm dev:server"
+  port = 3000
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-XSS-Protection = "1; mode=block"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "strict-origin-when-cross-origin"

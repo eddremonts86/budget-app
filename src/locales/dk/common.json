@@ -1,0 +1,82 @@
+{
+  "app": {
+    "name": "TanStack Template",
+    "description": "En moderne full-stack skabelon drevet af TanStack"
+  },
+  "nav": {
+    "home": "Hjem",
+    "todos": "Opgaver",
+    "settings": "Indstillinger",
+    "signIn": "Log ind",
+    "signOut": "Log ud"
+  },
+  "common": {
+    "loading": "Indlæser...",
+    "save": "Gem",
+    "cancel": "Annuller",
+    "delete": "Slet",
+    "edit": "Rediger",
+    "create": "Opret",
+    "search": "Søg",
+    "filter": "Filter",
+    "sort": "Sorter",
+    "actions": "Handlinger",
+    "confirm": "Bekræft",
+    "yes": "Ja",
+    "no": "Nej",
+    "submit": "Indsend",
+    "reset": "Nulstil",
+    "back": "Tilbage",
+    "next": "Næste",
+    "previous": "Forrige"
+  },
+  "theme": {
+    "light": "Lys",
+    "dark": "Mørk",
+    "system": "System"
+  },
+  "language": {
+    "select": "Vælg sprog",
+    "en": "Engelsk",
+    "es": "Spansk",
+    "dk": "Dansk"
+  },
+  "todo": {
+    "title": "Opgaver",
+    "createNew": "Opret Ny Opgave",
+    "editTodo": "Rediger Opgave",
+    "deleteTodo": "Slet Opgave",
+    "deleteConfirm": "Er du sikker på, at du vil slette denne opgave?",
+    "fields": {
+      "title": "Titel",
+      "description": "Beskrivelse",
+      "status": "Status",
+      "priority": "Prioritet",
+      "dueDate": "Forfaldsdato"
+    },
+    "status": {
+      "pending": "Afventer",
+      "in_progress": "I gang",
+      "completed": "Fuldført"
+    },
+    "priority": {
+      "low": "Lav",
+      "medium": "Mellem",
+      "high": "Høj"
+    },
+    "messages": {
+      "created": "Opgave oprettet",
+      "updated": "Opgave opdateret",
+      "deleted": "Opgave slettet"
+    },
+    "empty": "Ingen opgaver fundet. Opret din første!"
+  },
+  "validation": {
+    "required": "Dette felt er påkrævet",
+    "minLength": "Skal være mindst {{min}} tegn",
+    "maxLength": "Skal være højst {{max}} tegn",
+    "invalidEmail": "Ugyldig e-mailadresse",
+    "invalidDate": "Ugyldig dato",
+    "futureDate": "Dato skal være i fremtiden"
+  }
+}

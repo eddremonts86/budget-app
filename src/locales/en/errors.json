@@ -1,0 +1,21 @@
+{
+  "api": {
+    "badRequest": "Invalid request data",
+    "unauthorized": "Session expired. Please sign in again",
+    "forbidden": "You don't have permission for this action",
+    "notFound": "Resource not found",
+    "conflict": "Conflict with current resource state",
+    "validation": "Validation error in submitted data",
+    "tooManyRequests": "Too many requests. Try again later",
+    "serverError": "Internal server error. Try again later",
+    "unavailable": "Service temporarily unavailable",
+    "maintenance": "Service under maintenance. Try again later",
+    "networkError": "Network error. Check your connection"
+  },
+  "form": {
+    "required": "This field is required",
+    "invalid": "Invalid value",
+    "tooShort": "Value is too short",
+    "tooLong": "Value is too long"
+  }
+}

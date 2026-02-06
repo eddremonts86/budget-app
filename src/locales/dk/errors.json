@@ -1,0 +1,21 @@
+{
+  "api": {
+    "badRequest": "Ugyldige anmodningsdata",
+    "unauthorized": "Session udløbet. Log venligst ind igen",
+    "forbidden": "Du har ikke tilladelse til denne handling",
+    "notFound": "Ressource ikke fundet",
+    "conflict": "Konflikt med aktuel ressourcetilstand",
+    "validation": "Valideringsfejl i indsendte data",
+    "tooManyRequests": "For mange anmodninger. Prøv igen senere",
+    "serverError": "Intern serverfejl. Prøv igen senere",
+    "unavailable": "Tjeneste midlertidigt utilgængelig",
+    "maintenance": "Tjeneste under vedligeholdelse. Prøv igen senere",
+    "networkError": "Netværksfejl. Tjek din forbindelse"
+  },
+  "form": {
+    "required": "Dette felt er påkrævet",
+    "invalid": "Ugyldig værdi",
+    "tooShort": "Værdien er for kort",
+    "tooLong": "Værdien er for lang"
+  }
+}
