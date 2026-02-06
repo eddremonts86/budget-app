@@ -3,26 +3,8 @@
 import { motion } from 'framer-motion'
 import { Twitter, Facebook, Instagram, Linkedin, Github } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Badge, Card, Input, Button } from '@/shared/components/ui'
-
-const footerLinks = [
-  {
-    title: 'Product',
-    links: ['Features', 'Pricing', 'Documentation', 'API Reference'],
-  },
-  {
-    title: 'Company',
-    links: ['About Us', 'Careers', 'Blog', 'Press Kit'],
-  },
-  {
-    title: 'Resources',
-    links: ['Community', 'Help Center', 'Partners', 'Status'],
-  },
-  {
-    title: 'Legal',
-    links: ['Privacy', 'Terms', 'Cookie Policy', 'Licenses'],
-  },
-]
 
 const socialLinks = [
   { icon: Twitter, label: 'Twitter', href: '#' },
@@ -33,7 +15,27 @@ const socialLinks = [
 ]
 
 export function FooterBlock() {
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
+
+  const footerLinks = [
+    {
+      title: t('home.footer.links.essence.title'),
+      links: t('home.footer.links.essence.items', { returnObjects: true }) as string[],
+    },
+    {
+      title: t('home.footer.links.company.title'),
+      links: t('home.footer.links.company.items', { returnObjects: true }) as string[],
+    },
+    {
+      title: t('home.footer.links.community.title'),
+      links: t('home.footer.links.community.items', { returnObjects: true }) as string[],
+    },
+    {
+      title: t('home.footer.links.legal.title'),
+      links: t('home.footer.links.legal.items', { returnObjects: true }) as string[],
+    },
+  ]
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -55,24 +57,27 @@ export function FooterBlock() {
           >
             <div className="mb-4 inline-flex items-center gap-3">
               <Card className="rounded-2xl border border-border/60 bg-card/80 px-3 py-1 text-xs uppercase tracking-[0.32em] text-muted-foreground shadow-sm">
-                Brand
+                {t('home.footer.brand')}
               </Card>
               <Badge variant="outline" className="text-xs text-muted-foreground">
-                Since 2018
+                {t('home.footer.since')}
               </Badge>
             </div>
             <p className="mb-4 max-w-md text-sm text-muted-foreground">
-              Building amazing products with modern technologies. Join us on our journey to create
-              better user experiences.
+              {t('home.footer.description')}
             </p>
 
             <div className="mb-4">
               <p className="mb-2 text-sm font-medium text-foreground">
-                Subscribe to our newsletter
+                {t('home.footer.subscribe.title')}
               </p>
               <div className="flex gap-2">
-                <Input type="email" placeholder="Enter your email" className="max-w-[240px]" />
-                <Button size="sm">Subscribe</Button>
+                <Input
+                  type="email"
+                  placeholder={t('home.footer.subscribe.placeholder')}
+                  className="max-w-[240px]"
+                />
+                <Button size="sm">{t('home.footer.subscribe.button')}</Button>
               </div>
             </div>
           </motion.div>
@@ -99,7 +104,9 @@ export function FooterBlock() {
         </div>
 
         <div className="mt-16 flex flex-col items-center justify-between border-t border-border/40 pt-8 sm:flex-row">
-          <p className="text-sm text-muted-foreground">© 2024 Brand Inc. All rights reserved.</p>
+          <p className="text-sm text-muted-foreground">
+            {t('home.footer.copyright', { year: new Date().getFullYear() })}
+          </p>
           <div className="mt-4 flex gap-4 sm:mt-0">
             {socialLinks.map((social, index) => (
               <a

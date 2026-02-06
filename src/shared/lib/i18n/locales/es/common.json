@@ -1,10 +1,14 @@
 {
   "app": {
     "name": "TanStack Template",
+    "brand": "AI Solutions",
     "description": "Una plantilla full-stack moderna impulsada por TanStack"
   },
   "nav": {
     "home": "Inicio",
+    "services": "Soluciones",
+    "timeline": "Historia",
+    "contact": "Hablemos",
     "todos": "Tareas",
     "settings": "Configuración",
     "signIn": "Iniciar Sesión",
@@ -78,5 +82,183 @@
     "invalidEmail": "Dirección de email inválida",
     "invalidDate": "Fecha inválida",
     "futureDate": "La fecha debe ser futura"
+  },
+  "home": {
+    "hero": {
+      "badge": "Propósito en cada pixel",
+      "title": "Donde la intuición humana",
+      "titleHighlight": "se encuentra con la IA",
+      "description": "No estamos aquí para reemplazar tu voz, sino para amplificarla. Creamos sistemas que aprenden de tu esencia para que tú puedas volver a lo que realmente importa: crear, imaginar y liderar.",
+      "ctaPrimary": "Empieza tu transformación",
+      "ctaSecondary": "Nuestra filosofía",
+      "pills": {
+        "alma": "Tecnología con Alma",
+        "impacto": "Impacto Real",
+        "friccion": "Cero Fricción"
+      },
+      "stats": {
+        "hours": "Horas devueltas al talento",
+        "precision": "Precisión Humana",
+        "projects": "Proyectos con propósito"
+      }
+    },
+    "newHero": {
+      "badge": "Entendemos el ruido, buscamos la claridad",
+      "title": "Tu negocio es único,",
+      "titleHighlight": "tu IA también debería serlo",
+      "description": "¿Sientes que la tecnología actual es una barrera en lugar de un puente? Hemos ayudado a cientos de equipos a recuperar 15 horas semanales de trabajo mecánico para que puedan enfocarse en la estrategia que solo los humanos pueden trazar.",
+      "ctaPrimary": "Agenda una charla honesta",
+      "ctaSecondary": "Mira cómo trabajamos",
+      "stats": {
+        "customers": "Clientes felices",
+        "projects": "Proyectos completados",
+        "satisfaction": "Tasa de satisfacción"
+      }
+    },
+    "features": {
+      "title": "Nuestros pilares no son negociables",
+      "description": "Creemos que la tecnología debe estar al servicio de las personas, no al revés. Estas son las promesas que mantenemos en cada línea de código.",
+      "items": {
+        "efficiency": {
+          "title": "Eficiencia Invisible",
+          "description": "Automatizamos lo que te agota, no lo que te define. Sistemas que trabajan en segundo plano para que tú seas el protagonista."
+        },
+        "ethics": {
+          "title": "Ética por Diseño",
+          "description": "Tus datos son tu legado. Construimos con una privacidad innegociable, protegiendo la confianza que has ganado con tus clientes."
+        },
+        "closeness": {
+          "title": "Cercanía Radical",
+          "description": "No entregamos código y nos vamos. Somos tus socios tecnológicos, entendiendo tus desafíos como si fueran nuestros."
+        }
+      }
+    },
+    "services": {
+      "badge": "Cómo te acompañamos",
+      "title": "Soluciones que resuelven, no que complican",
+      "description": "Entendemos que detrás de cada requerimiento técnico hay un objetivo humano. Aquí es cómo lo hacemos realidad.",
+      "cta": "Ver cómo",
+      "items": {
+        "software": {
+          "title": "Software con Sentido",
+          "description": "No lanzamos código al vacío. Desarrollamos herramientas que eliminan la fricción diaria de tu equipo, devolviéndoles el tiempo que merecen.",
+          "badge": "Impacto Directo"
+        },
+        "design": {
+          "title": "Diseño Empático",
+          "description": "Interfaces que no necesitan manual. Nos ponemos en la piel de quien usará tu producto para que cada clic sea natural y sin estrés."
+        },
+        "mobility": {
+          "title": "Cercanía Digital",
+          "description": "Estar donde tus usuarios están, pero de forma respetuosa. Creamos experiencias móviles que se sienten como una extensión de su día a día.",
+          "badge": "Esencial"
+        },
+        "clarity": {
+          "title": "Claridad en el Caos",
+          "description": "En un mundo saturado de información, te ayudamos a que tu mensaje real llegue a las personas que genuinamente lo necesitan."
+        },
+        "growth": {
+          "title": "Crecimiento Sostenible",
+          "description": "Escalar no tiene por qué ser traumático. Optimizamos tus procesos para que tu proyecto crezca al ritmo de tus ambiciones, no de tus preocupaciones."
+        },
+        "trust": {
+          "title": "Tranquilidad Total",
+          "description": "Protegemos lo que más valoras: la confianza de tus usuarios. Implementamos seguridad robusta para que tú solo te preocupes de innovar.",
+          "badge": "Compromiso"
+        }
+      }
+    },
+    "timeline": {
+      "badge": "Nuestra Evolución",
+      "title": "Un camino de personas, no solo de código",
+      "description": "Miramos atrás no para celebrar logros, sino para recordar por qué empezamos este viaje en primer lugar.",
+      "events": {
+        "seed": {
+          "title": "La Semilla de una Idea",
+          "description": "Nacimos en un pequeño estudio, cansados de ver cómo la tecnología se alejaba de las personas."
+        },
+        "listening": {
+          "title": "Escuchando Historias Reales",
+          "description": "Llegamos a nuestros primeros 1,000 usuarios, no como números, sino como conversaciones que dieron forma a nuestra plataforma."
+        },
+        "growth": {
+          "title": "Creciendo con Responsabilidad",
+          "description": "Recibimos apoyo para expandirnos, manteniendo siempre nuestra promesa de no perder el toque humano."
+        },
+        "impact": {
+          "title": "Impacto Sin Fronteras",
+          "description": "Abrimos oficinas en 5 países, aprendiendo que el deseo de trabajar mejor es un lenguaje universal."
+        },
+        "purpose": {
+          "title": "Inteligencia con Propósito",
+          "description": "Lanzamos nuestras funciones de IA, diseñadas para devolverte el tiempo que el trabajo administrativo te robó."
+        }
+      },
+      "footer": "Y la historia sigue contigo..."
+    },
+    "contact": {
+      "title": "Hablemos de lo que te quita el sueño",
+      "description": "¿Tienes un proyecto en mente o simplemente quieres entender cómo la tecnología puede devolverte tu tiempo? Estamos aquí para escucharte, sin tecnicismos innecesarios.",
+      "form": {
+        "name": {
+          "label": "¿Cómo te llamas?",
+          "placeholder": "Tu nombre"
+        },
+        "email": {
+          "label": "Tu correo personal",
+          "placeholder": "ejemplo@correo.com"
+        },
+        "subject": {
+          "label": "¿Qué tienes en mente?",
+          "placeholder": "Cuéntanos brevemente..."
+        },
+        "message": {
+          "label": "Cuéntanos tu historia",
+          "placeholder": "¿Cuál es el mayor desafío al que te enfrentas hoy?"
+        },
+        "submit": "Enviar mensaje y empezar la charla"
+      },
+      "info": {
+        "email": "Email",
+        "phone": "Teléfono",
+        "location": "Ubicación"
+      },
+      "workingHours": {
+        "title": "Horario de Atención",
+        "weekdays": "Lunes - Viernes",
+        "saturday": "Sábado",
+        "sunday": "Domingo",
+        "closed": "Cerrado"
+      }
+    },
+    "footer": {
+      "brand": "Brand",
+      "since": "Desde 2018",
+      "copyright": "© {{year}} Brand Inc. Todos los derechos reservados.",
+      "description": "Humanizando la tecnología para que tú puedas ser más humano. No somos solo una empresa de IA, somos tus socios en la búsqueda de tiempo y propósito.",
+      "subscribe": {
+        "title": "Únete a nuestra charla semanal",
+        "placeholder": "Tu mejor correo",
+        "button": "Suscribirme"
+      },
+      "links": {
+        "essence": {
+          "title": "Nuestra Esencia",
+          "items": ["Filosofía", "Historias de éxito", "Metodología", "Blog Humano"]
+        },
+        "company": {
+          "title": "Compañía",
+          "items": ["Quiénes somos", "Cultura", "Trabaja con nosotros", "Prensa"]
+        },
+        "community": {
+          "title": "Comunidad",
+          "items": ["Eventos", "Centro de ayuda", "Socios", "Estado de red"]
+        },
+        "legal": {
+          "title": "Legalidad",
+          "items": ["Privacidad Ética", "Términos de uso", "Cookies", "Licencias"]
+        }
+      }
+    }
   }
 }

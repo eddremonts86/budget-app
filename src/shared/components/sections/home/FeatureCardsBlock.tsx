@@ -2,28 +2,30 @@
 
 import { Zap, Shield, Sparkles } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card } from '@/shared/components/ui'
 
-const features = [
-  {
-    icon: Zap,
-    title: 'Lightning Fast',
-    description: 'Built for speed with optimized performance and instant loading times.',
-  },
-  {
-    icon: Shield,
-    title: 'Secure by Default',
-    description: 'Enterprise-grade security with built-in protection and compliance.',
-  },
-  {
-    icon: Sparkles,
-    title: 'Beautiful Design',
-    description: 'Pixel-perfect interfaces that users love to interact with.',
-  },
-]
-
 export function FeatureCardsBlock() {
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
+
+  const features = [
+    {
+      icon: Zap,
+      title: t('home.features.items.efficiency.title'),
+      description: t('home.features.items.efficiency.description'),
+    },
+    {
+      icon: Shield,
+      title: t('home.features.items.ethics.title'),
+      description: t('home.features.items.ethics.description'),
+    },
+    {
+      icon: Sparkles,
+      title: t('home.features.items.closeness.title'),
+      description: t('home.features.items.closeness.description'),
+    },
+  ]
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -36,11 +38,14 @@ export function FeatureCardsBlock() {
     <section className="px-6 py-32">
       <div className="mx-auto max-w-7xl">
         <div className="mb-20 space-y-5 text-center">
-          <h2 className="text-5xl font-bold tracking-tight md:text-6xl">Everything you need</h2>
+          <h2 className="text-5xl font-bold tracking-tight md:text-6xl">
+            {t('home.features.title')}
+          </h2>
           <p className="mx-auto max-w-2xl text-lg leading-relaxed text-muted-foreground md:text-xl">
-            Powerful features that help you build better products faster
+            {t('home.features.description')}
           </p>
         </div>
+
 
         <div className="grid gap-8 md:grid-cols-3">
           {features.map((feature, index) => (

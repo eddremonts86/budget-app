@@ -3,31 +3,33 @@
 import { motion } from 'framer-motion'
 import { Mail, Phone, MapPin, Send } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Card, Button, Input, Textarea, Label } from '@/shared/components/ui'
 
-const contactInfo = [
-  {
-    icon: Mail,
-    label: 'Email',
-    value: 'hello@example.com',
-    href: 'mailto:hello@example.com',
-  },
-  {
-    icon: Phone,
-    label: 'Phone',
-    value: '+1 (555) 123-4567',
-    href: 'tel:+15551234567',
-  },
-  {
-    icon: MapPin,
-    label: 'Location',
-    value: 'San Francisco, CA',
-    href: '#',
-  },
-]
-
 export function ContactBlock() {
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
+
+  const contactInfo = [
+    {
+      icon: Mail,
+      label: t('home.contact.info.email'),
+      value: 'hello@example.com',
+      href: 'mailto:hello@example.com',
+    },
+    {
+      icon: Phone,
+      label: t('home.contact.info.phone'),
+      value: '+1 (555) 123-4567',
+      href: 'tel:+15551234567',
+    },
+    {
+      icon: MapPin,
+      label: t('home.contact.info.location'),
+      value: 'San Francisco, CA',
+      href: '#',
+    },
+  ]
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -49,10 +51,10 @@ export function ContactBlock() {
           className="mb-12 sm:mb-16 md:mb-20 text-center"
         >
           <h2 className="mb-4 text-3xl font-bold tracking-tight text-foreground sm:text-4xl md:text-5xl">
-            Get In Touch
+            {t('home.contact.title')}
           </h2>
           <p className="mx-auto max-w-2xl px-4 text-base text-muted-foreground sm:text-lg">
-            Have a project in mind? Let's discuss how we can work together
+            {t('home.contact.description')}
           </p>
         </motion.div>
 
@@ -69,22 +71,22 @@ export function ContactBlock() {
                 <div className="grid gap-6 sm:grid-cols-2">
                   <div className="space-y-2">
                     <Label htmlFor="name" className="text-sm font-medium">
-                      Name
+                      {t('home.contact.form.name.label')}
                     </Label>
                     <Input
                       id="name"
-                      placeholder="Your name"
+                      placeholder={t('home.contact.form.name.placeholder')}
                       className="bg-background/50 transition-colors focus:bg-background"
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="email" className="text-sm font-medium">
-                      Email
+                      {t('home.contact.form.email.label')}
                     </Label>
                     <Input
                       id="email"
                       type="email"
-                      placeholder="your.email@example.com"
+                      placeholder={t('home.contact.form.email.placeholder')}
                       className="bg-background/50 transition-colors focus:bg-background"
                     />
                   </div>
@@ -92,30 +94,29 @@ export function ContactBlock() {
 
                 <div className="space-y-2">
                   <Label htmlFor="subject" className="text-sm font-medium">
-                    Subject
+                    {t('home.contact.form.subject.label')}
                   </Label>
                   <Input
                     id="subject"
-                    placeholder="How can I help you?"
+                    placeholder={t('home.contact.form.subject.placeholder')}
                     className="bg-background/50 transition-colors focus:bg-background"
                   />
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="message" className="text-sm font-medium">
-                    Message
+                    {t('home.contact.form.message.label')}
                   </Label>
                   <Textarea
                     id="message"
-                    placeholder="Tell me about your project..."
-                    rows={5}
-                    className="resize-none bg-background/50 transition-colors focus:bg-background"
+                    placeholder={t('home.contact.form.message.placeholder')}
+                    className="min-h-[150px] bg-background/50 transition-colors focus:bg-background"
                   />
                 </div>
 
-                <Button type="submit" className="w-full gap-2 text-base">
-                  Send Message
-                  <Send className="h-4 w-4" />
+                <Button className="group w-full gap-2 py-6 text-base font-semibold transition-all hover:shadow-lg hover:shadow-primary/20">
+                  {t('home.contact.form.submit')}
+                  <Send className="h-4 w-4 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1" />
                 </Button>
               </form>
             </Card>
@@ -156,19 +157,23 @@ export function ContactBlock() {
               transition={{ delay: 0.6, duration: 0.5 }}
             >
               <Card className="rounded-xl border border-border/40 bg-background/60 p-6 backdrop-blur-sm sm:p-8">
-                <h3 className="mb-4 text-xl font-semibold text-foreground">Working Hours</h3>
+                <h3 className="mb-4 text-xl font-semibold text-foreground">
+                  {t('home.contact.workingHours.title')}
+                </h3>
                 <div className="space-y-3 text-sm text-muted-foreground sm:text-base">
                   <div className="flex justify-between border-b border-border/40 pb-2">
-                    <span>Monday - Friday</span>
+                    <span>{t('home.contact.workingHours.weekdays')}</span>
                     <span className="font-medium text-foreground">9:00 AM - 6:00 PM</span>
                   </div>
                   <div className="flex justify-between border-b border-border/40 pb-2">
-                    <span>Saturday</span>
+                    <span>{t('home.contact.workingHours.saturday')}</span>
                     <span className="font-medium text-foreground">10:00 AM - 4:00 PM</span>
                   </div>
                   <div className="flex justify-between pt-1">
-                    <span>Sunday</span>
-                    <span className="font-medium text-foreground">Closed</span>
+                    <span>{t('home.contact.workingHours.sunday')}</span>
+                    <span className="font-medium text-foreground">
+                      {t('home.contact.workingHours.closed')}
+                    </span>
                   </div>
                 </div>
               </Card>

@@ -3,6 +3,7 @@
 import { motion, type Variants } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/components/ui'
 
 type Point = {
@@ -17,14 +18,6 @@ interface WaveConfig {
   color: string
   opacity: number
 }
-
-const highlightPills = ['Immersive visuals', 'Responsive motion', 'GPU friendly'] as const
-
-const heroStats: { label: string; value: string }[] = [
-  { label: 'Live installations', value: '320+' },
-  { label: 'Latency', value: '8ms' },
-  { label: 'Teams onboarded', value: '120+' },
-]
 
 const containerVariants: Variants = {
   hidden: { opacity: 0, y: 24 },
@@ -54,10 +47,19 @@ const statsVariants: Variants = {
 }
 
 export function GlowyWavesHero() {
+  const { t } = useTranslation()
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const mouseRef = useRef<Point>({ x: 0, y: 0 })
   const targetMouseRef = useRef<Point>({ x: 0, y: 0 })
   const [mounted, setMounted] = useState(false)
+
+  const highlightPills = ['alma', 'impacto', 'friccion'] as const
+
+  const heroStats = [
+    { id: 'hours', value: '45k+' },
+    { id: 'precision', value: '99.9%' },
+    { id: 'projects', value: '85+' },
+  ] as const
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -301,47 +303,41 @@ export function GlowyWavesHero() {
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/40 bg-background/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-foreground/70 dark:border-border/60 dark:bg-background/70 dark:text-foreground/80"
           >
             <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
-            Reactive canvas hero
+            {t('home.hero.badge')}
           </motion.div>
 
           <motion.h1
             variants={itemVariants}
-            className="mb-6 text-4xl font-semibold tracking-tight text-foreground md:text-6xl lg:text-7xl"
+            className="mb-6 text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
           >
-            Welcome to immersive{' '}
-            <span className="bg-gradient-to-r from-primary via-primary/60 to-foreground/80 bg-clip-text text-transparent">
-              realtime playgrounds
+            {t('home.hero.title')}
+            <br />
+            <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+              {t('home.hero.titleHighlight')}
             </span>
           </motion.h1>
 
           <motion.p
             variants={itemVariants}
-            className="mx-auto mb-10 max-w-3xl text-lg text-foreground/70 md:text-2xl"
+            className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
-            Build living surfaces that respond to every interaction. Craft cinematic hero moments,
-            responsive canvases, and luminous gradients without leaving your design system.
+            {t('home.hero.description')}
           </motion.p>
 
           <motion.div
             variants={itemVariants}
-            className="mb-10 flex flex-col items-center justify-center gap-4 sm:flex-row"
+            className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
-            <Button
-              size="lg"
-              className="group gap-2 rounded-full px-8 text-base uppercase tracking-[0.2em]"
-            >
-              Launch Studio
-              <ArrowRight
-                className="h-4 w-4 transition-transform group-hover:translate-x-1"
-                aria-hidden="true"
-              />
+            <Button size="lg" className="group h-12 px-8 text-base font-medium">
+              {t('home.hero.ctaPrimary')}
+              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="rounded-full border-border/40 bg-background/60 px-8 text-base text-foreground/80 backdrop-blur transition-all hover:border-border/60 hover:bg-background/70 dark:border-border/50 dark:bg-background/40 dark:text-foreground/70 dark:hover:border-border/70 dark:hover:bg-background/50"
+              className="h-12 border-primary/20 px-8 text-base font-medium hover:bg-primary/5"
             >
-              Explore stories
+              {t('home.hero.ctaSecondary')}
             </Button>
           </motion.div>
 
@@ -354,19 +350,22 @@ export function GlowyWavesHero() {
                 key={pill}
                 className="rounded-full border border-border/40 bg-background/60 px-4 py-2 backdrop-blur dark:border-border/60 dark:bg-background/70"
               >
-                {pill}
+                {t(`home.hero.pills.${pill}`)}
               </li>
             ))}
           </motion.ul>
 
           <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: '-50px' }}
             variants={statsVariants}
             className="grid gap-4 rounded-2xl border border-border/30 bg-background/60 p-6 backdrop-blur-sm dark:border-border/60 dark:bg-background/70 sm:grid-cols-3"
           >
             {heroStats.map((stat) => (
-              <motion.div key={stat.label} variants={itemVariants} className="space-y-1">
+              <motion.div key={stat.id} variants={itemVariants} className="space-y-1">
                 <div className="text-xs uppercase tracking-[0.3em] text-foreground/50 dark:text-foreground/60">
-                  {stat.label}
+                  {t(`home.hero.stats.${stat.id}`)}
                 </div>
                 <div className="text-3xl font-semibold text-foreground">{stat.value}</div>
               </motion.div>

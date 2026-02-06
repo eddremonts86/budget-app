@@ -1,10 +1,14 @@
 {
   "app": {
     "name": "TanStack Template",
+    "brand": "AI Solutions",
     "description": "En moderne full-stack skabelon drevet af TanStack"
   },
   "nav": {
     "home": "Hjem",
+    "services": "Løsninger",
+    "timeline": "Historie",
+    "contact": "Lad os tale",
     "todos": "Opgaver",
     "settings": "Indstillinger",
     "signIn": "Log ind",
@@ -78,5 +82,183 @@
     "invalidEmail": "Ugyldig e-mailadresse",
     "invalidDate": "Ugyldig dato",
     "futureDate": "Dato skal være i fremtiden"
+  },
+  "home": {
+    "hero": {
+      "badge": "Formål i hver pixel",
+      "title": "Hvor menneskelig intuition",
+      "titleHighlight": "møder AI",
+      "description": "Vi er ikke her for at erstatte din stemme, men for at forstærke den. Vi skaber systemer, der lærer af din essens, så du kan vende tilbage til det, der virkelig betyder noget: at skabe, forestille sig og lede.",
+      "ctaPrimary": "Start din transformation",
+      "ctaSecondary": "Vores filosofi",
+      "pills": {
+        "alma": "Teknologi med Sjæl",
+        "impacto": "Reel Indflydelse",
+        "friccion": "Nul Friktion"
+      },
+      "stats": {
+        "hours": "Timer givet tilbage til talentet",
+        "precision": "Menneskelig Præcision",
+        "projects": "Projekter med formål"
+      }
+    },
+    "newHero": {
+      "badge": "Vi forstår støjen, vi søger klarhed",
+      "title": "Din virksomhed er unik,",
+      "titleHighlight": "din AI bør også være det",
+      "description": "Føles nuværende teknologi som en barriere i stedet for en bro? Vi har hjulpet hundredvis af teams med at genvinde 15 timer om ugen af mekanisk arbejde, så de kan fokusere på den strategi, som kun mennesker kan lægge.",
+      "ctaPrimary": "Planlæg en ærlig samtale",
+      "ctaSecondary": "Se hvordan vi arbejder",
+      "stats": {
+        "customers": "Glade Kunder",
+        "projects": "Afsluttede Projekter",
+        "satisfaction": "Tilfredshedsrate"
+      }
+    },
+    "features": {
+      "title": "Vores søjler er ikke til forhandling",
+      "description": "Vi mener, at teknologi skal tjene mennesker, ikke omvendt. Disse er de løfter, vi holder i hver linje kode.",
+      "items": {
+        "efficiency": {
+          "title": "Usynlig Effektivitet",
+          "description": "Vi automatiserer det, der udmatter dig, ikke det, der definerer dig. Systemer, der arbejder i baggrunden, så du er hovedpersonen."
+        },
+        "ethics": {
+          "title": "Etik ved Design",
+          "description": "Dine data er din arv. Vi bygger med ikke-forhandlingsbar privatlivsbeskyttelse, der beskytter den tillid, du har vundet hos dine kunder."
+        },
+        "closeness": {
+          "title": "Radikal Nærhed",
+          "description": "Vi leverer ikke bare kode og går. Vi er dine teknologiske partnere, der forstår dine udfordringer, som om de var vores egne."
+        }
+      }
+    },
+    "services": {
+      "badge": "Hvordan vi ledsager dig",
+      "title": "Løsninger der løser, ikke komplicerer",
+      "description": "Vi forstår, at der bag ethvert teknisk krav er et menneskeligt mål. Her er hvordan vi gør det til virkelighed.",
+      "cta": "Se hvordan",
+      "items": {
+        "software": {
+          "title": "Software med Mening",
+          "description": "Vi lancerer ikke kode ud i intetheden. Vi udvikler værktøjer, der eliminerer dit teams daglige friktion og giver dem den tid tilbage, de fortjener.",
+          "badge": "Direkte Indflydelse"
+        },
+        "design": {
+          "title": "Empatisk Design",
+          "description": "Brugerflader der ikke behøver en manual. Vi sætter os i de personers sted, der skal bruge dit produkt, så hvert klik føles naturligt og stressfrit."
+        },
+        "mobility": {
+          "title": "Digital Nærhed",
+          "description": "Vær hvor dine brugere er, men på en respektfuld måde. Vi skaber mobiloplevelser, der føles som en forlængelse af deres dagligdag.",
+          "badge": "Essentiel"
+        },
+        "clarity": {
+          "title": "Klarhed i Kaos",
+          "description": "I en verden mættet med information hjælper vi dit reelle budskab med at nå de mennesker, der virkelig har brug for det."
+        },
+        "growth": {
+          "title": "Bæredygtig Vækst",
+          "description": "Skalering behøver ikke at være traumatisk. Vi optimerer dine processer, så dit projekt vokser i takt med dine ambitioner, ikke dine bekymringer."
+        },
+        "trust": {
+          "title": "Total Ro i Sindet",
+          "description": "Vi beskytter det, du værdsætter mest: dine brugeres tillid. Vi implementerer robust sikkerhed, så du kun behøver at bekymre dig om at innovere.",
+          "badge": "Forpligtelse"
+        }
+      }
+    },
+    "timeline": {
+      "badge": "Vores Evolution",
+      "title": "En vej af mennesker, ikke kun kode",
+      "description": "Vi ser tilbage, ikke for at fejre præstationer, men for at huske, hvorfor vi startede denne rejse i første omgang.",
+      "events": {
+        "seed": {
+          "title": "Frøet til en Idé",
+          "description": "Vi blev født i et lille studie, trætte af at se, hvordan teknologien bevægede sig væk fra mennesker."
+        },
+        "listening": {
+          "title": "Lytter til Virkelige Historier",
+          "description": "Vi nåede vores første 1.000 brugere, ikke som tal, men som samtaler, der formede vores platform."
+        },
+        "growth": {
+          "title": "Vokser med Ansvar",
+          "description": "Vi modtog støtte til at ekspandere, mens vi altid holdt vores løfte om ikke at miste det menneskelige strejf."
+        },
+        "impact": {
+          "title": "Indflydelse Uden Grænser",
+          "description": "Vi åbnede kontorer i 5 lande og lærte, at ønsket om at arbejde bedre er et universelt sprog."
+        },
+        "purpose": {
+          "title": "Formålsbestemt Intelligens",
+          "description": "Vi lancerede vores AI-funktioner, designet til at give dig den tid tilbage, som administrativt arbejde stjal fra dig."
+        }
+      },
+      "footer": "Og historien fortsætter med dig..."
+    },
+    "contact": {
+      "title": "Lad os tale om det, der holder dig vågen om natten",
+      "description": "Har du et projekt i tankerne, eller vil du bare forstå, hvordan teknologi kan give dig din tid tilbage? Vi er her for at lytte til dig, uden unødvendige tekniske termer.",
+      "form": {
+        "name": {
+          "label": "Hvad er dit navn?",
+          "placeholder": "Dit navn"
+        },
+        "email": {
+          "label": "Din personlige e-mail",
+          "placeholder": "eksempel@mail.com"
+        },
+        "subject": {
+          "label": "Hvad har du i tankerne?",
+          "placeholder": "Fortæl os kort..."
+        },
+        "message": {
+          "label": "Fortæl os din historie",
+          "placeholder": "Hvad er den største udfordring, du står over for i dag?"
+        },
+        "submit": "Send besked og start samtalen"
+      },
+      "info": {
+        "email": "E-mail",
+        "phone": "Telefon",
+        "location": "Lokation"
+      },
+      "workingHours": {
+        "title": "Arbejdstider",
+        "weekdays": "Mandag - Fredag",
+        "saturday": "Lørdag",
+        "sunday": "Søndag",
+        "closed": "Lukket"
+      }
+    },
+    "footer": {
+      "brand": "Brand",
+      "since": "Siden 2018",
+      "copyright": "© {{year}} Brand Inc. Alle rettigheder forbeholdes.",
+      "description": "Humanisering af teknologi så du kan være mere menneskelig. Vi er ikke bare en AI-virksomhed, vi er dine partnere i søgen efter tid og formål.",
+      "subscribe": {
+        "title": "Deltag i vores ugentlige samtale",
+        "placeholder": "Din bedste e-mail",
+        "button": "Tilmeld dig"
+      },
+      "links": {
+        "essence": {
+          "title": "Vores Essens",
+          "items": ["Filosofi", "Succeshistorier", "Metode", "Menneskelig Blog"]
+        },
+        "company": {
+          "title": "Virksomhed",
+          "items": ["Om os", "Kultur", "Arbejd hos os", "Presse"]
+        },
+        "community": {
+          "title": "Fællesskab",
+          "items": ["Events", "Hjælpecenter", "Partnere", "Netværksstatus"]
+        },
+        "legal": {
+          "title": "Juridisk",
+          "items": ["Etisk Privatliv", "Brugsvilkår", "Cookies", "Licenser"]
+        }
+      }
+    }
   }
 }

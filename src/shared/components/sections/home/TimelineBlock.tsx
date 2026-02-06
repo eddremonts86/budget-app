@@ -3,43 +3,45 @@
 import { motion } from 'framer-motion'
 import { Calendar, CheckCircle2 } from 'lucide-react'
 import { useState, useEffect } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Badge, Card } from '@/shared/components/ui'
 
-const timelineEvents = [
-  {
-    year: '2020',
-    title: 'Company Founded',
-    description: 'Started with a vision to transform how businesses operate digitally.',
-    icon: CheckCircle2,
-  },
-  {
-    year: '2021',
-    title: 'First 1,000 Customers',
-    description: 'Reached our first major milestone with customers across 20 countries.',
-    icon: CheckCircle2,
-  },
-  {
-    year: '2022',
-    title: 'Series A Funding',
-    description: 'Raised $10M to accelerate product development and expand our team.',
-    icon: CheckCircle2,
-  },
-  {
-    year: '2023',
-    title: 'Global Expansion',
-    description: 'Opened offices in 5 new countries and launched multilingual support.',
-    icon: CheckCircle2,
-  },
-  {
-    year: '2024',
-    title: 'AI Integration',
-    description: 'Launched AI-powered features to help businesses scale faster.',
-    icon: CheckCircle2,
-  },
-]
-
 export function TimelineBlock() {
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
+
+  const timelineEvents = [
+    {
+      year: '2020',
+      title: t('home.timeline.events.seed.title'),
+      description: t('home.timeline.events.seed.description'),
+      icon: CheckCircle2,
+    },
+    {
+      year: '2021',
+      title: t('home.timeline.events.listening.title'),
+      description: t('home.timeline.events.listening.description'),
+      icon: CheckCircle2,
+    },
+    {
+      year: '2022',
+      title: t('home.timeline.events.growth.title'),
+      description: t('home.timeline.events.growth.description'),
+      icon: CheckCircle2,
+    },
+    {
+      year: '2023',
+      title: t('home.timeline.events.impact.title'),
+      description: t('home.timeline.events.impact.description'),
+      icon: CheckCircle2,
+    },
+    {
+      year: '2024',
+      title: t('home.timeline.events.purpose.title'),
+      description: t('home.timeline.events.purpose.description'),
+      icon: CheckCircle2,
+    },
+  ]
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -60,13 +62,13 @@ export function TimelineBlock() {
         >
           <Badge className="mb-4" variant="secondary">
             <Calendar className="mr-1 h-3 w-3" />
-            Our Journey
+            {t('home.timeline.badge')}
           </Badge>
           <h2 className="mb-4 text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
-            The Story of Our Growth
+            {t('home.timeline.title')}
           </h2>
           <p className="mx-auto max-w-2xl text-base text-muted-foreground md:text-lg">
-            From a small startup to a global platform trusted by thousands
+            {t('home.timeline.description')}
           </p>
         </motion.div>
 
@@ -159,7 +161,7 @@ export function TimelineBlock() {
               transition={{ duration: 2, repeat: Infinity }}
               className="h-2 w-2 rounded-full bg-primary"
             />
-            <span className="text-sm font-medium">And the journey continues...</span>
+            <span className="text-sm font-medium">{t('home.timeline.footer')}</span>
           </div>
         </motion.div>
       </div>

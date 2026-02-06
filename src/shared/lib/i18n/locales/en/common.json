@@ -1,11 +1,15 @@
 {
   "app": {
     "name": "TanStack Template",
+    "brand": "AI Solutions",
     "description": "A modern full-stack template powered by TanStack"
   },
   "nav": {
     "home": "Home",
-    "todos": "Todos",
+    "services": "Solutions",
+    "timeline": "Story",
+    "contact": "Let's Talk",
+    "todos": "Tasks",
     "settings": "Settings",
     "signIn": "Sign In",
     "signOut": "Sign Out"
@@ -78,5 +82,183 @@
     "invalidEmail": "Invalid email address",
     "invalidDate": "Invalid date",
     "futureDate": "Date must be in the future"
+  },
+  "home": {
+    "hero": {
+      "badge": "Purpose in every pixel",
+      "title": "Where human intuition",
+      "titleHighlight": "meets AI",
+      "description": "We're not here to replace your voice, but to amplify it. We create systems that learn from your essence so you can return to what really matters: creating, imagining, and leading.",
+      "ctaPrimary": "Start your transformation",
+      "ctaSecondary": "Our philosophy",
+      "pills": {
+        "alma": "Technology with Soul",
+        "impacto": "Real Impact",
+        "friccion": "Zero Friction"
+      },
+      "stats": {
+        "hours": "Hours returned to talent",
+        "precision": "Human Precision",
+        "projects": "Purpose-driven projects"
+      }
+    },
+    "newHero": {
+      "badge": "We understand the noise, we seek clarity",
+      "title": "Your business is unique,",
+      "titleHighlight": "your AI should be too",
+      "description": "Does current technology feel like a barrier instead of a bridge? We've helped hundreds of teams recover 15 hours a week of mechanical work so they can focus on the strategy only humans can trace.",
+      "ctaPrimary": "Schedule an honest talk",
+      "ctaSecondary": "See how we work",
+      "stats": {
+        "customers": "Happy Customers",
+        "projects": "Projects Completed",
+        "satisfaction": "Satisfaction Rate"
+      }
+    },
+    "features": {
+      "title": "Our pillars are non-negotiable",
+      "description": "We believe technology should serve people, not the other way around. These are the promises we keep in every line of code.",
+      "items": {
+        "efficiency": {
+          "title": "Invisible Efficiency",
+          "description": "We automate what exhausts you, not what defines you. Systems that work in the background so you are the protagonist."
+        },
+        "ethics": {
+          "title": "Ethics by Design",
+          "description": "Your data is your legacy. We build with non-negotiable privacy, protecting the trust you've earned with your customers."
+        },
+        "closeness": {
+          "title": "Radical Closeness",
+          "description": "We don't just deliver code and leave. We are your technological partners, understanding your challenges as if they were our own."
+        }
+      }
+    },
+    "services": {
+      "badge": "How we accompany you",
+      "title": "Solutions that solve, not complicate",
+      "description": "We understand that behind every technical requirement there is a human goal. Here's how we make it happen.",
+      "cta": "See how",
+      "items": {
+        "software": {
+          "title": "Software with Meaning",
+          "description": "We don't launch code into the void. We develop tools that eliminate your team's daily friction, giving them back the time they deserve.",
+          "badge": "Direct Impact"
+        },
+        "design": {
+          "title": "Empathetic Design",
+          "description": "Interfaces that don't need a manual. We put ourselves in the shoes of those who will use your product so that every click is natural and stress-free."
+        },
+        "mobility": {
+          "title": "Digital Proximity",
+          "description": "Be where your users are, but respectfully. We create mobile experiences that feel like an extension of their daily lives.",
+          "badge": "Essential"
+        },
+        "clarity": {
+          "title": "Clarity in Chaos",
+          "description": "In a world saturated with information, we help your real message reach the people who genuinely need it."
+        },
+        "growth": {
+          "title": "Sustainable Growth",
+          "description": "Scaling doesn't have to be traumatic. We optimize your processes so your project grows at the pace of your ambitions, not your worries."
+        },
+        "trust": {
+          "title": "Total Peace of Mind",
+          "description": "We protect what you value most: your users' trust. We implement robust security so you only worry about innovating.",
+          "badge": "Commitment"
+        }
+      }
+    },
+    "timeline": {
+      "badge": "Our Evolution",
+      "title": "A path of people, not just code",
+      "description": "We look back not to celebrate achievements, but to remember why we started this journey in the first place.",
+      "events": {
+        "seed": {
+          "title": "The Seed of an Idea",
+          "description": "We were born in a small studio, tired of seeing how technology was moving away from people."
+        },
+        "listening": {
+          "title": "Listening to Real Stories",
+          "description": "We reached our first 1,000 users, not as numbers, but as conversations that shaped our platform."
+        },
+        "growth": {
+          "title": "Growing with Responsibility",
+          "description": "We received support to expand, always keeping our promise not to lose the human touch."
+        },
+        "impact": {
+          "title": "Impact Without Borders",
+          "description": "We opened offices in 5 countries, learning that the desire to work better is a universal language."
+        },
+        "purpose": {
+          "title": "Purposeful Intelligence",
+          "description": "We launched our AI features, designed to give you back the time that administrative work stole from you."
+        }
+      },
+      "footer": "And the story continues with you..."
+    },
+    "contact": {
+      "title": "Let's talk about what keeps you up at night",
+      "description": "Do you have a project in mind or just want to understand how technology can give you back your time? We are here to listen to you, without unnecessary technicalities.",
+      "form": {
+        "name": {
+          "label": "What is your name?",
+          "placeholder": "Your name"
+        },
+        "email": {
+          "label": "Your personal email",
+          "placeholder": "example@mail.com"
+        },
+        "subject": {
+          "label": "What do you have in mind?",
+          "placeholder": "Tell us briefly..."
+        },
+        "message": {
+          "label": "Tell us your story",
+          "placeholder": "What is the biggest challenge you face today?"
+        },
+        "submit": "Send message and start the chat"
+      },
+      "info": {
+        "email": "Email",
+        "phone": "Phone",
+        "location": "Location"
+      },
+      "workingHours": {
+        "title": "Working Hours",
+        "weekdays": "Monday - Friday",
+        "saturday": "Saturday",
+        "sunday": "Sunday",
+        "closed": "Closed"
+      }
+    },
+    "footer": {
+      "brand": "Brand",
+      "since": "Since 2018",
+      "copyright": "© {{year}} Brand Inc. All rights reserved.",
+      "description": "Humanizing technology so you can be more human. We are not just an AI company, we are your partners in the search for time and purpose.",
+      "subscribe": {
+        "title": "Join our weekly talk",
+        "placeholder": "Your best email",
+        "button": "Subscribe"
+      },
+      "links": {
+        "essence": {
+          "title": "Our Essence",
+          "items": ["Philosophy", "Success stories", "Methodology", "Human Blog"]
+        },
+        "company": {
+          "title": "Company",
+          "items": ["About us", "Culture", "Work with us", "Press"]
+        },
+        "community": {
+          "title": "Community",
+          "items": ["Events", "Help Center", "Partners", "Network Status"]
+        },
+        "legal": {
+          "title": "Legal",
+          "items": ["Ethical Privacy", "Terms of Use", "Cookies", "Licenses"]
+        }
+      }
+    }
   }
 }

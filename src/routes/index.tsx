@@ -16,7 +16,7 @@ export const Route = createFileRoute('/')({
 
 function HomePage() {
   return (
-    <div className="flex flex-col min-h-screen">
+    <div className="flex flex-col min-h-screen" id="home">
       <Topbar />
       <main className="flex-grow pt-16">
         <GlowyWavesHero />
