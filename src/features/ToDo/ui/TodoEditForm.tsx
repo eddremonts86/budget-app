@@ -8,8 +8,8 @@ import { DatePicker } from '@/shared/components/ui/date-picker'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { useUpdateTodo } from '../api'
-import type { Todo, TodoPriority, TodoStatus } from '../model'
+import { useUpdateTodo } from '@/features/ToDo/api'
+import type { Todo, TodoPriority, TodoStatus } from '@/features/ToDo/model'
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type inference
 const formSchema = z.object({

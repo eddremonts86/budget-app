@@ -1,8 +1,8 @@
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useDeleteTodo, useTodosInfinite } from '../api'
-import type { TodoFilters } from '../model'
+import { useDeleteTodo, useTodosInfinite } from '@/features/ToDo/api'
+import type { TodoFilters } from '@/features/ToDo/model'
 import { TodoEditForm } from './TodoEditForm'
 import { TodoItem } from './TodoItem'
 

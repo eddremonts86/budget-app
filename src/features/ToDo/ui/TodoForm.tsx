@@ -7,8 +7,8 @@ import { DatePicker } from '@/shared/components/ui/date-picker'
 import { Input } from '@/shared/components/ui/input'
 import { Label } from '@/shared/components/ui/label'
 import { Textarea } from '@/shared/components/ui/textarea'
-import { useCreateTodo } from '../api'
-import type { TodoPriority, TodoStatus } from '../model'
+import { useCreateTodo } from '@/features/ToDo/api'
+import type { TodoPriority, TodoStatus } from '@/features/ToDo/model'
 
 // Form-specific schema with all required fields
 // eslint-disable-next-line @typescript-eslint/no-unused-vars -- used for type inference

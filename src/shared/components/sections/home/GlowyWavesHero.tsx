@@ -150,6 +150,34 @@ export function GlowyWavesHero() {
             color: resolveColor(['--foreground'], 0.2),
             opacity: 0.2,
           },
+          {
+            offset: Math.PI * 0.3,
+            amplitude: 65,
+            frequency: 0.0028,
+            color: '#0E21A0',
+            opacity: 0.4,
+          },
+          {
+            offset: Math.PI * 0.7,
+            amplitude: 75,
+            frequency: 0.0032,
+            color: '#4D2FB2',
+            opacity: 0.35,
+          },
+          {
+            offset: Math.PI * 1.2,
+            amplitude: 85,
+            frequency: 0.0025,
+            color: '#B153D7',
+            opacity: 0.3,
+          },
+          {
+            offset: Math.PI * 1.8,
+            amplitude: 60,
+            frequency: 0.0038,
+            color: '#F375C2',
+            opacity: 0.25,
+          },
         ] satisfies WaveConfig[],
       }
     }

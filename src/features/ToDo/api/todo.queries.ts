@@ -1,6 +1,6 @@
+import { todoApi } from '@/features/ToDo/api/todo.api'
+import type { TodoFilters, TodoPage } from '@/features/ToDo/model'
 import { useTQInfinite, useTQMutation, useTQSuspense, useTQuery } from '@/shared/lib/query'
-import type { TodoFilters, TodoPage } from '../model'
-import { todoApi } from './todo.api'
 
 /**
  * Query keys factory for todos
@@ -35,7 +35,7 @@ export function useTodosInfinite(filters?: TodoFilters, pageSize = 10) {
     {
       cache: 'standard',
       initialPageParam: 1,
-      getNextPageParam: (lastPage) => {
+      getNextPageParam: (lastPage: TodoPage) => {
         // If the current page returned no items, we reached the end
         if (!lastPage.items || lastPage.items.length === 0) return undefined
 

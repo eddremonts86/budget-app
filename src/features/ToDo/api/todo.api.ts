@@ -1,5 +1,5 @@
 import { apiClient } from '@/shared/lib/api'
-import type { CreateTodoInput, Todo, TodoFilters, TodoPage, UpdateTodoInput } from '../model'
+import type { CreateTodoInput, Todo, TodoFilters, TodoPage, UpdateTodoInput } from '@/features/ToDo/model'
 
 export const todoApi = {
   getAll: (filters?: TodoFilters) =>
