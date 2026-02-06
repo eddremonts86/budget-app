@@ -120,7 +120,7 @@ export function NewHeroSection() {
             offset: Math.PI / 2,
             amplitude: 190,
             frequency: 0.0024,
-            color: '#4D2FB2',
+            color: '#7132CA',
             opacity: 0.6,
             speed: 0.0026,
             chaos: 1.4,
@@ -135,7 +135,7 @@ export function NewHeroSection() {
             offset: Math.PI,
             amplitude: 70,
             frequency: 0.0042,
-            color: '#B153D7',
+            color: '#A167E1',
             opacity: 0.5,
             speed: 0.0016,
             chaos: 0.9,
@@ -150,7 +150,7 @@ export function NewHeroSection() {
             offset: Math.PI * 1.5,
             amplitude: 260,
             frequency: 0.002,
-            color: '#F375C2',
+            color: '#D84EB7',
             opacity: 0.4,
             speed: 0.003,
             chaos: 1.8,
@@ -222,8 +222,8 @@ export function NewHeroSection() {
       const pulse = Math.sin(time * wave.pulseSpeed + wave.offset)
       const freqPulse = Math.cos(time * wave.frequencyPulse + wave.offset * 0.5)
 
-      // Variation between 40% and 200% as requested
-      const currentAmplitude = wave.amplitude * (0.8 + 0.6 * pulse + 0.2 * Math.sin(time * 0.005))
+      // Variation between 40% and 130% as requested
+      const currentAmplitude = wave.amplitude * (0.85 + 0.35 * pulse + 0.1 * Math.sin(time * 0.005))
       const currentFrequency = wave.frequency * (1 + 0.3 * freqPulse)
 
       for (let x = 0; x <= canvas.width; x += 4) {

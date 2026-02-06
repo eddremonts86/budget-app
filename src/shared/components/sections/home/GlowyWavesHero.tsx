@@ -230,7 +230,7 @@ export function GlowyWavesHero() {
             offset: Math.PI * 0.7,
             amplitude: 160,
             frequency: 0.0032,
-            color: '#4D2FB2',
+            color: '#7132CA',
             opacity: 0.75,
             speed: 0.0026,
             chaos: 0.9,
@@ -245,7 +245,7 @@ export function GlowyWavesHero() {
             offset: Math.PI * 1.2,
             amplitude: 130,
             frequency: 0.0025,
-            color: '#B153D7',
+            color: '#A167E1',
             opacity: 0.5,
             speed: 0.002,
             chaos: 1.4,
@@ -260,7 +260,7 @@ export function GlowyWavesHero() {
             offset: Math.PI * 1.8,
             amplitude: 210,
             frequency: 0.0038,
-            color: '#F375C2',
+            color: '#D84EB7',
             opacity: 0.4,
             speed: 0.003,
             chaos: 1.2,
@@ -332,8 +332,8 @@ export function GlowyWavesHero() {
       const pulse = Math.sin(time * wave.pulseSpeed + wave.offset)
       const freqPulse = Math.cos(time * wave.frequencyPulse + wave.offset * 0.5)
 
-      // Variation between 40% and 200% as requested
-      const currentAmplitude = wave.amplitude * (0.8 + 0.6 * pulse + 0.2 * Math.sin(time * 0.005))
+      // Variation between 40% and 130% as requested
+      const currentAmplitude = wave.amplitude * (0.85 + 0.35 * pulse + 0.1 * Math.sin(time * 0.005))
       const currentFrequency = wave.frequency * (1 + 0.3 * freqPulse)
 
       for (let x = 0; x <= canvas.width; x += 4) {
