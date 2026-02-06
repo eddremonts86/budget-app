@@ -2,7 +2,7 @@
 
 import { motion, type Variants } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/components/ui'
 
@@ -51,7 +51,6 @@ export function GlowyWavesHero() {
   const canvasRef = useRef<HTMLCanvasElement | null>(null)
   const mouseRef = useRef<Point>({ x: 0, y: 0 })
   const targetMouseRef = useRef<Point>({ x: 0, y: 0 })
-  const [mounted, setMounted] = useState(false)
 
   const highlightPills = ['alma', 'impacto', 'friccion'] as const
 
@@ -60,11 +59,6 @@ export function GlowyWavesHero() {
     { id: 'precision', value: '99.9%' },
     { id: 'projects', value: '85+' },
   ] as const
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
 
   useEffect(() => {
     const canvas = canvasRef.current
@@ -274,7 +268,7 @@ export function GlowyWavesHero() {
       cancelAnimationFrame(animationId)
       observer.disconnect()
     }
-  }, [mounted])
+  }, [])
 
   return (
     <section
@@ -294,7 +288,7 @@ export function GlowyWavesHero() {
         <motion.div
           variants={containerVariants}
           initial="hidden"
-          animate={mounted ? 'visible' : 'hidden'}
+          animate="visible"
           className="w-full"
         >
           <motion.div
@@ -327,14 +321,20 @@ export function GlowyWavesHero() {
             variants={itemVariants}
             className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
-            <Button size="lg" className="group h-12 px-8 text-base font-medium">
+            <Button
+              size="lg"
+              className="group gap-2 rounded-full px-8 text-base uppercase tracking-[0.2em]"
+            >
               {t('home.hero.ctaPrimary')}
-              <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover:translate-x-1" />
+              <ArrowRight
+                className="h-4 w-4 transition-transform group-hover:translate-x-1"
+                aria-hidden="true"
+              />
             </Button>
             <Button
               size="lg"
               variant="outline"
-              className="h-12 border-primary/20 px-8 text-base font-medium hover:bg-primary/5"
+              className="rounded-full border-border/40 bg-background/60 px-8 text-base text-foreground/80 backdrop-blur transition-all hover:border-border/60 hover:bg-background/70 dark:border-border/50 dark:bg-background/40 dark:text-foreground/70 dark:hover:border-border/70 dark:hover:bg-background/50"
             >
               {t('home.hero.ctaSecondary')}
             </Button>

@@ -2,13 +2,11 @@
 
 import { motion, type Variants } from 'framer-motion'
 import { Code, Palette, Smartphone, Search, Rocket, Shield } from 'lucide-react'
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge, Card, Button } from '@/shared/components/ui'
 
 export function OurServicesSection() {
   const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
 
   const services = [
     { id: 'software', icon: Code },
@@ -18,11 +16,6 @@ export function OurServicesSection() {
     { id: 'growth', icon: Rocket },
     { id: 'trust', icon: Shield },
   ] as const
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -43,8 +36,6 @@ export function OurServicesSection() {
       transition: { duration: 0.5, ease: 'easeOut' },
     },
   }
-
-  if (!mounted) return null
 
   return (
     <section className="bg-background px-4 py-20 md:py-24">

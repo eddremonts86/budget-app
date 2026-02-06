@@ -2,18 +2,11 @@
 
 import { motion, type Variants } from 'framer-motion'
 import { ArrowRight, Sparkles, Play } from 'lucide-react'
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/shared/components/ui'
 
 export function NewHeroSection() {
   const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
-
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
 
   const containerVariants: Variants = {
     hidden: { opacity: 0 },
@@ -45,8 +38,6 @@ export function NewHeroSection() {
       },
     },
   }
-
-  if (!mounted) return null
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-background via-background to-primary/5 px-4 py-20 md:py-32 w-full">
