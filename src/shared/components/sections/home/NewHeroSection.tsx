@@ -17,6 +17,25 @@ interface WaveConfig {
   frequency: number
   color: string
   opacity: number
+  speed: number
+  chaos: number
+  attraction: number
+  pulseSpeed: number
+  frequencyPulse: number
+  particleChance: number
+  noiseScale: number
+  mouseResponse: 'attract' | 'repel' | 'frequency' | 'amplitude' | 'chaos'
+}
+
+interface Particle {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  life: number
+  maxLife: number
+  color: string
+  size: number
 }
 
 export function NewHeroSection() {
@@ -34,6 +53,8 @@ export function NewHeroSection() {
 
     let animationId: number
     let time = 0
+
+    const particles: Particle[] = []
 
     const computeThemeColors = () => {
       const rootStyles = getComputedStyle(document.documentElement)
@@ -82,31 +103,63 @@ export function NewHeroSection() {
         wavePalette: [
           {
             offset: 0,
-            amplitude: 70,
-            frequency: 0.003,
+            amplitude: 150,
+            frequency: 0.0028,
             color: '#0E21A0',
-            opacity: 0.45,
+            opacity: 0.75,
+            speed: 0.0022,
+            chaos: 1.1,
+            attraction: 0.7,
+            pulseSpeed: 0.0012,
+            frequencyPulse: 0.0003,
+            particleChance: 0.07,
+            noiseScale: 1.8,
+            mouseResponse: 'attract',
           },
           {
             offset: Math.PI / 2,
-            amplitude: 90,
-            frequency: 0.0026,
+            amplitude: 190,
+            frequency: 0.0024,
             color: '#4D2FB2',
-            opacity: 0.35,
+            opacity: 0.6,
+            speed: 0.0026,
+            chaos: 1.4,
+            attraction: -0.8,
+            pulseSpeed: 0.0016,
+            frequencyPulse: 0.0004,
+            particleChance: 0.1,
+            noiseScale: 2.4,
+            mouseResponse: 'repel',
           },
           {
             offset: Math.PI,
-            amplitude: 60,
-            frequency: 0.0034,
+            amplitude: 70,
+            frequency: 0.0042,
             color: '#B153D7',
-            opacity: 0.3,
+            opacity: 0.5,
+            speed: 0.0016,
+            chaos: 0.9,
+            attraction: 1.0,
+            pulseSpeed: 0.0009,
+            frequencyPulse: 0.0006,
+            particleChance: 0.04,
+            noiseScale: 0.9,
+            mouseResponse: 'frequency',
           },
           {
             offset: Math.PI * 1.5,
-            amplitude: 80,
-            frequency: 0.0022,
+            amplitude: 260,
+            frequency: 0.002,
             color: '#F375C2',
-            opacity: 0.25,
+            opacity: 0.4,
+            speed: 0.003,
+            chaos: 1.8,
+            attraction: -0.5,
+            pulseSpeed: 0.0022,
+            frequencyPulse: 0.0002,
+            particleChance: 0.12,
+            noiseScale: 3.0,
+            mouseResponse: 'chaos',
           },
         ] satisfies WaveConfig[],
       }
@@ -165,34 +218,125 @@ export function NewHeroSection() {
       ctx.save()
       ctx.beginPath()
 
+      // Organic fluctuations: Personality-driven pulsing
+      const pulse = Math.sin(time * wave.pulseSpeed + wave.offset)
+      const freqPulse = Math.cos(time * wave.frequencyPulse + wave.offset * 0.5)
+
+      // Variation between 40% and 200% as requested
+      const currentAmplitude = wave.amplitude * (0.8 + 0.6 * pulse + 0.2 * Math.sin(time * 0.005))
+      const currentFrequency = wave.frequency * (1 + 0.3 * freqPulse)
+
       for (let x = 0; x <= canvas.width; x += 4) {
         const dx = x - mouseRef.current.x
         const dy = canvas.height / 2 - mouseRef.current.y
         const distance = Math.sqrt(dx * dx + dy * dy)
         const influence = Math.max(0, 1 - distance / influenceRadius)
-        const mouseEffect =
-          influence * mouseInfluence * Math.sin(time * 0.001 + x * 0.01 + wave.offset)
 
-        const y =
-          canvas.height / 2 +
-          Math.sin(x * wave.frequency + time * 0.002 + wave.offset) * wave.amplitude +
-          Math.sin(x * wave.frequency * 0.4 + time * 0.003) * (wave.amplitude * 0.45) +
-          mouseEffect
+        // Variable mouse interaction based on personality
+        let mouseShift = 0
+        let mouseFreqShift = 0
+        let mouseAmpShift = 0
+        let mouseChaosShift = 0
+
+        switch (wave.mouseResponse) {
+          case 'attract':
+            mouseShift = influence * mouseInfluence * wave.attraction
+            break
+          case 'repel':
+            mouseShift = influence * mouseInfluence * wave.attraction
+            break
+          case 'frequency':
+            mouseFreqShift = influence * 0.01 * wave.chaos
+            break
+          case 'amplitude':
+            mouseAmpShift = influence * 100 * wave.chaos
+            break
+          case 'chaos':
+            mouseChaosShift = influence * 2.5
+            break
+        }
+
+        // Layered sinusoidal motion for "alive" impression
+        const phase = x * (currentFrequency + mouseFreqShift) + time * wave.speed + wave.offset
+
+        // Micro-waves and chaos
+        const noise = Math.sin(x * 0.05 + time * 0.1) * wave.noiseScale * (1 + mouseChaosShift)
+
+        const wave1 = Math.sin(phase)
+        const wave2 =
+          Math.sin(x * (currentFrequency * 2.1) + time * (wave.speed * 2.2) + wave.offset * 0.3) *
+          0.3
+        const wave3 =
+          Math.sin(x * (currentFrequency * 0.4) + time * (wave.speed * 0.5) + wave.offset * 1.7) *
+          0.7
+        const wave4 =
+          Math.sin(x * 0.01 + time * 0.002 + wave.offset * 2.5) *
+          (2 * (wave.chaos + mouseChaosShift))
+
+        const combinedWave =
+          (wave1 + wave2 + wave3 + wave4) * (currentAmplitude + mouseAmpShift) + noise
+        const y = canvas.height / 2 + combinedWave + mouseShift
 
         if (x === 0) {
           ctx.moveTo(x, y)
         } else {
           ctx.lineTo(x, y)
         }
+
+        // Particle generation: secondary effects
+        if (x % 30 === 0 && Math.random() < wave.particleChance * (0.5 + 1.5 * influence)) {
+          particles.push({
+            x,
+            y,
+            vx:
+              (Math.random() - 0.5) * 2 +
+              (wave.mouseResponse === 'repel' ? dx * 0.01 * influence : 0),
+            vy:
+              (Math.random() - 0.5) * 2 +
+              (wave.mouseResponse === 'repel' ? dy * 0.01 * influence : 0),
+            life: 1,
+            maxLife: 30 + Math.random() * 50,
+            color: wave.color,
+            size: 0.8 + Math.random() * 2.5,
+          })
+        }
       }
 
-      ctx.lineWidth = 2.5
+      ctx.lineWidth = 2.5 + 1.5 * Math.sin(time * 0.005 + wave.offset)
       ctx.strokeStyle = wave.color
-      ctx.globalAlpha = wave.opacity
-      ctx.shadowBlur = 35
+
+      // Opacity fluctuations
+      const baseOpacity = wave.opacity * (0.6 + 0.4 * Math.sin(time * 0.012 + wave.offset))
+      ctx.globalAlpha = baseOpacity
+
+      ctx.shadowBlur = 20 + 20 * Math.sin(time * 0.008)
       ctx.shadowColor = wave.color
       ctx.stroke()
 
+      ctx.restore()
+    }
+
+    const updateParticles = () => {
+      ctx.save()
+      for (let i = particles.length - 1; i >= 0; i--) {
+        const p = particles[i]
+        p.x += p.vx
+        p.y += p.vy
+        p.life -= 1 / p.maxLife
+
+        if (p.life <= 0) {
+          particles.splice(i, 1)
+          continue
+        }
+
+        ctx.beginPath()
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2)
+        ctx.fillStyle = p.color
+        ctx.globalAlpha = p.life * 0.6
+        ctx.shadowBlur = 10
+        ctx.shadowColor = p.color
+        ctx.fill()
+      }
       ctx.restore()
     }
 
@@ -213,6 +357,7 @@ export function NewHeroSection() {
       ctx.shadowBlur = 0
 
       themeColors.wavePalette.forEach(drawWave)
+      updateParticles()
 
       animationId = window.requestAnimationFrame(animate)
     }
