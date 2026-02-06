@@ -1,5 +1,5 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { Topbar } from '@/shared/components/globals/topbar'
+import { Topbar } from '@/components/composite/Topbar'
 import {
   GlowyWavesHero,
   FeatureCardsBlock,
@@ -8,7 +8,7 @@ import {
   TimelineBlock,
   ContactBlock,
   FooterBlock,
-} from '@/shared/components/sections/home'
+} from '@/features/Home'
 
 export const Route = createFileRoute('/')({
   component: HomePage,

@@ -21,4 +21,3 @@ export {
 } from './query'
 // Sentry
 export { initSentry, Sentry } from './sentry'
-export { cn } from './utils'

@@ -21,8 +21,8 @@ export type {
   TodoPriority,
   TodoStatus,
   UpdateTodoInput,
-} from './model'
+} from './types/todo.types'
 // Schemas (for form validation)
-export { createTodoSchema, updateTodoSchema } from './model'
+export { createTodoSchema, updateTodoSchema } from './types/todo.schema'
 // UI Components
-export { TodoEditForm, TodoForm, TodoItem, TodoList } from './ui'
+export { TodoEditForm, TodoForm, TodoItem, TodoList } from './components'

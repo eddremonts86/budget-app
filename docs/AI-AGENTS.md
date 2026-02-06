@@ -207,6 +207,7 @@ When working with any AI assistant, provide this context:
 - `src/features/ToDo/` - Functional features like todo management
 - `src/shared/lib/query/` - Query wrapper implementations
 - `src/shared/lib/api/` - Axios client setup
+- `src/shared/utils/index.ts` - Shared utilities
 - `src/shared/providers/` - React context providers
 - `biome.json` - Code style rules
 

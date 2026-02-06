@@ -11,6 +11,16 @@ const config = defineConfig({
   server: {
     port: 3000,
   },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: ['./src/tests/setup.ts'],
+    server: {
+      deps: {
+        inline: ['react', 'react-dom'],
+      },
+    },
+  },
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),

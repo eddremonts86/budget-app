@@ -92,13 +92,13 @@
     },
     {
       "id": "gen-0012",
-      "title": "Tarea de ejemplo 12",
+      "title": "Tarea de ejemplo 13",
       "description": "Todo generado automaticamente #12",
-      "status": "pending",
-      "priority": "low",
-      "dueDate": "2026-02-17",
+      "status": "in_progress",
+      "priority": "medium",
+      "dueDate": "2026-02-10",
       "createdAt": "2026-01-24T00:00:00.000Z",
-      "updatedAt": "2026-01-24T00:00:00.000Z"
+      "updatedAt": "2026-02-06T17:19:12.407Z"
     },
     {
       "id": "gen-0013",

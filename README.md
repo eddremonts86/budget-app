@@ -27,14 +27,25 @@ npm run test
 
 ## Project Structure
 
-This project follows a feature-based architecture:
+This project follows a feature-based architecture and atomic design principles:
 
-- `src/features/`: Functional features (e.g., `src/features/ToDo`).
-- `src/shared/`: Shared components, hooks, libs, and providers.
-  - `src/shared/components/ui/`: Reusable UI components.
-  - `src/shared/lib/`: Core libraries (API client, i18n, Query).
+- `src/components/`: Reusable UI components.
+  - `src/components/ui/`: Pure presentation components (shadcn/ui).
+  - `src/components/composite/`: Complex components combining multiple UI elements.
+  - `src/components/forms/`: Form-specific components.
+- `src/features/`: Functional modules by domain (e.g., `Home`, `ToDo`). Each feature contains its own components, hooks, types, and API logic.
+- `src/shared/`: Shared global resources.
+  - `src/shared/lib/`: Core library configurations (API client, i18n, Query, Sentry).
   - `src/shared/providers/`: Global React context providers.
+  - `src/shared/styles/`: Global styles and Tailwind configuration.
 - `src/routes/`: File-based routing with TanStack Router.
+
+## UI Components (shadcn/ui)
+
+The project uses [shadcn/ui](https://ui.shadcn.com/) for its core component library. The following components have been implemented and customized:
+- **Button**, **Badge**, **Card**, **Input**, **Textarea**, **Label**, **Select**, **Popover**, **Calendar**, **DatePicker**.
+
+Customizations are handled via Tailwind CSS variables in `src/shared/styles/globals.css` using the OKLCH color space for better perceptual uniformity.
 
 ## Localization
 

@@ -13,11 +13,11 @@
   "iconLibrary": "lucide",
   "rtl": false,
   "aliases": {
-    "components": "@/shared/components",
-    "utils": "@/shared/lib/utils",
-    "ui": "@/shared/components/ui",
+    "components": "@/components",
+    "utils": "@/shared/utils",
+    "ui": "@/components/ui",
     "lib": "@/shared/lib",
-    "hooks": "@/shared/hooks"
+    "hooks": "@/hooks"
   },
   "registries": {
     "@uitripled": "https://ui.tripled.work/r/{name}.json"

@@ -2,9 +2,10 @@ import { createFileRoute, Link } from '@tanstack/react-router'
 import { Plus, X } from 'lucide-react'
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { LanguageSelector } from '@/components/composite/LanguageSelector'
+import { ThemeToggle } from '@/components/composite/ThemeToggle'
 import { TodoForm, TodoList } from '@/features/ToDo'
-import { LanguageSelector, ThemeToggle } from '@/shared/components/ui'
-import { cn } from '@/shared/lib/utils'
+import { cn } from '@/shared/utils'
 
 export const Route = createFileRoute('/todos')({
   component: TodosPage,

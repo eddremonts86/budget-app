@@ -17,7 +17,7 @@ export {
 } from './lib/query'
 // Sentry
 export { initSentry, Sentry } from './lib/sentry'
-export { cn } from './lib/utils'
+export { cn } from './utils'
 
 // UI Components
-export { LanguageSelector, ThemeToggle } from './components/ui'
+export { LanguageSelector, ThemeToggle } from '../components/composite'
