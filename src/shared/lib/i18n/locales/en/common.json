@@ -97,9 +97,18 @@
         "friccion": "Zero Friction"
       },
       "stats": {
-        "hours": "Hours returned to talent",
-        "precision": "Human Precision",
-        "projects": "Purpose-driven projects"
+        "hours": {
+          "label": "Hours returned to talent",
+          "value": "2.5k+"
+        },
+        "precision": {
+          "label": "Human Precision",
+          "value": "99.9%"
+        },
+        "projects": {
+          "label": "Purpose-driven projects",
+          "value": "150+"
+        }
       }
     },
     "newHero": {
@@ -110,9 +119,18 @@
       "ctaPrimary": "Schedule an honest talk",
       "ctaSecondary": "See how we work",
       "stats": {
-        "customers": "Happy Customers",
-        "projects": "Projects Completed",
-        "satisfaction": "Satisfaction Rate"
+        "customers": {
+          "label": "Happy Customers",
+          "value": "10K+"
+        },
+        "projects": {
+          "label": "Projects Completed",
+          "value": "500+"
+        },
+        "satisfaction": {
+          "label": "Satisfaction Rate",
+          "value": "99%"
+        }
       }
     },
     "features": {

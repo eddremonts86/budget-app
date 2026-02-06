@@ -97,9 +97,18 @@
         "friccion": "Cero Fricción"
       },
       "stats": {
-        "hours": "Horas devueltas al talento",
-        "precision": "Precisión Humana",
-        "projects": "Proyectos con propósito"
+        "hours": {
+          "label": "Horas devueltas al talento",
+          "value": "2.5k+"
+        },
+        "precision": {
+          "label": "Precisión Humana",
+          "value": "99.9%"
+        },
+        "projects": {
+          "label": "Proyectos con propósito",
+          "value": "150+"
+        }
       }
     },
     "newHero": {
@@ -110,9 +119,18 @@
       "ctaPrimary": "Agenda una charla honesta",
       "ctaSecondary": "Mira cómo trabajamos",
       "stats": {
-        "customers": "Clientes felices",
-        "projects": "Proyectos completados",
-        "satisfaction": "Tasa de satisfacción"
+        "customers": {
+          "label": "Clientes felices",
+          "value": "10K+"
+        },
+        "projects": {
+          "label": "Proyectos completados",
+          "value": "500+"
+        },
+        "satisfaction": {
+          "label": "Tasa de satisfacción",
+          "value": "99%"
+        }
       }
     },
     "features": {

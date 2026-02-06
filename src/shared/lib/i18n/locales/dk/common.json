@@ -97,9 +97,18 @@
         "friccion": "Nul Friktion"
       },
       "stats": {
-        "hours": "Timer givet tilbage til talentet",
-        "precision": "Menneskelig Præcision",
-        "projects": "Projekter med formål"
+        "hours": {
+          "label": "Timer givet tilbage til talentet",
+          "value": "2.5k+"
+        },
+        "precision": {
+          "label": "Menneskelig Præcision",
+          "value": "99.9%"
+        },
+        "projects": {
+          "label": "Projekter med formål",
+          "value": "150+"
+        }
       }
     },
     "newHero": {
@@ -110,9 +119,18 @@
       "ctaPrimary": "Planlæg en ærlig samtale",
       "ctaSecondary": "Se hvordan vi arbejder",
       "stats": {
-        "customers": "Glade Kunder",
-        "projects": "Afsluttede Projekter",
-        "satisfaction": "Tilfredshedsrate"
+        "customers": {
+          "label": "Glade Kunder",
+          "value": "10K+"
+        },
+        "projects": {
+          "label": "Afsluttede Projekter",
+          "value": "500+"
+        },
+        "satisfaction": {
+          "label": "Tilfredshedsrate",
+          "value": "99%"
+        }
       }
     },
     "features": {

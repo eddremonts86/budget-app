@@ -102,18 +102,24 @@ export function NewHeroSection() {
             className="mt-16 flex items-center justify-center gap-8 text-sm text-muted-foreground"
           >
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">10K+</div>
-              <div>{t('home.newHero.stats.customers')}</div>
+              <div className="text-2xl font-bold text-foreground">
+                {t('home.newHero.stats.customers.value')}
+              </div>
+              <div>{t('home.newHero.stats.customers.label')}</div>
             </div>
             <div className="h-8 w-px bg-border" />
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">500+</div>
-              <div>{t('home.newHero.stats.projects')}</div>
+              <div className="text-2xl font-bold text-foreground">
+                {t('home.newHero.stats.projects.value')}
+              </div>
+              <div>{t('home.newHero.stats.projects.label')}</div>
             </div>
             <div className="h-8 w-px bg-border" />
             <div className="text-center">
-              <div className="text-2xl font-bold text-foreground">99%</div>
-              <div>{t('home.newHero.stats.satisfaction')}</div>
+              <div className="text-2xl font-bold text-foreground">
+                {t('home.newHero.stats.satisfaction.value')}
+              </div>
+              <div>{t('home.newHero.stats.satisfaction.label')}</div>
             </div>
           </motion.div>
         </motion.div>

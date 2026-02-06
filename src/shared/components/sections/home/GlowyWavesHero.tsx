@@ -67,7 +67,6 @@ export function GlowyWavesHero() {
   }, [])
 
   useEffect(() => {
-    if (!mounted) return undefined
     const canvas = canvasRef.current
     if (!canvas) return undefined
 
@@ -275,7 +274,7 @@ export function GlowyWavesHero() {
       cancelAnimationFrame(animationId)
       observer.disconnect()
     }
-  }, [])
+  }, [mounted])
 
   return (
     <section
@@ -365,9 +364,11 @@ export function GlowyWavesHero() {
             {heroStats.map((stat) => (
               <motion.div key={stat.id} variants={itemVariants} className="space-y-1">
                 <div className="text-xs uppercase tracking-[0.3em] text-foreground/50 dark:text-foreground/60">
-                  {t(`home.hero.stats.${stat.id}`)}
+                  {t(`home.hero.stats.${stat.id}.label`)}
                 </div>
-                <div className="text-3xl font-semibold text-foreground">{stat.value}</div>
+                <div className="text-3xl font-semibold text-foreground">
+                  {t(`home.hero.stats.${stat.id}.value`)}
+                </div>
               </motion.div>
             ))}
           </motion.div>
