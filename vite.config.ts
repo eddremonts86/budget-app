@@ -7,6 +7,8 @@ import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
+const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST
+
 const config = defineConfig({
   server: {
     port: 3000,
@@ -15,9 +17,11 @@ const config = defineConfig({
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./src/tests/setup.ts'],
-    server: {
-      deps: {
-        inline: ['react', 'react-dom'],
+    deps: {
+      optimizer: {
+        web: {
+          include: ['react', 'react-dom'],
+        },
       },
     },
   },
@@ -25,10 +29,18 @@ const config = defineConfig({
     dedupe: ['react', 'react-dom'],
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'use-sync-external-store/shim/with-selector.js': fileURLToPath(new URL('./src/shared/lib/shim-with-selector.ts', import.meta.url)),
-      'use-sync-external-store/shim/with-selector': fileURLToPath(new URL('./src/shared/lib/shim-with-selector.ts', import.meta.url)),
-      'use-sync-external-store/shim/index.js': fileURLToPath(new URL('./src/shared/lib/shim.ts', import.meta.url)),
-      'use-sync-external-store/shim': fileURLToPath(new URL('./src/shared/lib/shim.ts', import.meta.url)),
+      'use-sync-external-store/shim/with-selector.js': fileURLToPath(
+        new URL('./src/shared/lib/shim-with-selector.ts', import.meta.url),
+      ),
+      'use-sync-external-store/shim/with-selector': fileURLToPath(
+        new URL('./src/shared/lib/shim-with-selector.ts', import.meta.url),
+      ),
+      'use-sync-external-store/shim/index.js': fileURLToPath(
+        new URL('./src/shared/lib/shim.ts', import.meta.url),
+      ),
+      'use-sync-external-store/shim': fileURLToPath(
+        new URL('./src/shared/lib/shim.ts', import.meta.url),
+      ),
     },
   },
   plugins: [
@@ -37,10 +49,10 @@ const config = defineConfig({
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
-    tanstackStart(),
+    !isTest && tanstackStart(),
     viteReact(),
     // netlify(),
-  ],
+  ].filter(Boolean),
 })
 
 export default config

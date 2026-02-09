@@ -17,5 +17,17 @@
     "invalid": "Ugyldig værdi",
     "tooShort": "Værdien er for kort",
     "tooLong": "Værdien er for lang"
+  },
+  "boundary": {
+    "title": "Ups! Noget gik galt",
+    "description": "Der opstod en uventet fejl. Vi er blevet underrettet og arbejder på at løse det.",
+    "goHome": "Gå til forsiden",
+    "retry": "Prøv igen",
+    "showDetails": "Vis tekniske detaljer",
+    "hideDetails": "Skjul tekniske detaljer",
+    "errorMessage": "Fejlmeddelelse:",
+    "stackTrace": "Stack trace:",
+    "unauthenticatedTitle": "Begrænset adgang",
+    "unauthenticatedDescription": "Log venligst ind for at se dette indhold."
   }
 }

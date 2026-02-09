@@ -2,7 +2,7 @@
 
 import { Slot } from 'radix-ui'
 import * as React from 'react'
-import { cn } from '@/shared/utils'
+import { cn } from '@/shared/utils/index'
 import { badgeVariants, type BadgeVariantProps } from './badge-variants'
 
 export interface BadgeProps

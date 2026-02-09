@@ -1,6 +1,7 @@
 import { ClerkProvider } from '@clerk/tanstack-react-start'
 import type { ReactNode } from 'react'
 import { Toaster } from 'sonner'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { I18nProvider } from './i18n-provider'
 import { QueryProvider } from './query-provider'
 import { ThemeProvider } from './theme-provider'
@@ -25,7 +26,7 @@ export function AppProviders({ children }: AppProvidersProps) {
       <I18nProvider>
         <ThemeProvider defaultTheme="system">
           <QueryProvider>
-            {children}
+            <TooltipProvider>{children}</TooltipProvider>
             <Toaster
               position="top-right"
               expand

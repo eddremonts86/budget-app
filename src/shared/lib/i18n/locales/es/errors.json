@@ -17,5 +17,17 @@
     "invalid": "Valor inválido",
     "tooShort": "El valor es muy corto",
     "tooLong": "El valor es muy largo"
+  },
+  "boundary": {
+    "title": "¡Ups! Algo salió mal",
+    "description": "Ha ocurrido un error inesperado. Hemos sido notificados y estamos trabajando para solucionarlo.",
+    "goHome": "Ir al inicio",
+    "retry": "Reintentar",
+    "showDetails": "Mostrar detalles técnicos",
+    "hideDetails": "Ocultar detalles técnicos",
+    "errorMessage": "Mensaje de error:",
+    "stackTrace": "Rastreo de la pila:",
+    "unauthenticatedTitle": "Acceso restringido",
+    "unauthenticatedDescription": "Por favor, inicia sesión para ver este contenido."
   }
 }
