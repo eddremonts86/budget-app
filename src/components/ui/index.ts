@@ -1,6 +1,8 @@
-export { Button, buttonVariants } from './button'
+export { Button } from './button'
+export { buttonVariants } from './button-variants'
 export { Calendar, CalendarDayButton } from './calendar'
-export { Badge, badgeVariants } from './badge'
+export { Badge } from './badge'
+export { badgeVariants } from './badge-variants'
 export { Card, CardHeader, CardFooter, CardTitle, CardDescription, CardContent } from './card'
 export { DatePicker } from './date-picker'
 export { Input } from './input'
@@ -19,3 +21,11 @@ export {
   SelectValue,
 } from './select'
 export { Textarea } from './textarea'
+export {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupText,
+  InputGroupInput,
+  InputGroupTextarea,
+} from './input-group'

@@ -4,7 +4,7 @@ const SENTRY_DSN = import.meta.env.VITE_SENTRY_DSN
 
 export function initSentry() {
   if (!SENTRY_DSN) {
-    // biome-ignore lint/suspicious/noConsole: Logging for development
+    // eslint-disable-next-line no-console
     console.info('Sentry DSN not configured, skipping initialization')
     return
   }

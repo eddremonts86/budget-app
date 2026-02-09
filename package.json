@@ -20,6 +20,7 @@
     "test:visual": "percy exec -- playwright test"
   },
   "dependencies": {
+    "@base-ui/react": "^1.1.0",
     "@clerk/tanstack-react-start": "^0.29.1",
     "@sentry/react": "^10.38.0",
     "@tanstack/db": "^0.5.25",

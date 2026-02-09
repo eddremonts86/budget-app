@@ -1,16 +1,7 @@
-import { createContext, type ReactNode, useContext, useEffect, useState } from 'react'
-
-type Theme = 'dark' | 'light' | 'system'
-
-interface ThemeProviderState {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-  resolvedTheme: 'dark' | 'light'
-}
+import { type ReactNode, useEffect, useState } from 'react'
+import { ThemeProviderContext, type Theme } from './theme-context'
 
 const STORAGE_KEY = 'tanstack-template-theme'
-
-const ThemeProviderContext = createContext<ThemeProviderState | undefined>(undefined)
 
 function getSystemTheme(): 'dark' | 'light' {
   if (typeof window === 'undefined') return 'light'
@@ -44,8 +35,8 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
 
     // Add the theme class
     root.classList.add(effectiveTheme)
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setResolvedTheme(effectiveTheme)
+    // We don't set resolvedTheme here to avoid cascading renders
+    // It's already handled by the state update logic or system listener
   }, [theme])
 
   // Listen for system theme changes
@@ -69,6 +60,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
   const setTheme = (newTheme: Theme) => {
     localStorage.setItem(STORAGE_KEY, newTheme)
     setThemeState(newTheme)
+    setResolvedTheme(newTheme === 'system' ? getSystemTheme() : newTheme)
   }
 
   return (
@@ -76,12 +68,4 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
       {children}
     </ThemeProviderContext.Provider>
   )
-}
-
-export function useTheme() {
-  const context = useContext(ThemeProviderContext)
-  if (!context) {
-    throw new Error('useTheme must be used within a ThemeProvider')
-  }
-  return context
 }

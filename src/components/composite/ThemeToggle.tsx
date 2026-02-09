@@ -1,6 +1,6 @@
 import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react'
 import { useEffect, useState, memo, useMemo, useCallback } from 'react'
-import { useTheme } from '@/shared/providers'
+import { useTheme } from '@/shared/providers/theme-context'
 import { cn } from '@/shared/utils'
 
 type Theme = 'light' | 'dark' | 'system'

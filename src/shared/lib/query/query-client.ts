@@ -2,7 +2,7 @@ import * as Sentry from '@sentry/react'
 import { QueryClient } from '@tanstack/react-query'
 
 function handleQueryError(error: unknown) {
-  // biome-ignore lint/suspicious/noConsole: Error logging is necessary
+  // eslint-disable-next-line no-console
   console.error('Query error:', error)
 
   Sentry.captureException(error, {

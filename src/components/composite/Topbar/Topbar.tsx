@@ -7,60 +7,22 @@ import { Rocket, LogIn } from 'lucide-react'
 import { memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui'
-import { LanguageSelector } from './LanguageSelector'
-import { ThemeToggle } from './ThemeToggle'
-
-interface NavItem {
-  id: string
-  label: string
-  href?: string
-  to?: string
-}
-
-const NavLink = memo(
-  ({
-    item,
-    onClick,
-  }: {
-    item: NavItem
-    onClick: (e: React.MouseEvent<HTMLAnchorElement>, id: string) => void
-  }) => {
-    if (item.to) {
-      return (
-        <Link
-          to={item.to as '/'}
-          className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-          onClick={(e) => onClick(e as unknown as React.MouseEvent<HTMLAnchorElement>, item.id)}
-        >
-          {item.label}
-        </Link>
-      )
-    }
-
-    return (
-      <a
-        href={item.href}
-        className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
-        onClick={(e) => onClick(e, item.id)}
-      >
-        {item.label}
-      </a>
-    )
-  },
-)
-
-NavLink.displayName = 'NavLink'
+import { LanguageSelector } from '../LanguageSelector'
+import { ThemeToggle } from '../ThemeToggle'
+import { TOPBAR_HEIGHT } from './constants'
+import { getDashboardItem, getNavItems } from './nav-config'
+import { NavLink } from './NavLink'
+import type { NavItem } from './types'
 
 export const Topbar = memo(function Topbar() {
   const { t } = useTranslation()
 
   const handleScroll = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
-    e.preventDefault()
     const element = document.getElementById(id)
     if (element) {
-      const topbarHeight = 64 // h-16 = 4rem = 64px
+      e.preventDefault()
       const elementPosition = element.getBoundingClientRect().top
-      const offsetPosition = elementPosition + window.pageYOffset - topbarHeight
+      const offsetPosition = elementPosition + window.pageYOffset - TOPBAR_HEIGHT
 
       window.scrollTo({
         top: id === 'home' ? 0 : offsetPosition,
@@ -69,15 +31,9 @@ export const Topbar = memo(function Topbar() {
     }
   }, [])
 
-  const navItems = useMemo<NavItem[]>(
-    () => [
-      { id: 'home', label: t('nav.home'), to: '/' },
-      { id: 'services', label: t('nav.services'), href: '#services' },
-      { id: 'timeline', label: t('nav.timeline'), href: '#timeline' },
-      { id: 'contact', label: t('nav.contact'), href: '#contact' },
-    ],
-    [t],
-  )
+  const navItems = useMemo<NavItem[]>(() => getNavItems(t), [t])
+
+  const dashboardItem = useMemo<NavItem>(() => getDashboardItem(), [])
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
@@ -105,6 +61,9 @@ export const Topbar = memo(function Topbar() {
             {navItems.map((item) => (
               <NavLink key={item.id} item={item} onClick={handleScroll} />
             ))}
+            <SignedIn>
+              <NavLink item={dashboardItem} onClick={handleScroll} />
+            </SignedIn>
           </nav>
         </div>
 

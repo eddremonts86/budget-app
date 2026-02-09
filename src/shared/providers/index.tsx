@@ -44,4 +44,4 @@ export function AppProviders({ children }: AppProvidersProps) {
 
 export { I18nProvider } from './i18n-provider'
 export { QueryProvider } from './query-provider'
-export { ThemeProvider, useTheme } from './theme-provider'
+export { ThemeProvider } from './theme-provider'
