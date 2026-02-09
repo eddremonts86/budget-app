@@ -38,24 +38,39 @@ const data = {
       icon: IconDashboard,
     },
     {
-      title: 'Lifecycle',
-      url: '/dashboard',
+      title: 'Todos',
+      url: '/dashboard/todos',
       icon: IconListDetails,
     },
     {
       title: 'Analytics',
-      url: '/dashboard',
+      url: '/dashboard/analytics',
       icon: IconChartBar,
     },
     {
       title: 'Projects',
-      url: '/dashboard',
+      url: '/dashboard/projects',
       icon: IconFolder,
     },
     {
       title: 'Team',
-      url: '/dashboard',
+      url: '/dashboard/team',
       icon: IconUsers,
+    },
+    {
+      title: 'Users',
+      url: '/dashboard/users',
+      icon: IconUsers,
+    },
+    {
+      title: 'Categories',
+      url: '/dashboard/categories',
+      icon: IconListDetails,
+    },
+    {
+      title: 'Transactions',
+      url: '/dashboard/transactions',
+      icon: IconReport,
     },
   ],
   navClouds: [
