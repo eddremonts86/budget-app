@@ -9,7 +9,6 @@
     "services": "Solutions",
     "timeline": "Story",
     "contact": "Let's Talk",
-    "todos": "Tasks",
     "settings": "Settings",
     "signIn": "Sign In",
     "signOut": "Sign Out"
@@ -44,36 +43,6 @@
     "en": "English",
     "es": "Spanish",
     "dk": "Danish"
-  },
-  "todo": {
-    "title": "Todos",
-    "createNew": "Create New Todo",
-    "editTodo": "Edit Todo",
-    "deleteTodo": "Delete Todo",
-    "deleteConfirm": "Are you sure you want to delete this todo?",
-    "fields": {
-      "title": "Title",
-      "description": "Description",
-      "status": "Status",
-      "priority": "Priority",
-      "dueDate": "Due Date"
-    },
-    "status": {
-      "pending": "Pending",
-      "in_progress": "In Progress",
-      "completed": "Completed"
-    },
-    "priority": {
-      "low": "Low",
-      "medium": "Medium",
-      "high": "High"
-    },
-    "messages": {
-      "created": "Todo created successfully",
-      "updated": "Todo updated successfully",
-      "deleted": "Todo deleted successfully"
-    },
-    "empty": "No todos found. Create your first one!"
   },
   "validation": {
     "required": "This field is required",

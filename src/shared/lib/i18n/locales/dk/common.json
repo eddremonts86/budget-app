@@ -9,7 +9,6 @@
     "services": "Løsninger",
     "timeline": "Historie",
     "contact": "Lad os tale",
-    "todos": "Opgaver",
     "settings": "Indstillinger",
     "signIn": "Log ind",
     "signOut": "Log ud"
@@ -44,36 +43,6 @@
     "en": "Engelsk",
     "es": "Spansk",
     "dk": "Dansk"
-  },
-  "todo": {
-    "title": "Opgaver",
-    "createNew": "Opret Ny Opgave",
-    "editTodo": "Rediger Opgave",
-    "deleteTodo": "Slet Opgave",
-    "deleteConfirm": "Er du sikker på, at du vil slette denne opgave?",
-    "fields": {
-      "title": "Titel",
-      "description": "Beskrivelse",
-      "status": "Status",
-      "priority": "Prioritet",
-      "dueDate": "Forfaldsdato"
-    },
-    "status": {
-      "pending": "Afventer",
-      "in_progress": "I gang",
-      "completed": "Fuldført"
-    },
-    "priority": {
-      "low": "Lav",
-      "medium": "Mellem",
-      "high": "Høj"
-    },
-    "messages": {
-      "created": "Opgave oprettet",
-      "updated": "Opgave opdateret",
-      "deleted": "Opgave slettet"
-    },
-    "empty": "Ingen opgaver fundet. Opret din første!"
   },
   "validation": {
     "required": "Dette felt er påkrævet",

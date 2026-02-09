@@ -14,10 +14,10 @@ import { setupAuthInterceptor, setupErrorInterceptor } from './interceptors'
  * import { apiClient } from '@/shared/lib/api'
  *
  * // GET request
- * const { data } = await apiClient.get('/todos')
+ * const { data } = await apiClient.get('/users')
  *
  * // POST request
- * const { data } = await apiClient.post('/todos', { title: 'New Todo' })
+ * const { data } = await apiClient.post('/users', { name: 'John Doe' })
  * ```
  */
 export const apiClient = axios.create({
