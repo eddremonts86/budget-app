@@ -22,6 +22,7 @@ const config = defineConfig({
     },
   },
   resolve: {
+    dedupe: ['react', 'react-dom'],
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },

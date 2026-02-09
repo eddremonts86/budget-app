@@ -11,6 +11,25 @@ interface UseTodoVirtualizerProps {
   isFetchingNextPage: boolean
 }
 
+interface ShouldFetchNextPageOptions {
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
+  virtualItems: Array<{ index: number }>
+  totalRows: number
+}
+
+export function shouldFetchNextPage({
+  hasNextPage,
+  isFetchingNextPage,
+  virtualItems,
+  totalRows,
+}: ShouldFetchNextPageOptions) {
+  if (!hasNextPage || isFetchingNextPage || virtualItems.length === 0) return false
+
+  const lastItem = virtualItems[virtualItems.length - 1]
+  return lastItem.index >= totalRows - 3
+}
+
 export function useTodoVirtualizer({
   todos,
   hasNextPage,
@@ -43,10 +62,14 @@ export function useTodoVirtualizer({
   }, [rowVirtualizer, todosLength, editingId])
 
   useEffect(() => {
-    if (!hasNextPage || isFetchingNextPage || virtualItems.length === 0) return
-
-    const lastItem = virtualItems[virtualItems.length - 1]
-    if (lastItem.index >= totalRows - 3) {
+    if (
+      shouldFetchNextPage({
+        hasNextPage,
+        isFetchingNextPage,
+        virtualItems,
+        totalRows,
+      })
+    ) {
       fetchNextPage()
     }
   }, [fetchNextPage, hasNextPage, isFetchingNextPage, virtualItems, totalRows])
