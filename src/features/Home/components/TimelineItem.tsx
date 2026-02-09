@@ -56,7 +56,7 @@ export function TimelineItem({
 
       <div className={`ml-16 w-full md:ml-0 md:w-5/12 ${isEven ? 'md:pr-12' : 'md:pl-12'}`}>
         <motion.div whileHover={{ scale: 1.02, y: -5 }} transition={{ duration: 0.2 }}>
-          <Card className="relative overflow-hidden border-border/50 bg-card p-4 shadow-lg md:p-6">
+          <Card className="relative overflow-hidden border-border/50 bg-background/50 p-4 shadow-lg backdrop-blur-xl transition-colors hover:border-primary/50 md:p-6">
             <div className="relative z-10">
               <Badge className="mb-3" variant="outline">
                 {year}

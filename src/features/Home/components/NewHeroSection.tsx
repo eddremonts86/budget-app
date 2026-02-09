@@ -79,7 +79,7 @@ export function NewHeroSection() {
           >
             {t('home.newHero.title')}
             <br />
-            <span className="bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {t('home.newHero.titleHighlight')}
             </span>
           </motion.h1>

@@ -39,7 +39,10 @@ export function OurServicesSection() {
   }
 
   return (
-    <section className="bg-background px-4 py-20 md:py-24">
+    <section className="relative overflow-hidden bg-background px-4 py-20 md:py-24">
+      {/* Ambient background glow */}
+      <div className="absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[100px]" />
+
       <div className="mx-auto max-w-7xl">
         <motion.div
           initial={{ opacity: 0, y: -20 }}

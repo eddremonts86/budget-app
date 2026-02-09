@@ -84,7 +84,7 @@ export function GlowyWavesHero() {
           >
             {t('home.hero.title')}
             <br />
-            <span className="bg-gradient-to-r from-primary via-primary/80 to-primary/60 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {t('home.hero.titleHighlight')}
             </span>
           </motion.h1>
@@ -100,10 +100,7 @@ export function GlowyWavesHero() {
             variants={itemVariants}
             className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
-            <Button
-              size="lg"
-              className="group gap-2 rounded-full px-8 text-base uppercase tracking-[0.2em]"
-            >
+            <Button size="lg" className="group gap-2 rounded-full px-8 text-base">
               {t('home.hero.ctaPrimary')}
               <ArrowRight
                 className="h-4 w-4 transition-transform group-hover:translate-x-1"
