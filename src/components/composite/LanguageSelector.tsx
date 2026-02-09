@@ -10,7 +10,13 @@ const languageFlags: Record<SupportedLanguage, string> = {
   dk: '🇩🇰',
 }
 
-export const LanguageSelector = memo(function LanguageSelector() {
+export const LanguageSelector = memo(function LanguageSelector({
+  align = 'right',
+  side = 'bottom',
+}: {
+  align?: 'left' | 'right'
+  side?: 'top' | 'bottom'
+}) {
   const { i18n, t } = useTranslation()
   const currentLanguage = i18n.language as SupportedLanguage
   const [mounted, setMounted] = useState(false)
@@ -20,9 +26,12 @@ export const LanguageSelector = memo(function LanguageSelector() {
     setMounted(true)
   }, [])
 
-  const handleLanguageChange = useCallback((lang: SupportedLanguage) => {
-    i18n.changeLanguage(lang)
-  }, [i18n])
+  const handleLanguageChange = useCallback(
+    (lang: SupportedLanguage) => {
+      i18n.changeLanguage(lang)
+    },
+    [i18n],
+  )
 
   return (
     <div className="relative group">
@@ -41,10 +50,12 @@ export const LanguageSelector = memo(function LanguageSelector() {
 
       <div
         className={cn(
-          'absolute right-0 top-full mt-1 w-40 rounded-md border bg-popover p-1 shadow-md',
+          'absolute mt-1 w-40 rounded-md border bg-popover p-1 shadow-md',
           'opacity-0 invisible group-hover:opacity-100 group-hover:visible',
           'transition-all duration-200',
           'z-50',
+          align === 'right' ? 'right-0' : 'left-0',
+          side === 'top' ? 'bottom-full mb-1 mt-0' : 'top-full mt-1',
           !mounted && 'hidden',
         )}
       >

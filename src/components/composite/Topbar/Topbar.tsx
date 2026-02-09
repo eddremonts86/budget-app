@@ -3,10 +3,18 @@
 import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { Rocket, LogIn } from 'lucide-react'
-import { memo, useCallback, useMemo } from 'react'
+import { Rocket, LogIn, Menu } from 'lucide-react'
+import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui'
+import {
+  Button,
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  Separator,
+} from '@/components/ui'
 import { LanguageSelector } from '../LanguageSelector'
 import { ThemeToggle } from '../ThemeToggle'
 import { TOPBAR_HEIGHT } from './constants'
@@ -16,8 +24,10 @@ import type { NavItem } from './types'
 
 export const Topbar = memo(function Topbar() {
   const { t } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false)
 
   const handleScroll = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
+    setIsOpen(false)
     const element = document.getElementById(id)
     if (element) {
       e.preventDefault()
@@ -65,11 +75,67 @@ export const Topbar = memo(function Topbar() {
               <NavLink item={dashboardItem} onClick={handleScroll} />
             </SignedIn>
           </nav>
+
+          <div className="md:hidden">
+            <Sheet open={isOpen} onOpenChange={setIsOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon" className="md:hidden">
+                  <Menu className="h-6 w-6" />
+                  <span className="sr-only">Toggle menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px] flex flex-col px-0">
+                <div className="flex flex-col h-full">
+                  <SheetHeader className="px-6 py-6">
+                    <SheetTitle className="flex items-center gap-2">
+                      <Rocket className="w-6 h-6 text-primary" />
+                      <span>{t('app.brand')}</span>
+                    </SheetTitle>
+                  </SheetHeader>
+                  <Separator />
+                  <div className="flex flex-col gap-2 p-4 flex-1 overflow-y-auto">
+                    {navItems.map((item) => (
+                      <NavLink
+                        key={item.id}
+                        item={item}
+                        onClick={handleScroll}
+                        className="text-lg w-full justify-start px-4 py-3 h-auto hover:bg-secondary rounded-lg transition-colors"
+                      />
+                    ))}
+                    <SignedIn>
+                      <NavLink
+                        item={dashboardItem}
+                        onClick={handleScroll}
+                        className="text-lg w-full justify-start px-4 py-3 h-auto hover:bg-secondary rounded-lg transition-colors"
+                      />
+                    </SignedIn>
+                  </div>
+
+                  <div className="mt-auto border-t p-6 flex flex-col gap-4 bg-muted/30">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {t('language.title', 'Language')}
+                      </span>
+                      <LanguageSelector side="top" align="right" />
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {t('theme.title', 'Theme')}
+                      </span>
+                      <ThemeToggle />
+                    </div>
+                  </div>
+                </div>
+              </SheetContent>
+            </Sheet>
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
-          <LanguageSelector />
-          <ThemeToggle />
+          <div className="hidden sm:flex items-center gap-4">
+            <LanguageSelector />
+            <ThemeToggle />
+          </div>
 
           <SignedOut>
             <SignInButton mode="modal">
