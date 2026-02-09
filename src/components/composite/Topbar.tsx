@@ -1,10 +1,12 @@
 'use client'
 
+import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
-import { Rocket } from 'lucide-react'
+import { Rocket, LogIn } from 'lucide-react'
 import { memo, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui'
 import { LanguageSelector } from './LanguageSelector'
 import { ThemeToggle } from './ThemeToggle'
 
@@ -109,6 +111,28 @@ export const Topbar = memo(function Topbar() {
         <div className="flex items-center gap-4">
           <LanguageSelector />
           <ThemeToggle />
+
+          <SignedOut>
+            <SignInButton mode="modal">
+              <Button variant="ghost" size="sm" className="gap-2">
+                <LogIn className="h-4 w-4" />
+                {t('nav.signIn')}
+              </Button>
+            </SignInButton>
+          </SignedOut>
+
+          <SignedIn>
+            <div className="flex items-center gap-2">
+              <UserButton
+                afterSignOutUrl="/"
+                appearance={{
+                  elements: {
+                    avatarBox: 'h-8 w-8',
+                  },
+                }}
+              />
+            </div>
+          </SignedIn>
         </div>
       </div>
     </header>

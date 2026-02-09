@@ -2,7 +2,7 @@ import { createRootRoute } from '@tanstack/react-router'
 import { NotFoundPage } from '@/components/composite'
 import { initSentry } from '@/shared/lib/sentry'
 import appCss from '@/shared/styles/globals.css?url'
-import { RootDocument, RootErrorBoundary } from './root-components'
+import { RootDocument, RootErrorBoundary } from './-root-components'
 
 // Initialize Sentry
 initSentry()

@@ -25,6 +25,10 @@ const config = defineConfig({
     dedupe: ['react', 'react-dom'],
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
+      'use-sync-external-store/shim/with-selector.js': fileURLToPath(new URL('./src/shared/lib/shim-with-selector.ts', import.meta.url)),
+      'use-sync-external-store/shim/with-selector': fileURLToPath(new URL('./src/shared/lib/shim-with-selector.ts', import.meta.url)),
+      'use-sync-external-store/shim/index.js': fileURLToPath(new URL('./src/shared/lib/shim.ts', import.meta.url)),
+      'use-sync-external-store/shim': fileURLToPath(new URL('./src/shared/lib/shim.ts', import.meta.url)),
     },
   },
   plugins: [

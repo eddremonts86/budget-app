@@ -43,7 +43,7 @@ export function setupErrorInterceptor(client: AxiosInstance) {
       })
 
       // Log to Sentry for server errors (5xx) and unexpected errors
-      // Skip logging for expected client errors (401, 403, 404)
+      // Skip logging for expected client errors (401, 403, 404, 422)
       const skipSentryStatuses = [401, 403, 404, 422]
       if (status && !skipSentryStatuses.includes(status)) {
         Sentry.captureException(error, {
