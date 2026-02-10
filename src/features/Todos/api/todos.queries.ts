@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTQuery, useTQInfinite } from '@/shared/lib/query'
+import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import { todosApi } from './todos.api'
 
 export const todoKeys = {
@@ -26,33 +25,27 @@ export const useTodo = (id: string) => {
 }
 
 export const useCreateTodo = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: todosApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: todoKeys.all })
-    },
+  return useTQMutation(['todos', 'create'], todosApi.create, {
+    invalidateKeys: [todoKeys.all],
+    successMessage: 'Tarea creada correctamente',
   })
 }
 
 export const useUpdateTodo = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof todosApi.update>[1] }) =>
+  return useTQMutation(
+    ['todos', 'update'],
+    ({ id, data }: { id: string; data: Parameters<typeof todosApi.update>[1] }) =>
       todosApi.update(id, data),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: todoKeys.all })
-      queryClient.invalidateQueries({ queryKey: todoKeys.detail(id) })
+    {
+      invalidateKeys: [todoKeys.all],
+      successMessage: 'Tarea actualizada correctamente',
     },
-  })
+  )
 }
 
 export const useDeleteTodo = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: todosApi.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: todoKeys.all })
-    },
+  return useTQMutation(['todos', 'delete'], todosApi.delete, {
+    invalidateKeys: [todoKeys.all],
+    successMessage: 'Tarea eliminada correctamente',
   })
 }

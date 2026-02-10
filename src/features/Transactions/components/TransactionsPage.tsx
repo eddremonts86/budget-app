@@ -1,6 +1,8 @@
-import * as React from 'react'
 import { type ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import * as React from 'react'
+import { useInView } from 'react-intersection-observer'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -19,6 +21,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TableCell, TableRow } from '@/components/ui/table'
 import { DataTable } from '@/shared/ui/DataTable'
 import {
   useCreateTransaction,
@@ -33,14 +36,16 @@ export function TransactionsPage() {
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null)
 
-  const {
-    data,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-    isLoading,
-    isError,
-  } = useInfiniteTransactions(10)
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useInfiniteTransactions(10)
+
+  const { ref, inView } = useInView()
+
+  React.useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const createMutation = useCreateTransaction()
   const updateMutation = useUpdateTransaction()
@@ -67,11 +72,7 @@ export function TransactionsPage() {
           Pending: 'secondary',
           Rejected: 'destructive',
         }
-        return (
-          <Badge variant={variants[status] || 'outline'}>
-            {status}
-          </Badge>
-        )
+        return <Badge variant={variants[status] || 'outline'}>{status}</Badge>
       },
     },
     {
@@ -114,9 +115,18 @@ export function TransactionsPage() {
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => {
-                  if (confirm('Are you sure you want to delete this transaction?')) {
-                    deleteMutation.mutate(transaction.id)
-                  }
+                  toast.error('¿Estás seguro de eliminar esta transacción?', {
+                    description: 'Esta acción no se puede deshacer.',
+                    action: {
+                      label: 'Eliminar',
+                      onClick: () => deleteMutation.mutate(transaction.id),
+                    },
+                    cancel: {
+                      label: 'Cancelar',
+                      onClick: () => {},
+                    },
+                    duration: 10000,
+                  })
                 }}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -165,20 +175,23 @@ export function TransactionsPage() {
           <Skeleton className="h-10 w-full" />
         </div>
       ) : (
-        <>
-          <DataTable columns={columns} data={allTransactions} filterColumn="customer_name" />
+        <DataTable columns={columns} data={allTransactions} filterColumn="customer_name">
           {hasNextPage && (
-            <div className="flex justify-center mt-4 pb-8">
-              <Button
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                variant="outline"
-              >
-                {isFetchingNextPage ? 'Loading more...' : 'Load More'}
-              </Button>
-            </div>
+            <TableRow className="hover:bg-transparent border-none">
+              <TableCell colSpan={columns.length} className="py-4">
+                <div ref={ref} className="flex justify-center">
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    variant="outline"
+                  >
+                    {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
           )}
-        </>
+        </DataTable>
       )}
 
       {/* Create Sheet */}
@@ -186,9 +199,7 @@ export function TransactionsPage() {
         <SheetContent className="sm:max-w-[540px]">
           <SheetHeader>
             <SheetTitle>Create Transaction</SheetTitle>
-            <SheetDescription>
-              Add a new transaction record.
-            </SheetDescription>
+            <SheetDescription>Add a new transaction record.</SheetDescription>
           </SheetHeader>
           <div className="py-6">
             <TransactionForm
@@ -204,13 +215,14 @@ export function TransactionsPage() {
       </Sheet>
 
       {/* Edit Sheet */}
-      <Sheet open={!!editingTransaction} onOpenChange={(open) => !open && setEditingTransaction(null)}>
+      <Sheet
+        open={!!editingTransaction}
+        onOpenChange={(open) => !open && setEditingTransaction(null)}
+      >
         <SheetContent className="sm:max-w-[540px]">
           <SheetHeader>
             <SheetTitle>Edit Transaction</SheetTitle>
-            <SheetDescription>
-              Update transaction details.
-            </SheetDescription>
+            <SheetDescription>Update transaction details.</SheetDescription>
           </SheetHeader>
           <div className="py-6">
             {editingTransaction && (

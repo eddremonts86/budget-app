@@ -1,6 +1,8 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
+import { useInView } from 'react-intersection-observer'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -18,6 +20,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TableCell, TableRow } from '@/components/ui/table'
 import { DataTable } from '@/shared/ui/DataTable'
 import {
   useCreateCategory,
@@ -34,6 +37,14 @@ export function CategoriesPage() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteCategories(10)
+
+  const { ref, inView } = useInView()
+
+  React.useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const createMutation = useCreateCategory()
   const updateMutation = useUpdateCategory()
@@ -83,9 +94,18 @@ export function CategoriesPage() {
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => {
-                  if (confirm('Are you sure you want to delete this category?')) {
-                    deleteMutation.mutate(category.id)
-                  }
+                  toast.error('¿Estás seguro de eliminar esta categoría?', {
+                    description: 'Esta acción no se puede deshacer.',
+                    action: {
+                      label: 'Eliminar',
+                      onClick: () => deleteMutation.mutate(category.id),
+                    },
+                    cancel: {
+                      label: 'Cancelar',
+                      onClick: () => {},
+                    },
+                    duration: 10000,
+                  })
                 }}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -134,20 +154,23 @@ export function CategoriesPage() {
           <Skeleton className="h-10 w-full" />
         </div>
       ) : (
-        <>
-          <DataTable columns={columns} data={allCategories} filterColumn="name" />
+        <DataTable columns={columns} data={allCategories} filterColumn="name">
           {hasNextPage && (
-            <div className="flex justify-center mt-4 pb-8">
-              <Button
-                onClick={() => fetchNextPage()}
-                disabled={isFetchingNextPage}
-                variant="outline"
-              >
-                {isFetchingNextPage ? 'Loading more...' : 'Load More'}
-              </Button>
-            </div>
+            <TableRow className="hover:bg-transparent border-none">
+              <TableCell colSpan={columns.length} className="py-4">
+                <div ref={ref} className="flex justify-center">
+                  <Button
+                    onClick={() => fetchNextPage()}
+                    disabled={isFetchingNextPage}
+                    variant="outline"
+                  >
+                    {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                  </Button>
+                </div>
+              </TableCell>
+            </TableRow>
           )}
-        </>
+        </DataTable>
       )}
 
       {/* Create Sheet */}

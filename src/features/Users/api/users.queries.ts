@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTQuery, useTQInfinite } from '@/shared/lib/query'
+import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import { usersApi } from './users.api'
 
 export const userKeys = {
@@ -30,33 +29,23 @@ export const useUser = (id: string) => {
 }
 
 export const useCreateUser = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: usersApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all })
-    },
+  return useTQMutation(['users', 'create'], usersApi.create, {
+    invalidateKeys: [userKeys.all],
+    successMessage: 'Usuario creado correctamente',
   })
 }
 
 export const useUpdateUser = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof usersApi.update>[1] }) =>
-      usersApi.update(id, data),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all })
-      queryClient.invalidateQueries({ queryKey: userKeys.detail(id) })
-    },
+  return useTQMutation(['users', 'update'], ({ id, data }: { id: string; data: Parameters<typeof usersApi.update>[1] }) =>
+    usersApi.update(id, data), {
+    invalidateKeys: [userKeys.all],
+    successMessage: 'Usuario actualizado correctamente',
   })
 }
 
 export const useDeleteUser = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: usersApi.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: userKeys.all })
-    },
+  return useTQMutation(['users', 'delete'], usersApi.delete, {
+    invalidateKeys: [userKeys.all],
+    successMessage: 'Usuario eliminado correctamente',
   })
 }

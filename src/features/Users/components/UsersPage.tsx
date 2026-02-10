@@ -1,5 +1,5 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import {
   ChevronDown,
   Mail,
@@ -10,6 +10,8 @@ import {
   UserPlus,
 } from 'lucide-react'
 import * as React from 'react'
+import { useInView } from 'react-intersection-observer'
+import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -29,6 +31,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { TableCell, TableRow } from '@/components/ui/table'
 import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
 import { useCreateUser, useDeleteUser, useInfiniteUsers, useUpdateUser } from '../api/users.queries'
@@ -41,6 +44,14 @@ export function UsersPage() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteUsers(10)
+
+  const { ref, inView } = useInView()
+
+  React.useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const createMutation = useCreateUser()
   const updateMutation = useUpdateUser()
@@ -125,9 +136,18 @@ export function UsersPage() {
               <DropdownMenuItem
                 className="text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive"
                 onClick={() => {
-                  if (confirm('¿Estás seguro de eliminar este usuario?')) {
-                    deleteMutation.mutate(user.id)
-                  }
+                  toast.error('¿Estás seguro de eliminar este usuario?', {
+                    description: 'Esta acción no se puede deshacer.',
+                    action: {
+                      label: 'Eliminar',
+                      onClick: () => deleteMutation.mutate(user.id),
+                    },
+                    cancel: {
+                      label: 'Cancelar',
+                      onClick: () => {},
+                    },
+                    duration: 10000,
+                  })
                 }}
               >
                 <Trash2 className="h-4 w-4" />
@@ -197,36 +217,34 @@ export function UsersPage() {
         </div>
       ) : (
         <div className="relative group">
-          <DataTable columns={columns} data={allUsers} filterColumn="name" />
-
-          <AnimatePresence>
+          <DataTable columns={columns} data={allUsers} filterColumn="name">
             {hasNextPage && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-center mt-12 pb-12"
-              >
-                <Button
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                  variant="outline"
-                  className="h-12 px-10 rounded-2xl border-dashed border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all group"
-                >
-                  {isFetchingNextPage ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      Sincronizando...
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2 font-semibold">
-                      Cargar más usuarios
-                      <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                    </div>
-                  )}
-                </Button>
-              </motion.div>
+              <TableRow className="hover:bg-transparent border-none">
+                <TableCell colSpan={columns.length} className="py-8">
+                  <div ref={ref} className="flex justify-center">
+                    <Button
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      variant="outline"
+                      className="h-12 px-10 rounded-2xl border-dashed border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all group"
+                    >
+                      {isFetchingNextPage ? (
+                        <div className="flex items-center gap-2">
+                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                          Sincronizando...
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2 font-semibold">
+                          Cargar más usuarios
+                          <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
+                        </div>
+                      )}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
             )}
-          </AnimatePresence>
+          </DataTable>
         </div>
       )}
 

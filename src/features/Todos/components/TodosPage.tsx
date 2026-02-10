@@ -1,8 +1,9 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Calendar, Clock, Flag, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
 import { useInView } from 'react-intersection-observer'
+import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,14 +23,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { TableCell, TableRow } from '@/components/ui/table'
 import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
 import { useCreateTodo, useDeleteTodo, useInfiniteTodos, useUpdateTodo } from '../api/todos.queries'
@@ -171,9 +165,18 @@ export function TodosPage() {
               <DropdownMenuItem
                 className="text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive"
                 onClick={() => {
-                  if (confirm('¿Estás seguro de eliminar esta tarea?')) {
-                    deleteMutation.mutate(todo.id)
-                  }
+                  toast.error('¿Estás seguro de eliminar esta tarea?', {
+                    description: 'Esta acción no se puede deshacer.',
+                    action: {
+                      label: 'Eliminar',
+                      onClick: () => deleteMutation.mutate(todo.id),
+                    },
+                    cancel: {
+                      label: 'Cancelar',
+                      onClick: () => {},
+                    },
+                    duration: 10000, // Más tiempo para que el usuario decida
+                  })
                 }}
               >
                 <Trash2 className="h-4 w-4" />
@@ -249,25 +252,18 @@ export function TodosPage() {
             filterColumn="title"
             className="max-h-[600px] overflow-y-auto"
           >
-            <AnimatePresence>
-              {hasNextPage && (
-                <motion.tr
-                  ref={ref}
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  exit={{ opacity: 0 }}
-                >
-                  <TableCell colSpan={columns.length} className="p-0 border-none">
-                    <div className="flex justify-center py-8">
-                      <div className="flex items-center gap-2 text-muted-foreground font-medium bg-secondary/20 px-6 py-3 rounded-2xl backdrop-blur-sm border border-border/40">
-                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                        Cargando más tareas...
-                      </div>
+            {hasNextPage && (
+              <TableRow className="border-none hover:bg-transparent">
+                <TableCell colSpan={columns.length} className="p-0">
+                  <div ref={ref} className="flex justify-center py-8">
+                    <div className="flex items-center gap-2 text-muted-foreground font-medium bg-secondary/20 px-6 py-3 rounded-2xl backdrop-blur-sm border border-border/40">
+                      <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                      Cargando más tareas...
                     </div>
-                  </TableCell>
-                </motion.tr>
-              )}
-            </AnimatePresence>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </DataTable>
         </Field>
       )}

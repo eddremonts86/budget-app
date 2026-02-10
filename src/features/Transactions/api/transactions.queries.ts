@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTQuery, useTQInfinite } from '@/shared/lib/query'
+import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import { transactionsApi } from './transactions.api'
 
 export const transactionKeys = {
@@ -32,38 +31,28 @@ export const useTransaction = (id: string) => {
 }
 
 export const useCreateTransaction = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: transactionsApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
-    },
+  return useTQMutation(['transactions', 'create'], transactionsApi.create, {
+    invalidateKeys: [transactionKeys.all],
+    successMessage: 'Transacción creada correctamente',
   })
 }
 
 export const useUpdateTransaction = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({
-      id,
-      data,
-    }: {
-      id: string
-      data: Parameters<typeof transactionsApi.update>[1]
-    }) => transactionsApi.update(id, data),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
-      queryClient.invalidateQueries({ queryKey: transactionKeys.detail(id) })
-    },
+  return useTQMutation(['transactions', 'update'], ({
+    id,
+    data,
+  }: {
+    id: string
+    data: Parameters<typeof transactionsApi.update>[1]
+  }) => transactionsApi.update(id, data), {
+    invalidateKeys: [transactionKeys.all],
+    successMessage: 'Transacción actualizada correctamente',
   })
 }
 
 export const useDeleteTransaction = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: transactionsApi.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: transactionKeys.all })
-    },
+  return useTQMutation(['transactions', 'delete'], transactionsApi.delete, {
+    invalidateKeys: [transactionKeys.all],
+    successMessage: 'Transacción eliminada correctamente',
   })
 }

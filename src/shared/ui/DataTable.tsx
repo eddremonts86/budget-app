@@ -150,43 +150,40 @@ export function DataTable<TData, TValue>({
             ))}
           </TableHeader>
           <TableBody>
-            <AnimatePresence mode="popLayout">
-              {table.getRowModel().rows?.length ? (
-                <>
-                  {table.getRowModel().rows.map((row, index) => (
-                    <motion.tr
-                      key={row.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.95 }}
-                      transition={{ duration: 0.2, delay: index * 0.03 }}
-                      className="group hover:bg-secondary/10 transition-colors cursor-default"
+            <AnimatePresence mode="popLayout" initial={false}>
+              {table.getRowModel().rows?.map((row, index) => (
+                <motion.tr
+                  key={row.id}
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, scale: 0.95 }}
+                  transition={{ duration: 0.2, delay: index * 0.03 }}
+                  className="group hover:bg-secondary/10 transition-colors cursor-default"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="py-4 px-6 text-sm border-b border-border/40"
                     >
-                      {row.getVisibleCells().map((cell) => (
-                        <TableCell
-                          key={cell.id}
-                          className="py-4 px-6 text-sm border-b border-border/40"
-                        >
-                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                        </TableCell>
-                      ))}
-                    </motion.tr>
+                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                    </TableCell>
                   ))}
-                  {children}
-                </>
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={columns.length} className="h-32 text-center">
-                    <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
-                      <div className="p-3 rounded-full bg-secondary/30">
-                        <Search className="w-6 h-6 opacity-20" />
-                      </div>
-                      <p className="font-medium">No se encontraron resultados</p>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
+                </motion.tr>
+              ))}
             </AnimatePresence>
+            {children}
+            {!table.getRowModel().rows?.length && (
+              <TableRow>
+                <TableCell colSpan={columns.length} className="h-32 text-center">
+                  <div className="flex flex-col items-center justify-center gap-2 text-muted-foreground">
+                    <div className="p-3 rounded-full bg-secondary/30">
+                      <Search className="w-6 h-6 opacity-20" />
+                    </div>
+                    <p className="font-medium">No se encontraron resultados</p>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>

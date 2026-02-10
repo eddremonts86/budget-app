@@ -14979,16 +14979,6 @@
       "dueDate": "2026-02-20",
       "createdAt": "2026-02-05T00:00:00.000Z",
       "updatedAt": "2026-02-05T00:00:00.000Z"
-    },
-    {
-      "id": "057e",
-      "title": "Este es un ejemplo",
-      "description": "un buen ejemplo",
-      "status": "pending",
-      "priority": "medium",
-      "dueDate": "2026-02-10",
-      "createdAt": "2026-02-10T11:47:14.183Z",
-      "updatedAt": "2026-02-10T11:47:14.183Z"
     }
   ],
   "users": [

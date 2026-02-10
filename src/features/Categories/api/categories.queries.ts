@@ -1,5 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useTQuery, useTQInfinite } from '@/shared/lib/query'
+import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import { categoriesApi } from './categories.api'
 
 export const categoryKeys = {
@@ -32,33 +31,23 @@ export const useCategory = (id: string) => {
 }
 
 export const useCreateCategory = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: categoriesApi.create,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-    },
+  return useTQMutation(['categories', 'create'], categoriesApi.create, {
+    invalidateKeys: [categoryKeys.all],
+    successMessage: 'Categoría creada correctamente',
   })
 }
 
 export const useUpdateCategory = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Parameters<typeof categoriesApi.update>[1] }) =>
-      categoriesApi.update(id, data),
-    onSuccess: (_, { id }) => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-      queryClient.invalidateQueries({ queryKey: categoryKeys.detail(id) })
-    },
+  return useTQMutation(['categories', 'update'], ({ id, data }: { id: string; data: Parameters<typeof categoriesApi.update>[1] }) =>
+    categoriesApi.update(id, data), {
+    invalidateKeys: [categoryKeys.all],
+    successMessage: 'Categoría actualizada correctamente',
   })
 }
 
 export const useDeleteCategory = () => {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: categoriesApi.delete,
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: categoryKeys.all })
-    },
+  return useTQMutation(['categories', 'delete'], categoriesApi.delete, {
+    invalidateKeys: [categoryKeys.all],
+    successMessage: 'Categoría eliminada correctamente',
   })
 }
