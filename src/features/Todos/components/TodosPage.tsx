@@ -1,16 +1,8 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { motion, AnimatePresence } from 'framer-motion'
-import {
-  Calendar,
-  ChevronDown,
-  Clock,
-  Flag,
-  MoreHorizontal,
-  Pencil,
-  Plus,
-  Trash2,
-} from 'lucide-react'
+import { Calendar, Clock, Flag, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
+import { useInView } from 'react-intersection-observer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -30,6 +22,14 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table'
 import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
 import { useCreateTodo, useDeleteTodo, useInfiniteTodos, useUpdateTodo } from '../api/todos.queries'
@@ -42,6 +42,14 @@ export function TodosPage() {
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteTodos(10)
+
+  const { ref, inView } = useInView()
+
+  React.useEffect(() => {
+    if (inView && hasNextPage && !isFetchingNextPage) {
+      fetchNextPage()
+    }
+  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const createMutation = useCreateTodo()
   const updateMutation = useUpdateTodo()
@@ -235,36 +243,32 @@ export function TodosPage() {
         </FieldGroup>
       ) : (
         <Field className="relative group">
-          <DataTable columns={columns} data={allTodos} filterColumn="title" />
-
-          <AnimatePresence>
-            {hasNextPage && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex justify-center mt-12 pb-12"
-              >
-                <Button
-                  onClick={() => fetchNextPage()}
-                  disabled={isFetchingNextPage}
-                  variant="outline"
-                  className="h-12 px-10 rounded-2xl border-dashed border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all group"
+          <DataTable
+            columns={columns}
+            data={allTodos}
+            filterColumn="title"
+            className="max-h-[600px] overflow-y-auto"
+          >
+            <AnimatePresence>
+              {hasNextPage && (
+                <motion.tr
+                  ref={ref}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
                 >
-                  {isFetchingNextPage ? (
-                    <div className="flex items-center gap-2">
-                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                      Cargando...
+                  <TableCell colSpan={columns.length} className="p-0 border-none">
+                    <div className="flex justify-center py-8">
+                      <div className="flex items-center gap-2 text-muted-foreground font-medium bg-secondary/20 px-6 py-3 rounded-2xl backdrop-blur-sm border border-border/40">
+                        <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                        Cargando más tareas...
+                      </div>
                     </div>
-                  ) : (
-                    <div className="flex items-center gap-2 font-semibold">
-                      Ver más tareas
-                      <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                    </div>
-                  )}
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
+                  </TableCell>
+                </motion.tr>
+              )}
+            </AnimatePresence>
+          </DataTable>
         </Field>
       )}
 

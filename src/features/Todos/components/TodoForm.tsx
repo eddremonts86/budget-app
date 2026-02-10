@@ -137,7 +137,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                   </div>
                   <FieldError
                     errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : String(e),
+                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
                     )}
                     className="text-xs font-medium"
                   />
@@ -169,7 +169,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                   />
                   <FieldError
                     errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : String(e),
+                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
                     )}
                   />
                 </Field>
@@ -209,7 +209,9 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                     </Select>
                     <FieldError
                       errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string' ? e : String(e),
+                        typeof e === 'string'
+                          ? e
+                          : (e as { message?: string })?.message || String(e),
                       )}
                     />
                   </Field>
@@ -256,7 +258,9 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                     </Select>
                     <FieldError
                       errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string' ? e : String(e),
+                        typeof e === 'string'
+                          ? e
+                          : (e as { message?: string })?.message || String(e),
                       )}
                     />
                   </Field>
@@ -287,7 +291,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                       >
                         <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
                         {field.state.value ? (
-                          format(new Date(field.state.value), 'PPP', { locale: es })
+                          format(new Date(`${field.state.value}T00:00:00`), 'PPP', { locale: es })
                         ) : (
                           <span>Seleccionar fecha</span>
                         )}
@@ -299,10 +303,16 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                     >
                       <Calendar
                         mode="single"
-                        selected={field.state.value ? new Date(field.state.value) : undefined}
-                        onSelect={(date) =>
-                          field.handleChange(date?.toISOString().split('T')[0] ?? '')
+                        selected={
+                          field.state.value ? new Date(`${field.state.value}T00:00:00`) : undefined
                         }
+                        onSelect={(date) => {
+                          if (!date) return
+                          const year = date.getFullYear()
+                          const month = String(date.getMonth() + 1).padStart(2, '0')
+                          const day = String(date.getDate()).padStart(2, '0')
+                          field.handleChange(`${year}-${month}-${day}`)
+                        }}
                         initialFocus
                         locale={es}
                         className="rounded-2xl"
@@ -311,7 +321,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                   </Popover>
                   <FieldError
                     errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : String(e),
+                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
                     )}
                   />
                 </Field>

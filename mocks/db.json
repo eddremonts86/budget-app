@@ -14979,6 +14979,16 @@
       "dueDate": "2026-02-20",
       "createdAt": "2026-02-05T00:00:00.000Z",
       "updatedAt": "2026-02-05T00:00:00.000Z"
+    },
+    {
+      "id": "057e",
+      "title": "Este es un ejemplo",
+      "description": "un buen ejemplo",
+      "status": "pending",
+      "priority": "medium",
+      "dueDate": "2026-02-10",
+      "createdAt": "2026-02-10T11:47:14.183Z",
+      "updatedAt": "2026-02-10T11:47:14.183Z"
     }
   ],
   "users": [
@@ -15051,7 +15061,7 @@
       },
       "status": "Approved",
       "date": "2023-06-23",
-      "amount": 250.0
+      "amount": 250
     },
     {
       "id": "2",
@@ -15061,7 +15071,7 @@
       },
       "status": "Pending",
       "date": "2023-06-24",
-      "amount": 150.0
+      "amount": 150
     },
     {
       "id": "3",
@@ -15071,7 +15081,7 @@
       },
       "status": "Approved",
       "date": "2023-06-25",
-      "amount": 350.0
+      "amount": 350
     },
     {
       "id": "4",
@@ -15081,7 +15091,7 @@
       },
       "status": "Approved",
       "date": "2023-06-26",
-      "amount": 450.0
+      "amount": 450
     }
   ]
 }

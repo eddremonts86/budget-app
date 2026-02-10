@@ -29,17 +29,22 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/shared/lib/utils'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
   data: TData[]
   filterColumn?: string
+  children?: React.ReactNode
+  className?: string
 }
 
 export function DataTable<TData, TValue>({
   columns,
   data,
   filterColumn,
+  children,
+  className,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -117,16 +122,23 @@ export function DataTable<TData, TValue>({
         </div>
       </Field>
 
-      <div className="rounded-3xl border border-border/40 bg-card/30 backdrop-blur-sm overflow-hidden shadow-sm">
-        <Table>
-          <TableHeader className="bg-secondary/20">
+      <div
+        className={cn(
+          'rounded-3xl border border-border/40 bg-card/30 backdrop-blur-sm overflow-hidden shadow-sm',
+        )}
+      >
+        <Table
+          className="border-separate border-spacing-0"
+          containerClassName={cn('overflow-y-auto', className)}
+        >
+          <TableHeader className="sticky top-0 z-20 bg-secondary/95 backdrop-blur-md shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id} className="hover:bg-transparent border-border/40">
+              <TableRow key={headerGroup.id} className="hover:bg-transparent border-none">
                 {headerGroup.headers.map((header) => {
                   return (
                     <TableHead
                       key={header.id}
-                      className="h-12 text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-6"
+                      className="h-12 text-xs font-bold uppercase tracking-wider text-muted-foreground/70 px-6 border-b border-border/40 sticky top-0 bg-inherit"
                     >
                       {header.isPlaceholder
                         ? null
@@ -140,22 +152,28 @@ export function DataTable<TData, TValue>({
           <TableBody>
             <AnimatePresence mode="popLayout">
               {table.getRowModel().rows?.length ? (
-                table.getRowModel().rows.map((row, index) => (
-                  <motion.tr
-                    key={row.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2, delay: index * 0.03 }}
-                    className="group border-border/40 hover:bg-secondary/10 transition-colors cursor-default"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id} className="py-4 px-6 text-sm">
-                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                      </TableCell>
-                    ))}
-                  </motion.tr>
-                ))
+                <>
+                  {table.getRowModel().rows.map((row, index) => (
+                    <motion.tr
+                      key={row.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.95 }}
+                      transition={{ duration: 0.2, delay: index * 0.03 }}
+                      className="group hover:bg-secondary/10 transition-colors cursor-default"
+                    >
+                      {row.getVisibleCells().map((cell) => (
+                        <TableCell
+                          key={cell.id}
+                          className="py-4 px-6 text-sm border-b border-border/40"
+                        >
+                          {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                        </TableCell>
+                      ))}
+                    </motion.tr>
+                  ))}
+                  {children}
+                </>
               ) : (
                 <TableRow>
                   <TableCell colSpan={columns.length} className="h-32 text-center">
