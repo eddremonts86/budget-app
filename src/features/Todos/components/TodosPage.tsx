@@ -270,14 +270,14 @@ export function TodosPage() {
 
       {/* Sheets with custom styling and proper padding */}
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 overflow-y-auto">
-          <SheetHeader className="pb-6 border-b border-border/40">
+        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
+          <SheetHeader className="p-6 border-b border-border/40 shrink-0">
             <SheetTitle className="text-2xl font-bold tracking-tight">Crear Tarea</SheetTitle>
             <SheetDescription className="text-base">
               Añade una nueva tarea a tu lista. Completa los detalles a continuación.
             </SheetDescription>
           </SheetHeader>
-          <Field className="py-8 px-4">
+          <div className="flex-1 overflow-y-auto p-6">
             <TodoForm
               onSubmit={async (values) => {
                 await createMutation.mutateAsync(values)
@@ -286,19 +286,19 @@ export function TodosPage() {
               onCancel={() => setIsCreateOpen(false)}
               isLoading={createMutation.isPending}
             />
-          </Field>
+          </div>
         </SheetContent>
       </Sheet>
 
       <Sheet open={!!editingTodo} onOpenChange={(open) => !open && setEditingTodo(null)}>
-        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 overflow-y-auto">
-          <SheetHeader className="pb-6 border-b border-border/40">
+        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
+          <SheetHeader className="p-6 border-b border-border/40 shrink-0">
             <SheetTitle className="text-2xl font-bold tracking-tight">Editar Tarea</SheetTitle>
             <SheetDescription className="text-base">
               Actualiza los detalles de tu tarea. Los cambios se guardarán inmediatamente.
             </SheetDescription>
           </SheetHeader>
-          <Field className="py-8 px-4">
+          <div className="flex-1 overflow-y-auto p-6">
             {editingTodo && (
               <TodoForm
                 defaultValues={editingTodo}
@@ -310,7 +310,7 @@ export function TodosPage() {
                 isLoading={updateMutation.isPending}
               />
             )}
-          </Field>
+          </div>
         </SheetContent>
       </Sheet>
     </FieldGroup>
