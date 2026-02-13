@@ -93,6 +93,36 @@
     "overview": "Oversigt",
     "placeholder": "Analyse-graf kommer snart..."
   },
+  "sectionCards": {
+    "totalRevenue": {
+      "title": "Samlet omsætning",
+      "trend": "Stigende denne måned",
+      "detail": "Besøgende de seneste 6 måneder"
+    },
+    "newCustomers": {
+      "title": "Nye kunder",
+      "trend": "Ned 20% i denne periode",
+      "detail": "Kundeanskaffelse kræver opmærksomhed"
+    },
+    "activeAccounts": {
+      "title": "Aktive konti",
+      "trend": "Stærk brugerfastholdelse",
+      "detail": "Engagement overgår målene"
+    },
+    "growthRate": {
+      "title": "Vækstrate",
+      "trend": "Stabil præstationsforbedring",
+      "detail": "Opfylder vækstprognoserne"
+    }
+  },
+  "chart": {
+    "timeRange": {
+      "placeholder": "Vælg et interval",
+      "90d": "Seneste 3 måneder",
+      "30d": "Seneste 30 dage",
+      "7d": "Seneste 7 dage"
+    }
+  },
   "categories": {
     "title": "Kategorier",
     "add": "Tilføj kategori",

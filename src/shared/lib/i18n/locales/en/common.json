@@ -93,6 +93,36 @@
     "overview": "Overview",
     "placeholder": "Analytics chart coming soon..."
   },
+  "sectionCards": {
+    "totalRevenue": {
+      "title": "Total Revenue",
+      "trend": "Trending up this month",
+      "detail": "Visitors for the last 6 months"
+    },
+    "newCustomers": {
+      "title": "New Customers",
+      "trend": "Down 20% this period",
+      "detail": "Acquisition needs attention"
+    },
+    "activeAccounts": {
+      "title": "Active Accounts",
+      "trend": "Strong user retention",
+      "detail": "Engagement exceeds targets"
+    },
+    "growthRate": {
+      "title": "Growth Rate",
+      "trend": "Steady performance increase",
+      "detail": "Meets growth projections"
+    }
+  },
+  "chart": {
+    "timeRange": {
+      "placeholder": "Select a range",
+      "90d": "Last 3 months",
+      "30d": "Last 30 days",
+      "7d": "Last 7 days"
+    }
+  },
   "categories": {
     "title": "Categories",
     "add": "Add Category",

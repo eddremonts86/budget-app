@@ -93,6 +93,36 @@
     "overview": "Resumen",
     "placeholder": "Gráfico de analíticas próximamente..."
   },
+  "sectionCards": {
+    "totalRevenue": {
+      "title": "Ingresos Totales",
+      "trend": "Tendencia al alza este mes",
+      "detail": "Visitantes de los últimos 6 meses"
+    },
+    "newCustomers": {
+      "title": "Nuevos Clientes",
+      "trend": "Baja del 20% en este periodo",
+      "detail": "La adquisición necesita atención"
+    },
+    "activeAccounts": {
+      "title": "Cuentas Activas",
+      "trend": "Fuerte retención de usuarios",
+      "detail": "El engagement supera objetivos"
+    },
+    "growthRate": {
+      "title": "Tasa de Crecimiento",
+      "trend": "Incremento de rendimiento estable",
+      "detail": "Cumple las proyecciones de crecimiento"
+    }
+  },
+  "chart": {
+    "timeRange": {
+      "placeholder": "Selecciona un rango",
+      "90d": "Últimos 3 meses",
+      "30d": "Últimos 30 días",
+      "7d": "Últimos 7 días"
+    }
+  },
   "categories": {
     "title": "Categorías",
     "add": "Agregar Categoría",
