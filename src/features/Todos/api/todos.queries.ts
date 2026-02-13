@@ -1,3 +1,4 @@
+import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import { todosApi } from './todos.api'
 
@@ -27,7 +28,7 @@ export const useTodo = (id: string) => {
 export const useCreateTodo = () => {
   return useTQMutation(['todos', 'create'], todosApi.create, {
     invalidateKeys: [todoKeys.all],
-    successMessage: 'Tarea creada correctamente',
+    successMessage: i18n.t('todos.toast.created'),
   })
 }
 
@@ -38,7 +39,7 @@ export const useUpdateTodo = () => {
       todosApi.update(id, data),
     {
       invalidateKeys: [todoKeys.all],
-      successMessage: 'Tarea actualizada correctamente',
+      successMessage: i18n.t('todos.toast.updated'),
     },
   )
 }
@@ -46,6 +47,6 @@ export const useUpdateTodo = () => {
 export const useDeleteTodo = () => {
   return useTQMutation(['todos', 'delete'], todosApi.delete, {
     invalidateKeys: [todoKeys.all],
-    successMessage: 'Tarea eliminada correctamente',
+    successMessage: i18n.t('todos.toast.deleted'),
   })
 }

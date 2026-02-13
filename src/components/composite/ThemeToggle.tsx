@@ -1,5 +1,6 @@
 import { Monitor, Moon, Sun, type LucideIcon } from 'lucide-react'
 import { useEffect, useState, memo, useMemo, useCallback } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useTheme } from '@/shared/providers/theme-context'
 import { cn } from '@/shared/utils'
 
@@ -44,6 +45,7 @@ ThemeButton.displayName = 'ThemeButton'
 
 export const ThemeToggle = memo(function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
 
   // Avoid hydration mismatch by only rendering theme-specific classes after mount
@@ -54,11 +56,11 @@ export const ThemeToggle = memo(function ThemeToggle() {
 
   const themeOptions = useMemo<ThemeOption[]>(
     () => [
-      { value: 'light', icon: Sun, label: 'Light theme' },
-      { value: 'dark', icon: Moon, label: 'Dark theme' },
-      { value: 'system', icon: Monitor, label: 'System theme' },
+      { value: 'light', icon: Sun, label: t('themeToggle.light') },
+      { value: 'dark', icon: Moon, label: t('themeToggle.dark') },
+      { value: 'system', icon: Monitor, label: t('themeToggle.system') },
     ],
-    [],
+    [t],
   )
 
   const handleThemeChange = useCallback(

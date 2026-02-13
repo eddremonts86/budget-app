@@ -15,6 +15,7 @@
   },
   "common": {
     "loading": "Cargando...",
+    "loadingMore": "Cargando más...",
     "save": "Guardar",
     "cancel": "Cancelar",
     "delete": "Eliminar",
@@ -25,13 +26,16 @@
     "sort": "Ordenar",
     "actions": "Acciones",
     "confirm": "Confirmar",
+    "undoWarning": "Esta acción no se puede deshacer.",
     "yes": "Sí",
     "no": "No",
     "submit": "Enviar",
     "reset": "Reiniciar",
     "back": "Atrás",
     "next": "Siguiente",
-    "previous": "Anterior"
+    "previous": "Anterior",
+    "loadMore": "Cargar más",
+    "openMenu": "Abrir menú"
   },
   "theme": {
     "light": "Claro",
@@ -44,13 +48,253 @@
     "es": "Español",
     "dk": "Danés"
   },
+  "themeToggle": {
+    "light": "Tema claro",
+    "dark": "Tema oscuro",
+    "system": "Tema del sistema"
+  },
+  "sidebar": {
+    "main": {
+      "dashboard": "Dashboard",
+      "analytics": "Analíticas",
+      "todos": "Tareas",
+      "users": "Usuarios",
+      "transactions": "Transacciones",
+      "categories": "Categorías",
+      "projects": "Proyectos",
+      "team": "Equipo"
+    }
+  },
+  "dashboard": {
+    "error": {
+      "title": "Error",
+      "description": "Ocurrió un error al cargar los datos del dashboard."
+    },
+    "stats": {
+      "totalRevenue": "Ingresos Totales",
+      "subscriptions": "Suscripciones",
+      "sales": "Ventas",
+      "activeNow": "Activos Ahora",
+      "change": "{{value}} desde el mes pasado",
+      "activeNowContext": "{{value}} {{context}}"
+    },
+    "recentTransactions": "Transacciones recientes",
+    "recentSummary": "Has realizado {{count}} ventas este mes.",
+    "table": {
+      "customer": "Cliente",
+      "status": "Estado",
+      "date": "Fecha",
+      "amount": "Monto"
+    }
+  },
+  "analytics": {
+    "title": "Analíticas",
+    "pageViews": "Vistas de página",
+    "overview": "Resumen",
+    "placeholder": "Gráfico de analíticas próximamente..."
+  },
+  "categories": {
+    "title": "Categorías",
+    "add": "Agregar Categoría",
+    "nameLabel": "Nombre",
+    "namePlaceholder": "Nombre de la categoría",
+    "colorLabel": "Color",
+    "save": "Guardar Categoría",
+    "summary": "Mostrando {{shown}} de {{total}} categorías",
+    "columns": {
+      "name": "Nombre",
+      "color": "Color"
+    },
+    "description": {
+      "create": "Agrega una nueva categoría para tus transacciones.",
+      "edit": "Actualiza los detalles de la categoría."
+    },
+    "confirm": {
+      "delete": "¿Estás seguro de eliminar esta categoría?"
+    },
+    "error": {
+      "title": "Error",
+      "description": "Ocurrió un error al cargar las categorías."
+    }
+  },
+  "projects": {
+    "title": "Proyectos"
+  },
+  "team": {
+    "title": "Equipo"
+  },
+  "todos": {
+    "title": "Tareas",
+    "subtitlePrefix": "Gestiona tu flujo de trabajo. Tienes ",
+    "subtitleSuffix": " tareas activas.",
+    "actions": {
+      "new": "Nueva Tarea",
+      "create": "Crear Tarea",
+      "update": "Actualizar Tarea",
+      "edit": "Editar Tarea",
+      "delete": "Eliminar"
+    },
+    "form": {
+      "headerTitle": "Detalles de la tarea",
+      "headerSubtitle": "Define objetivos y fechas de entrega.",
+      "titleLabel": "Título del Proyecto",
+      "titlePlaceholder": "Ej: Rediseño del dashboard",
+      "descriptionLabel": "Descripción Detallada",
+      "descriptionPlaceholder": "Describe los pasos a seguir...",
+      "statusLabel": "Estado actual",
+      "statusPlaceholder": "Selecciona estado",
+      "statusPending": "Pendiente",
+      "statusInProgress": "En progreso",
+      "statusCompleted": "Completada",
+      "priorityLabel": "Prioridad",
+      "priorityPlaceholder": "Selecciona prioridad",
+      "priorityLow": "Baja",
+      "priorityMedium": "Media",
+      "priorityHigh": "Alta",
+      "dueDateLabel": "Fecha límite",
+      "dueDatePlaceholder": "Selecciona fecha"
+    },
+    "status": {
+      "pending": "Pendiente",
+      "inProgress": "En progreso",
+      "completed": "Completada"
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "table": {
+      "title": "Tarea",
+      "status": "Estado",
+      "priority": "Prioridad",
+      "createdAt": "Creada"
+    },
+    "confirm": {
+      "delete": "¿Estás seguro de eliminar esta tarea?"
+    },
+    "loadingMore": "Cargando más tareas...",
+    "error": {
+      "title": "Error al cargar",
+      "description": "No pudimos obtener tus tareas. Revisa tu conexión e inténtalo nuevamente.",
+      "retry": "Reintentar"
+    },
+    "sheet": {
+      "createTitle": "Crear tarea",
+      "createDescription": "Añade una nueva tarea a tu lista. Completa los detalles abajo.",
+      "editTitle": "Editar tarea",
+      "editDescription": "Actualiza los detalles de la tarea. Los cambios se guardan al instante."
+    },
+    "toast": {
+      "created": "Tarea creada correctamente",
+      "updated": "Tarea actualizada correctamente",
+      "deleted": "Tarea eliminada correctamente"
+    }
+  },
+  "users": {
+    "title": "Usuarios",
+    "subtitlePrefix": "Gestiona los niveles de acceso para ",
+    "subtitleSuffix": " miembros del equipo.",
+    "actions": {
+      "new": "Nuevo Usuario",
+      "save": "Guardar Usuario",
+      "editProfile": "Editar Perfil",
+      "deleteAccount": "Eliminar Cuenta"
+    },
+    "form": {
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Nombre de usuario",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "Correo electrónico",
+      "roleLabel": "Rol",
+      "rolePlaceholder": "Selecciona rol",
+      "roleUser": "Usuario",
+      "roleAdmin": "Administrador",
+      "avatarLabel": "URL de avatar",
+      "avatarPlaceholder": "URL de avatar",
+      "avatarRandom": "Aleatorio"
+    },
+    "table": {
+      "user": "Usuario",
+      "role": "Rol / Acceso"
+    },
+    "confirm": {
+      "delete": "¿Estás seguro de eliminar este usuario?"
+    },
+    "loadingMore": "Sincronizando...",
+    "loadMore": "Cargar más usuarios",
+    "error": {
+      "title": "Error de conexión",
+      "description": "No pudimos sincronizar la lista de usuarios. Intenta nuevamente en unos momentos.",
+      "retry": "Reintentar"
+    },
+    "sheet": {
+      "createTitle": "Registro de usuario",
+      "createDescription": "Crea un nuevo perfil de acceso para tu equipo.",
+      "editTitle": "Perfil de usuario",
+      "editDescription": "Actualiza la información de contacto y permisos."
+    },
+    "toast": {
+      "created": "Usuario creado correctamente",
+      "updated": "Usuario actualizado correctamente",
+      "deleted": "Usuario eliminado correctamente"
+    }
+  },
+  "transactions": {
+    "title": "Transacciones",
+    "summary": "Mostrando {{shown}} de {{total}} transacciones",
+    "actions": {
+      "add": "Agregar Transacción",
+      "save": "Guardar Transacción",
+      "edit": "Editar",
+      "delete": "Eliminar"
+    },
+    "form": {
+      "customerNameLabel": "Nombre del cliente",
+      "customerNamePlaceholder": "Nombre del cliente",
+      "customerEmailLabel": "Correo del cliente",
+      "customerEmailPlaceholder": "Correo del cliente",
+      "statusLabel": "Estado",
+      "statusPlaceholder": "Selecciona estado",
+      "statusApproved": "Aprobada",
+      "amountLabel": "Monto",
+      "amountPlaceholder": "0.00",
+      "dateLabel": "Fecha"
+    },
+    "table": {
+      "customer": "Cliente",
+      "status": "Estado",
+      "date": "Fecha",
+      "amount": "Monto"
+    },
+    "status": {
+      "approved": "Aprobado",
+      "pending": "Pendiente",
+      "rejected": "Rechazado"
+    },
+    "confirm": {
+      "delete": "¿Estás seguro de eliminar esta transacción?"
+    },
+    "error": {
+      "title": "Error",
+      "description": "Ocurrió un error al cargar las transacciones."
+    },
+    "toast": {
+      "created": "Transacción creada correctamente",
+      "updated": "Transacción actualizada correctamente",
+      "deleted": "Transacción eliminada correctamente"
+    }
+  },
   "validation": {
     "required": "Este campo es obligatorio",
     "minLength": "Debe tener al menos {{min}} caracteres",
     "maxLength": "Debe tener como máximo {{max}} caracteres",
     "invalidEmail": "Dirección de email inválida",
+    "invalidUrl": "URL inválida",
+    "invalidColor": "Color inválido",
     "invalidDate": "Fecha inválida",
-    "futureDate": "La fecha debe ser futura"
+    "futureDate": "La fecha debe ser futura",
+    "minAmount": "Debe ser mayor que 0"
   },
   "home": {
     "hero": {

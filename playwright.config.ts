@@ -1,5 +1,36 @@
 import { defineConfig, devices } from '@playwright/test'
 
+const languages = ['en', 'es', 'dk'] as const
+
+const languageLocales: Record<(typeof languages)[number], string> = {
+  en: 'en-US',
+  es: 'es-ES',
+  dk: 'da-DK',
+}
+
+const baseProjects = [
+  {
+    name: 'chromium',
+    use: { ...devices['Desktop Chrome'] },
+  },
+  {
+    name: 'firefox',
+    use: { ...devices['Desktop Firefox'] },
+  },
+  {
+    name: 'webkit',
+    use: { ...devices['Desktop Safari'] },
+  },
+  {
+    name: 'Mobile Chrome',
+    use: { ...devices['Pixel 5'] },
+  },
+  {
+    name: 'Mobile Safari',
+    use: { ...devices['iPhone 12'] },
+  },
+]
+
 /**
  * See https://playwright.dev/docs/test-configuration.
  */
@@ -16,31 +47,21 @@ export default defineConfig({
     screenshot: 'only-on-failure',
   },
 
-  projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
-    {
-      name: 'firefox',
-      use: { ...devices['Desktop Firefox'] },
-    },
-    {
-      name: 'webkit',
-      use: { ...devices['Desktop Safari'] },
-    },
-    {
-      name: 'Mobile Chrome',
-      use: { ...devices['Pixel 5'] },
-    },
-    {
-      name: 'Mobile Safari',
-      use: { ...devices['iPhone 12'] },
-    },
-  ],
+  projects: baseProjects.flatMap((project) =>
+    languages.map((language) => ({
+      name: `${project.name}-${language}`,
+      metadata: {
+        language,
+      },
+      use: {
+        ...project.use,
+        locale: languageLocales[language],
+      },
+    })),
+  ),
 
   webServer: {
-    command: 'pnpm dev:server',
+    command: 'VITE_E2E=true pnpm dev:server',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

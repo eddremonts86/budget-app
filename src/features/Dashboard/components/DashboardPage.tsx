@@ -1,4 +1,5 @@
 import { IconUsers, IconCreditCard, IconActivity, IconCurrencyDollar } from '@tabler/icons-react'
+import { useTranslation } from 'react-i18next'
 import {
   Card,
   CardContent,
@@ -17,6 +18,7 @@ import {
 import { useDashboardStats, useRecentTransactions } from '../api/dashboard.queries'
 
 export function DashboardPage() {
+  const { t } = useTranslation()
   const { data: stats, isLoading: isLoadingStats, isError: isErrorStats } = useDashboardStats()
   const {
     data: transactions,
@@ -28,10 +30,10 @@ export function DashboardPage() {
     return (
       <div className="flex items-center justify-center h-[400px]">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-destructive">Error</h2>
-          <p className="text-muted-foreground">
-            Ocurrió un error al cargar los datos del dashboard.
-          </p>
+          <h2 className="text-2xl font-bold tracking-tight text-destructive">
+            {t('dashboard.error.title')}
+          </h2>
+          <p className="text-muted-foreground">{t('dashboard.error.description')}</p>
         </div>
       </div>
     )
@@ -57,7 +59,9 @@ export function DashboardPage() {
           <>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Total Revenue</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {t('dashboard.stats.totalRevenue')}
+                </CardTitle>
                 <IconCurrencyDollar className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -65,14 +69,19 @@ export function DashboardPage() {
                   ${stats?.revenue.value.toLocaleString() ?? '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {(stats?.revenue.change ?? 0) > 0 ? '+' : ''}
-                  {stats?.revenue.change ?? 0}% from last month
+                  {t('dashboard.stats.change', {
+                    value: `${(stats?.revenue.change ?? 0) > 0 ? '+' : ''}${
+                      stats?.revenue.change ?? 0
+                    }%`,
+                  })}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Subscriptions</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {t('dashboard.stats.subscriptions')}
+                </CardTitle>
                 <IconUsers className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -81,14 +90,17 @@ export function DashboardPage() {
                   {stats?.subscriptions.value.toLocaleString() ?? '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {(stats?.subscriptions.change ?? 0) > 0 ? '+' : ''}
-                  {stats?.subscriptions.change ?? 0}% from last month
+                  {t('dashboard.stats.change', {
+                    value: `${(stats?.subscriptions.change ?? 0) > 0 ? '+' : ''}${
+                      stats?.subscriptions.change ?? 0
+                    }%`,
+                  })}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Sales</CardTitle>
+                <CardTitle className="text-sm font-medium">{t('dashboard.stats.sales')}</CardTitle>
                 <IconCreditCard className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -97,14 +109,19 @@ export function DashboardPage() {
                   {stats?.sales.value.toLocaleString() ?? '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {(stats?.sales.change ?? 0) > 0 ? '+' : ''}
-                  {stats?.sales.change ?? 0}% from last month
+                  {t('dashboard.stats.change', {
+                    value: `${(stats?.sales.change ?? 0) > 0 ? '+' : ''}${
+                      stats?.sales.change ?? 0
+                    }%`,
+                  })}
                 </p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Now</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {t('dashboard.stats.activeNow')}
+                </CardTitle>
                 <IconActivity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -113,8 +130,12 @@ export function DashboardPage() {
                   {stats?.activeNow.value.toLocaleString() ?? '0'}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {(stats?.activeNow.change ?? 0) > 0 ? '+' : ''}
-                  {stats?.activeNow.change ?? 0} {stats?.activeNow.context ?? ''}
+                  {t('dashboard.stats.activeNowContext', {
+                    value: `${(stats?.activeNow.change ?? 0) > 0 ? '+' : ''}${
+                      stats?.activeNow.change ?? 0
+                    }`,
+                    context: stats?.activeNow.context ?? '',
+                  })}
                 </p>
               </CardContent>
             </Card>
@@ -124,12 +145,12 @@ export function DashboardPage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Recent Transactions</CardTitle>
+          <CardTitle>{t('dashboard.recentTransactions')}</CardTitle>
           <CardDescription>
             {isLoadingTransactions ? (
               <Skeleton className="h-4 w-[250px]" />
             ) : (
-              `You made ${transactions?.length || 0} sales this month.`
+              t('dashboard.recentSummary', { count: transactions?.length || 0 })
             )}
           </CardDescription>
         </CardHeader>
@@ -137,10 +158,10 @@ export function DashboardPage() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Customer</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Date</TableHead>
-                <TableHead className="text-right">Amount</TableHead>
+                <TableHead>{t('dashboard.table.customer')}</TableHead>
+                <TableHead>{t('dashboard.table.status')}</TableHead>
+                <TableHead>{t('dashboard.table.date')}</TableHead>
+                <TableHead className="text-right">{t('dashboard.table.amount')}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -171,7 +192,15 @@ export function DashboardPage() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <Badge variant="outline">{tx.status}</Badge>
+                        <Badge variant="outline">
+                          {tx.status === 'Approved'
+                            ? t('transactions.status.approved')
+                            : tx.status === 'Pending'
+                              ? t('transactions.status.pending')
+                              : tx.status === 'Rejected'
+                                ? t('transactions.status.rejected')
+                                : tx.status}
+                        </Badge>
                       </TableCell>
                       <TableCell className="hidden md:table-cell">{tx.date}</TableCell>
                       <TableCell className="text-right">${tx.amount.toFixed(2)}</TableCell>

@@ -60,7 +60,8 @@ export {
   TableHeader,
   TableRow,
 } from './table'
-export { Toggle, toggleVariants } from './toggle'
+export { Toggle } from './toggle'
+export { toggleVariants } from './toggle-variants'
 export { Checkbox } from './checkbox'
 export {
   DropdownMenu,
@@ -114,6 +115,5 @@ export {
   SidebarRail,
   SidebarSeparator,
   SidebarTrigger,
-  useSidebar,
 } from './sidebar'
 export { ToggleGroup, ToggleGroupItem } from './toggle-group'

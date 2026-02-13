@@ -7,7 +7,6 @@ import {
   IconTrash,
   type Icon,
 } from "@tabler/icons-react"
-
 import { Link } from "@tanstack/react-router"
 import {
   DropdownMenu,
@@ -23,8 +22,8 @@ import {
   SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
+import { useSidebar } from "@/hooks/use-sidebar"
 
 export function NavDocuments({
   items,

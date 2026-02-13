@@ -1,6 +1,7 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -33,6 +34,7 @@ import type { Transaction } from '../model/types'
 import { TransactionForm } from './TransactionForm'
 
 export function TransactionsPage() {
+  const { t } = useTranslation()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null)
 
@@ -54,7 +56,7 @@ export function TransactionsPage() {
   const columns: ColumnDef<Transaction>[] = [
     {
       accessorKey: 'customer.name',
-      header: 'Customer',
+      header: t('transactions.table.customer'),
       cell: ({ row }) => (
         <div className="flex flex-col">
           <span className="font-medium">{row.original.customer.name}</span>
@@ -64,7 +66,7 @@ export function TransactionsPage() {
     },
     {
       accessorKey: 'status',
-      header: 'Status',
+      header: t('transactions.table.status'),
       cell: ({ row }) => {
         const status = row.getValue('status') as string
         const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
@@ -72,12 +74,17 @@ export function TransactionsPage() {
           Pending: 'secondary',
           Rejected: 'destructive',
         }
-        return <Badge variant={variants[status] || 'outline'}>{status}</Badge>
+        const labels: Record<string, string> = {
+          Approved: t('transactions.status.approved'),
+          Pending: t('transactions.status.pending'),
+          Rejected: t('transactions.status.rejected'),
+        }
+        return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>
       },
     },
     {
       accessorKey: 'amount',
-      header: 'Amount',
+      header: t('transactions.table.amount'),
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue('amount'))
         const formatted = new Intl.NumberFormat('en-US', {
@@ -89,7 +96,7 @@ export function TransactionsPage() {
     },
     {
       accessorKey: 'date',
-      header: 'Date',
+      header: t('transactions.table.date'),
       cell: ({ row }) => new Date(row.getValue('date')).toLocaleDateString(),
     },
     {
@@ -101,28 +108,28 @@ export function TransactionsPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t('common.openMenu')}</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
               <DropdownMenuItem onClick={() => setEditingTransaction(transaction)}>
                 <Pencil className="mr-2 h-4 w-4" />
-                Edit
+                {t('transactions.actions.edit')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-destructive"
                 onClick={() => {
-                  toast.error('¿Estás seguro de eliminar esta transacción?', {
-                    description: 'Esta acción no se puede deshacer.',
+                  toast.error(t('transactions.confirm.delete'), {
+                    description: t('common.undoWarning'),
                     action: {
-                      label: 'Eliminar',
+                      label: t('common.delete'),
                       onClick: () => deleteMutation.mutate(transaction.id),
                     },
                     cancel: {
-                      label: 'Cancelar',
+                      label: t('common.cancel'),
                       onClick: () => {},
                     },
                     duration: 10000,
@@ -130,7 +137,7 @@ export function TransactionsPage() {
                 }}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                Delete
+                {t('transactions.actions.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -143,8 +150,10 @@ export function TransactionsPage() {
     return (
       <div className="flex items-center justify-center h-[400px]">
         <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-destructive">Error</h2>
-          <p className="text-muted-foreground">Ocurrió un error al cargar las transacciones.</p>
+          <h2 className="text-2xl font-bold tracking-tight text-destructive">
+            {t('transactions.error.title')}
+          </h2>
+          <p className="text-muted-foreground">{t('transactions.error.description')}</p>
         </div>
       </div>
     )
@@ -157,14 +166,17 @@ export function TransactionsPage() {
     <div className="space-y-4">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Transactions</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t('transactions.title')}</h2>
           <p className="text-muted-foreground">
-            Mostrando {allTransactions.length} de {totalCount} transacciones
+            {t('transactions.summary', {
+              shown: allTransactions.length,
+              total: totalCount,
+            })}
           </p>
         </div>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          Add Transaction
+          {t('transactions.actions.add')}
         </Button>
       </div>
 
@@ -185,7 +197,7 @@ export function TransactionsPage() {
                     disabled={isFetchingNextPage}
                     variant="outline"
                   >
-                    {isFetchingNextPage ? 'Loading more...' : 'Load More'}
+                    {isFetchingNextPage ? t('common.loadingMore') : t('common.loadMore')}
                   </Button>
                 </div>
               </TableCell>
@@ -198,8 +210,8 @@ export function TransactionsPage() {
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <SheetContent className="sm:max-w-[540px]">
           <SheetHeader>
-            <SheetTitle>Create Transaction</SheetTitle>
-            <SheetDescription>Add a new transaction record.</SheetDescription>
+            <SheetTitle>{t('transactions.actions.add')}</SheetTitle>
+            <SheetDescription>{t('transactions.title')}</SheetDescription>
           </SheetHeader>
           <div className="py-6">
             <TransactionForm
@@ -221,8 +233,8 @@ export function TransactionsPage() {
       >
         <SheetContent className="sm:max-w-[540px]">
           <SheetHeader>
-            <SheetTitle>Edit Transaction</SheetTitle>
-            <SheetDescription>Update transaction details.</SheetDescription>
+            <SheetTitle>{t('transactions.actions.edit')}</SheetTitle>
+            <SheetDescription>{t('transactions.title')}</SheetDescription>
           </SheetHeader>
           <div className="py-6">
             {editingTransaction && (

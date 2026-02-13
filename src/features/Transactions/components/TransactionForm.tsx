@@ -1,5 +1,6 @@
 import { useForm } from '@tanstack/react-form'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
@@ -13,17 +14,18 @@ import {
 } from '@/components/ui/select'
 import type { Transaction } from '../model/types'
 
-const transactionSchema = z.object({
-  customer: z.object({
-    name: z.string().min(1, 'Customer name is required'),
-    email: z.string().email('Invalid customer email'),
-  }),
-  status: z.enum(['Approved', 'Pending', 'Rejected']),
-  date: z.string().min(1, 'Date is required'),
-  amount: z.coerce.number().min(0.01, 'Amount must be greater than 0'),
-})
+const createTransactionSchema = (t: (key: string) => string) =>
+  z.object({
+    customer: z.object({
+      name: z.string().min(1, t('validation.required')),
+      email: z.string().min(1, t('validation.required')).email(t('validation.invalidEmail')),
+    }),
+    status: z.enum(['Approved', 'Pending', 'Rejected']),
+    date: z.string().min(1, t('validation.required')),
+    amount: z.coerce.number().min(0.01, t('validation.minAmount')),
+  })
 
-type TransactionFormValues = z.infer<typeof transactionSchema>
+type TransactionFormValues = z.infer<ReturnType<typeof createTransactionSchema>>
 
 type TransactionFormProps = {
   defaultValues?: Partial<Transaction>
@@ -32,7 +34,14 @@ type TransactionFormProps = {
   isLoading?: boolean
 }
 
-export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }: TransactionFormProps) {
+export function TransactionForm({
+  defaultValues,
+  onSubmit,
+  onCancel,
+  isLoading,
+}: TransactionFormProps) {
+  const { t } = useTranslation()
+  const transactionSchema = React.useMemo(() => createTransactionSchema(t), [t])
   const form = useForm({
     defaultValues: {
       customer: {
@@ -64,15 +73,17 @@ export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }
         name="customer.name"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Customer Name</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('transactions.form.customerNameLabel')}</FieldLabel>
             <Input
               id={field.name}
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="Customer name"
+              placeholder={t('transactions.form.customerNamePlaceholder')}
             />
-            <FieldError errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))} />
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
           </Field>
         )}
       />
@@ -81,16 +92,20 @@ export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }
         name="customer.email"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Customer Email</FieldLabel>
+            <FieldLabel htmlFor={field.name}>
+              {t('transactions.form.customerEmailLabel')}
+            </FieldLabel>
             <Input
               id={field.name}
               type="email"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="Customer email"
+              placeholder={t('transactions.form.customerEmailPlaceholder')}
             />
-            <FieldError errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))} />
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
           </Field>
         )}
       />
@@ -100,21 +115,25 @@ export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }
           name="status"
           children={(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Status</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('transactions.form.statusLabel')}</FieldLabel>
               <Select
                 value={field.state.value}
-                onValueChange={(value) => field.handleChange(value as TransactionFormValues['status'])}
+                onValueChange={(value) =>
+                  field.handleChange(value as TransactionFormValues['status'])
+                }
               >
                 <SelectTrigger id={field.name}>
-                  <SelectValue placeholder="Select status" />
+                  <SelectValue placeholder={t('transactions.form.statusPlaceholder')} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="Approved">Approved</SelectItem>
-                  <SelectItem value="Pending">Pending</SelectItem>
-                  <SelectItem value="Rejected">Rejected</SelectItem>
+                  <SelectItem value="Approved">{t('transactions.status.approved')}</SelectItem>
+                  <SelectItem value="Pending">{t('transactions.status.pending')}</SelectItem>
+                  <SelectItem value="Rejected">{t('transactions.status.rejected')}</SelectItem>
                 </SelectContent>
               </Select>
-              <FieldError errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))} />
+              <FieldError
+                errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+              />
             </Field>
           )}
         />
@@ -123,7 +142,7 @@ export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }
           name="amount"
           children={(field) => (
             <Field>
-              <FieldLabel htmlFor={field.name}>Amount</FieldLabel>
+              <FieldLabel htmlFor={field.name}>{t('transactions.form.amountLabel')}</FieldLabel>
               <Input
                 id={field.name}
                 type="number"
@@ -131,9 +150,11 @@ export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(Number(e.target.value))}
-                placeholder="0.00"
+                placeholder={t('transactions.form.amountPlaceholder')}
               />
-              <FieldError errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))} />
+              <FieldError
+                errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+              />
             </Field>
           )}
         />
@@ -143,7 +164,7 @@ export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }
         name="date"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Date</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('transactions.form.dateLabel')}</FieldLabel>
             <Input
               id={field.name}
               type="date"
@@ -151,17 +172,19 @@ export function TransactionForm({ defaultValues, onSubmit, onCancel, isLoading }
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
             />
-            <FieldError errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))} />
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
           </Field>
         )}
       />
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save Transaction'}
+          {isLoading ? t('common.loading') : t('transactions.actions.save')}
         </Button>
       </div>
     </form>

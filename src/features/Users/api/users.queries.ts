@@ -1,3 +1,4 @@
+import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import { usersApi } from './users.api'
 
@@ -31,7 +32,7 @@ export const useUser = (id: string) => {
 export const useCreateUser = () => {
   return useTQMutation(['users', 'create'], usersApi.create, {
     invalidateKeys: [userKeys.all],
-    successMessage: 'Usuario creado correctamente',
+    successMessage: i18n.t('users.toast.created'),
   })
 }
 
@@ -39,13 +40,13 @@ export const useUpdateUser = () => {
   return useTQMutation(['users', 'update'], ({ id, data }: { id: string; data: Parameters<typeof usersApi.update>[1] }) =>
     usersApi.update(id, data), {
     invalidateKeys: [userKeys.all],
-    successMessage: 'Usuario actualizado correctamente',
+    successMessage: i18n.t('users.toast.updated'),
   })
 }
 
 export const useDeleteUser = () => {
   return useTQMutation(['users', 'delete'], usersApi.delete, {
     invalidateKeys: [userKeys.all],
-    successMessage: 'Usuario eliminado correctamente',
+    successMessage: i18n.t('users.toast.deleted'),
   })
 }

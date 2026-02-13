@@ -34,7 +34,16 @@ export function setupErrorInterceptor(client: AxiosInstance) {
       const code = error.response?.data?.code
 
       // Determine the message to show
-      const displayMessage = serverMessage || errorMessages[status ?? 0] || error.message
+      let displayMessage = serverMessage || errorMessages[status ?? 0] || error.message
+
+      // Handle specific network errors
+      if (!status) {
+        if (error.message === 'Network Error') {
+          displayMessage = 'Error de conexión. Revisa tu internet'
+        } else if (error.code === 'ECONNABORTED') {
+          displayMessage = 'La solicitud tardó demasiado tiempo'
+        }
+      }
 
       // Show toast notification
       toast.error(displayMessage, {

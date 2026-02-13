@@ -2,6 +2,7 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { motion } from 'framer-motion'
 import { Calendar, Clock, Flag, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
 import { toast } from 'sonner'
 import { Badge } from '@/components/ui/badge'
@@ -31,6 +32,7 @@ import type { Todo } from '../model/types'
 import { TodoForm } from './TodoForm'
 
 export function TodosPage() {
+  const { t } = useTranslation()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingTodo, setEditingTodo] = React.useState<Todo | null>(null)
 
@@ -52,7 +54,7 @@ export function TodosPage() {
   const columns: ColumnDef<Todo>[] = [
     {
       accessorKey: 'title',
-      header: 'Tarea',
+      header: t('todos.table.title'),
       cell: ({ row }) => {
         const title = row.getValue('title') as string
         const dueDate = row.original.dueDate
@@ -70,7 +72,7 @@ export function TodosPage() {
     },
     {
       accessorKey: 'status',
-      header: 'Estado',
+      header: t('todos.table.status'),
       cell: ({ row }) => {
         const status = row.getValue('status') as string
         const variants: Record<string, string> = {
@@ -79,9 +81,9 @@ export function TodosPage() {
           pending: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
         }
         const labels: Record<string, string> = {
-          completed: 'Completada',
-          in_progress: 'En Progreso',
-          pending: 'Pendiente',
+          completed: t('todos.status.completed'),
+          in_progress: t('todos.status.inProgress'),
+          pending: t('todos.status.pending'),
         }
         return (
           <Badge
@@ -95,13 +97,18 @@ export function TodosPage() {
     },
     {
       accessorKey: 'priority',
-      header: 'Prioridad',
+      header: t('todos.table.priority'),
       cell: ({ row }) => {
         const priority = row.getValue('priority') as string
         const variants: Record<string, string> = {
           high: 'bg-destructive/10 text-destructive border-destructive/20',
           medium: 'bg-primary/10 text-primary border-primary/20',
           low: 'bg-secondary text-secondary-foreground border-transparent',
+        }
+        const labels: Record<string, string> = {
+          high: t('todos.priority.high'),
+          medium: t('todos.priority.medium'),
+          low: t('todos.priority.low'),
         }
         return (
           <Badge
@@ -113,7 +120,7 @@ export function TodosPage() {
           >
             <div className="flex items-center gap-1.5">
               <Flag className="w-3 h-3" />
-              {priority === 'high' ? 'Alta' : priority === 'medium' ? 'Media' : 'Baja'}
+              {labels[priority] || priority}
             </div>
           </Badge>
         )
@@ -121,7 +128,7 @@ export function TodosPage() {
     },
     {
       accessorKey: 'createdAt',
-      header: 'Creado',
+      header: t('todos.table.createdAt'),
       cell: ({ row }) => {
         const date = row.getValue('createdAt') as string
         return (
@@ -143,7 +150,7 @@ export function TodosPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 w-9 p-0 rounded-full hover:bg-secondary/80">
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t('common.openMenu')}</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -152,27 +159,27 @@ export function TodosPage() {
               className="w-48 p-2 rounded-2xl shadow-2xl backdrop-blur-xl border-border/40"
             >
               <DropdownMenuLabel className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
-                Opciones
+                {t('common.actions')}
               </DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() => setEditingTodo(todo)}
                 className="rounded-lg m-1 gap-2 cursor-pointer focus:bg-primary/5 focus:text-primary"
               >
                 <Pencil className="h-4 w-4" />
-                Editar Tarea
+                {t('todos.actions.edit')}
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border/40" />
               <DropdownMenuItem
                 className="text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive"
                 onClick={() => {
-                  toast.error('¿Estás seguro de eliminar esta tarea?', {
-                    description: 'Esta acción no se puede deshacer.',
+                  toast.error(t('todos.confirm.delete'), {
+                    description: t('common.undoWarning'),
                     action: {
-                      label: 'Eliminar',
+                      label: t('common.delete'),
                       onClick: () => deleteMutation.mutate(todo.id),
                     },
                     cancel: {
-                      label: 'Cancelar',
+                      label: t('common.cancel'),
                       onClick: () => {},
                     },
                     duration: 10000, // Más tiempo para que el usuario decida
@@ -180,7 +187,7 @@ export function TodosPage() {
                 }}
               >
                 <Trash2 className="h-4 w-4" />
-                Eliminar
+                {t('todos.actions.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -201,13 +208,11 @@ export function TodosPage() {
             <Trash2 className="w-6 h-6 text-destructive" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold tracking-tight">Error de Carga</h2>
-            <p className="text-muted-foreground text-sm">
-              No pudimos recuperar tus tareas. Revisa tu conexión e intenta de nuevo.
-            </p>
+            <h2 className="text-xl font-bold tracking-tight">{t('todos.error.title')}</h2>
+            <p className="text-muted-foreground text-sm">{t('todos.error.description')}</p>
           </div>
           <Button variant="outline" onClick={() => window.location.reload()}>
-            Reintentar
+            {t('todos.error.retry')}
           </Button>
         </div>
       </motion.div>
@@ -222,11 +227,12 @@ export function TodosPage() {
       <Field className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-            Tareas
+            {t('todos.title')}
           </h2>
           <p className="text-muted-foreground font-medium">
-            Gestiona tu flujo de trabajo. Tienes{' '}
-            <span className="text-foreground">{totalCount}</span> tareas activas.
+            {t('todos.subtitlePrefix')}
+            <span className="text-foreground">{totalCount}</span>
+            {t('todos.subtitleSuffix')}
           </p>
         </div>
         <Button
@@ -234,7 +240,7 @@ export function TodosPage() {
           className="rounded-2xl h-12 px-6 gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
         >
           <Plus className="w-5 h-5" />
-          Nueva Tarea
+          {t('todos.actions.new')}
         </Button>
       </Field>
 
@@ -258,7 +264,7 @@ export function TodosPage() {
                   <div ref={ref} className="flex justify-center py-8">
                     <div className="flex items-center gap-2 text-muted-foreground font-medium bg-secondary/20 px-6 py-3 rounded-2xl backdrop-blur-sm border border-border/40">
                       <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                      Cargando más tareas...
+                      {t('todos.loadingMore')}
                     </div>
                   </div>
                 </TableCell>
@@ -272,9 +278,11 @@ export function TodosPage() {
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
         <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
           <SheetHeader className="p-6 border-b border-border/40 shrink-0">
-            <SheetTitle className="text-2xl font-bold tracking-tight">Crear Tarea</SheetTitle>
+            <SheetTitle className="text-2xl font-bold tracking-tight">
+              {t('todos.sheet.createTitle')}
+            </SheetTitle>
             <SheetDescription className="text-base">
-              Añade una nueva tarea a tu lista. Completa los detalles a continuación.
+              {t('todos.sheet.createDescription')}
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto p-6">
@@ -293,9 +301,11 @@ export function TodosPage() {
       <Sheet open={!!editingTodo} onOpenChange={(open) => !open && setEditingTodo(null)}>
         <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
           <SheetHeader className="p-6 border-b border-border/40 shrink-0">
-            <SheetTitle className="text-2xl font-bold tracking-tight">Editar Tarea</SheetTitle>
+            <SheetTitle className="text-2xl font-bold tracking-tight">
+              {t('todos.sheet.editTitle')}
+            </SheetTitle>
             <SheetDescription className="text-base">
-              Actualiza los detalles de tu tarea. Los cambios se guardarán inmediatamente.
+              {t('todos.sheet.editDescription')}
             </SheetDescription>
           </SheetHeader>
           <div className="flex-1 overflow-y-auto p-6">

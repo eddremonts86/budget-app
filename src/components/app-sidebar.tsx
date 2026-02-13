@@ -14,6 +14,7 @@ import {
   IconUsers,
 } from '@tabler/icons-react'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { NavMain } from '@/components/nav-main'
 import { NavSecondary } from '@/components/nav-secondary'
 import { NavUser } from '@/components/nav-user'
@@ -28,48 +29,6 @@ import {
 } from '@/components/ui/sidebar'
 
 const data = {
-  navMain: [
-    {
-      title: 'Dashboard',
-      url: '/dashboard',
-      icon: IconDashboard,
-    },
-    {
-      title: 'Todos',
-      url: '/dashboard/todos',
-      icon: IconListDetails,
-    },
-    {
-      title: 'Analytics',
-      url: '/dashboard/analytics',
-      icon: IconChartBar,
-    },
-    {
-      title: 'Projects',
-      url: '/dashboard/projects',
-      icon: IconFolder,
-    },
-    {
-      title: 'Team',
-      url: '/dashboard/team',
-      icon: IconUsers,
-    },
-    {
-      title: 'Users',
-      url: '/dashboard/users',
-      icon: IconUsers,
-    },
-    {
-      title: 'Categories',
-      url: '/dashboard/categories',
-      icon: IconListDetails,
-    },
-    {
-      title: 'Transactions',
-      url: '/dashboard/transactions',
-      icon: IconReport,
-    },
-  ],
   navClouds: [
     {
       title: 'Capture',
@@ -138,6 +97,50 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const { t } = useTranslation()
+  const navMain = [
+    {
+      title: t('sidebar.main.dashboard'),
+      url: '/dashboard',
+      icon: IconDashboard,
+    },
+    {
+      title: t('sidebar.main.todos'),
+      url: '/dashboard/todos',
+      icon: IconListDetails,
+    },
+    {
+      title: t('sidebar.main.analytics'),
+      url: '/dashboard/analytics',
+      icon: IconChartBar,
+    },
+    {
+      title: t('sidebar.main.projects'),
+      url: '/dashboard/projects',
+      icon: IconFolder,
+    },
+    {
+      title: t('sidebar.main.team'),
+      url: '/dashboard/team',
+      icon: IconUsers,
+    },
+    {
+      title: t('sidebar.main.users'),
+      url: '/dashboard/users',
+      icon: IconUsers,
+    },
+    {
+      title: t('sidebar.main.categories'),
+      url: '/dashboard/categories',
+      icon: IconListDetails,
+    },
+    {
+      title: t('sidebar.main.transactions'),
+      url: '/dashboard/transactions',
+      icon: IconReport,
+    },
+  ]
+
   return (
     <Sidebar collapsible="offcanvas" {...props}>
       <SidebarHeader>
@@ -153,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={navMain} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>

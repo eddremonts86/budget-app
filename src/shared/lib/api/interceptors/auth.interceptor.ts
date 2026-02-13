@@ -9,12 +9,16 @@ export function setupAuthInterceptor(client: AxiosInstance) {
     if (typeof window !== 'undefined') {
       try {
         // @ts-expect-error - Clerk adds this to window
-        const token = await window.Clerk?.session?.getToken()
-        if (token) {
-          config.headers.Authorization = `Bearer ${token}`
+        const clerk = window.Clerk
+        if (clerk?.session) {
+          const token = await clerk.session.getToken()
+          if (token) {
+            config.headers.Authorization = `Bearer ${token}`
+          }
         }
-      } catch {
-        // Silent fail - user might not be authenticated
+      } catch (error) {
+        // eslint-disable-next-line no-console
+        console.warn('Failed to fetch Clerk token:', error)
       }
     }
 

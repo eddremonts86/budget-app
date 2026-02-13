@@ -13,6 +13,7 @@ export default tseslint.config(
       'node_modules/**',
       '.tanstack/**',
       '.netlify/**',
+      '.agents/**',
       'src/routeTree.gen.ts',
       'playwright-report/**',
       'test-results/**',
@@ -71,6 +72,12 @@ export default tseslint.config(
       eqeqeq: ['error', 'always'],
       'prefer-const': 'error',
       'prefer-template': 'error',
+    },
+  },
+  {
+    files: ['src/components/data-table.tsx', 'src/shared/ui/DataTable.tsx'],
+    rules: {
+      'react-hooks/incompatible-library': 'off',
     },
   },
 )

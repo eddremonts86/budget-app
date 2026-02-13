@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import React from 'react'
 import { describe, it, expect, vi } from 'vitest'
-import { ErrorStateView } from './ErrorStateView'
+import { ErrorStateView } from '@/shared/ui/feedback/ErrorStateView'
 
 // Mock framer-motion to avoid animation issues in tests
 vi.mock('framer-motion', () => ({

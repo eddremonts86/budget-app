@@ -1,7 +1,9 @@
 import { expect, test } from '@playwright/test'
+import { applyLanguage, getByLabelI18n } from './utils/i18n'
 
 test.describe('Topbar', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page }, testInfo) => {
+    await applyLanguage(page, testInfo)
     await page.goto('/')
   })
 
@@ -12,8 +14,8 @@ test.describe('Topbar', () => {
   })
 
   test('should show theme controls', async ({ page }) => {
-    await expect(page.getByLabel('Light theme')).toBeVisible()
-    await expect(page.getByLabel('Dark theme')).toBeVisible()
-    await expect(page.getByLabel('System theme')).toBeVisible()
+    await expect(await getByLabelI18n(page, 'themeToggle.light')).toBeVisible()
+    await expect(await getByLabelI18n(page, 'themeToggle.dark')).toBeVisible()
+    await expect(await getByLabelI18n(page, 'themeToggle.system')).toBeVisible()
   })
 })

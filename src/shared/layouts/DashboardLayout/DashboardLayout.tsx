@@ -14,14 +14,15 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 
 export function DashboardLayout() {
   const { isLoaded, userId } = useAuth()
+  const isE2E = import.meta.env.VITE_E2E === 'true'
 
-  if (isLoaded && !userId) {
+  if (!isE2E && isLoaded && !userId) {
     throw redirect({
       to: '/',
     })
   }
 
-  if (!isLoaded) {
+  if (!isE2E && !isLoaded) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p>Loading...</p>

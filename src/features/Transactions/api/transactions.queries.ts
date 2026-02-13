@@ -1,3 +1,4 @@
+import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import { transactionsApi } from './transactions.api'
 
@@ -33,7 +34,7 @@ export const useTransaction = (id: string) => {
 export const useCreateTransaction = () => {
   return useTQMutation(['transactions', 'create'], transactionsApi.create, {
     invalidateKeys: [transactionKeys.all],
-    successMessage: 'Transacción creada correctamente',
+    successMessage: i18n.t('transactions.toast.created'),
   })
 }
 
@@ -46,13 +47,13 @@ export const useUpdateTransaction = () => {
     data: Parameters<typeof transactionsApi.update>[1]
   }) => transactionsApi.update(id, data), {
     invalidateKeys: [transactionKeys.all],
-    successMessage: 'Transacción actualizada correctamente',
+    successMessage: i18n.t('transactions.toast.updated'),
   })
 }
 
 export const useDeleteTransaction = () => {
   return useTQMutation(['transactions', 'delete'], transactionsApi.delete, {
     invalidateKeys: [transactionKeys.all],
-    successMessage: 'Transacción eliminada correctamente',
+    successMessage: i18n.t('transactions.toast.deleted'),
   })
 }

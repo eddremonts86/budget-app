@@ -15,6 +15,7 @@
   },
   "common": {
     "loading": "Loading...",
+    "loadingMore": "Loading more...",
     "save": "Save",
     "cancel": "Cancel",
     "delete": "Delete",
@@ -25,13 +26,16 @@
     "sort": "Sort",
     "actions": "Actions",
     "confirm": "Confirm",
+    "undoWarning": "This action cannot be undone.",
     "yes": "Yes",
     "no": "No",
     "submit": "Submit",
     "reset": "Reset",
     "back": "Back",
     "next": "Next",
-    "previous": "Previous"
+    "previous": "Previous",
+    "loadMore": "Load More",
+    "openMenu": "Open menu"
   },
   "theme": {
     "light": "Light",
@@ -44,13 +48,253 @@
     "es": "Spanish",
     "dk": "Danish"
   },
+  "themeToggle": {
+    "light": "Light theme",
+    "dark": "Dark theme",
+    "system": "System theme"
+  },
+  "sidebar": {
+    "main": {
+      "dashboard": "Dashboard",
+      "analytics": "Analytics",
+      "todos": "Todos",
+      "users": "Users",
+      "transactions": "Transactions",
+      "categories": "Categories",
+      "projects": "Projects",
+      "team": "Team"
+    }
+  },
+  "dashboard": {
+    "error": {
+      "title": "Error",
+      "description": "An error occurred while loading the dashboard data."
+    },
+    "stats": {
+      "totalRevenue": "Total Revenue",
+      "subscriptions": "Subscriptions",
+      "sales": "Sales",
+      "activeNow": "Active Now",
+      "change": "{{value}} from last month",
+      "activeNowContext": "{{value}} {{context}}"
+    },
+    "recentTransactions": "Recent Transactions",
+    "recentSummary": "You made {{count}} sales this month.",
+    "table": {
+      "customer": "Customer",
+      "status": "Status",
+      "date": "Date",
+      "amount": "Amount"
+    }
+  },
+  "analytics": {
+    "title": "Analytics",
+    "pageViews": "Page Views",
+    "overview": "Overview",
+    "placeholder": "Analytics chart coming soon..."
+  },
+  "categories": {
+    "title": "Categories",
+    "add": "Add Category",
+    "nameLabel": "Name",
+    "namePlaceholder": "Category name",
+    "colorLabel": "Color",
+    "save": "Save Category",
+    "summary": "Showing {{shown}} of {{total}} categories",
+    "columns": {
+      "name": "Name",
+      "color": "Color"
+    },
+    "description": {
+      "create": "Add a new category for your transactions.",
+      "edit": "Update category details."
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this category?"
+    },
+    "error": {
+      "title": "Error",
+      "description": "An error occurred while loading categories."
+    }
+  },
+  "projects": {
+    "title": "Projects"
+  },
+  "team": {
+    "title": "Team"
+  },
+  "todos": {
+    "title": "Todos",
+    "subtitlePrefix": "Manage your workflow. You have ",
+    "subtitleSuffix": " active tasks.",
+    "actions": {
+      "new": "New Task",
+      "create": "Create Task",
+      "update": "Update Task",
+      "edit": "Edit Task",
+      "delete": "Delete"
+    },
+    "form": {
+      "headerTitle": "Task Details",
+      "headerSubtitle": "Define objectives and delivery dates.",
+      "titleLabel": "Project Title",
+      "titlePlaceholder": "Ex: Dashboard redesign",
+      "descriptionLabel": "Detailed Description",
+      "descriptionPlaceholder": "Describe the steps to follow...",
+      "statusLabel": "Current Status",
+      "statusPlaceholder": "Select status",
+      "statusPending": "Pending",
+      "statusInProgress": "In Progress",
+      "statusCompleted": "Completed",
+      "priorityLabel": "Priority",
+      "priorityPlaceholder": "Select priority",
+      "priorityLow": "Low",
+      "priorityMedium": "Medium",
+      "priorityHigh": "High",
+      "dueDateLabel": "Due Date",
+      "dueDatePlaceholder": "Select date"
+    },
+    "status": {
+      "pending": "Pending",
+      "inProgress": "In Progress",
+      "completed": "Completed"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "table": {
+      "title": "Task",
+      "status": "Status",
+      "priority": "Priority",
+      "createdAt": "Created"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this task?"
+    },
+    "loadingMore": "Loading more tasks...",
+    "error": {
+      "title": "Load Error",
+      "description": "We couldn't fetch your tasks. Check your connection and try again.",
+      "retry": "Retry"
+    },
+    "sheet": {
+      "createTitle": "Create Task",
+      "createDescription": "Add a new task to your list. Complete the details below.",
+      "editTitle": "Edit Task",
+      "editDescription": "Update your task details. Changes are saved immediately."
+    },
+    "toast": {
+      "created": "Task created successfully",
+      "updated": "Task updated successfully",
+      "deleted": "Task deleted successfully"
+    }
+  },
+  "users": {
+    "title": "Users",
+    "subtitlePrefix": "Manage access levels for ",
+    "subtitleSuffix": " team members.",
+    "actions": {
+      "new": "New User",
+      "save": "Save User",
+      "editProfile": "Edit Profile",
+      "deleteAccount": "Delete Account"
+    },
+    "form": {
+      "nameLabel": "Name",
+      "namePlaceholder": "User name",
+      "emailLabel": "Email",
+      "emailPlaceholder": "User email",
+      "roleLabel": "Role",
+      "rolePlaceholder": "Select role",
+      "roleUser": "User",
+      "roleAdmin": "Admin",
+      "avatarLabel": "Avatar URL",
+      "avatarPlaceholder": "Avatar URL",
+      "avatarRandom": "Random"
+    },
+    "table": {
+      "user": "User",
+      "role": "Role / Access"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this user?"
+    },
+    "loadingMore": "Syncing...",
+    "loadMore": "Load more users",
+    "error": {
+      "title": "Connection Error",
+      "description": "We couldn't sync the user list. Please retry in a moment.",
+      "retry": "Retry"
+    },
+    "sheet": {
+      "createTitle": "User Registration",
+      "createDescription": "Create a new access profile for your team.",
+      "editTitle": "User Profile",
+      "editDescription": "Update contact information and permissions."
+    },
+    "toast": {
+      "created": "User created successfully",
+      "updated": "User updated successfully",
+      "deleted": "User deleted successfully"
+    }
+  },
+  "transactions": {
+    "title": "Transactions",
+    "summary": "Showing {{shown}} of {{total}} transactions",
+    "actions": {
+      "add": "Add Transaction",
+      "save": "Save Transaction",
+      "edit": "Edit",
+      "delete": "Delete"
+    },
+    "form": {
+      "customerNameLabel": "Customer Name",
+      "customerNamePlaceholder": "Customer name",
+      "customerEmailLabel": "Customer Email",
+      "customerEmailPlaceholder": "Customer email",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Select status",
+      "statusApproved": "Approved",
+      "amountLabel": "Amount",
+      "amountPlaceholder": "0.00",
+      "dateLabel": "Date"
+    },
+    "table": {
+      "customer": "Customer",
+      "status": "Status",
+      "date": "Date",
+      "amount": "Amount"
+    },
+    "status": {
+      "approved": "Approved",
+      "pending": "Pending",
+      "rejected": "Rejected"
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete this transaction?"
+    },
+    "error": {
+      "title": "Error",
+      "description": "An error occurred while loading transactions."
+    },
+    "toast": {
+      "created": "Transaction created successfully",
+      "updated": "Transaction updated successfully",
+      "deleted": "Transaction deleted successfully"
+    }
+  },
   "validation": {
     "required": "This field is required",
     "minLength": "Must be at least {{min}} characters",
     "maxLength": "Must be at most {{max}} characters",
     "invalidEmail": "Invalid email address",
+    "invalidUrl": "Invalid URL",
+    "invalidColor": "Invalid color",
     "invalidDate": "Invalid date",
-    "futureDate": "Date must be in the future"
+    "futureDate": "Date must be in the future",
+    "minAmount": "Must be greater than 0"
   },
   "home": {
     "hero": {

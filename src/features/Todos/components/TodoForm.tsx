@@ -1,6 +1,6 @@
 import { useForm } from '@tanstack/react-form'
 import { format } from 'date-fns'
-import { es } from 'date-fns/locale'
+import { da, enUS, es } from 'date-fns/locale'
 import { motion } from 'framer-motion'
 import {
   Calendar as CalendarIcon,
@@ -12,6 +12,7 @@ import {
   X,
 } from 'lucide-react'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
@@ -30,15 +31,16 @@ import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/shared/lib/utils'
 import type { Todo } from '../model/types'
 
-const todoSchema = z.object({
-  title: z.string().min(1, 'El título es obligatorio'),
-  description: z.string().min(1, 'La descripción es obligatoria'),
-  status: z.enum(['pending', 'in_progress', 'completed']),
-  priority: z.enum(['low', 'medium', 'high']),
-  dueDate: z.string().min(1, 'La fecha es obligatoria'),
-})
+const createTodoSchema = (t: (key: string) => string) =>
+  z.object({
+    title: z.string().min(1, t('validation.required')),
+    description: z.string().min(1, t('validation.required')),
+    status: z.enum(['pending', 'in_progress', 'completed']),
+    priority: z.enum(['low', 'medium', 'high']),
+    dueDate: z.string().min(1, t('validation.required')),
+  })
 
-type TodoFormValues = z.infer<typeof todoSchema>
+type TodoFormValues = z.infer<ReturnType<typeof createTodoSchema>>
 
 type TodoFormProps = {
   defaultValues?: Partial<Todo>
@@ -48,6 +50,15 @@ type TodoFormProps = {
 }
 
 export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoFormProps) {
+  const { t, i18n } = useTranslation()
+  const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
+  const locale = React.useMemo(() => {
+    const language = i18n.language?.toLowerCase() ?? 'en'
+    const normalized = language.split('-')[0]
+    if (normalized === 'es') return es
+    if (normalized === 'dk' || normalized === 'da') return da
+    return enUS
+  }, [i18n.language])
   const form = useForm({
     defaultValues: {
       title: defaultValues?.title ?? '',
@@ -101,10 +112,10 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
               <ListTodo className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold tracking-tight">Detalles de la Tarea</h3>
-              <p className="text-sm text-muted-foreground">
-                Define los objetivos y tiempos de entrega.
-              </p>
+              <h3 className="text-lg font-semibold tracking-tight">
+                {t('todos.form.headerTitle')}
+              </h3>
+              <p className="text-sm text-muted-foreground">{t('todos.form.headerSubtitle')}</p>
             </div>
           </div>
           <Separator className="bg-border/50" />
@@ -120,7 +131,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                     htmlFor={field.name}
                     className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80"
                   >
-                    Título del Proyecto
+                    {t('todos.form.titleLabel')}
                   </FieldLabel>
                   <div className="relative group">
                     <Input
@@ -130,7 +141,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                       onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
                         field.handleChange(e.target.value)
                       }
-                      placeholder="Ej: Rediseño de Dashboard"
+                      placeholder={t('todos.form.titlePlaceholder')}
                       className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 focus:border-primary transition-all duration-300 rounded-xl px-4 text-base"
                     />
                     <div className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
@@ -155,7 +166,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                     htmlFor={field.name}
                     className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80"
                   >
-                    Descripción Detallada
+                    {t('todos.form.descriptionLabel')}
                   </FieldLabel>
                   <Textarea
                     id={field.name}
@@ -164,7 +175,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                     onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
                       field.handleChange(e.target.value)
                     }
-                    placeholder="Describe los pasos a seguir..."
+                    placeholder={t('todos.form.descriptionPlaceholder')}
                     className="min-h-[120px] bg-secondary/30 border-transparent hover:border-primary/30 focus:border-primary transition-all duration-300 rounded-xl p-4 resize-none text-base"
                   />
                   <FieldError
@@ -184,7 +195,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                 <motion.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
-                      <MoreHorizontal className="w-3.5 h-3.5" /> Estado Actual
+                      <MoreHorizontal className="w-3.5 h-3.5" /> {t('todos.form.statusLabel')}
                     </FieldLabel>
                     <Select
                       value={field.state.value}
@@ -193,17 +204,17 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                       }
                     >
                       <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
-                        <SelectValue placeholder="Seleccionar estado" />
+                        <SelectValue placeholder={t('todos.form.statusPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
                         <SelectItem value="pending" className="rounded-lg m-1">
-                          Pendiente
+                          {t('todos.form.statusPending')}
                         </SelectItem>
                         <SelectItem value="in_progress" className="rounded-lg m-1">
-                          En Progreso
+                          {t('todos.form.statusInProgress')}
                         </SelectItem>
                         <SelectItem value="completed" className="rounded-lg m-1">
-                          Completada
+                          {t('todos.form.statusCompleted')}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -225,7 +236,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                 <motion.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
-                      <Flag className="w-3.5 h-3.5" /> Prioridad
+                      <Flag className="w-3.5 h-3.5" /> {t('todos.form.priorityLabel')}
                     </FieldLabel>
                     <Select
                       value={field.state.value}
@@ -239,20 +250,20 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                           field.state.value === 'high' && 'text-destructive',
                         )}
                       >
-                        <SelectValue placeholder="Seleccionar prioridad" />
+                        <SelectValue placeholder={t('todos.form.priorityPlaceholder')} />
                       </SelectTrigger>
                       <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
                         <SelectItem value="low" className="rounded-lg m-1">
-                          Baja
+                          {t('todos.form.priorityLow')}
                         </SelectItem>
                         <SelectItem value="medium" className="rounded-lg m-1">
-                          Media
+                          {t('todos.form.priorityMedium')}
                         </SelectItem>
                         <SelectItem
                           value="high"
                           className="rounded-lg m-1 font-semibold text-destructive"
                         >
-                          Alta
+                          {t('todos.form.priorityHigh')}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -278,7 +289,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                     htmlFor={field.name}
                     className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2"
                   >
-                    <CalendarIcon className="w-3.5 h-3.5" /> Fecha de Entrega
+                    <CalendarIcon className="w-3.5 h-3.5" /> {t('todos.form.dueDateLabel')}
                   </FieldLabel>
                   <Popover>
                     <PopoverTrigger asChild>
@@ -291,9 +302,9 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                       >
                         <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
                         {field.state.value ? (
-                          format(new Date(`${field.state.value}T00:00:00`), 'PPP', { locale: es })
+                          format(new Date(`${field.state.value}T00:00:00`), 'PPP', { locale })
                         ) : (
-                          <span>Seleccionar fecha</span>
+                          <span>{t('todos.form.dueDatePlaceholder')}</span>
                         )}
                       </Button>
                     </PopoverTrigger>
@@ -314,7 +325,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                           field.handleChange(`${year}-${month}-${day}`)
                         }}
                         initialFocus
-                        locale={es}
+                        locale={locale}
                         className="rounded-2xl"
                       />
                     </PopoverContent>
@@ -343,7 +354,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
             className="rounded-xl px-6 hover:bg-secondary/50 transition-colors"
           >
             <X className="w-4 h-4 mr-2" />
-            Cancelar
+            {t('common.cancel')}
           </Button>
           <Button
             type="submit"
@@ -353,12 +364,12 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
             {isLoading ? (
               <div className="flex items-center gap-2">
                 <Loader2 className="w-4 h-4 animate-spin" />
-                Guardando...
+                {t('common.loading')}
               </div>
             ) : (
               <div className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
-                {defaultValues?.id ? 'Actualizar Tarea' : 'Crear Tarea'}
+                {defaultValues?.id ? t('todos.actions.update') : t('todos.actions.create')}
               </div>
             )}
           </Button>

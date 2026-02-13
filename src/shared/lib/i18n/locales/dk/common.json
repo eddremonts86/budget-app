@@ -15,6 +15,7 @@
   },
   "common": {
     "loading": "Indlæser...",
+    "loadingMore": "Indlæser mere...",
     "save": "Gem",
     "cancel": "Annuller",
     "delete": "Slet",
@@ -25,13 +26,16 @@
     "sort": "Sorter",
     "actions": "Handlinger",
     "confirm": "Bekræft",
+    "undoWarning": "Denne handling kan ikke fortrydes.",
     "yes": "Ja",
     "no": "Nej",
     "submit": "Indsend",
     "reset": "Nulstil",
     "back": "Tilbage",
     "next": "Næste",
-    "previous": "Forrige"
+    "previous": "Forrige",
+    "loadMore": "Indlæs flere",
+    "openMenu": "Åbn menu"
   },
   "theme": {
     "light": "Lys",
@@ -44,13 +48,253 @@
     "es": "Spansk",
     "dk": "Dansk"
   },
+  "themeToggle": {
+    "light": "Lyst tema",
+    "dark": "Mørkt tema",
+    "system": "Systemtema"
+  },
+  "sidebar": {
+    "main": {
+      "dashboard": "Dashboard",
+      "analytics": "Analyse",
+      "todos": "Opgaver",
+      "users": "Brugere",
+      "transactions": "Transaktioner",
+      "categories": "Kategorier",
+      "projects": "Projekter",
+      "team": "Team"
+    }
+  },
+  "dashboard": {
+    "error": {
+      "title": "Fejl",
+      "description": "Der opstod en fejl ved indlæsning af dashboard-data."
+    },
+    "stats": {
+      "totalRevenue": "Samlet omsætning",
+      "subscriptions": "Abonnementer",
+      "sales": "Salg",
+      "activeNow": "Aktive nu",
+      "change": "{{value}} siden sidste måned",
+      "activeNowContext": "{{value}} {{context}}"
+    },
+    "recentTransactions": "Seneste transaktioner",
+    "recentSummary": "Du har lavet {{count}} salg denne måned.",
+    "table": {
+      "customer": "Kunde",
+      "status": "Status",
+      "date": "Dato",
+      "amount": "Beløb"
+    }
+  },
+  "analytics": {
+    "title": "Analyse",
+    "pageViews": "Sidevisninger",
+    "overview": "Oversigt",
+    "placeholder": "Analyse-graf kommer snart..."
+  },
+  "categories": {
+    "title": "Kategorier",
+    "add": "Tilføj kategori",
+    "nameLabel": "Navn",
+    "namePlaceholder": "Kategorinavn",
+    "colorLabel": "Farve",
+    "save": "Gem kategori",
+    "summary": "Viser {{shown}} af {{total}} kategorier",
+    "columns": {
+      "name": "Navn",
+      "color": "Farve"
+    },
+    "description": {
+      "create": "Tilføj en ny kategori til dine transaktioner.",
+      "edit": "Opdater kategoridetaljerne."
+    },
+    "confirm": {
+      "delete": "Er du sikker på, at du vil slette denne kategori?"
+    },
+    "error": {
+      "title": "Fejl",
+      "description": "Der opstod en fejl ved indlæsning af kategorier."
+    }
+  },
+  "projects": {
+    "title": "Projekter"
+  },
+  "team": {
+    "title": "Team"
+  },
+  "todos": {
+    "title": "Opgaver",
+    "subtitlePrefix": "Administrer din arbejdsgang. Du har ",
+    "subtitleSuffix": " aktive opgaver.",
+    "actions": {
+      "new": "Ny opgave",
+      "create": "Opret opgave",
+      "update": "Opdater opgave",
+      "edit": "Rediger opgave",
+      "delete": "Slet"
+    },
+    "form": {
+      "headerTitle": "Opgavedetaljer",
+      "headerSubtitle": "Definer mål og deadlines.",
+      "titleLabel": "Projekt titel",
+      "titlePlaceholder": "Fx: Dashboard redesign",
+      "descriptionLabel": "Detaljeret beskrivelse",
+      "descriptionPlaceholder": "Beskriv de næste skridt...",
+      "statusLabel": "Nuværende status",
+      "statusPlaceholder": "Vælg status",
+      "statusPending": "Afventer",
+      "statusInProgress": "I gang",
+      "statusCompleted": "Gennemført",
+      "priorityLabel": "Prioritet",
+      "priorityPlaceholder": "Vælg prioritet",
+      "priorityLow": "Lav",
+      "priorityMedium": "Mellem",
+      "priorityHigh": "Høj",
+      "dueDateLabel": "Forfaldsdato",
+      "dueDatePlaceholder": "Vælg dato"
+    },
+    "status": {
+      "pending": "Afventer",
+      "inProgress": "I gang",
+      "completed": "Gennemført"
+    },
+    "priority": {
+      "low": "Lav",
+      "medium": "Mellem",
+      "high": "Høj"
+    },
+    "table": {
+      "title": "Opgave",
+      "status": "Status",
+      "priority": "Prioritet",
+      "createdAt": "Oprettet"
+    },
+    "confirm": {
+      "delete": "Er du sikker på, at du vil slette denne opgave?"
+    },
+    "loadingMore": "Indlæser flere opgaver...",
+    "error": {
+      "title": "Indlæsningsfejl",
+      "description": "Vi kunne ikke hente dine opgaver. Tjek din forbindelse og prøv igen.",
+      "retry": "Prøv igen"
+    },
+    "sheet": {
+      "createTitle": "Opret opgave",
+      "createDescription": "Tilføj en ny opgave til din liste. Udfyld detaljerne nedenfor.",
+      "editTitle": "Rediger opgave",
+      "editDescription": "Opdater dine opgavedetaljer. Ændringer gemmes straks."
+    },
+    "toast": {
+      "created": "Opgave oprettet",
+      "updated": "Opgave opdateret",
+      "deleted": "Opgave slettet"
+    }
+  },
+  "users": {
+    "title": "Brugere",
+    "subtitlePrefix": "Administrer adgangsniveauer for ",
+    "subtitleSuffix": " teammedlemmer.",
+    "actions": {
+      "new": "Ny bruger",
+      "save": "Gem bruger",
+      "editProfile": "Rediger profil",
+      "deleteAccount": "Slet konto"
+    },
+    "form": {
+      "nameLabel": "Navn",
+      "namePlaceholder": "Brugernavn",
+      "emailLabel": "E-mail",
+      "emailPlaceholder": "Bruger e-mail",
+      "roleLabel": "Rolle",
+      "rolePlaceholder": "Vælg rolle",
+      "roleUser": "Bruger",
+      "roleAdmin": "Admin",
+      "avatarLabel": "Avatar-URL",
+      "avatarPlaceholder": "Avatar-URL",
+      "avatarRandom": "Tilfældig"
+    },
+    "table": {
+      "user": "Bruger",
+      "role": "Rolle / Adgang"
+    },
+    "confirm": {
+      "delete": "Er du sikker på, at du vil slette denne bruger?"
+    },
+    "loadingMore": "Synkroniserer...",
+    "loadMore": "Indlæs flere brugere",
+    "error": {
+      "title": "Forbindelsesfejl",
+      "description": "Vi kunne ikke synkronisere brugerlisten. Prøv igen om lidt.",
+      "retry": "Prøv igen"
+    },
+    "sheet": {
+      "createTitle": "Brugerregistrering",
+      "createDescription": "Opret en ny adgangsprofil til dit team.",
+      "editTitle": "Brugerprofil",
+      "editDescription": "Opdater kontaktinfo og tilladelser."
+    },
+    "toast": {
+      "created": "Bruger oprettet",
+      "updated": "Bruger opdateret",
+      "deleted": "Bruger slettet"
+    }
+  },
+  "transactions": {
+    "title": "Transaktioner",
+    "summary": "Viser {{shown}} af {{total}} transaktioner",
+    "actions": {
+      "add": "Tilføj transaktion",
+      "save": "Gem transaktion",
+      "edit": "Rediger",
+      "delete": "Slet"
+    },
+    "form": {
+      "customerNameLabel": "Kundenavn",
+      "customerNamePlaceholder": "Kundenavn",
+      "customerEmailLabel": "Kunde e-mail",
+      "customerEmailPlaceholder": "Kunde e-mail",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Vælg status",
+      "statusApproved": "Godkendt",
+      "amountLabel": "Beløb",
+      "amountPlaceholder": "0.00",
+      "dateLabel": "Dato"
+    },
+    "table": {
+      "customer": "Kunde",
+      "status": "Status",
+      "date": "Dato",
+      "amount": "Beløb"
+    },
+    "status": {
+      "approved": "Godkendt",
+      "pending": "Afventer",
+      "rejected": "Afvist"
+    },
+    "confirm": {
+      "delete": "Er du sikker på, at du vil slette denne transaktion?"
+    },
+    "error": {
+      "title": "Fejl",
+      "description": "Der opstod en fejl ved indlæsning af transaktioner."
+    },
+    "toast": {
+      "created": "Transaktion oprettet",
+      "updated": "Transaktion opdateret",
+      "deleted": "Transaktion slettet"
+    }
+  },
   "validation": {
     "required": "Dette felt er påkrævet",
     "minLength": "Skal være mindst {{min}} tegn",
     "maxLength": "Skal være højst {{max}} tegn",
     "invalidEmail": "Ugyldig e-mailadresse",
+    "invalidUrl": "Ugyldig URL",
+    "invalidColor": "Ugyldig farve",
     "invalidDate": "Ugyldig dato",
-    "futureDate": "Dato skal være i fremtiden"
+    "futureDate": "Dato skal være i fremtiden",
+    "minAmount": "Skal være større end 0"
   },
   "home": {
     "hero": {

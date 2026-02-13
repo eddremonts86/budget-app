@@ -1,17 +1,19 @@
 import { useForm } from '@tanstack/react-form'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import type { Category } from '../model/types'
 
-const categorySchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  color: z.string().regex(/^#[0-9A-F]{6}$/i, 'Invalid hex color'),
-})
+const createCategorySchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t('validation.required')),
+    color: z.string().regex(/^#[0-9A-F]{6}$/i, t('validation.invalidColor')),
+  })
 
-type CategoryFormValues = z.infer<typeof categorySchema>
+type CategoryFormValues = z.infer<ReturnType<typeof createCategorySchema>>
 
 type CategoryFormProps = {
   defaultValues?: Partial<Category>
@@ -21,6 +23,8 @@ type CategoryFormProps = {
 }
 
 export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: CategoryFormProps) {
+  const { t } = useTranslation()
+  const categorySchema = React.useMemo(() => createCategorySchema(t), [t])
   const form = useForm({
     defaultValues: {
       name: defaultValues?.name ?? '',
@@ -47,15 +51,17 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
         name="name"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('categories.nameLabel')}</FieldLabel>
             <Input
               id={field.name}
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="Category name"
+              placeholder={t('categories.namePlaceholder')}
             />
-            <FieldError errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))} />
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
           </Field>
         )}
       />
@@ -64,7 +70,7 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
         name="color"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Color</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('categories.colorLabel')}</FieldLabel>
             <div className="flex gap-2">
               <Input
                 id={field.name}
@@ -81,17 +87,19 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
                 className="flex-1"
               />
             </div>
-            <FieldError errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))} />
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
           </Field>
         )}
       />
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save Category'}
+          {isLoading ? t('common.loading') : t('categories.save')}
         </Button>
       </div>
     </form>

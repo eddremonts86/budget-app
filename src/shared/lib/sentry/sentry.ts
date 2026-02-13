@@ -24,6 +24,27 @@ export function initSentry() {
     // Session Replay
     replaysSessionSampleRate: 0.1,
     replaysOnErrorSampleRate: 1.0,
+
+    // Filter out common network errors and noise
+    ignoreErrors: [
+      // Network connectivity issues
+      'net::ERR_NAME_NOT_RESOLVED',
+      'net::ERR_NETWORK_CHANGED',
+      'net::ERR_INTERNET_DISCONNECTED',
+      'net::ERR_CONNECTION_REFUSED',
+      'net::ERR_CONNECTION_RESET',
+      'Network Error',
+      'Failed to fetch',
+      'Load failed',
+      // Clerk telemetry and noise
+      'clerk-telemetry',
+    ],
+    denyUrls: [
+      // Ignore errors from these domains
+      /clerk-telemetry\.com/i,
+      /extensions\//i,
+      /^chrome:\/\//i,
+    ],
   })
 }
 

@@ -1,5 +1,6 @@
 import { useForm } from '@tanstack/react-form'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
@@ -13,14 +14,15 @@ import {
 } from '@/components/ui/select'
 import type { User } from '../model/types'
 
-const userSchema = z.object({
-  name: z.string().min(1, 'Name is required'),
-  email: z.string().email('Invalid email address'),
-  role: z.enum(['admin', 'user']),
-  avatar: z.string().url('Invalid avatar URL').or(z.string().min(1, 'Avatar is required')),
-})
+const createUserSchema = (t: (key: string) => string) =>
+  z.object({
+    name: z.string().min(1, t('validation.required')),
+    email: z.string().min(1, t('validation.required')).email(t('validation.invalidEmail')),
+    role: z.enum(['admin', 'user']),
+    avatar: z.string().min(1, t('validation.required')).url(t('validation.invalidUrl')),
+  })
 
-type UserFormValues = z.infer<typeof userSchema>
+type UserFormValues = z.infer<ReturnType<typeof createUserSchema>>
 
 type UserFormProps = {
   defaultValues?: Partial<User>
@@ -30,10 +32,9 @@ type UserFormProps = {
 }
 
 export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserFormProps) {
-  const initialAvatar = React.useMemo(
-    () => `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`,
-    [],
-  )
+  const { t } = useTranslation()
+  const initialAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
+  const userSchema = React.useMemo(() => createUserSchema(t), [t])
 
   const form = useForm({
     defaultValues: {
@@ -63,13 +64,13 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
         name="name"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Name</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('users.form.nameLabel')}</FieldLabel>
             <Input
               id={field.name}
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="User name"
+              placeholder={t('users.form.namePlaceholder')}
             />
             <FieldError
               errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
@@ -82,14 +83,14 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
         name="email"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Email</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('users.form.emailLabel')}</FieldLabel>
             <Input
               id={field.name}
               type="email"
               value={field.state.value}
               onBlur={field.handleBlur}
               onChange={(e) => field.handleChange(e.target.value)}
-              placeholder="User email"
+              placeholder={t('users.form.emailPlaceholder')}
             />
             <FieldError
               errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
@@ -102,17 +103,17 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
         name="role"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Role</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('users.form.roleLabel')}</FieldLabel>
             <Select
               value={field.state.value}
               onValueChange={(value) => field.handleChange(value as UserFormValues['role'])}
             >
               <SelectTrigger id={field.name}>
-                <SelectValue placeholder="Select role" />
+                <SelectValue placeholder={t('users.form.rolePlaceholder')} />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="user">User</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="user">{t('users.form.roleUser')}</SelectItem>
+                <SelectItem value="admin">{t('users.form.roleAdmin')}</SelectItem>
               </SelectContent>
             </Select>
             <FieldError
@@ -126,14 +127,14 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
         name="avatar"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Avatar URL</FieldLabel>
+            <FieldLabel htmlFor={field.name}>{t('users.form.avatarLabel')}</FieldLabel>
             <div className="flex gap-2">
               <Input
                 id={field.name}
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(e.target.value)}
-                placeholder="Avatar URL"
+                placeholder={t('users.form.avatarPlaceholder')}
               />
               <Button
                 type="button"
@@ -144,7 +145,7 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                   )
                 }
               >
-                Random
+                {t('users.form.avatarRandom')}
               </Button>
             </div>
             <FieldError
@@ -156,10 +157,10 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
 
       <div className="flex justify-end gap-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
-          Cancel
+          {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? 'Saving...' : 'Save User'}
+          {isLoading ? t('common.loading') : t('users.actions.save')}
         </Button>
       </div>
     </form>

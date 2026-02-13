@@ -1,7 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
 import { IconFolder } from '@tabler/icons-react'
+import { useTranslation } from 'react-i18next'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
 
 export function ProjectsPage() {
+  const { t } = useTranslation()
   const projects = [
     { id: '1', name: 'Website Redesign', status: 'In Progress', progress: 45 },
     { id: '2', name: 'Mobile App', status: 'Planning', progress: 10 },
@@ -11,7 +13,7 @@ export function ProjectsPage() {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h2 className="text-3xl font-bold tracking-tight">Projects</h2>
+        <h2 className="text-3xl font-bold tracking-tight">{t('projects.title')}</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         {projects.map((project) => (

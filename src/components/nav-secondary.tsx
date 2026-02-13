@@ -1,9 +1,8 @@
 "use client"
 
-import * as React from "react"
 import { type Icon } from "@tabler/icons-react"
-
 import { Link } from "@tanstack/react-router"
+import * as React from "react"
 import {
   SidebarGroup,
   SidebarGroupContent,

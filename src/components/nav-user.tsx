@@ -1,3 +1,4 @@
+import { useUser, useClerk } from "@clerk/tanstack-react-start"
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -5,8 +6,6 @@ import {
   IconNotification,
   IconUserCircle,
 } from "@tabler/icons-react"
-import { useUser, useClerk } from "@clerk/tanstack-react-start"
-
 import {
   Avatar,
   AvatarFallback,
@@ -25,8 +24,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-  useSidebar,
 } from "@/components/ui/sidebar"
+import { useSidebar } from "@/hooks/use-sidebar"
 
 export function NavUser() {
   const { isMobile } = useSidebar()

@@ -10,6 +10,7 @@ import {
   UserPlus,
 } from 'lucide-react'
 import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
 import { toast } from 'sonner'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -39,6 +40,7 @@ import type { User } from '../model/types'
 import { UserForm } from './UserForm'
 
 export function UsersPage() {
+  const { t } = useTranslation()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingUser, setEditingUser] = React.useState<User | null>(null)
 
@@ -60,7 +62,7 @@ export function UsersPage() {
   const columns: ColumnDef<User>[] = [
     {
       accessorKey: 'name',
-      header: 'Usuario',
+      header: t('users.table.user'),
       cell: ({ row }) => {
         const avatar = row.original.avatar
         const name = row.original.name
@@ -85,7 +87,7 @@ export function UsersPage() {
     },
     {
       accessorKey: 'role',
-      header: 'Rol / Acceso',
+      header: t('users.table.role'),
       cell: ({ row }) => {
         const role = row.getValue('role') as string
         const isAdmin = role === 'admin'
@@ -114,7 +116,7 @@ export function UsersPage() {
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-9 w-9 p-0 rounded-full hover:bg-secondary/80">
-                <span className="sr-only">Open menu</span>
+                <span className="sr-only">{t('common.openMenu')}</span>
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
@@ -123,27 +125,27 @@ export function UsersPage() {
               className="w-48 p-2 rounded-2xl shadow-2xl backdrop-blur-xl border-border/40"
             >
               <DropdownMenuLabel className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
-                Opciones
+                {t('common.actions')}
               </DropdownMenuLabel>
               <DropdownMenuItem
                 onClick={() => setEditingUser(user)}
                 className="rounded-lg m-1 gap-2 cursor-pointer focus:bg-primary/5 focus:text-primary"
               >
                 <Pencil className="h-4 w-4" />
-                Editar Perfil
+                {t('users.actions.editProfile')}
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border/40" />
               <DropdownMenuItem
                 className="text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive"
                 onClick={() => {
-                  toast.error('¿Estás seguro de eliminar este usuario?', {
-                    description: 'Esta acción no se puede deshacer.',
+                  toast.error(t('users.confirm.delete'), {
+                    description: t('common.confirm'),
                     action: {
-                      label: 'Eliminar',
+                      label: t('common.delete'),
                       onClick: () => deleteMutation.mutate(user.id),
                     },
                     cancel: {
-                      label: 'Cancelar',
+                      label: t('common.cancel'),
                       onClick: () => {},
                     },
                     duration: 10000,
@@ -151,7 +153,7 @@ export function UsersPage() {
                 }}
               >
                 <Trash2 className="h-4 w-4" />
-                Eliminar Cuenta
+                {t('users.actions.deleteAccount')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -172,13 +174,11 @@ export function UsersPage() {
             <Trash2 className="w-6 h-6 text-destructive" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-bold tracking-tight">Error de Conexión</h2>
-            <p className="text-muted-foreground text-sm">
-              No pudimos sincronizar la lista de usuarios. Por favor, reintenta en unos momentos.
-            </p>
+            <h2 className="text-xl font-bold tracking-tight">{t('users.error.title')}</h2>
+            <p className="text-muted-foreground text-sm">{t('users.error.description')}</p>
           </div>
           <Button variant="outline" onClick={() => window.location.reload()}>
-            Reintentar Carga
+            {t('users.error.retry')}
           </Button>
         </div>
       </motion.div>
@@ -193,11 +193,12 @@ export function UsersPage() {
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div className="space-y-1">
           <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
-            Usuarios
+            {t('users.title')}
           </h2>
           <p className="text-muted-foreground font-medium">
-            Gestiona los niveles de acceso de <span className="text-foreground">{totalCount}</span>{' '}
-            miembros del equipo.
+            {t('users.subtitlePrefix')}
+            <span className="text-foreground">{totalCount}</span>
+            {t('users.subtitleSuffix')}
           </p>
         </div>
         <Button
@@ -205,7 +206,7 @@ export function UsersPage() {
           className="rounded-2xl h-12 px-6 gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
         >
           <UserPlus className="w-5 h-5" />
-          Nuevo Usuario
+          {t('users.actions.new')}
         </Button>
       </div>
 
@@ -231,11 +232,11 @@ export function UsersPage() {
                       {isFetchingNextPage ? (
                         <div className="flex items-center gap-2">
                           <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          Sincronizando...
+                          {t('users.loadingMore')}
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 font-semibold">
-                          Cargar más usuarios
+                          {t('users.loadMore')}
                           <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
                         </div>
                       )}
@@ -253,10 +254,10 @@ export function UsersPage() {
         <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80">
           <SheetHeader className="pb-6 border-b border-border/40">
             <SheetTitle className="text-2xl font-bold tracking-tight">
-              Registro de Usuario
+              {t('users.sheet.createTitle')}
             </SheetTitle>
             <SheetDescription className="text-base">
-              Crea un nuevo perfil de acceso para tu equipo.
+              {t('users.sheet.createDescription')}
             </SheetDescription>
           </SheetHeader>
           <div className="py-8">
@@ -275,9 +276,11 @@ export function UsersPage() {
       <Sheet open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
         <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80">
           <SheetHeader className="pb-6 border-b border-border/40">
-            <SheetTitle className="text-2xl font-bold tracking-tight">Perfil de Usuario</SheetTitle>
+            <SheetTitle className="text-2xl font-bold tracking-tight">
+              {t('users.sheet.editTitle')}
+            </SheetTitle>
             <SheetDescription className="text-base">
-              Actualiza la información de contacto y permisos.
+              {t('users.sheet.editDescription')}
             </SheetDescription>
           </SheetHeader>
           <div className="py-8">
