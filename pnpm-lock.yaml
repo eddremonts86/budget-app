@@ -32,6 +32,18 @@ importers:
       '@tabler/icons-react':
         specifier: ^3.36.1
         version: 3.36.1(react@19.2.4)
+      '@tanstack/ai':
+        specifier: ^0.5.0
+        version: 0.5.0
+      '@tanstack/ai-anthropic':
+        specifier: ^0.5.0
+        version: 0.5.0(@tanstack/ai@0.5.0)(zod@3.25.76)
+      '@tanstack/ai-openai':
+        specifier: ^0.5.0
+        version: 0.5.0(@tanstack/ai@0.5.0)(ws@8.19.0)(zod@3.25.76)
+      '@tanstack/ai-react':
+        specifier: ^0.5.0
+        version: 0.5.3(@tanstack/ai@0.5.0)(@types/react@19.2.13)(react@19.2.4)
       '@tanstack/db':
         specifier: ^0.5.25
         version: 0.5.25(typescript@5.9.3)
@@ -251,6 +263,15 @@ packages:
 
   '@acemir/cssom@0.9.31':
     resolution: {integrity: sha512-ZnR3GSaH+/vJ0YlHau21FjfLYjMpYVIzTD8M8vIEQvIGxeOXyXdzCI140rrCY862p/C/BbzWsjc1dgnM9mkoTA==}
+
+  '@anthropic-ai/sdk@0.71.2':
+    resolution: {integrity: sha512-TGNDEUuEstk/DKu0/TflXAEt+p+p/WhTlFzEnoosvbaDU2LTjm42igSdlL0VijrKpWejtOKxX0b8A7uc+XiSAQ==}
+    hasBin: true
+    peerDependencies:
+      zod: ^3.25.0 || ^4.0.0
+    peerDependenciesMeta:
+      zod:
+        optional: true
 
   '@asamuzakjp/css-color@4.1.2':
     resolution: {integrity: sha512-NfBUvBaYgKIuq6E/RBLY1m0IohzNHAYyaJGuTK79Z23uNwmz2jl1mPsC5ZxCCxylinKhT1Amn5oNTlx1wN8cQg==}
@@ -2367,6 +2388,32 @@ packages:
     resolution: {integrity: sha512-jVA+/UpKL1vRLg6Hkao5jldawNmRo7mQYrZtNHMIVpLfLhDml5nMRUo/8MwoX2vNXvnaXNNMedrMfMugAVX1nA==}
     peerDependencies:
       vite: ^5.2.0 || ^6 || ^7
+
+  '@tanstack/ai-anthropic@0.5.0':
+    resolution: {integrity: sha512-PiQx4Kpw+NNjXvVhes29LoO/IvD8M9GGQsNvtLCd+dDhZt3FzdNwHWMZBCpaQWPW142iuhowagh79X//onNjDw==}
+    peerDependencies:
+      '@tanstack/ai': ^0.5.0
+      zod: ^4.0.0
+
+  '@tanstack/ai-client@0.4.4':
+    resolution: {integrity: sha512-OEXDBHBKi8KO6wGYd4XA6MEqBDgKhCnRqUucp6aXVEob/HmXyqzWVyyUCsTT/Chc/802VKlC2ddWgwlr/fKSAg==}
+
+  '@tanstack/ai-openai@0.5.0':
+    resolution: {integrity: sha512-0xJg+BkqVgIRbl4LyiPQWCLOapfGpK4lSzqjaWRkz2Hf1C3m4exg76rBuv1mvr4G3XAR5SnMRSj3XxlWMuRImA==}
+    peerDependencies:
+      '@tanstack/ai': ^0.5.0
+      zod: ^4.0.0
+
+  '@tanstack/ai-react@0.5.3':
+    resolution: {integrity: sha512-D17UbP6asaMhkgXWZayu7gRHXnliMTm4f1QLOWMrdggZ9NlD41p9jjuoGl5J3I5ne+XGunrBUHrBXGP+GbMK9g==}
+    peerDependencies:
+      '@tanstack/ai': ^0.5.0
+      '@types/react': '>=18.0.0'
+      react: '>=18.0.0'
+
+  '@tanstack/ai@0.5.0':
+    resolution: {integrity: sha512-RGTLobq2jFCddLINGsETAsVixIvZTfWVJFBkz+l5JaYaGp0uQkJBDhC375ru0LWH7WsE3BWIUeU1p9QQ0zBGzA==}
+    engines: {node: '>=18'}
 
   '@tanstack/db-ivm@0.1.17':
     resolution: {integrity: sha512-DK7vm56CDxNuRAdsbiPs+gITJ+16tUtYgZg3BRTLYKGIDsy8sdIO7sQFq5zl7Y+aIKAPmMAbVp9UjJ75FTtwgQ==}
@@ -4513,6 +4560,10 @@ packages:
   json-parse-even-better-errors@2.3.1:
     resolution: {integrity: sha512-xyFwyhro/JEof6Ghe2iz2NcXoj2sloNsWr/XsERDK/oiPCfaNhl5ONfp+jQdAZRQQ0IJWNzH9zIZF7li91kh2w==}
 
+  json-schema-to-ts@3.1.1:
+    resolution: {integrity: sha512-+DWg8jCJG2TEnpy7kOm/7/AxaYoaRbjVB4LFZLySZlWn8exGs3A4OLJR966cVvU26N7X9TWxl+Jsw7dzAqKT6g==}
+    engines: {node: '>=16'}
+
   json-schema-traverse@0.4.1:
     resolution: {integrity: sha512-xbbCH5dCYU5T8LcEhhuh7HJ88HXuW3qsI3Y0zOZFKfZEHcpWiHU/Jxzk629Brsab/mMiHQti9wMP+845RPe3Vg==}
 
@@ -4967,6 +5018,18 @@ packages:
     resolution: {integrity: sha512-1FlR+gjXK7X+AsAHso35MnyN5KqGwJRi/31ft6x0M194ht7S+rWAvd7PHss9xSKMzE0asv1pyIHaJYq+BbacAQ==}
     engines: {node: '>=12'}
 
+  openai@6.22.0:
+    resolution: {integrity: sha512-7Yvy17F33Bi9RutWbsaYt5hJEEJ/krRPOrwan+f9aCPuMat1WVsb2VNSII5W1EksKT6fF69TG/xj4XzodK3JZw==}
+    hasBin: true
+    peerDependencies:
+      ws: ^8.18.0
+      zod: ^3.25 || ^4.0
+    peerDependenciesMeta:
+      ws:
+        optional: true
+      zod:
+        optional: true
+
   optionator@0.9.4:
     resolution: {integrity: sha512-6IpQ7mKUxRcZNLIObR0hz7lxsapSSIYNZJwXPGeF0mTVqGKFIXj1DQcMoT22S3ROcLyY/rz0PWaWZ9ayWmad9g==}
     engines: {node: '>= 0.8.0'}
@@ -5052,6 +5115,9 @@ packages:
 
   parse5@8.0.0:
     resolution: {integrity: sha512-9m4m5GSgXjL4AjumKzq1Fgfp3Z8rsvjRNbnkVwfu2ImRqE5D0LnY2QfDen18FSY9C573YU5XxSapdHZTZ2WolA==}
+
+  partial-json@0.1.7:
+    resolution: {integrity: sha512-Njv/59hHaokb/hRUjce3Hdv12wd60MtM9Z5Olmn+nehe0QDAsRtRbJPvJ0Z91TusF0SuZRIvnM+S4l6EIP8leA==}
 
   path-exists@4.0.0:
     resolution: {integrity: sha512-ak9Qy5Q7jYb2Wwcey5Fpvg2KoAc/ZIhLSLOSBmRmygPsGwkVVt0fZa0qrtMz+m6tJTAHfZQ8FnmB4MG4LWy7/w==}
@@ -5769,6 +5835,9 @@ packages:
     resolution: {integrity: sha512-aZbgViZrg1QNcG+LULa7nhZpJTZSLm/mXnHXnbAbjmN5aSa0y7V+wvv6+4WaBtpISJzThKy+PIPxc1Nq1EJ9mg==}
     engines: {node: '>= 14.0.0'}
 
+  ts-algebra@2.0.0:
+    resolution: {integrity: sha512-FPAhNPFMrkwz76P7cdjdmiShwMynZYN6SgOujD1urY4oNm80Ou9oMdmbR45LotcKOXoy7wSmHkRFE6Mxbrhefw==}
+
   ts-api-utils@2.4.0:
     resolution: {integrity: sha512-3TaVTaAv2gTiMB35i3FiGJaRfwb3Pyn/j3m/bfAvGe8FB7CF6u+LMYqYlDh7reQf7UNvoTvdfAqHGmPGOSsPmA==}
     engines: {node: '>=18.12'}
@@ -6238,6 +6307,12 @@ packages:
 snapshots:
 
   '@acemir/cssom@0.9.31': {}
+
+  '@anthropic-ai/sdk@0.71.2(zod@3.25.76)':
+    dependencies:
+      json-schema-to-ts: 3.1.1
+    optionalDependencies:
+      zod: 3.25.76
 
   '@asamuzakjp/css-color@4.1.2':
     dependencies:
@@ -8560,6 +8635,36 @@ snapshots:
       tailwindcss: 4.1.18
       vite: 7.3.1(@types/node@22.19.9)(jiti@2.6.1)(lightningcss@1.30.2)(terser@5.46.0)(tsx@4.21.0)(yaml@2.8.2)
 
+  '@tanstack/ai-anthropic@0.5.0(@tanstack/ai@0.5.0)(zod@3.25.76)':
+    dependencies:
+      '@anthropic-ai/sdk': 0.71.2(zod@3.25.76)
+      '@tanstack/ai': 0.5.0
+      zod: 3.25.76
+
+  '@tanstack/ai-client@0.4.4':
+    dependencies:
+      '@tanstack/ai': 0.5.0
+
+  '@tanstack/ai-openai@0.5.0(@tanstack/ai@0.5.0)(ws@8.19.0)(zod@3.25.76)':
+    dependencies:
+      '@tanstack/ai': 0.5.0
+      openai: 6.22.0(ws@8.19.0)(zod@3.25.76)
+      zod: 3.25.76
+    transitivePeerDependencies:
+      - ws
+
+  '@tanstack/ai-react@0.5.3(@tanstack/ai@0.5.0)(@types/react@19.2.13)(react@19.2.4)':
+    dependencies:
+      '@tanstack/ai': 0.5.0
+      '@tanstack/ai-client': 0.4.4
+      '@types/react': 19.2.13
+      react: 19.2.4
+
+  '@tanstack/ai@0.5.0':
+    dependencies:
+      '@tanstack/devtools-event-client': 0.4.0
+      partial-json: 0.1.7
+
   '@tanstack/db-ivm@0.1.17(typescript@5.9.3)':
     dependencies:
       fractional-indexing: 3.2.0
@@ -10867,6 +10972,11 @@ snapshots:
 
   json-parse-even-better-errors@2.3.1: {}
 
+  json-schema-to-ts@3.1.1:
+    dependencies:
+      '@babel/runtime': 7.28.6
+      ts-algebra: 2.0.0
+
   json-schema-traverse@0.4.1: {}
 
   json-schema-traverse@1.0.0: {}
@@ -11270,6 +11380,11 @@ snapshots:
     dependencies:
       mimic-fn: 4.0.0
 
+  openai@6.22.0(ws@8.19.0)(zod@3.25.76):
+    optionalDependencies:
+      ws: 8.19.0
+      zod: 3.25.76
+
   optionator@0.9.4:
     dependencies:
       deep-is: 0.1.4
@@ -11375,6 +11490,8 @@ snapshots:
   parse5@8.0.0:
     dependencies:
       entities: 6.0.1
+
+  partial-json@0.1.7: {}
 
   path-exists@4.0.0: {}
 
@@ -12149,6 +12266,8 @@ snapshots:
   tree-kill@1.2.2: {}
 
   triple-beam@1.4.1: {}
+
+  ts-algebra@2.0.0: {}
 
   ts-api-utils@2.4.0(typescript@5.9.3):
     dependencies:

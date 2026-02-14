@@ -35,7 +35,8 @@
     "next": "Næste",
     "previous": "Forrige",
     "loadMore": "Indlæs flere",
-    "openMenu": "Åbn menu"
+    "openMenu": "Åbn menu",
+    "optional": "valgfri"
   },
   "theme": {
     "light": "Lys",
@@ -62,7 +63,117 @@
       "transactions": "Transaktioner",
       "categories": "Kategorier",
       "projects": "Projekter",
-      "team": "Team"
+      "team": "Team",
+      "settings": "Indstillinger"
+    },
+    "secondary": {
+      "settings": "Indstillinger",
+      "help": "Hjælp",
+      "search": "Søg"
+    }
+  },
+  "ai": {
+    "search": {
+      "title": "AI-søgning",
+      "description": "Spørg assistenten eller hop til en sektion.",
+      "placeholder": "Søg i dashboardet...",
+      "providerAuto": "Automatisk udbyder",
+      "cta": "Søg",
+      "searching": "Søger...",
+      "shortcut": "⌘K / Ctrl+K",
+      "offline": "Du er offline. Søgning er ikke tilgængelig.",
+      "error": "Vi kunne ikke gennemføre søgningen.",
+      "resultsTitle": "Oversigt",
+      "empty": "Ingen AI-oversigt endnu. Stil et spørgsmål for at starte.",
+      "suggestions": "Foreslåede destinationer"
+    },
+    "chat": {
+      "title": "AI-hjælp",
+      "description": "Spørg om dashboardet, arbejdsgange eller data.",
+      "placeholder": "Skriv dit spørgsmål...",
+      "send": "Send",
+      "typing": "AI skriver...",
+      "offline": "Du er offline. Opret forbindelse for at sende beskeder.",
+      "error": "Vi kunne ikke nå AI-tjenesten.",
+      "empty": "Start samtalen med et spørgsmål.",
+      "providers": "Udbyderstatus"
+    }
+  },
+  "settings": {
+    "title": "Indstillinger",
+    "description": "Administrer dine dashboard-præferencer og applikationsindstillinger.",
+    "language": {
+      "title": "Sprog",
+      "description": "Vælg dit foretrukne visningssprog. Ændringer træder i kraft med det samme."
+    },
+    "theme": {
+      "title": "Tema",
+      "description": "Vælg dit foretrukne farveskema til grænsefladen."
+    },
+    "devtools": {
+      "title": "Udviklerværktøjer",
+      "description": "Vis eller skjul TanStack DevTools i grænsefladen.",
+      "show": "Vis DevTools",
+      "showDescription": "Vis TanStack DevTools-panelet til fejlfinding."
+    },
+    "actions": {
+      "save": "Gem Ændringer",
+      "reset": "Gendan Standarder",
+      "saving": "Gemmer..."
+    },
+    "messages": {
+      "saved": "Indstillingerne er gemt.",
+      "reset": "Indstillinger gendannet til standarder.",
+      "error": "Kunne ikke gemme indstillinger. Prøv igen."
+    },
+    "ai": {
+      "title": "AI Konfiguration",
+      "description": "Konfigurer parametre for AI-tjenesten, herunder base-URL, adgangstoken og endpoints.",
+      "sections": {
+        "connection": "Forbindelsesdetaljer",
+        "parameters": "Modelparametre",
+        "endpoints": "Endpoint-konfiguration"
+      },
+      "tabs": {
+        "system": "System",
+        "ai": "AI"
+      },
+      "providers": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "lm-studio": "LM Studio"
+      },
+      "fields": {
+        "provider": "AI-udbyder",
+        "baseUrl": "Base-URL",
+        "port": "Port",
+        "token": "Adgangstoken (valgfrit)",
+        "apiKey": "API-nøgle",
+        "model": "Model-ID",
+        "temperature": "Temperatur",
+        "maxTokens": "Max Tokens",
+        "topP": "Top P",
+        "frequencyPenalty": "Frekvensstraf",
+        "presencePenalty": "Tilstedeværelsesstraf",
+        "chatEndpoint": "Chat-endpoint",
+        "modelsEndpoint": "Model-endpoint",
+        "loadEndpoint": "Indlæs-endpoint",
+        "downloadEndpoint": "Download-endpoint",
+        "timeout": "Timeout (ms)",
+        "additionalParams": "Yderligere parametre (JSON)"
+      },
+      "actions": {
+        "save": "Gem konfiguration",
+        "reset": "Gendan standardindstillinger",
+        "test": "Test forbindelse",
+        "confirmReset": "Er du sikker på, at du vil nulstille AI-konfigurationen til standardværdierne?"
+      },
+      "messages": {
+        "saved": "AI-konfigurationen er gemt.",
+        "reset": "AI-konfigurationen er nulstillet.",
+        "testSuccess": "Forbindelse til AI-tjenesten oprettet.",
+        "testError": "Kunne ikke oprette forbindelse til AI-tjenesten."
+      }
     }
   },
   "dashboard": {

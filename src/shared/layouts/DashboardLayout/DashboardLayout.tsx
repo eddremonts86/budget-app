@@ -1,5 +1,6 @@
 import { useAuth } from '@clerk/tanstack-react-start'
-import { Outlet, redirect } from '@tanstack/react-router'
+import { Outlet, redirect, useLocation } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
   Breadcrumb,
@@ -14,7 +15,16 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 
 export function DashboardLayout() {
   const { isLoaded, userId } = useAuth()
+  const { pathname } = useLocation()
+  const { t } = useTranslation()
   const isE2E = import.meta.env.VITE_E2E === 'true'
+
+  // Get current page title from pathname
+  const segments = pathname.split('/').filter(Boolean)
+  const lastSegment = segments[segments.length - 1] || 'dashboard'
+  const pageTitle = t(`sidebar.main.${lastSegment}`, {
+    defaultValue: lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1),
+  })
 
   if (!isE2E && isLoaded && !userId) {
     throw redirect({
@@ -33,7 +43,7 @@ export function DashboardLayout() {
   return (
     <SidebarProvider>
       <AppSidebar />
-      <SidebarInset>
+      <SidebarInset className="flex flex-col h-screen overflow-hidden">
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
           <div className="flex items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
@@ -41,19 +51,31 @@ export function DashboardLayout() {
             <Breadcrumb>
               <BreadcrumbList>
                 <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">Dashboard</BreadcrumbLink>
+                  <BreadcrumbLink href="/dashboard">{t('sidebar.main.dashboard')}</BreadcrumbLink>
                 </BreadcrumbItem>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Overview</BreadcrumbPage>
-                </BreadcrumbItem>
+                {segments.length > 1 && (
+                  <>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                )}
+                {segments.length === 1 && segments[0] === 'dashboard' && (
+                  <>
+                    <BreadcrumbSeparator className="hidden md:block" />
+                    <BreadcrumbItem>
+                      <BreadcrumbPage>Overview</BreadcrumbPage>
+                    </BreadcrumbItem>
+                  </>
+                )}
               </BreadcrumbList>
             </Breadcrumb>
           </div>
         </header>
-        <main className="flex flex-1 flex-col gap-4 p-4 pt-0">
+        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4 pt-0">
           <Outlet />
-        </main>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   )

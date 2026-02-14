@@ -33,7 +33,20 @@ const resources = {
   },
 }
 
+const shouldIgnoreI18nLog = (args: unknown[]) =>
+  args.some((arg) => typeof arg === 'string' && arg.includes('locize.com'))
+
+const i18nLogger = {
+  type: 'logger' as const,
+  log: (...args: unknown[]) => {
+    if (shouldIgnoreI18nLog(args)) return
+  },
+  warn: () => {},
+  error: () => {},
+}
+
 i18n
+  .use(i18nLogger)
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({

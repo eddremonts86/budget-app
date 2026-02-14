@@ -35,7 +35,8 @@
     "next": "Next",
     "previous": "Previous",
     "loadMore": "Load More",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "optional": "optional"
   },
   "theme": {
     "light": "Light",
@@ -62,7 +63,117 @@
       "transactions": "Transactions",
       "categories": "Categories",
       "projects": "Projects",
-      "team": "Team"
+      "team": "Team",
+      "settings": "Settings"
+    },
+    "secondary": {
+      "settings": "Settings",
+      "help": "Get Help",
+      "search": "Search"
+    }
+  },
+  "ai": {
+    "search": {
+      "title": "AI Search",
+      "description": "Ask the assistant or jump to a section.",
+      "placeholder": "Search the dashboard...",
+      "providerAuto": "Auto provider",
+      "cta": "Search",
+      "searching": "Searching...",
+      "shortcut": "⌘K / Ctrl+K",
+      "offline": "You're offline. Search is unavailable.",
+      "error": "We couldn't complete the search.",
+      "resultsTitle": "Summary",
+      "empty": "No AI summary yet. Ask a question to get started.",
+      "suggestions": "Suggested destinations"
+    },
+    "chat": {
+      "title": "AI Help",
+      "description": "Ask about the dashboard, workflows, or data.",
+      "placeholder": "Type your question...",
+      "send": "Send",
+      "typing": "AI is typing...",
+      "offline": "You're offline. Connect to send messages.",
+      "error": "We couldn't reach the AI service.",
+      "empty": "Start the conversation with a question.",
+      "providers": "Provider status"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your dashboard preferences and application settings.",
+    "language": {
+      "title": "Language",
+      "description": "Select your preferred display language. Changes apply immediately."
+    },
+    "theme": {
+      "title": "Theme",
+      "description": "Choose your preferred color scheme for the interface."
+    },
+    "devtools": {
+      "title": "Developer Tools",
+      "description": "Show or hide TanStack DevTools in the interface.",
+      "show": "Show DevTools",
+      "showDescription": "Display TanStack DevTools panel for debugging."
+    },
+    "actions": {
+      "save": "Save Changes",
+      "reset": "Restore Defaults",
+      "saving": "Saving..."
+    },
+    "messages": {
+      "saved": "Settings saved successfully.",
+      "reset": "Settings restored to defaults.",
+      "error": "Failed to save settings. Please try again."
+    },
+    "ai": {
+      "title": "AI Configuration",
+      "description": "Configure AI service parameters, including base URL, access token, and endpoints.",
+      "sections": {
+        "connection": "Connection Details",
+        "parameters": "Model Parameters",
+        "endpoints": "Endpoints Configuration"
+      },
+      "tabs": {
+        "system": "System",
+        "ai": "AI Configuration"
+      },
+      "providers": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "lm-studio": "LM Studio"
+      },
+      "fields": {
+        "provider": "AI Provider",
+        "baseUrl": "Base URL",
+        "port": "Port",
+        "token": "Access Token (optional)",
+        "apiKey": "API Key",
+        "model": "Model ID",
+        "temperature": "Temperature",
+        "maxTokens": "Max Tokens",
+        "topP": "Top P",
+        "frequencyPenalty": "Frequency Penalty",
+        "presencePenalty": "Presence Penalty",
+        "chatEndpoint": "Chat Endpoint",
+        "modelsEndpoint": "Models Endpoint",
+        "loadEndpoint": "Load Endpoint",
+        "downloadEndpoint": "Download Endpoint",
+        "timeout": "Timeout (ms)",
+        "additionalParams": "Additional Params (JSON)"
+      },
+      "actions": {
+        "save": "Save Configuration",
+        "reset": "Restore Defaults",
+        "test": "Test Connection",
+        "confirmReset": "Are you sure you want to reset AI configuration to default values?"
+      },
+      "messages": {
+        "saved": "AI configuration saved successfully.",
+        "reset": "AI configuration reset.",
+        "testSuccess": "Successfully connected to AI service.",
+        "testError": "Failed to connect to AI service."
+      }
     }
   },
   "dashboard": {

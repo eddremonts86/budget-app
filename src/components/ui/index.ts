@@ -117,3 +117,4 @@ export {
   SidebarTrigger,
 } from './sidebar'
 export { ToggleGroup, ToggleGroupItem } from './toggle-group'
+export { Switch } from './switch'

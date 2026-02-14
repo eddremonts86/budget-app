@@ -2,8 +2,29 @@ import * as Sentry from '@sentry/react'
 import { TanStackDevtools } from '@tanstack/react-devtools'
 import { HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
+import { useDevtoolsVisibility } from '@/features/Settings'
 import { AppProviders } from '@/shared/providers'
 import { RootErrorContent } from './-root-components/RootErrorContent'
+
+function DevtoolsWrapper() {
+  const visible = useDevtoolsVisibility()
+
+  if (!visible) return null
+
+  return (
+    <TanStackDevtools
+      config={{
+        position: 'bottom-right',
+      }}
+      plugins={[
+        {
+          name: 'TanStack Router',
+          render: <TanStackRouterDevtoolsPanel />,
+        },
+      ]}
+    />
+  )
+}
 
 export function RootDocument({ children }: { children: React.ReactNode }) {
   return (
@@ -11,20 +32,10 @@ export function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
         <AppProviders>
           {children}
-          <TanStackDevtools
-            config={{
-              position: 'bottom-right',
-            }}
-            plugins={[
-              {
-                name: 'TanStack Router',
-                render: <TanStackRouterDevtoolsPanel />,
-              },
-            ]}
-          />
+          <DevtoolsWrapper />
         </AppProviders>
         <Scripts />
       </body>
@@ -41,7 +52,7 @@ export function RootErrorBoundary({ error }: { error: Error }) {
       <head>
         <HeadContent />
       </head>
-      <body className="min-h-screen bg-background font-sans antialiased">
+      <body className="min-h-screen bg-background font-sans antialiased" suppressHydrationWarning>
         <AppProviders>
           <RootErrorContent error={error} />
         </AppProviders>

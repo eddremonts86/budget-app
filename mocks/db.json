@@ -15083,5 +15083,147 @@
       "date": "2023-06-26",
       "amount": 450
     }
+  ],
+  "ai-config": {
+    "provider": "lm-studio",
+    "baseUrl": "http://192.168.1.107:1234/api/v1",
+    "port": 1234,
+    "token": "",
+    "apiKey": "",
+    "parameters": {
+      "model": "qwen/qwen2.5-coder-14b",
+      "temperature": 0.7,
+      "max_tokens": 2048,
+      "top_p": 1,
+      "frequency_penalty": 0,
+      "presence_penalty": 0
+    },
+    "endpoints": {
+      "chat": "/chat/completions",
+      "models": "/models",
+      "load": "/models/load",
+      "download": "/models/download",
+      "status": "/models/download/status/:job_id"
+    },
+    "timeout": 8000,
+    "additionalParams": ""
+  },
+  "audit-logs": [
+    {
+      "id": "8317e3fc-0860-439e-a67b-f29bf726b23c",
+      "timestamp": "2026-02-14T16:53:06.660Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://localhost:1234/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "qwen/qwen2.5-coder-14b",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "f8694924-239b-4231-8991-a2947b55cd4a",
+      "timestamp": "2026-02-14T16:53:42.814Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.107:1234/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "qwen/qwen2.5-coder-14b",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "7cc6ba31-a6eb-49a6-a950-2cf0446a8360",
+      "timestamp": "2026-02-14T16:54:30.404Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.107:1234/api/v1/",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "qwen/qwen2.5-coder-14b",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "37ca872b-4c98-49a0-8229-16b284625e5f",
+      "timestamp": "2026-02-14T16:54:43.199Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.107:1234/api/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "qwen/qwen2.5-coder-14b",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    }
   ]
 }

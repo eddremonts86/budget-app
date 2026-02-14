@@ -35,7 +35,8 @@
     "next": "Siguiente",
     "previous": "Anterior",
     "loadMore": "Cargar más",
-    "openMenu": "Abrir menú"
+    "openMenu": "Abrir menú",
+    "optional": "opcional"
   },
   "theme": {
     "light": "Claro",
@@ -62,7 +63,117 @@
       "transactions": "Transacciones",
       "categories": "Categorías",
       "projects": "Proyectos",
-      "team": "Equipo"
+      "team": "Equipo",
+      "settings": "Configuración"
+    },
+    "secondary": {
+      "settings": "Configuración",
+      "help": "Ayuda",
+      "search": "Buscar"
+    }
+  },
+  "ai": {
+    "search": {
+      "title": "Búsqueda IA",
+      "description": "Pregunta al asistente o salta a una sección.",
+      "placeholder": "Busca en el dashboard...",
+      "providerAuto": "Proveedor automático",
+      "cta": "Buscar",
+      "searching": "Buscando...",
+      "shortcut": "⌘K / Ctrl+K",
+      "offline": "Estás sin conexión. La búsqueda no está disponible.",
+      "error": "No pudimos completar la búsqueda.",
+      "resultsTitle": "Resumen",
+      "empty": "Aún no hay resumen. Haz una pregunta para empezar.",
+      "suggestions": "Destinos sugeridos"
+    },
+    "chat": {
+      "title": "Ayuda IA",
+      "description": "Pregunta sobre el dashboard, los flujos o los datos.",
+      "placeholder": "Escribe tu pregunta...",
+      "send": "Enviar",
+      "typing": "La IA está escribiendo...",
+      "offline": "Estás sin conexión. Conéctate para enviar mensajes.",
+      "error": "No pudimos contactar el servicio de IA.",
+      "empty": "Inicia la conversación con una pregunta.",
+      "providers": "Estado de proveedores"
+    }
+  },
+  "settings": {
+    "title": "Configuración",
+    "description": "Administra tus preferencias del panel de control y la configuración de la aplicación.",
+    "language": {
+      "title": "Idioma",
+      "description": "Selecciona tu idioma de visualización preferido. Los cambios se aplican inmediatamente."
+    },
+    "theme": {
+      "title": "Tema",
+      "description": "Elige tu esquema de colores preferido para la interfaz."
+    },
+    "devtools": {
+      "title": "Herramientas de Desarrollo",
+      "description": "Mostrar u ocultar las DevTools de TanStack en la interfaz.",
+      "show": "Mostrar DevTools",
+      "showDescription": "Mostrar el panel de DevTools de TanStack para depuración."
+    },
+    "actions": {
+      "save": "Guardar Cambios",
+      "reset": "Restablecer Valores",
+      "saving": "Guardando..."
+    },
+    "messages": {
+      "saved": "Configuración guardada exitosamente.",
+      "reset": "Configuración restablecida a los valores predeterminados.",
+      "error": "Error al guardar la configuración. Inténtalo de nuevo."
+    },
+    "ai": {
+      "title": "Configuración de IA",
+      "description": "Configura los parámetros del servicio de IA, incluyendo la URL base, el token de acceso y los endpoints.",
+      "sections": {
+        "connection": "Detalles de Conexión",
+        "parameters": "Parámetros del Modelo",
+        "endpoints": "Configuración de Endpoints"
+      },
+      "tabs": {
+        "system": "Sistema",
+        "ai": "IA"
+      },
+      "providers": {
+        "openai": "OpenAI",
+        "anthropic": "Anthropic",
+        "lm-studio": "LM Studio"
+      },
+      "fields": {
+        "provider": "Proveedor de IA",
+        "baseUrl": "URL Base",
+        "port": "Puerto",
+        "token": "Token de Acceso (opcional)",
+        "apiKey": "Clave API",
+        "model": "ID del Modelo",
+        "temperature": "Temperatura",
+        "maxTokens": "Máximo de Tokens",
+        "topP": "Top P",
+        "frequencyPenalty": "Penalización de Frecuencia",
+        "presencePenalty": "Penalización de Presencia",
+        "chatEndpoint": "Endpoint de Chat",
+        "modelsEndpoint": "Endpoint de Modelos",
+        "loadEndpoint": "Endpoint de Carga",
+        "downloadEndpoint": "Endpoint de Descarga",
+        "timeout": "Tiempo de espera (ms)",
+        "additionalParams": "Parámetros Adicionales (JSON)"
+      },
+      "actions": {
+        "save": "Guardar Configuración",
+        "reset": "Restablecer Valores",
+        "test": "Probar Conexión",
+        "confirmReset": "¿Estás seguro de que deseas restablecer la configuración de IA a los valores por defecto?"
+      },
+      "messages": {
+        "saved": "Configuración de IA guardada correctamente.",
+        "reset": "Configuración de IA restablecida.",
+        "testSuccess": "Conexión con el servicio de IA establecida correctamente.",
+        "testError": "Error al conectar con el servicio de IA."
+      }
     }
   },
   "dashboard": {
