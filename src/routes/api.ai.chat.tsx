@@ -6,9 +6,13 @@ import { detectBestProvider, getProvider } from '@/shared/lib/ai/server/provider
 
 type ChatRequestBody = {
   messages: Array<{
-    role: 'user' | 'assistant' | 'tool'
+    role: 'user' | 'assistant' | 'tool' | 'system'
     content?: string
-    parts?: Array<{ type: 'text'; content: string }>
+    parts?: Array<
+      | { type: 'text'; content: string }
+      | { type: 'image'; image: string }
+      | { type: 'thinking'; content: string }
+    >
   }>
   conversationId?: string
   providerId?: AiProviderId
@@ -31,22 +35,32 @@ export const Route = createFileRoute('/api/ai/chat')({
 
           const messages = rawMessages
             .map((msg) => {
-              let content = ''
-              if (typeof msg.content === 'string') {
-                content = msg.content
-              } else if (Array.isArray(msg.parts)) {
-                content = msg.parts
-                  .filter((p) => p.type === 'text')
-                  .map((p) => p.content)
-                  .join('\n')
+              const role = (msg.role === 'system' ? 'user' : msg.role) as 'user' | 'assistant' | 'tool'
+              
+              if (Array.isArray(msg.parts)) {
+                const parts = msg.parts.map(p => {
+                  if (p.type === 'text') return { type: 'text' as const, text: p.content }
+                  if (p.type === 'image') return { type: 'image' as const, image: p.image }
+                  return { type: 'text' as const, text: '' }
+                })
+
+                return {
+                  role,
+                  content: msg.parts.map((p) => {
+                    if (p.type === 'text') return p.content
+                    if (p.type === 'image') return `[Image Attached]`
+                    return ''
+                  }).join('\n'),
+                  parts
+                }
               }
 
               return {
-                role: msg.role,
-                content,
+                role,
+                content: msg.content || '',
               }
             })
-            .filter((msg) => msg.content.length > 0)
+            .filter((msg) => (msg.content?.length ?? 0) > 0 || ('parts' in msg && Array.isArray(msg.parts) && msg.parts.length > 0))
           if (messages.length === 0) {
             return new Response(JSON.stringify({ error: 'MISSING_MESSAGES' }), {
               status: 400,
@@ -83,6 +97,17 @@ export const Route = createFileRoute('/api/ai/chat')({
               },
             )
           }
+
+          // Idiomatic Response System: Detect language and force response in that language
+          const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')
+          if (lastUserMessage) {
+            const systemInstruction = `CRITICAL: Detect the language of the user message and respond ONLY in that exact language. Do not mix languages. If the user speaks Spanish, respond in Spanish. If English, respond in English. If Portuguese, respond in Portuguese. The user message is: "${lastUserMessage.content.substring(0, 100)}..."`
+            messages.unshift({
+              role: 'user',
+              content: `[SYSTEM INSTRUCTION: ${systemInstruction}]\n\nUser Message follows:`,
+            })
+          }
+
           const provider = getProvider(providerId)
           if (!provider) {
             return new Response(JSON.stringify({ error: 'UNKNOWN_PROVIDER' }), {

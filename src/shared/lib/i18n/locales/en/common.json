@@ -38,7 +38,8 @@
     "openMenu": "Open menu",
     "optional": "optional",
     "stop": "Stop",
-    "clear": "Clear"
+    "clear": "Clear",
+    "send": "Send"
   },
   "theme": {
     "light": "Light",
@@ -98,12 +99,25 @@
       "offline": "You're offline. Connect to send messages.",
       "error": "We couldn't reach the AI service.",
       "empty": "Start the conversation with a question.",
-      "providers": "Provider status"
+      "providers": "Provider status",
+      "thinking": "Thinking Process",
+      "dropFiles": "Drop files here to upload",
+      "pressEnter": "Press Enter to send",
+      "emptyDescription": "How can I help you today? You can ask about your data, configure the dashboard, or upload an image to analyze.",
+      "assistantName": "Smart Assistant",
+      "supportAssistant": "Support Assistant",
+      "agentInactive": "The assistant is currently unavailable",
+      "retry": "Retry",
+      "connectionError": "Connection error with the server"
     }
   },
   "settings": {
     "title": "Settings",
     "description": "Manage your dashboard preferences and application settings.",
+    "sections": {
+      "interface": "Interface Settings",
+      "development": "Development Tools"
+    },
     "language": {
       "title": "Language",
       "description": "Select your preferred display language. Changes apply immediately."
@@ -161,6 +175,7 @@
         "modelsEndpoint": "Models Endpoint",
         "loadEndpoint": "Load Endpoint",
         "downloadEndpoint": "Download Endpoint",
+        "statusEndpoint": "Status Endpoint",
         "timeout": "Timeout (ms)",
         "additionalParams": "Additional Params (JSON)"
       },

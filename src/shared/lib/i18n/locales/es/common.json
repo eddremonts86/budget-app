@@ -38,7 +38,8 @@
     "openMenu": "Abrir menú",
     "optional": "opcional",
     "stop": "Detener",
-    "clear": "Limpiar"
+    "clear": "Limpiar",
+    "send": "Enviar"
   },
   "theme": {
     "light": "Claro",
@@ -98,12 +99,25 @@
       "offline": "Estás sin conexión. Conéctate para enviar mensajes.",
       "error": "No pudimos contactar el servicio de IA.",
       "empty": "Inicia la conversación con una pregunta.",
-      "providers": "Estado de proveedores"
+      "providers": "Estado de proveedores",
+      "thinking": "Proceso de pensamiento",
+      "dropFiles": "Suelta archivos aquí para subir",
+      "pressEnter": "Presiona Enter para enviar",
+      "emptyDescription": "¿En qué puedo ayudarte hoy? Puedes preguntarme sobre tus datos, configurar el dashboard o subir una imagen para analizar.",
+      "assistantName": "Asistente Inteligente",
+      "supportAssistant": "Asistente de Soporte",
+      "agentInactive": "El asistente no está disponible en este momento",
+      "retry": "Reintentar",
+      "connectionError": "Error de conexión con el servidor"
     }
   },
   "settings": {
     "title": "Configuración",
     "description": "Administra tus preferencias del panel de control y la configuración de la aplicación.",
+    "sections": {
+      "interface": "Configuración de Interfaz",
+      "development": "Herramientas de Desarrollo"
+    },
     "language": {
       "title": "Idioma",
       "description": "Selecciona tu idioma de visualización preferido. Los cambios se aplican inmediatamente."
@@ -161,7 +175,8 @@
         "modelsEndpoint": "Endpoint de Modelos",
         "loadEndpoint": "Endpoint de Carga",
         "downloadEndpoint": "Endpoint de Descarga",
-        "timeout": "Tiempo de espera (ms)",
+        "statusEndpoint": "Endpoint de Estado",
+        "timeout": "Tiempo de Espera (ms)",
         "additionalParams": "Parámetros Adicionales (JSON)"
       },
       "actions": {

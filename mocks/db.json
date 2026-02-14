@@ -15091,7 +15091,7 @@
     "token": "",
     "apiKey": "",
     "parameters": {
-      "model": "qwen/qwen2.5-coder-14b",
+      "model": "zai-org/glm-4.6v-flash",
       "temperature": 0.7,
       "max_tokens": 2048,
       "top_p": 1,
@@ -15208,6 +15208,35 @@
         "apiKey": "",
         "parameters": {
           "model": "qwen/qwen2.5-coder-14b",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "4d42f3e2-33cf-45cc-8a87-9fd97b9e587a",
+      "timestamp": "2026-02-14T20:30:24.071Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.107:1234/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "zai-org/glm-4.6v-flash",
           "temperature": 0.7,
           "max_tokens": 2048,
           "top_p": 1,
