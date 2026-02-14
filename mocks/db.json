@@ -15086,7 +15086,7 @@
   ],
   "ai-config": {
     "provider": "lm-studio",
-    "baseUrl": "http://192.168.1.107:1234/api/v1",
+    "baseUrl": "http://192.168.1.107:1234/v1",
     "port": 1234,
     "token": "",
     "apiKey": "",

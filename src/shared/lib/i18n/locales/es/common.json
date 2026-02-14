@@ -36,7 +36,9 @@
     "previous": "Anterior",
     "loadMore": "Cargar más",
     "openMenu": "Abrir menú",
-    "optional": "opcional"
+    "optional": "opcional",
+    "stop": "Detener",
+    "clear": "Limpiar"
   },
   "theme": {
     "light": "Claro",

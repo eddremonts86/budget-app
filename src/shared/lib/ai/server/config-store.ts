@@ -20,7 +20,7 @@ export async function getActiveAiConfig(): Promise<AiConfigFormData> {
     // Return a default LM Studio config if fetch fails as a fallback
     return {
       provider: 'lm-studio',
-      baseUrl: 'http://192.168.1.107:1234/api/v1',
+      baseUrl: 'http://192.168.1.107:1234/v1',
       port: 1234,
       parameters: {
         model: 'local-model',
@@ -31,7 +31,7 @@ export async function getActiveAiConfig(): Promise<AiConfigFormData> {
         presence_penalty: 0,
       },
       endpoints: {
-        chat: '/chat',
+        chat: '/chat/completions',
         models: '/models',
         load: '/models/load',
         download: '/models/download',

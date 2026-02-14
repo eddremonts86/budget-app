@@ -36,7 +36,9 @@
     "previous": "Previous",
     "loadMore": "Load More",
     "openMenu": "Open menu",
-    "optional": "optional"
+    "optional": "optional",
+    "stop": "Stop",
+    "clear": "Clear"
   },
   "theme": {
     "light": "Light",

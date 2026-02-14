@@ -5,7 +5,11 @@ import { getActiveAiConfig, validateAiConfig } from '@/shared/lib/ai/server/conf
 import { detectBestProvider, getProvider } from '@/shared/lib/ai/server/providers'
 
 type ChatRequestBody = {
-  messages: Array<{ role: 'user' | 'assistant' | 'tool'; content: string }>
+  messages: Array<{
+    role: 'user' | 'assistant' | 'tool'
+    content?: string
+    parts?: Array<{ type: 'text'; content: string }>
+  }>
   conversationId?: string
   providerId?: AiProviderId
   model?: string
@@ -23,15 +27,26 @@ export const Route = createFileRoute('/api/ai/chat')({
       POST: async ({ request }: { request: Request }) => {
         try {
           const body = (await request.json()) as ChatRequestBody
-          const messages = Array.isArray(body.messages)
-            ? body.messages.filter(
-                (message) =>
-                  (message.role === 'user' ||
-                    message.role === 'assistant' ||
-                    message.role === 'tool') &&
-                  typeof message.content === 'string',
-              )
-            : []
+          const rawMessages = Array.isArray(body.messages) ? body.messages : []
+
+          const messages = rawMessages
+            .map((msg) => {
+              let content = ''
+              if (typeof msg.content === 'string') {
+                content = msg.content
+              } else if (Array.isArray(msg.parts)) {
+                content = msg.parts
+                  .filter((p) => p.type === 'text')
+                  .map((p) => p.content)
+                  .join('\n')
+              }
+
+              return {
+                role: msg.role,
+                content,
+              }
+            })
+            .filter((msg) => msg.content.length > 0)
           if (messages.length === 0) {
             return new Response(JSON.stringify({ error: 'MISSING_MESSAGES' }), {
               status: 400,
@@ -77,17 +92,40 @@ export const Route = createFileRoute('/api/ai/chat')({
           }
 
           const adapter = provider.buildAdapter(config)(body.model ?? config.parameters.model)
+
+          interface ExtendedModelOptions {
+            temperature?: number
+            max_tokens?: number
+            top_p?: number
+            frequency_penalty?: number
+            presence_penalty?: number
+            thinking?: {
+              type: 'enabled'
+              budget_tokens: number
+            }
+          }
+
+          const modelOptions: ExtendedModelOptions = {
+            temperature: body.params?.temperature ?? config.parameters.temperature,
+            max_tokens: body.params?.maxTokens ?? config.parameters.max_tokens,
+            top_p: body.params?.topP ?? config.parameters.top_p,
+            frequency_penalty: config.parameters.frequency_penalty,
+            presence_penalty: config.parameters.presence_penalty,
+          }
+
+          // Enable reasoning/thinking for compatible models if supported
+          if (providerId === 'anthropic' || providerId === 'lm-studio') {
+            modelOptions.thinking = {
+              type: 'enabled',
+              budget_tokens: Math.floor((modelOptions.max_tokens ?? 2048) / 2),
+            }
+          }
+
           const stream = chat({
             adapter,
             messages,
             conversationId: body.conversationId,
-            modelOptions: {
-              temperature: body.params?.temperature ?? config.parameters.temperature,
-              max_tokens: body.params?.maxTokens ?? config.parameters.max_tokens,
-              top_p: body.params?.topP ?? config.parameters.top_p,
-              frequency_penalty: config.parameters.frequency_penalty,
-              presence_penalty: config.parameters.presence_penalty,
-            },
+            modelOptions: modelOptions as Parameters<typeof chat>[0]['modelOptions'],
           })
           return toServerSentEventsResponse(stream)
         } catch (error) {

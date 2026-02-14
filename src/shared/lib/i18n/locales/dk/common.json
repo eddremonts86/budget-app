@@ -36,7 +36,9 @@
     "previous": "Forrige",
     "loadMore": "Indlæs flere",
     "openMenu": "Åbn menu",
-    "optional": "valgfri"
+    "optional": "valgfri",
+    "stop": "Stop",
+    "clear": "Ryd"
   },
   "theme": {
     "light": "Lys",

@@ -26,14 +26,24 @@ export const registerProvider = (provider: ProviderRegistryItem) => {
   providerRegistry.set(provider.id, provider)
 }
 
+const normalizeOpenAiBaseUrl = (baseUrl: string) => {
+  let url = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
+  // Si termina en /api/v1, lo normalizamos a /v1 para compatibilidad con el adaptador de OpenAI
+  if (url.endsWith('/api/v1')) {
+    url = url.replace('/api/v1', '/v1')
+  }
+  return url
+}
+
 registerProvider({
   id: 'lm-studio',
   label: 'LM Studio',
   buildAdapter: (config) => {
     const apiKey = config.apiKey || config.token || 'lm-studio'
+    const baseUrl = normalizeOpenAiBaseUrl(config.baseUrl)
     return (model) =>
       createOpenaiChat(model as Parameters<typeof createOpenaiChat>[0], apiKey, {
-        baseURL: config.baseUrl,
+        baseURL: baseUrl,
         defaultHeaders: getProviderHeaders(config),
       })
   },
@@ -44,9 +54,10 @@ registerProvider({
   label: 'OpenAI',
   buildAdapter: (config) => {
     const apiKey = config.apiKey || config.token || ''
+    const baseUrl = normalizeOpenAiBaseUrl(config.baseUrl)
     return (model) =>
       createOpenaiChat(model as Parameters<typeof createOpenaiChat>[0], apiKey, {
-        baseURL: config.baseUrl,
+        baseURL: baseUrl,
         defaultHeaders: getProviderHeaders(config),
       })
   },
@@ -57,9 +68,10 @@ registerProvider({
   label: 'Anthropic',
   buildAdapter: (config) => {
     const apiKey = config.apiKey || config.token || ''
+    const baseUrl = config.baseUrl.endsWith('/') ? config.baseUrl.slice(0, -1) : config.baseUrl
     return (model) =>
       createAnthropicChat(model as Parameters<typeof createAnthropicChat>[0], apiKey, {
-        baseURL: config.baseUrl,
+        baseURL: baseUrl,
         defaultHeaders: getProviderHeaders(config),
       })
   },
@@ -90,11 +102,11 @@ export const getProviderHeaders = (config: AiConfigFormData) => {
 }
 
 const buildProbeUrl = (config: AiConfigFormData) => {
-  try {
-    return new URL(config.endpoints.models, config.baseUrl).toString()
-  } catch {
-    return `${config.baseUrl}${config.endpoints.models}`
-  }
+  const baseUrl = config.baseUrl.endsWith('/') ? config.baseUrl.slice(0, -1) : config.baseUrl
+  const modelsEndpoint = config.endpoints.models.startsWith('/')
+    ? config.endpoints.models
+    : `/${config.endpoints.models}`
+  return `${baseUrl}${modelsEndpoint}`
 }
 
 const withTimeout = async (input: RequestInfo | URL, init: RequestInit, timeoutMs: number) => {
@@ -153,6 +165,12 @@ export const probeProvider = async (config: AiConfigFormData): Promise<AiProvide
       message: error instanceof Error ? error.message : 'UNKNOWN_ERROR',
     }
   }
+}
+
+export const listProviderStatuses = async (): Promise<AiProviderStatus[]> => {
+  const config = await getActiveAiConfig()
+  const status = await probeProvider(config)
+  return [status]
 }
 
 export const detectBestProvider = async () => {

@@ -48,7 +48,12 @@ const formatContent = (content: unknown): string => {
 
 const formatMessage = (message: UIMessage): string => {
   if (!Array.isArray(message.parts)) return ''
-  return message.parts.map((part) => formatContent(part)).join('\n')
+  return message.parts
+    .map((part) => {
+      if (part.type === 'thinking') return `> Thinking: ${part.content}`
+      return formatContent(part)
+    })
+    .join('\n')
 }
 
 const toUiMessage = (message: StoredMessage, index: number): UIMessage => ({
@@ -56,6 +61,26 @@ const toUiMessage = (message: StoredMessage, index: number): UIMessage => ({
   role: message.role,
   parts: [{ type: 'text', content: message.content }],
 })
+
+function MessagePart({ part }: { part: UIMessage['parts'][number] }) {
+  if (part.type === 'thinking') {
+    return (
+      <div className="mb-2 rounded-lg bg-muted/50 p-2 text-xs italic text-muted-foreground border-l-2 border-primary/30">
+        <div className="flex items-center gap-2 mb-1 opacity-70">
+          <span className="animate-pulse">💭</span>
+          <span className="font-semibold uppercase tracking-wider">Thinking...</span>
+        </div>
+        <div className="whitespace-pre-wrap">{part.content}</div>
+      </div>
+    )
+  }
+
+  if (part.type === 'text') {
+    return <div className="whitespace-pre-wrap">{part.content}</div>
+  }
+
+  return null
+}
 
 export function HelpChatPage() {
   const { t } = useTranslation()
@@ -80,10 +105,17 @@ export function HelpChatPage() {
     [],
   )
 
-  const { messages, sendMessage, isLoading } = useChat({
+  const { messages, sendMessage, isLoading, stop, clear } = useChat({
     connection: fetchServerSentEvents('/api/ai/chat'),
     initialMessages,
   })
+
+  const handleClear = () => {
+    if (typeof window !== 'undefined') {
+      window.localStorage.removeItem(storageKey)
+    }
+    clear()
+  }
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return
@@ -125,22 +157,33 @@ export function HelpChatPage() {
         <h2 className="text-3xl font-bold tracking-tight">{t('ai.chat.title')}</h2>
         <p className="text-muted-foreground">{t('ai.chat.description')}</p>
       </div>
-      <div className="flex shrink-0 flex-wrap items-center gap-2 text-xs text-muted-foreground">
-        <span className="font-medium">{t('ai.chat.providers')}</span>
-        {(providerQuery.data?.statuses ?? []).map((status) => (
-          <Badge
-            key={status.id}
-            variant={
-              status.status === 'available'
-                ? 'success'
-                : status.status === 'auth_required'
-                  ? 'warning'
-                  : 'destructive'
-            }
-          >
-            {status.id.toUpperCase()}
-          </Badge>
-        ))}
+      <div className="flex shrink-0 flex-wrap items-center justify-between gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2">
+          <span className="font-medium">{t('ai.chat.providers')}</span>
+          {(providerQuery.data?.statuses ?? []).map((status) => (
+            <Badge
+              key={status.id}
+              variant={
+                status.status === 'available'
+                  ? 'success'
+                  : status.status === 'auth_required'
+                    ? 'warning'
+                    : 'destructive'
+              }
+            >
+              {status.id.toUpperCase()}
+            </Badge>
+          ))}
+        </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 px-2 text-xs text-muted-foreground hover:text-destructive"
+          onClick={handleClear}
+          disabled={messages.length === 0 || isLoading}
+        >
+          {t('common.clear')}
+        </Button>
       </div>
       <div className="flex flex-1 flex-col min-h-0 rounded-xl border bg-card overflow-hidden">
         <div className="flex-1 overflow-y-auto p-4">
@@ -152,18 +195,36 @@ export function HelpChatPage() {
                 <div
                   key={message.id}
                   className={cn(
-                    'max-w-[75%] rounded-2xl px-4 py-2 text-sm leading-relaxed',
+                    'max-w-[85%] rounded-2xl px-4 py-2 text-sm leading-relaxed',
                     message.role === 'user'
                       ? 'ml-auto bg-primary text-primary-foreground'
                       : 'bg-muted text-foreground',
                   )}
                 >
-                  {formatMessage(message)}
+                  {message.parts.map((part, idx) => (
+                    <MessagePart key={`${message.id}-part-${idx}`} part={part} />
+                  ))}
                 </div>
               ))}
               {isLoading && (
-                <div className="max-w-[60%] rounded-2xl bg-muted px-4 py-2 text-sm text-muted-foreground">
-                  {t('ai.chat.typing')}
+                <div className="max-w-[85%] rounded-2xl bg-muted px-4 py-2 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-2">
+                    <div className="flex gap-1">
+                      <span
+                        className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/50"
+                        style={{ animationDelay: '0ms' }}
+                      />
+                      <span
+                        className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/50"
+                        style={{ animationDelay: '150ms' }}
+                      />
+                      <span
+                        className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground/50"
+                        style={{ animationDelay: '300ms' }}
+                      />
+                    </div>
+                    <span>{t('ai.chat.typing')}</span>
+                  </div>
                 </div>
               )}
               <div ref={bottomRef} />
@@ -188,9 +249,16 @@ export function HelpChatPage() {
               <div className="text-xs text-muted-foreground">
                 {!isOnline ? t('ai.chat.offline') : null}
               </div>
-              <Button type="button" onClick={handleSend} disabled={!isOnline || isLoading}>
-                {t('ai.chat.send')}
-              </Button>
+              <div className="flex gap-2">
+                {isLoading && (
+                  <Button type="button" variant="outline" onClick={stop}>
+                    {t('common.stop')}
+                  </Button>
+                )}
+                <Button type="button" onClick={handleSend} disabled={!isOnline || isLoading}>
+                  {t('ai.chat.send')}
+                </Button>
+              </div>
             </div>
           </div>
         </div>

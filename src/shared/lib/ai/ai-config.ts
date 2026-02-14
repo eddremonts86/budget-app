@@ -64,7 +64,7 @@ export const aiConfig: AiConfig = {
       id: 'lm-studio',
       baseUrl: lmstudioBaseUrl,
       endpoints: {
-        chat: '/chat',
+        chat: '/chat/completions',
         models: '/models',
       },
       headers: lmstudioHeaders,
