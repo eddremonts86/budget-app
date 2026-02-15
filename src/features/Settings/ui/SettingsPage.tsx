@@ -43,7 +43,7 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full max-w-6xl space-y-8 py-6">
+    <div className="mx-auto w-full  space-y-8 px-4 py-6 md:px-6">
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">{t('settings.title')}</h2>
         <p className="text-muted-foreground max-w-2xl">{t('settings.description')}</p>
@@ -58,14 +58,14 @@ export function SettingsPage() {
                 className="justify-start gap-2 px-3 py-2 data-[state=active]:bg-muted data-[state=active]:text-primary dark:data-[state=active]:bg-muted/50"
               >
                 <IconAdjustmentsHorizontal className="size-4" />
-                <span className="hidden sm:inline">{t('settings.ai.tabs.system')}</span>
+                <span className="truncate">{t('settings.ai.tabs.system')}</span>
               </TabsTrigger>
               <TabsTrigger
                 value="ai"
                 className="justify-start gap-2 px-3 py-2 data-[state=active]:bg-muted data-[state=active]:text-primary dark:data-[state=active]:bg-muted/50"
               >
                 <IconRobot className="size-4" />
-                <span className="hidden sm:inline">{t('settings.ai.tabs.ai')}</span>
+                <span className="truncate">{t('settings.ai.tabs.ai')}</span>
               </TabsTrigger>
             </TabsList>
           </aside>

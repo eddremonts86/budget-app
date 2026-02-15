@@ -23,7 +23,7 @@ export function LanguageSelector({ value, onChange }: LanguageSelectorProps) {
         {t('language.select')}
       </Label>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger id="language-select" className="w-full max-w-xs">
+        <SelectTrigger id="language-select" className="w-full sm:max-w-xs">
           <SelectValue placeholder={t('language.select')} />
         </SelectTrigger>
         <SelectContent>

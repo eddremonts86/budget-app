@@ -222,7 +222,7 @@ export function AiConfigForm() {
                   <Field>
                     <FieldLabel>{t('settings.ai.fields.provider')}</FieldLabel>
                     <Select value={field.state.value} onValueChange={handleProviderChange}>
-                      <SelectTrigger className="w-full max-w-xs">
+                      <SelectTrigger className="w-full sm:max-w-xs">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -514,7 +514,7 @@ export function AiConfigForm() {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field
                   name="parameters.temperature"
                   children={(field) => (
@@ -591,7 +591,7 @@ export function AiConfigForm() {
                 )}
               />
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <form.Field
                   name="parameters.frequency_penalty"
                   children={(field) => (
@@ -686,19 +686,19 @@ export function AiConfigForm() {
                   {t('settings.ai.actions.save')}
                 </Button>
 
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex flex-col gap-2 sm:flex-row">
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
                     onClick={handleTestConnection}
                     disabled={testMutation.isPending}
-                    className="text-xs"
+                    className="h-auto w-full flex-1 whitespace-normal py-2 text-xs sm:w-auto"
                   >
                     {testMutation.isPending ? (
-                      <IconLoader2 className="size-3 animate-spin mr-1" />
+                      <IconLoader2 className="mr-1 size-3 animate-spin" />
                     ) : (
-                      <IconWorldCheck className="size-3 mr-1" />
+                      <IconWorldCheck className="mr-1 size-3" />
                     )}
                     {t('settings.ai.actions.test')}
                   </Button>
@@ -708,9 +708,9 @@ export function AiConfigForm() {
                     size="sm"
                     onClick={handleReset}
                     disabled={resetMutation.isPending}
-                    className="text-xs text-muted-foreground hover:text-destructive"
+                    className="h-auto w-full flex-1 whitespace-normal py-2 text-xs text-muted-foreground hover:text-destructive sm:w-auto"
                   >
-                    <IconRefresh className="size-3 mr-1" />
+                    <IconRefresh className="mr-1 size-3" />
                     {t('settings.ai.actions.reset')}
                   </Button>
                 </div>

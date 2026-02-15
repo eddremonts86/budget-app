@@ -15086,7 +15086,7 @@
   ],
   "ai-config": {
     "provider": "lm-studio",
-    "baseUrl": "http://192.168.1.107:1234/v1",
+    "baseUrl": "http://192.168.1.140:1234/v1",
     "port": 1234,
     "token": "",
     "apiKey": "",
@@ -15232,6 +15232,35 @@
       "changes": {
         "provider": "lm-studio",
         "baseUrl": "http://192.168.1.107:1234/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "zai-org/glm-4.6v-flash",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "2b58a609-a69b-4d5f-8f78-b9ac9b536407",
+      "timestamp": "2026-02-14T23:14:24.544Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.140:1234/v1",
         "port": 1234,
         "token": "",
         "apiKey": "",
