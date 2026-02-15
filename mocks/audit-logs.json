@@ -1,0 +1,234 @@
+[
+  {
+    "timestamp": "2026-02-15T20:39:04.183Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:39:39.120Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:41:20.507Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:41:47.730Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:49:44.438Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:52:33.973Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:53:06.538Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:55:04.174Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:07:44.849Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:09:19.889Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:09:58.110Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:33:03.042Z",
+    "locale": "en",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:34:08.026Z",
+    "locale": "en",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:37:43.804Z",
+    "locale": "es",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:38:22.247Z",
+    "locale": "es",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:44:53.524Z",
+    "locale": "es",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:01:58.228Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:02:40.712Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:03:24.488Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:03:55.359Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:06:23.267Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:07:54.017Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:08:22.661Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:10:31.080Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:14:28.273Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:14:37.032Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:15:29.330Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:15:30.401Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:45:59.717Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  }
+]

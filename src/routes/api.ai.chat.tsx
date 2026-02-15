@@ -1,8 +1,13 @@
+import { promises as fs } from 'fs'
+import path from 'path'
 import { chat, toServerSentEventsResponse } from '@tanstack/ai'
 import { createFileRoute } from '@tanstack/react-router'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
+import { logAudit } from '@/shared/lib/ai/audit'
 import { getActiveAiConfig, validateAiConfig } from '@/shared/lib/ai/server/config-store'
 import { detectBestProvider, getProvider } from '@/shared/lib/ai/server/providers'
+import { injectDynamicContext } from '@/shared/lib/rag/context'
+import { retrieveContext } from '@/shared/lib/rag/retrieval'
 
 type ChatRequestBody = {
   messages: Array<{
@@ -35,10 +40,13 @@ export const Route = createFileRoute('/api/ai/chat')({
 
           const messages = rawMessages
             .map((msg) => {
-              const role = (msg.role === 'system' ? 'user' : msg.role) as 'user' | 'assistant' | 'tool'
-              
+              const role = (msg.role === 'system' ? 'user' : msg.role) as
+                | 'user'
+                | 'assistant'
+                | 'tool'
+
               if (Array.isArray(msg.parts)) {
-                const parts = msg.parts.map(p => {
+                const parts = msg.parts.map((p) => {
                   if (p.type === 'text') return { type: 'text' as const, text: p.content }
                   if (p.type === 'image') return { type: 'image' as const, image: p.image }
                   return { type: 'text' as const, text: '' }
@@ -46,12 +54,14 @@ export const Route = createFileRoute('/api/ai/chat')({
 
                 return {
                   role,
-                  content: msg.parts.map((p) => {
-                    if (p.type === 'text') return p.content
-                    if (p.type === 'image') return `[Image Attached]`
-                    return ''
-                  }).join('\n'),
-                  parts
+                  content: msg.parts
+                    .map((p) => {
+                      if (p.type === 'text') return p.content
+                      if (p.type === 'image') return `[Image Attached]`
+                      return ''
+                    })
+                    .join('\n'),
+                  parts,
                 }
               }
 
@@ -60,13 +70,51 @@ export const Route = createFileRoute('/api/ai/chat')({
                 content: msg.content || '',
               }
             })
-            .filter((msg) => (msg.content?.length ?? 0) > 0 || ('parts' in msg && Array.isArray(msg.parts) && msg.parts.length > 0))
+            .filter(
+              (msg) =>
+                (msg.content?.length ?? 0) > 0 ||
+                ('parts' in msg && Array.isArray(msg.parts) && msg.parts.length > 0),
+            )
           if (messages.length === 0) {
             return new Response(JSON.stringify({ error: 'MISSING_MESSAGES' }), {
               status: 400,
               headers: { 'Content-Type': 'application/json' },
             })
           }
+
+          const url = new URL(request.url)
+          let locale = url.searchParams.get('locale') || 'en-US'
+
+          // Check for language override
+          try {
+            const settingsPath = path.resolve(process.cwd(), 'mocks/ai-settings.json')
+            const content = await fs.readFile(settingsPath, 'utf-8')
+            const settings = JSON.parse(content)
+            if (settings.forceLocale) {
+              locale = settings.forceLocale
+            }
+          } catch {
+            // ignore
+          }
+
+          // Inject Mandatory Language System Prompt
+          const systemPrompt = `You are a helpful AI assistant.
+
+          Configuration:
+          - Language: ${locale}
+          - Current Time: ${new Date().toISOString()}
+
+          Instructions:
+          1. Respond ONLY in ${locale}.
+          2. Use Markdown for formatting (bold, italics, code blocks).
+          3. Be helpful and direct.`
+
+          // Ensure system message is first
+          messages.unshift({
+            role: 'system',
+            content: systemPrompt,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          } as any)
 
           const config = await getActiveAiConfig()
           const validation = validateAiConfig(config)
@@ -89,24 +137,69 @@ export const Route = createFileRoute('/api/ai/chat')({
           const providerId = body.providerId ?? config.provider ?? detection.provider ?? null
 
           if (!providerId) {
-            return new Response(
-              JSON.stringify({ error: 'NO_PROVIDER', statuses: detection.statuses }),
-              {
-                status: 503,
-                headers: { 'Content-Type': 'application/json' },
-              },
-            )
-          }
-
-          // Idiomatic Response System: Detect language and force response in that language
-          const lastUserMessage = [...messages].reverse().find((m) => m.role === 'user')
-          if (lastUserMessage) {
-            const systemInstruction = `CRITICAL: Detect the language of the user message and respond ONLY in that exact language. Do not mix languages. If the user speaks Spanish, respond in Spanish. If English, respond in English. If Portuguese, respond in Portuguese. The user message is: "${lastUserMessage.content.substring(0, 100)}..."`
-            messages.unshift({
-              role: 'user',
-              content: `[SYSTEM INSTRUCTION: ${systemInstruction}]\n\nUser Message follows:`,
+            return new Response(JSON.stringify({ error: 'NO_PROVIDER_CONFIGURED' }), {
+              status: 400,
+              headers: { 'Content-Type': 'application/json' },
             })
           }
+
+          // RAG & Context Injection
+          const lastUserMessage = messages
+            .slice()
+            .reverse()
+            .find((m) => m.role === 'user')
+
+          if (lastUserMessage && typeof lastUserMessage.content === 'string') {
+            const query = lastUserMessage.content
+
+            // Retrieve RAG Context
+            const ragContext = await retrieveContext(query)
+
+            // Inject Dynamic Context
+            const dynamicContext = await injectDynamicContext(query)
+
+            let contextBlock = ''
+            if (ragContext || dynamicContext) {
+              contextBlock = `\n\n--- TECHNICAL CONTEXT ---\n${ragContext}\n\n--- REAL-TIME DATA ---\n${dynamicContext}\n`
+            }
+
+            // Enhance the LAST user message directly instead of adding a new one
+            // This is more robust for instruction-following models
+            const newContent = contextBlock
+              ? `Context:\n${contextBlock}\n\nQuestion:\n${query}`
+              : query
+
+            lastUserMessage.content = newContent
+
+            // Also update parts if they exist to ensure consistency for adapters that prefer parts
+            if (
+              'parts' in lastUserMessage &&
+              Array.isArray(lastUserMessage.parts) &&
+              lastUserMessage.parts.length > 0 &&
+              contextBlock // Only update parts if context was added
+            ) {
+              const textPart = lastUserMessage.parts.find((p) => p.type === 'text')
+              if (textPart && 'text' in textPart) {
+                textPart.text = newContent
+              } else {
+                // If no text part found (unlikely for a user message with content), add one
+                lastUserMessage.parts.push({ type: 'text', text: newContent })
+              }
+            }
+          }
+
+          // Audit Log
+          logAudit({
+            timestamp: new Date().toISOString(),
+            locale,
+            query: lastUserMessage?.content
+              ? `${String(lastUserMessage.content).slice(0, 50)}...`
+              : 'No content',
+            providerId: providerId || 'unknown',
+            model: body.model ?? config.parameters.model ?? 'unknown',
+            contextLength: 0,
+            // eslint-disable-next-line no-console
+          }).catch((err) => console.error('Audit log failed:', err))
 
           const provider = getProvider(providerId)
           if (!provider) {

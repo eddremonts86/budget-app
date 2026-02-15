@@ -59,8 +59,7 @@ export const aiConfigApi = {
         timeout: 10000, // A bit more for connection test
       })
       return true
-    } catch (error) {
-      console.error(`Connection test failed for ${config.provider}:`, error)
+    } catch {
       return false
     }
   },

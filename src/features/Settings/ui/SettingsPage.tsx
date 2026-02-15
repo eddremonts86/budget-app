@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useSettings } from '../hooks/useSettings'
 import type { Theme } from '../model'
 import { AiConfigForm } from './AiConfigForm'
+import { AiLanguageAudit } from './AiLanguageAudit'
 import { DevtoolsToggle } from './DevtoolsToggle'
 import { LanguageSelector } from './LanguageSelector'
 import { ThemeSelector } from './ThemeSelector'
@@ -135,6 +136,7 @@ export function SettingsPage() {
 
             <TabsContent value="ai" className="mt-0 outline-none">
               <AiConfigForm />
+              <AiLanguageAudit />
             </TabsContent>
           </div>
         </div>

@@ -32,6 +32,14 @@ export default tseslint.config(
   // Project-wide settings
   {
     files: ['**/*.{ts,tsx}'],
+    settings: {
+      'import-x/resolver': {
+        typescript: {
+          alwaysTryTypes: true,
+          project: './tsconfig.json',
+        },
+      },
+    },
     plugins: {
       'react-hooks': reactHooks,
       'react-refresh': reactRefresh,

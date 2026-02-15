@@ -15086,12 +15086,12 @@
   ],
   "ai-config": {
     "provider": "lm-studio",
-    "baseUrl": "http://192.168.1.140:1234/v1",
+    "baseUrl": "http://192.168.1.156:1234/v1",
     "port": 1234,
     "token": "",
     "apiKey": "",
     "parameters": {
-      "model": "zai-org/glm-4.6v-flash",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
       "temperature": 0.7,
       "max_tokens": 2048,
       "top_p": 1,
@@ -15266,6 +15266,93 @@
         "apiKey": "",
         "parameters": {
           "model": "zai-org/glm-4.6v-flash",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "826b80a0-c0d4-4764-aa65-6398b41ec22e",
+      "timestamp": "2026-02-15T19:23:28.798Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.156:1234/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "zai-org/glm-4.6v-flash",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "fa42bd68-e05f-46a2-9806-24abc88f85f1",
+      "timestamp": "2026-02-15T20:17:46.199Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.156:1234/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "zai-org/glm-4.6v-flash",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "/models/load",
+          "download": "/models/download",
+          "status": "/models/download/status/:job_id"
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      }
+    },
+    {
+      "id": "e396cd6a-74c2-4109-940c-deeb7b66c457",
+      "timestamp": "2026-02-15T21:33:50.083Z",
+      "action": "update",
+      "changes": {
+        "provider": "lm-studio",
+        "baseUrl": "http://192.168.1.156:1234/v1",
+        "port": 1234,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "deepseek/deepseek-r1-0528-qwen3-8b",
           "temperature": 0.7,
           "max_tokens": 2048,
           "top_p": 1,

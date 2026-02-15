@@ -17,6 +17,7 @@ import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard
 import { Route as ApiAiStatusRouteImport } from './routes/api.ai.status'
 import { Route as ApiAiSearchRouteImport } from './routes/api.ai.search'
 import { Route as ApiAiChatRouteImport } from './routes/api.ai.chat'
+import { Route as ApiAiAuditRouteImport } from './routes/api.ai.audit'
 import { Route as DashboardDashboardUsersRouteImport } from './routes/_dashboard.dashboard.users'
 import { Route as DashboardDashboardTransactionsRouteImport } from './routes/_dashboard.dashboard.transactions'
 import { Route as DashboardDashboardTodosRouteImport } from './routes/_dashboard.dashboard.todos'
@@ -63,6 +64,11 @@ const ApiAiSearchRoute = ApiAiSearchRouteImport.update({
 const ApiAiChatRoute = ApiAiChatRouteImport.update({
   id: '/api/ai/chat',
   path: '/api/ai/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiAuditRoute = ApiAiAuditRouteImport.update({
+  id: '/api/ai/audit',
+  path: '/api/ai/audit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DashboardDashboardUsersRoute = DashboardDashboardUsersRouteImport.update({
@@ -128,6 +134,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/todos': typeof DashboardDashboardTodosRoute
   '/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/dashboard/users': typeof DashboardDashboardUsersRoute
+  '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
@@ -144,6 +151,7 @@ export interface FileRoutesByTo {
   '/dashboard/todos': typeof DashboardDashboardTodosRoute
   '/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/dashboard/users': typeof DashboardDashboardUsersRoute
+  '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
@@ -164,6 +172,7 @@ export interface FileRoutesById {
   '/_dashboard/dashboard/todos': typeof DashboardDashboardTodosRoute
   '/_dashboard/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/_dashboard/dashboard/users': typeof DashboardDashboardUsersRoute
+  '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
@@ -183,6 +192,7 @@ export interface FileRouteTypes {
     | '/dashboard/todos'
     | '/dashboard/transactions'
     | '/dashboard/users'
+    | '/api/ai/audit'
     | '/api/ai/chat'
     | '/api/ai/search'
     | '/api/ai/status'
@@ -199,6 +209,7 @@ export interface FileRouteTypes {
     | '/dashboard/todos'
     | '/dashboard/transactions'
     | '/dashboard/users'
+    | '/api/ai/audit'
     | '/api/ai/chat'
     | '/api/ai/search'
     | '/api/ai/status'
@@ -218,6 +229,7 @@ export interface FileRouteTypes {
     | '/_dashboard/dashboard/todos'
     | '/_dashboard/dashboard/transactions'
     | '/_dashboard/dashboard/users'
+    | '/api/ai/audit'
     | '/api/ai/chat'
     | '/api/ai/search'
     | '/api/ai/status'
@@ -227,6 +239,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   LandingRoute: typeof LandingRouteWithChildren
+  ApiAiAuditRoute: typeof ApiAiAuditRoute
   ApiAiChatRoute: typeof ApiAiChatRoute
   ApiAiSearchRoute: typeof ApiAiSearchRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
@@ -288,6 +301,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ai/chat'
       fullPath: '/api/ai/chat'
       preLoaderRoute: typeof ApiAiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/audit': {
+      id: '/api/ai/audit'
+      path: '/api/ai/audit'
+      fullPath: '/api/ai/audit'
+      preLoaderRoute: typeof ApiAiAuditRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_dashboard/dashboard/users': {
@@ -411,6 +431,7 @@ const LandingRouteWithChildren =
 const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   LandingRoute: LandingRouteWithChildren,
+  ApiAiAuditRoute: ApiAiAuditRoute,
   ApiAiChatRoute: ApiAiChatRoute,
   ApiAiSearchRoute: ApiAiSearchRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
