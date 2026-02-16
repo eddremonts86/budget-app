@@ -9,6 +9,139 @@ npm install
 npm run dev
 ```
 
+## Run with Docker (one command)
+
+This repository includes a full local stack in Docker Compose:
+
+- App (TanStack Start / Vite) on `http://localhost:3000`
+- Mock API (`json-server`) on `http://localhost:3001`
+- ChromaDB on `http://localhost:8000`
+- LM Studio headless (`llmster`) on `http://localhost:1234`
+
+Start everything:
+
+```bash
+docker compose up --build
+```
+
+Or with pnpm:
+
+```bash
+pnpm docker:up
+```
+
+Full stack + automatic LM Studio model bootstrap:
+
+```bash
+pnpm docker:up:full
+```
+
+Verify all services and endpoints:
+
+```bash
+pnpm docker:check
+```
+
+Reset stack (keep data volumes):
+
+```bash
+pnpm docker:reset
+```
+
+Hard reset stack (remove named volumes, including LM Studio models):
+
+```bash
+pnpm docker:reset:hard
+```
+
+Stop everything:
+
+```bash
+docker compose down
+```
+
+Or with pnpm:
+
+```bash
+pnpm docker:down
+```
+
+### LM Studio first-time setup
+
+The LM Studio container is included, but models are not pre-downloaded.
+After the stack is running, download and load a model once:
+
+```bash
+docker compose exec lmstudio lms get google/gemma-3-1b
+docker compose exec lmstudio lms load google/gemma-3-1b
+```
+
+You can then use `http://localhost:1234/v1` (or `http://lmstudio:1234/v1` inside Docker network) as your OpenAI-compatible base URL.
+
+You can automate first-time model setup with:
+
+```bash
+pnpm docker:ai:init
+```
+
+Inspect LM Studio status/models:
+
+```bash
+pnpm docker:ai:status
+```
+
+Enable server-side CORS in LM Studio (`lms server start --cors`):
+
+```bash
+pnpm docker:ai:cors
+```
+
+Run an AI smoke test against app APIs (provider status + search probe):
+
+```bash
+pnpm docker:ai:smoke
+```
+
+Run an AI chat streaming smoke test (SSE):
+
+```bash
+pnpm docker:ai:smoke:chat
+```
+
+Run full verification (stack + search + chat smoke):
+
+```bash
+pnpm docker:verify
+```
+
+Download + load a specific model:
+
+```bash
+pnpm docker:ai:load
+```
+
+Optional custom model/identifier:
+
+```bash
+LMSTUDIO_MODEL=Qwen/Qwen2.5-Coder-7B-Instruct-GGUF LMSTUDIO_IDENTIFIER=local-model pnpm docker:ai:init
+```
+
+```bash
+LMSTUDIO_MODEL=Qwen/Qwen2.5-Coder-7B-Instruct-GGUF LMSTUDIO_IDENTIFIER=local-model pnpm docker:ai:load
+```
+
+### LM Studio persistence and architecture
+
+- Downloaded models and LM Studio state persist in a Docker volume (`lmstudio_data`).
+- Default platform is `linux/amd64` (compatible on most hosts; Apple Silicon runs it via emulation).
+- If you use a native ARM64 LM Studio image in the future, override `LMSTUDIO_PLATFORM` in your Docker env.
+
+### Troubleshooting
+
+- If AI endpoints fail (`/v1/models`), run `pnpm docker:ai:init` to download/load a model.
+- If you see architecture warnings on Apple Silicon, this is expected with `linux/amd64` images.
+- If a service fails, inspect logs with `pnpm docker:logs`.
+
 # Building For Production
 
 To build this application for production:
@@ -43,6 +176,7 @@ This project follows a feature-based architecture and atomic design principles:
 ## UI Components (shadcn/ui)
 
 The project uses [shadcn/ui](https://ui.shadcn.com/) for its core component library. The following components have been implemented and customized:
+
 - **Button**, **Badge**, **Card**, **Input**, **Textarea**, **Label**, **Select**, **Popover**, **Calendar**, **DatePicker**.
 
 Customizations are handled via Tailwind CSS variables in `src/shared/styles/globals.css` using the OKLCH color space for better perceptual uniformity.

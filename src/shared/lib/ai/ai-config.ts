@@ -45,7 +45,7 @@ const parseHeaderJson = (value?: string) => {
   }
 }
 
-const baseUrl = readEnv('VITE_AI_BASE_URL') ?? 'http://192.168.1.107:1234/v1'
+const baseUrl = readEnv('VITE_AI_BASE_URL') ?? 'http://localhost:1234/v1'
 
 const lmstudioBaseUrl = readEnv('VITE_AI_LMSTUDIO_BASE_URL') ?? baseUrl
 const openaiBaseUrl = readEnv('VITE_AI_OPENAI_BASE_URL') ?? baseUrl

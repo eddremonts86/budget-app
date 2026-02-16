@@ -678,5 +678,117 @@
     "providerId": "lm-studio",
     "model": "default_model",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:27:12.956Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:27:48.587Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:28:15.755Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:31:35.562Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:37:14.662Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:41:03.332Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:44:30.149Z",
+    "locale": "en",
+    "query": "dime cuantas tareas tenemos?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:44:40.637Z",
+    "locale": "en",
+    "query": "Create a new project plan...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:48:47.559Z",
+    "locale": "en",
+    "query": "quien eres?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:49:22.319Z",
+    "locale": "en",
+    "query": "dime la verdad...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:57:15.941Z",
+    "locale": "en",
+    "query": "Create a new project plan...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:57:31.362Z",
+    "locale": "en",
+    "query": "que quiere decir 2?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:58:11.910Z",
+    "locale": "en",
+    "query": "How many users are currently active in Acme Inc.?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:58:38.240Z",
+    "locale": "en",
+    "query": "How many users are in Acme Inc.?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
   }
 ]

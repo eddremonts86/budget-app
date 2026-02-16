@@ -18172,12 +18172,12 @@
   ],
   "ai-config": {
     "provider": "lm-studio",
-    "baseUrl": "http://192.168.1.156:1234/v1",
+    "baseUrl": "http://localhost:1234/v1",
     "port": 1234,
     "token": "",
     "apiKey": "",
     "parameters": {
-      "model": "default_model",
+      "model": "local-model",
       "temperature": 0.7,
       "max_tokens": 2048,
       "top_p": 1,

@@ -64,10 +64,10 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
     },
   },
   'lm-studio': {
-    baseUrl: 'http://192.168.1.107:1234/api/v1',
+    baseUrl: 'http://localhost:1234/v1',
     port: 1234,
     endpoints: {
-      chat: '/chat',
+      chat: '/chat/completions',
       models: '/models',
       load: '/models/load',
       download: '/models/download',

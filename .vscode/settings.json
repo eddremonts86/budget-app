@@ -25,5 +25,6 @@
   "eslint.enable": true,
   "editor.codeActionsOnSave": {
     "source.fixAll.eslint": "explicit"
-  }
+  },
+  "cSpell.words": ["chromadb", "healthcheck", "llmster", "lmstudio", "tanstack"]
 }

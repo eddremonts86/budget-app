@@ -33,6 +33,8 @@ const resources = {
   },
 }
 
+const defaultLocale = import.meta.env.VITE_DEFAULT_LOCALE || 'en'
+
 const shouldIgnoreI18nLog = (args: unknown[]) =>
   args.some((arg) => typeof arg === 'string' && arg.includes('locize.com'))
 
@@ -51,6 +53,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
+    lng: defaultLocale,
     fallbackLng: 'en',
     supportedLngs: supportedLanguages,
     ns: ['common', 'errors'],
@@ -59,7 +62,7 @@ i18n
       escapeValue: false, // React already escapes
     },
     detection: {
-      order: ['localStorage', 'navigator', 'htmlTag'],
+      order: [],
       caches: ['localStorage'],
       lookupLocalStorage: 'i18nextLng',
     },

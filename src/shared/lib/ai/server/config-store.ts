@@ -1,7 +1,12 @@
 import axios from 'axios'
 import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
 
-const API_URL = process.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = process.env.API_URL_INTERNAL || process.env.VITE_API_URL || 'http://localhost:3001'
+const LMSTUDIO_BASE_URL =
+  process.env.AI_BASE_URL_INTERNAL ||
+  process.env.VITE_AI_LMSTUDIO_BASE_URL ||
+  process.env.VITE_AI_BASE_URL
+const LMSTUDIO_MODEL = process.env.AI_LMSTUDIO_MODEL || process.env.LMSTUDIO_IDENTIFIER
 
 /**
  * Fetches the active AI configuration from the database/mock API.
@@ -11,16 +16,27 @@ export async function getActiveAiConfig(): Promise<AiConfigFormData> {
   try {
     const { data } = await axios.get<AiConfigFormData>(`${API_URL}/ai-config`)
 
-    if (!data || !data.provider) {
+    if (!data?.provider) {
       throw new Error('AI_CONFIG_NOT_FOUND')
     }
 
-    return data
+    if (data.provider !== 'lm-studio') {
+      return data
+    }
+
+    return {
+      ...data,
+      baseUrl: LMSTUDIO_BASE_URL || data.baseUrl,
+      parameters: {
+        ...data.parameters,
+        model: LMSTUDIO_MODEL || data.parameters.model,
+      },
+    }
   } catch {
     // Return a default LM Studio config if fetch fails as a fallback
     return {
       provider: 'lm-studio',
-      baseUrl: 'http://192.168.1.107:1234/v1',
+      baseUrl: LMSTUDIO_BASE_URL || 'http://localhost:1234/v1',
       port: 1234,
       parameters: {
         model: 'local-model',
