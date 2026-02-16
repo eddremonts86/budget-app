@@ -18023,6 +18023,30 @@
       "createdBy": "",
       "createdAt": "2026-02-16T14:13:36.187Z",
       "updatedAt": "2026-02-16T14:13:36.187Z"
+    },
+    {
+      "id": "d3c4",
+      "title": "Ensenar a Eline sobre FT",
+      "description": "Instrucciones y materiales para la sesión de entrenamiento",
+      "status": "pending",
+      "priority": "high",
+      "dueDate": "2026-02-23",
+      "assignedTo": "12345",
+      "createdBy": "",
+      "createdAt": "2026-02-16T15:44:44.940Z",
+      "updatedAt": "2026-02-16T15:44:44.940Z"
+    },
+    {
+      "id": "bd97",
+      "title": "Nueva tarea",
+      "description": "Tarea sin descripción en este momento",
+      "status": "pending",
+      "priority": "high",
+      "dueDate": "2026-04-16",
+      "assignedTo": "user-12345",
+      "createdBy": "",
+      "createdAt": "2026-02-16T17:05:59.678Z",
+      "updatedAt": "2026-02-16T17:05:59.678Z"
     }
   ],
   "users": [
@@ -18048,6 +18072,14 @@
       "email": "antonio.migel@gmail.com",
       "role": "user",
       "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=Antonio Miguel",
+      "createdAt": "2026-02-16"
+    },
+    {
+      "id": "dd43",
+      "name": "Eline",
+      "email": "eline_storm@hotmail.com",
+      "role": "user",
+      "avatar": "https://api.dicebear.com/7.x/avataaars/svg?seed=eline",
       "createdAt": "2026-02-16"
     }
   ],

@@ -14,27 +14,29 @@ import { Link } from '@tanstack/react-router'
 import {
   AlertCircle,
   ChevronRight,
-  Cpu,
   Loader2,
   Navigation,
+  Pin,
+  PinOff,
   Search,
   Sparkles,
   WifiOff,
+  X,
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { NavMain } from '@/components/nav-main'
 import { NavSecondary } from '@/components/nav-secondary'
 import { NavUser } from '@/components/nav-user'
 import {
   Badge,
   Button,
-  Input,
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
   Sheet,
   SheetContent,
   SheetDescription,
@@ -50,19 +52,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
-import type { AiProviderStatus } from '@/shared/lib/ai/server/providers'
-import { useTQMutation, useTQuery } from '@/shared/lib/query'
+import { useTQMutation } from '@/shared/lib/query'
 import { cn } from '@/shared/utils'
 
 type SearchResultPayload = {
   result: unknown
   providerId?: AiProviderId
-}
-
-type ProviderQueryData = {
-  statuses: AiProviderStatus[]
-  provider: AiProviderId | null
 }
 
 const extractSearchText = (result: unknown) => {
@@ -80,10 +77,9 @@ const extractSearchText = (result: unknown) => {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
-  const [isSearchOpen, setIsSearchOpen] = React.useState(false)
+  const { isOpen: isSearchOpen, setIsOpen: setIsSearchOpen, isPinned, setIsPinned } = useAiSearch()
   const [searchQuery, setSearchQuery] = React.useState('')
   const [searchResult, setSearchResult] = React.useState<SearchResultPayload | null>(null)
-  const [selectedProvider, setSelectedProvider] = React.useState<'auto' | AiProviderId>('auto')
   const [isOnline, setIsOnline] = React.useState(true)
 
   React.useEffect(() => {
@@ -112,19 +108,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     }
     window.addEventListener('keydown', handleKeydown)
     return () => window.removeEventListener('keydown', handleKeydown)
-  }, [])
-
-  const providerQuery = useTQuery(
-    ['ai', 'status'],
-    async () => {
-      const res = await fetch('/api/ai/status')
-      if (!res.ok) {
-        throw new Error('STATUS_FAILED')
-      }
-      return (await res.json()) as ProviderQueryData
-    },
-    { cache: 'realtime', refetchInterval: 20000 },
-  )
+  }, [setIsSearchOpen])
 
   const searchMutation = useTQMutation<
     SearchResultPayload,
@@ -152,71 +136,86 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   )
   const navMain = [
     {
-      title: t('sidebar.main.dashboard'),
-      url: '/dashboard',
-      icon: IconDashboard,
+      title: 'Dashboard',
+      items: [
+        {
+          title: t('sidebar.secondary.search'),
+          icon: IconSearch,
+          onClick: () => setIsSearchOpen(true),
+        },
+        {
+          title: t('sidebar.main.dashboard'),
+          url: '/dashboard',
+          icon: IconDashboard,
+        },
+        {
+          title: t('sidebar.main.analytics'),
+          url: '/dashboard/analytics',
+          icon: IconChartBar,
+        },
+      ],
     },
     {
-      title: t('sidebar.main.todos'),
-      url: '/dashboard/todos',
-      icon: IconListDetails,
+      title: 'General',
+      items: [
+        {
+          title: t('sidebar.main.transactions'),
+          url: '/dashboard/transactions',
+          icon: IconReport,
+        },
+        {
+          title: t('sidebar.main.projects'),
+          url: '/dashboard/projects',
+          icon: IconFolder,
+        },
+      ],
     },
     {
-      title: t('sidebar.main.analytics'),
-      url: '/dashboard/analytics',
-      icon: IconChartBar,
+      title: 'Management',
+      items: [
+        {
+          title: t('sidebar.main.todos'),
+          url: '/dashboard/todos',
+          icon: IconListDetails,
+        },
+        {
+          title: t('sidebar.main.categories'),
+          url: '/dashboard/categories',
+          icon: IconListDetails,
+        },
+      ],
     },
     {
-      title: t('sidebar.main.projects'),
-      url: '/dashboard/projects',
-      icon: IconFolder,
-    },
-    {
-      title: t('sidebar.main.team'),
-      url: '/dashboard/team',
-      icon: IconUsers,
-    },
-    {
-      title: t('sidebar.main.users'),
-      url: '/dashboard/users',
-      icon: IconUsers,
-    },
-    {
-      title: t('sidebar.main.categories'),
-      url: '/dashboard/categories',
-      icon: IconListDetails,
-    },
-    {
-      title: t('sidebar.main.transactions'),
-      url: '/dashboard/transactions',
-      icon: IconReport,
-    },
-    {
-      title: t('sidebar.main.settings'),
-      url: '/dashboard/settings',
-      icon: IconSettings,
+      title: 'Administration',
+      items: [
+        {
+          title: t('sidebar.main.users'),
+          url: '/dashboard/users',
+          icon: IconUsers,
+        },
+        {
+          title: t('sidebar.main.team'),
+          url: '/dashboard/team',
+          icon: IconUsers,
+        },
+        {
+          title: t('sidebar.main.settings'),
+          url: '/dashboard/settings',
+          icon: IconSettings,
+        },
+      ],
     },
   ]
   const navSecondary = [
-    {
-      title: t('sidebar.secondary.settings'),
-      url: '/dashboard/settings',
-      icon: IconSettings,
-    },
     {
       title: t('sidebar.secondary.help'),
       url: '/dashboard/help',
       icon: IconHelp,
     },
-    {
-      title: t('sidebar.secondary.search'),
-      icon: IconSearch,
-      onClick: () => setIsSearchOpen(true),
-    },
   ]
 
   const searchableLinks = [
-    ...navMain,
+    ...navMain.flatMap((section) => section.items).filter((item) => item.url),
     {
       title: t('sidebar.secondary.help'),
       url: '/dashboard/help',
@@ -242,13 +241,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={navMain} />
+        <NavMain sections={navMain} />
         <NavSecondary items={navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
       <Sheet
+        modal={!isPinned}
         open={isSearchOpen}
         onOpenChange={(open) => {
           setIsSearchOpen(open)
@@ -257,90 +257,94 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           }
         }}
       >
-        <SheetContent className="flex flex-col gap-0 p-0 sm:max-w-[560px]">
-          <SheetHeader className="border-b p-6">
-            <SheetTitle className="flex items-center gap-2">
-              <Search className="size-5 text-primary" />
-              {t('ai.search.title')}
-            </SheetTitle>
-            <SheetDescription>{t('ai.search.description')}</SheetDescription>
+        <SheetContent
+          overlay={!isPinned}
+          showCloseButton={false}
+          className={cn(
+            'flex flex-col gap-0 p-0 sm:max-w-[560px]',
+            isPinned && 'shadow-none border-l',
+          )}
+          onInteractOutside={(e) => {
+            if (isPinned) e.preventDefault()
+          }}
+        >
+          <SheetHeader className="border-b px-6 h-16 flex flex-row items-center justify-between space-y-0">
+            <div className="flex items-center gap-2">
+              <SheetTitle className="flex items-center gap-2">
+                <Search className="size-5 text-primary" />
+                {t('ai.search.title')}
+              </SheetTitle>
+              <SheetDescription className="hidden sm:inline-block ml-2">
+                {t('ai.search.description')}
+              </SheetDescription>
+            </div>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={() => setIsPinned(!isPinned)}
+                title={isPinned ? 'Unpin' : 'Pin to right'}
+              >
+                {isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-8 w-8 text-muted-foreground hover:text-foreground"
+                onClick={() => setIsSearchOpen(false)}
+                title="Close"
+              >
+                <X className="size-4" />
+              </Button>
+            </div>
           </SheetHeader>
 
           <div className="flex flex-1 flex-col overflow-hidden">
             <form
-              className="flex shrink-0 flex-col gap-4 border-b bg-muted/20 p-6"
+              className="flex shrink-0 flex-col gap-4 border-b p-4 bg-background"
               onSubmit={(event) => {
                 event.preventDefault()
                 const trimmed = searchQuery.trim()
                 if (!trimmed || !isOnline || searchMutation.isPending) return
                 searchMutation.mutate({
                   query: trimmed,
-                  providerId: selectedProvider === 'auto' ? undefined : selectedProvider,
                 })
               }}
             >
               <div className="flex flex-col gap-3">
-                <div className="relative">
-                  <Input
+                <InputGroup>
+                  <InputGroupAddon>
+                    <Search className="size-4 text-muted-foreground" />
+                  </InputGroupAddon>
+                  <InputGroupInput
                     value={searchQuery}
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder={t('ai.search.placeholder')}
-                    className="h-11 pl-10 pr-24"
+                    className="h-10"
                     autoFocus
                   />
-                  <Search className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-                  <div className="absolute right-3 top-1/2 flex -translate-y-1/2 items-center gap-1.5">
+                  <InputGroupAddon align="inline-end">
                     <kbd className="pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">
                       <span className="text-xs">⌘</span>K
                     </kbd>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3">
-                  <Select
-                    value={selectedProvider}
-                    onValueChange={(value) => setSelectedProvider(value as 'auto' | AiProviderId)}
-                  >
-                    <SelectTrigger className="h-9 w-[160px] bg-background">
-                      <div className="flex items-center gap-2">
-                        <Cpu className="size-3.5 text-muted-foreground" />
-                        <SelectValue placeholder={t('ai.search.providerAuto')} />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="auto">{t('ai.search.providerAuto')}</SelectItem>
-                      {(providerQuery.data?.statuses ?? []).map((status) => (
-                        <SelectItem key={status.id} value={status.id}>
-                          <span className="flex items-center gap-2">
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                'h-2 w-2 rounded-full p-0',
-                                status.available ? 'bg-green-500' : 'bg-red-500',
-                              )}
-                            />
-                            {status.id.toUpperCase()}
-                          </span>
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-
-                  <Button
-                    type="submit"
-                    className="h-9 px-6"
-                    disabled={!isOnline || searchMutation.isPending || !searchQuery.trim()}
-                  >
-                    {searchMutation.isPending ? (
-                      <>
-                        <Loader2 className="mr-2 size-4 animate-spin" />
-                        {t('ai.search.searching')}
-                      </>
-                    ) : (
-                      t('ai.search.cta')
-                    )}
-                  </Button>
-                </div>
+                  </InputGroupAddon>
+                  <InputGroupAddon align="inline-end" className="p-0">
+                    <InputGroupButton
+                      type="submit"
+                      disabled={!isOnline || searchMutation.isPending || !searchQuery.trim()}
+                      variant="default"
+                      className="h-full w-20 rounded-l-none border-l-0 hover:bg-primary/90 transition-all shadow-none"
+                      title={t('ai.search.cta')}
+                    >
+                      {searchMutation.isPending ? (
+                        <Loader2 className="size-4 animate-spin" />
+                      ) : (
+                        <span className="font-medium">{t('ai.search.cta')}</span>
+                      )}
+                    </InputGroupButton>
+                  </InputGroupAddon>
+                </InputGroup>
 
                 {!isOnline && (
                   <div className="flex items-center gap-2 text-xs text-destructive">
@@ -372,11 +376,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                       </Badge>
                     )}
                   </div>
-                  <div className="rounded-xl border bg-card p-4 shadow-sm">
+                  <div className="bg-transparent p-0">
                     <div className="text-sm leading-relaxed text-foreground/90">
                       {searchResult?.result ? (
-                        <div className="prose prose-sm dark:prose-invert">
-                          {extractSearchText(searchResult.result)}
+                        <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4">
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {extractSearchText(searchResult.result)}
+                          </ReactMarkdown>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center justify-center py-4 text-center">
@@ -389,41 +395,41 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     </div>
                   </div>
                 </section>
-
-                {/* Suggestions Section */}
-                <section>
-                  <h3 className="mb-4 text-sm font-semibold flex items-center gap-2">
-                    <Navigation className="size-4 text-primary" />
-                    {t('ai.search.suggestions')}
-                  </h3>
-                  <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-                    {(filteredLinks.length ? filteredLinks : searchableLinks)
-                      .slice(0, 8)
-                      .map((item) => (
-                        <Link
-                          key={item.title}
-                          to={item.url as '/dashboard'}
-                          onClick={() => setIsSearchOpen(false)}
-                          className="group flex items-center gap-3 rounded-lg border bg-background p-3 transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm"
-                        >
-                          <div className="flex size-8 items-center justify-center rounded-md bg-muted transition-colors group-hover:bg-primary/10 group-hover:text-primary">
-                            <item.icon className="size-4" />
-                          </div>
-                          <div className="flex flex-col overflow-hidden">
-                            <span className="truncate text-sm font-medium group-hover:text-primary">
-                              {item.title}
-                            </span>
-                            <span className="truncate text-[10px] text-muted-foreground">
-                              {item.url}
-                            </span>
-                          </div>
-                          <ChevronRight className="ml-auto size-3 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
-                        </Link>
-                      ))}
-                  </div>
-                </section>
               </div>
             </div>
+
+            {/* Suggestions Section */}
+            <section className="border-t bg-muted/20 p-6">
+              <h3 className="mb-4 text-sm font-semibold flex items-center gap-2">
+                <Navigation className="size-4 text-primary" />
+                {t('ai.search.suggestions')}
+              </h3>
+              <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                {(filteredLinks.length ? filteredLinks : searchableLinks)
+                  .slice(0, 4)
+                  .map((item) => (
+                    <Link
+                      key={item.title}
+                      to={item.url as '/dashboard'}
+                      onClick={() => setIsSearchOpen(false)}
+                      className="group flex items-center gap-3 rounded-lg border bg-background p-3 transition-all hover:border-primary/50 hover:bg-primary/5 hover:shadow-sm"
+                    >
+                      <div className="flex size-8 items-center justify-center rounded-md bg-muted transition-colors group-hover:bg-primary/10 group-hover:text-primary">
+                        <item.icon className="size-4" />
+                      </div>
+                      <div className="flex flex-col overflow-hidden">
+                        <span className="truncate text-sm font-medium group-hover:text-primary">
+                          {item.title}
+                        </span>
+                        <span className="truncate text-[10px] text-muted-foreground">
+                          {item.url}
+                        </span>
+                      </div>
+                      <ChevronRight className="ml-auto size-3 opacity-0 transition-all group-hover:opacity-100 group-hover:translate-x-1" />
+                    </Link>
+                  ))}
+              </div>
+            </section>
           </div>
         </SheetContent>
       </Sheet>

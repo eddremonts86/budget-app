@@ -598,5 +598,85 @@
     "providerId": "lm-studio",
     "model": "default_model",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:44:35.591Z",
+    "locale": "en",
+    "query": "crea una tarea que se llame \"Ensenar a Eline sobre...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:46:27.796Z",
+    "locale": "en",
+    "query": "crea un usuario que se llame Eline con correo \"eli...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:46:53.218Z",
+    "locale": "en",
+    "query": "cuantas tareas tengo pendientes...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:47:46.290Z",
+    "locale": "en",
+    "query": "crea un plan para completar almenos 100 tareas en ...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:48:17.953Z",
+    "locale": "en",
+    "query": "noooooo!!! crea un plan para terminar las tareas q...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:48:47.677Z",
+    "locale": "en",
+    "query": "dende puedo cambiar el thema de la app...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:03:46.859Z",
+    "locale": "en",
+    "query": "cuantas tareas tengo endientes...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:05:28.568Z",
+    "locale": "en",
+    "query": "creame una tarea que se llame \"Nueva tarea\" con ri...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:06:46.858Z",
+    "locale": "en",
+    "query": "cual es el mejor footbolista del la histria...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:07:18.198Z",
+    "locale": "en",
+    "query": "donde cambio el thema de la app?...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
   }
 ]

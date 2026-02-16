@@ -12,7 +12,34 @@ import {
 } from '@/components/ui/breadcrumb'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { AiSearchProvider } from '@/features/Ai/context/AiSearchContext'
+import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
+import { cn } from '@/shared/utils'
+
+function DashboardContent({ children }: { children: React.ReactNode }) {
+  const { isPinned, isOpen } = useAiSearch()
+
+  return (
+    <SidebarInset className="flex flex-col h-screen overflow-hidden">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+        <div className="flex items-center gap-2 px-4">
+          <SidebarTrigger className="-ml-1" />
+          <Separator orientation="vertical" className="mr-2 h-4" />
+          <Breadcrumb>{children}</Breadcrumb>
+        </div>
+      </header>
+      <div
+        className={cn(
+          'flex-1 flex flex-col min-h-0 overflow-y-auto p-4 transition-all duration-300 ease-in-out',
+          isPinned && isOpen && 'mr-[560px]',
+        )}
+      >
+        <Outlet />
+      </div>
+    </SidebarInset>
+  )
+}
 
 export function DashboardLayout() {
   const { isLoaded, userId } = useAuth()
@@ -45,42 +72,33 @@ export function DashboardLayout() {
   }
 
   return (
-    <SidebarProvider>
-      <AppSidebar />
-      <SidebarInset className="flex flex-col h-screen overflow-hidden">
-        <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator orientation="vertical" className="mr-2 h-4" />
-            <Breadcrumb>
-              <BreadcrumbList>
-                <BreadcrumbItem className="hidden md:block">
-                  <BreadcrumbLink href="/dashboard">{t('sidebar.main.dashboard')}</BreadcrumbLink>
+    <AiSearchProvider>
+      <SidebarProvider>
+        <AppSidebar />
+        <DashboardContent>
+          <BreadcrumbList>
+            <BreadcrumbItem className="hidden md:block">
+              <BreadcrumbLink href="/dashboard">{t('sidebar.main.dashboard')}</BreadcrumbLink>
+            </BreadcrumbItem>
+            {segments.length > 1 && (
+              <>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
                 </BreadcrumbItem>
-                {segments.length > 1 && (
-                  <>
-                    <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </>
-                )}
-                {segments.length === 1 && segments[0] === 'dashboard' && (
-                  <>
-                    <BreadcrumbSeparator className="hidden md:block" />
-                    <BreadcrumbItem>
-                      <BreadcrumbPage>Overview</BreadcrumbPage>
-                    </BreadcrumbItem>
-                  </>
-                )}
-              </BreadcrumbList>
-            </Breadcrumb>
-          </div>
-        </header>
-        <div className="flex-1 flex flex-col min-h-0 overflow-y-auto p-4">
-          <Outlet />
-        </div>
-      </SidebarInset>
-    </SidebarProvider>
+              </>
+            )}
+            {segments.length === 1 && segments[0] === 'dashboard' && (
+              <>
+                <BreadcrumbSeparator className="hidden md:block" />
+                <BreadcrumbItem>
+                  <BreadcrumbPage>Overview</BreadcrumbPage>
+                </BreadcrumbItem>
+              </>
+            )}
+          </BreadcrumbList>
+        </DashboardContent>
+      </SidebarProvider>
+    </AiSearchProvider>
   )
 }

@@ -3,6 +3,7 @@ import { createFileRoute } from '@tanstack/react-router'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { getActiveAiConfig, validateAiConfig } from '@/shared/lib/ai/server/config-store'
 import { detectBestProvider, getProvider } from '@/shared/lib/ai/server/providers'
+import appKnowledge from '../../mocks/app-knowledge.json'
 
 type SearchRequestBody = {
   query: string
@@ -68,9 +69,18 @@ export const Route = createFileRoute('/api/ai/search')({
 
           const adapter = provider.buildAdapter(config)(body.model ?? config.parameters.model)
           const prompt = [
-            'You are a concise assistant that answers app search queries.',
-            'Respond with a helpful short summary and up to five suggested navigation targets if relevant.',
-            `Query: ${body.query}`,
+            'You are a helpful assistant for the "Acme Inc. Dashboard".',
+            'Here is the application knowledge base:',
+            JSON.stringify(appKnowledge, null, 2),
+            '-------------------',
+            `User Query: ${body.query}`,
+            '-------------------',
+            'Instructions:',
+            '1. Answer the user query based on the knowledge base.',
+            '2. Provide a concise summary.',
+            '3. Use Markdown formatting (bold, lists, etc.) to make it readable.',
+            '4. If the user asks about navigation, suggest where to go.',
+            "5. If the information is not in the knowledge base, say you don't know but offer to search for general terms.",
           ].join('\n')
           const result = await chat({
             adapter,
