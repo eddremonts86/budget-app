@@ -1,0 +1,77 @@
+{
+  "activeProvider": "lm-studio",
+  "providers": {
+    "openai": {
+      "provider": "openai",
+      "baseUrl": "https://api.openai.com/v1",
+      "port": 443,
+      "token": "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",
+      "apiKey": "",
+      "parameters": {
+        "model": "gpt-4o",
+        "temperature": 0.7,
+        "max_tokens": 2048,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0
+      },
+      "endpoints": {
+        "chat": "/chat/completions",
+        "models": "/models",
+        "load": "",
+        "download": "",
+        "status": ""
+      },
+      "timeout": 8000,
+      "additionalParams": ""
+    },
+    "anthropic": {
+      "provider": "anthropic",
+      "baseUrl": "https://api.anthropic.com/v1",
+      "port": 443,
+      "token": "",
+      "apiKey": "",
+      "parameters": {
+        "model": "claude-3-5-sonnet-20240620",
+        "temperature": 0.7,
+        "max_tokens": 2048,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0
+      },
+      "endpoints": {
+        "chat": "/messages",
+        "models": "/models",
+        "load": "",
+        "download": "",
+        "status": ""
+      },
+      "timeout": 30000,
+      "additionalParams": ""
+    },
+    "lm-studio": {
+      "provider": "lm-studio",
+      "baseUrl": "http://localhost:1234/v1",
+      "port": 1234,
+      "token": "",
+      "apiKey": "",
+      "parameters": {
+        "model": "local-model",
+        "temperature": 0.7,
+        "max_tokens": 2048,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0
+      },
+      "endpoints": {
+        "chat": "/chat/completions",
+        "models": "/models",
+        "load": "/models/load",
+        "download": "/models/download",
+        "status": "/models/download/status/:job_id"
+      },
+      "timeout": 30000,
+      "additionalParams": ""
+    }
+  }
+}

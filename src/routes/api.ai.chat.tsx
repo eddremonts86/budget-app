@@ -2,15 +2,6 @@ import { chat, toServerSentEventsResponse } from '@tanstack/ai'
 import { createFileRoute } from '@tanstack/react-router'
 import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
-import { logAudit } from '@/shared/lib/ai/audit'
-import { getActiveAiConfig, validateAiConfig } from '@/shared/lib/ai/server/config-store'
-import {
-  detectBestProvider,
-  getProvider,
-  getProviderHeaders,
-} from '@/shared/lib/ai/server/providers'
-import { injectDynamicContext } from '@/shared/lib/rag/context'
-import { retrieveContext } from '@/shared/lib/rag/retrieval'
 
 type ChatRequestBody = {
   messages: Array<{
@@ -49,6 +40,7 @@ type ChatMessage = {
 type ExtendedModelOptions = {
   temperature?: number
   max_tokens?: number
+  max_output_tokens?: number
   top_p?: number
   frequency_penalty?: number
   presence_penalty?: number
@@ -135,6 +127,11 @@ const injectReferenceContext = async (messages: ChatMessage[], locale: string) =
   const query = findLastUserQuery(messages)
   if (!query) return ''
 
+  const [{ retrieveContext }, { injectDynamicContext }] = await Promise.all([
+    import('@/shared/lib/rag/retrieval'),
+    import('@/shared/lib/rag/context'),
+  ])
+
   const ragContext = await retrieveContext(query)
   const dynamicContext = await injectDynamicContext(query, locale)
 
@@ -169,12 +166,19 @@ const buildModelOptions = (
   body: ChatRequestBody,
   config: AiConfigFormData,
 ): ExtendedModelOptions => {
+  const maxTokens = body.params?.maxTokens ?? config.parameters.max_tokens
+
   const options: ExtendedModelOptions = {
     temperature: body.params?.temperature ?? config.parameters.temperature,
-    max_tokens: body.params?.maxTokens ?? config.parameters.max_tokens,
     top_p: body.params?.topP ?? config.parameters.top_p,
     frequency_penalty: config.parameters.frequency_penalty,
     presence_penalty: config.parameters.presence_penalty,
+  }
+
+  if (providerId === 'openai') {
+    options.max_output_tokens = maxTokens
+  } else {
+    options.max_tokens = maxTokens
   }
 
   if (providerId === 'anthropic') {
@@ -446,6 +450,8 @@ const streamLmStudioChat = async (
   body: ChatRequestBody,
   messages: ChatMessage[],
 ) => {
+  const { getProviderHeaders } = await import('@/shared/lib/ai/server/providers')
+
   const baseUrl = normalizeBaseUrl(config.baseUrl)
   const chatEndpoint = config.endpoints.chat.startsWith('/')
     ? config.endpoints.chat
@@ -485,105 +491,117 @@ const streamLmStudioChat = async (
   return toServerSentEventsResponse(stream)
 }
 
+export const handleChatPost = async ({ request }: { request: Request }) => {
+  try {
+    const [
+      { logAudit },
+      { getActiveAiConfig, validateAiConfig },
+      { detectBestProvider, getProvider },
+    ] = await Promise.all([
+      import('@/shared/lib/ai/audit'),
+      import('@/shared/lib/ai/server/config-store'),
+      import('@/shared/lib/ai/server/providers'),
+    ])
+
+    const body = (await request.json()) as ChatRequestBody
+    const rawMessages = Array.isArray(body.messages) ? body.messages : []
+
+    const messages = normalizeIncomingMessages(rawMessages)
+    if (messages.length === 0) {
+      return new Response(JSON.stringify({ error: 'MISSING_MESSAGES' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const url = new URL(request.url)
+    const locale = url.searchParams.get('locale') || 'en-US'
+
+    const systemPrompt = buildSystemPrompt(resolveLanguageName(locale))
+
+    // Ensure system message is first
+    messages.unshift({
+      role: 'user',
+      content: systemPrompt,
+    })
+
+    const config = await getActiveAiConfig()
+    const validation = validateAiConfig(config)
+
+    if (!validation.valid) {
+      return new Response(
+        JSON.stringify({
+          error: 'CONFIG_INVALID',
+          message: validation.error,
+          provider: config.provider,
+        }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
+    const detection = await detectBestProvider()
+    const providerId = body.providerId ?? config.provider ?? detection.provider ?? null
+
+    if (!providerId) {
+      return new Response(JSON.stringify({ error: 'NO_PROVIDER_CONFIGURED' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    const lastUserQuery = await injectReferenceContext(messages, locale)
+
+    // Audit Log
+    logAudit({
+      timestamp: new Date().toISOString(),
+      locale,
+      query: lastUserQuery ? `${String(lastUserQuery).slice(0, 50)}...` : 'No content',
+      providerId: providerId || 'unknown',
+      model: body.model ?? config.parameters.model ?? 'unknown',
+      contextLength: 0,
+      // eslint-disable-next-line no-console
+    }).catch((err) => console.error('Audit log failed:', err))
+
+    const provider = getProvider(providerId)
+    if (!provider) {
+      return new Response(JSON.stringify({ error: 'UNKNOWN_PROVIDER' }), {
+        status: 400,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    if (providerId === 'lm-studio') {
+      return await streamLmStudioChat(config, body, messages)
+    }
+
+    const adapter = provider.buildAdapter(config)(body.model ?? config.parameters.model)
+
+    const modelOptions = buildModelOptions(providerId, body, config)
+
+    const stream = chat({
+      adapter,
+      messages,
+      conversationId: body.conversationId,
+      modelOptions: modelOptions as Parameters<typeof chat>[0]['modelOptions'],
+    })
+    return toServerSentEventsResponse(stream)
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'UNKNOWN_ERROR'
+    return new Response(JSON.stringify({ error: message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+}
+
 export const Route = createFileRoute('/api/ai/chat')({
   component: () => null,
   server: {
     handlers: {
-      POST: async ({ request }: { request: Request }) => {
-        try {
-          const body = (await request.json()) as ChatRequestBody
-          const rawMessages = Array.isArray(body.messages) ? body.messages : []
-
-          const messages = normalizeIncomingMessages(rawMessages)
-          if (messages.length === 0) {
-            return new Response(JSON.stringify({ error: 'MISSING_MESSAGES' }), {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            })
-          }
-
-          const url = new URL(request.url)
-          const locale = url.searchParams.get('locale') || 'en-US'
-
-          const systemPrompt = buildSystemPrompt(resolveLanguageName(locale))
-
-          // Ensure system message is first
-          messages.unshift({
-            role: 'user',
-            content: systemPrompt,
-          })
-
-          const config = await getActiveAiConfig()
-          const validation = validateAiConfig(config)
-
-          if (!validation.valid) {
-            return new Response(
-              JSON.stringify({
-                error: 'CONFIG_INVALID',
-                message: validation.error,
-                provider: config.provider,
-              }),
-              {
-                status: 400,
-                headers: { 'Content-Type': 'application/json' },
-              },
-            )
-          }
-
-          const detection = await detectBestProvider()
-          const providerId = body.providerId ?? config.provider ?? detection.provider ?? null
-
-          if (!providerId) {
-            return new Response(JSON.stringify({ error: 'NO_PROVIDER_CONFIGURED' }), {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            })
-          }
-
-          const lastUserQuery = await injectReferenceContext(messages, locale)
-
-          // Audit Log
-          logAudit({
-            timestamp: new Date().toISOString(),
-            locale,
-            query: lastUserQuery ? `${String(lastUserQuery).slice(0, 50)}...` : 'No content',
-            providerId: providerId || 'unknown',
-            model: body.model ?? config.parameters.model ?? 'unknown',
-            contextLength: 0,
-            // eslint-disable-next-line no-console
-          }).catch((err) => console.error('Audit log failed:', err))
-
-          const provider = getProvider(providerId)
-          if (!provider) {
-            return new Response(JSON.stringify({ error: 'UNKNOWN_PROVIDER' }), {
-              status: 400,
-              headers: { 'Content-Type': 'application/json' },
-            })
-          }
-
-          if (providerId === 'lm-studio') {
-            return await streamLmStudioChat(config, body, messages)
-          }
-
-          const adapter = provider.buildAdapter(config)(body.model ?? config.parameters.model)
-
-          const modelOptions = buildModelOptions(providerId, body, config)
-
-          const stream = chat({
-            adapter,
-            messages,
-            conversationId: body.conversationId,
-            modelOptions: modelOptions as Parameters<typeof chat>[0]['modelOptions'],
-          })
-          return toServerSentEventsResponse(stream)
-        } catch (error) {
-          const message = error instanceof Error ? error.message : 'UNKNOWN_ERROR'
-          return new Response(JSON.stringify({ error: message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          })
-        }
-      },
+      POST: handleChatPost,
     },
   },
 })

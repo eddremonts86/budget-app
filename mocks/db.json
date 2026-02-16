@@ -18170,43 +18170,939 @@
       "amount": 450
     }
   ],
-  "ai-config": {
-    "provider": "lm-studio",
-    "baseUrl": "http://localhost:1234/v1",
-    "port": 1234,
-    "token": "",
-    "apiKey": "",
-    "parameters": {
-      "model": "local-model",
-      "temperature": 0.7,
-      "max_tokens": 2048,
-      "top_p": 1,
-      "frequency_penalty": 0,
-      "presence_penalty": 0
-    },
-    "endpoints": {
-      "chat": "/chat/completions",
-      "models": "/models",
-      "load": "/models/load",
-      "download": "/models/download",
-      "status": "/models/download/status/:job_id"
-    },
-    "timeout": 8000,
-    "additionalParams": ""
-  },
   "audit-logs": [
     {
-      "id": "8317e3fc-0860-439e-a67b-f29bf726b23c",
-      "timestamp": "2026-02-14T16:53:06.660Z",
-      "action": "update",
-      "changes": {
+      "timestamp": "2026-02-15T20:39:04.183Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T20:39:39.120Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T20:41:20.507Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T20:41:47.730Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T20:49:44.438Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T20:52:33.973Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T20:53:06.538Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T20:55:04.174Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:07:44.849Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:09:19.889Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:09:58.110Z",
+      "locale": "en-US",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:33:03.042Z",
+      "locale": "en",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "zai-org/glm-4.6v-flash",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:34:08.026Z",
+      "locale": "en",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:37:43.804Z",
+      "locale": "es",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:38:22.247Z",
+      "locale": "es",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T21:44:53.524Z",
+      "locale": "es",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:01:58.228Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:02:40.712Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:03:24.488Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:03:55.359Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:06:23.267Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:07:54.017Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:08:22.661Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:10:31.080Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:14:28.273Z",
+      "locale": "es-ES",
+      "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:14:37.032Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:15:29.330Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:15:30.401Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-15T22:45:59.717Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T11:29:57.332Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T11:31:30.025Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T11:31:38.039Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T11:31:56.796Z",
+      "locale": "es-ES",
+      "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T11:54:18.195Z",
+      "locale": "en",
+      "query": "Cuanto es 10 + 30?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T11:58:38.864Z",
+      "locale": "es",
+      "query": "Cuanto es 10 + 30?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:01:20.996Z",
+      "locale": "es",
+      "query": "Cuanto es 10 + 30?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:01:32.653Z",
+      "locale": "es",
+      "query": "Cuanto es 10 + 30?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:02:14.824Z",
+      "locale": "es",
+      "query": "Cuanto es 10 + 30?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:02:47.705Z",
+      "locale": "es",
+      "query": "Cuanto es 10 + 30?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:03:22.239Z",
+      "locale": "es",
+      "query": "Cuantas tareas faltan por resolverse?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:05:17.083Z",
+      "locale": "es",
+      "query": "Cuantas tareas faltan por resolverse?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:05:53.564Z",
+      "locale": "es",
+      "query": "Donde puedo ver la lista de usuarios de la aplicac...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:07:28.776Z",
+      "locale": "es",
+      "query": "cual cres que es la tarea mas importante que debo ...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:08:22.364Z",
+      "locale": "es",
+      "query": "ok dame la lista de las 7 mas importantes para hoy...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:10:49.121Z",
+      "locale": "es",
+      "query": "pero Configurar CI/CD en GitHub Actions luce como ...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:12:59.456Z",
+      "locale": "es",
+      "query": "si voy a /api/tasks puedo ver que Configurar CI/CD...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:14:25.008Z",
+      "locale": "es",
+      "query": "ok dame la lista de las 7 mas importantes para hoy...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:15:43.405Z",
+      "locale": "es",
+      "query": "ok dame la lista de las 7 mas importantes para hoy...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:17:01.930Z",
+      "locale": "es",
+      "query": "mepuedes decir cual es el metal mas caro?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:36:14.118Z",
+      "locale": "en",
+      "query": "Donde puedo ver y gestionar las tareas? Dame la UR...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:36:24.100Z",
+      "locale": "en",
+      "query": "Cuantas tareas pendientes hay y donde puedo verlas...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:36:32.966Z",
+      "locale": "en",
+      "query": "Cuantos usuarios hay registrados? Quienes son? Don...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:36:44.517Z",
+      "locale": "en",
+      "query": "Como cambio el idioma de la aplicacion a español?...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:36:55.981Z",
+      "locale": "en",
+      "query": "Dame un resumen de todas las secciones de la aplic...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T12:47:32.675Z",
+      "locale": "es",
+      "query": "Crea una tarea llamada \"Revisar documentación del ...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:07:12.243Z",
+      "locale": "es",
+      "query": "Actualiza la tarea \"Configurar TanStack Start\" y p...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:09:57.612Z",
+      "locale": "en",
+      "query": "la tarea Revisar documentación del API debes actua...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:12:05.039Z",
+      "locale": "es",
+      "query": "Marca la tarea \"Configurar TanStack Start\" como co...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:17:23.849Z",
+      "locale": "en",
+      "query": "actualizala a pendiente, asignala a edd remonts y ...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:28:42.319Z",
+      "locale": "en",
+      "query": "actualizala a pendiente, asignala a edd remonts y ...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:29:01.151Z",
+      "locale": "en",
+      "query": "actualizala a pendiente, asignala a edd remonts y ...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:46:44.090Z",
+      "locale": "es",
+      "query": "crea una tarea llamada \"Revisar documentación\" con...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T13:47:35.529Z",
+      "locale": "es",
+      "query": "actualiza la tarea \"Configurar TanStack Start\" a e...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T14:10:56.198Z",
+      "locale": "es",
+      "query": "lee este fichero y crea las tareas que contiene\n[F...",
+      "providerId": "lm-studio",
+      "model": "qwen/qwen3-vl-4b",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T14:53:12.004Z",
+      "locale": "en",
+      "query": "hola...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T14:53:27.475Z",
+      "locale": "en",
+      "query": "que??...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:00:31.115Z",
+      "locale": "en",
+      "query": "ok, como puedo crear un usuario?...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:02:08.261Z",
+      "locale": "en",
+      "query": "pero no deberia poder decir el nombre y email del ...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:03:43.314Z",
+      "locale": "en",
+      "query": "ok entonces ei te digo que crees un usuario de nom...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:05:07.634Z",
+      "locale": "en",
+      "query": "crea una tarea que se llame \"crear usuarios automa...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:06:54.773Z",
+      "locale": "en",
+      "query": "crea un usuario que se llame \"Antonio Miguel\" con ...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:08:05.043Z",
+      "locale": "en",
+      "query": "que hay aqui\n[Image Attached]...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:16:08.701Z",
+      "locale": "en",
+      "query": "kjawbdaks\n[Image Attached]...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:29:44.722Z",
+      "locale": "es",
+      "query": "Create a new project plan...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:32:00.763Z",
+      "locale": "en",
+      "query": "Create a new project plan...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:44:35.591Z",
+      "locale": "en",
+      "query": "crea una tarea que se llame \"Ensenar a Eline sobre...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:46:27.796Z",
+      "locale": "en",
+      "query": "crea un usuario que se llame Eline con correo \"eli...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:46:53.218Z",
+      "locale": "en",
+      "query": "cuantas tareas tengo pendientes...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:47:46.290Z",
+      "locale": "en",
+      "query": "crea un plan para completar almenos 100 tareas en ...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:48:17.953Z",
+      "locale": "en",
+      "query": "noooooo!!! crea un plan para terminar las tareas q...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T15:48:47.677Z",
+      "locale": "en",
+      "query": "dende puedo cambiar el thema de la app...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T17:03:46.859Z",
+      "locale": "en",
+      "query": "cuantas tareas tengo endientes...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T17:05:28.568Z",
+      "locale": "en",
+      "query": "creame una tarea que se llame \"Nueva tarea\" con ri...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T17:06:46.858Z",
+      "locale": "en",
+      "query": "cual es el mejor footbolista del la histria...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T17:07:18.198Z",
+      "locale": "en",
+      "query": "donde cambio el thema de la app?...",
+      "providerId": "lm-studio",
+      "model": "default_model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:27:12.956Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:27:48.587Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:28:15.755Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:31:35.562Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:37:14.662Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:41:03.332Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:44:30.149Z",
+      "locale": "en",
+      "query": "dime cuantas tareas tenemos?...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:44:40.637Z",
+      "locale": "en",
+      "query": "Create a new project plan...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:48:47.559Z",
+      "locale": "en",
+      "query": "quien eres?...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:49:22.319Z",
+      "locale": "en",
+      "query": "dime la verdad...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:57:15.941Z",
+      "locale": "en",
+      "query": "Create a new project plan...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:57:31.362Z",
+      "locale": "en",
+      "query": "que quiere decir 2?...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:58:11.910Z",
+      "locale": "en",
+      "query": "How many users are currently active in Acme Inc.?...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T19:58:38.240Z",
+      "locale": "en",
+      "query": "How many users are in Acme Inc.?...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:18:57.266Z",
+      "locale": "en",
+      "query": "que dia es hoy ?...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:19:14.054Z",
+      "locale": "en",
+      "query": "que dia es hoy ?...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:20:42.688Z",
+      "locale": "en",
+      "query": "ewfde...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:31:59.323Z",
+      "locale": "en",
+      "query": "que modelo eres ?...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:32:18.049Z",
+      "locale": "en",
+      "query": "que?...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:33:31.496Z",
+      "locale": "en",
+      "query": "que hay?...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:47:38.358Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:48:10.805Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:48:53.838Z",
+      "locale": "es-ES",
+      "query": "Responde solo con una frase corta en español confi...",
+      "providerId": "openai",
+      "model": "gpt-4o",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T20:50:31.000Z",
+      "locale": "es-ES",
+      "query": "responde breve...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    }
+  ],
+  "ai-config-store": {
+    "activeProvider": "lm-studio",
+    "providers": {
+      "openai": {
+        "provider": "openai",
+        "baseUrl": "https://api.openai.com/v1",
+        "port": 443,
+        "token": "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",
+        "apiKey": "",
+        "parameters": {
+          "model": "gpt-4o",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/chat/completions",
+          "models": "/models",
+          "load": "",
+          "download": "",
+          "status": ""
+        },
+        "timeout": 8000,
+        "additionalParams": ""
+      },
+      "anthropic": {
+        "provider": "anthropic",
+        "baseUrl": "https://api.anthropic.com/v1",
+        "port": 443,
+        "token": "",
+        "apiKey": "",
+        "parameters": {
+          "model": "claude-3-5-sonnet-20240620",
+          "temperature": 0.7,
+          "max_tokens": 2048,
+          "top_p": 1,
+          "frequency_penalty": 0,
+          "presence_penalty": 0
+        },
+        "endpoints": {
+          "chat": "/messages",
+          "models": "/models",
+          "load": "",
+          "download": "",
+          "status": ""
+        },
+        "timeout": 30000,
+        "additionalParams": ""
+      },
+      "lm-studio": {
         "provider": "lm-studio",
         "baseUrl": "http://localhost:1234/v1",
         "port": 1234,
         "token": "",
         "apiKey": "",
         "parameters": {
-          "model": "qwen/qwen2.5-coder-14b",
+          "model": "local-model",
           "temperature": 0.7,
           "max_tokens": 2048,
           "top_p": 1,
@@ -18220,415 +19116,492 @@
           "download": "/models/download",
           "status": "/models/download/status/:job_id"
         },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "f8694924-239b-4231-8991-a2947b55cd4a",
-      "timestamp": "2026-02-14T16:53:42.814Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.107:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen2.5-coder-14b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "7cc6ba31-a6eb-49a6-a950-2cf0446a8360",
-      "timestamp": "2026-02-14T16:54:30.404Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.107:1234/api/v1/",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen2.5-coder-14b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "37ca872b-4c98-49a0-8229-16b284625e5f",
-      "timestamp": "2026-02-14T16:54:43.199Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.107:1234/api/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen2.5-coder-14b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "4d42f3e2-33cf-45cc-8a87-9fd97b9e587a",
-      "timestamp": "2026-02-14T20:30:24.071Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.107:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "zai-org/glm-4.6v-flash",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "2b58a609-a69b-4d5f-8f78-b9ac9b536407",
-      "timestamp": "2026-02-14T23:14:24.544Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.140:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "zai-org/glm-4.6v-flash",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "826b80a0-c0d4-4764-aa65-6398b41ec22e",
-      "timestamp": "2026-02-15T19:23:28.798Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "zai-org/glm-4.6v-flash",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "fa42bd68-e05f-46a2-9806-24abc88f85f1",
-      "timestamp": "2026-02-15T20:17:46.199Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "zai-org/glm-4.6v-flash",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "e396cd6a-74c2-4109-940c-deeb7b66c457",
-      "timestamp": "2026-02-15T21:33:50.083Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "deepseek/deepseek-r1-0528-qwen3-8b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "bd44debe-882e-4638-bce6-4a0c05a103c5",
-      "timestamp": "2026-02-16T11:31:09.821Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen3-vl-4b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "e4cd62d5-36c0-44f1-b020-8d0c35cd90af",
-      "timestamp": "2026-02-16T11:31:10.997Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen3-vl-4b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "5621c56d-4b2a-4754-a9b5-48e22b73dba8",
-      "timestamp": "2026-02-16T11:31:11.540Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen3-vl-4b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "08b3352a-0607-40b1-964f-0c29108001c8",
-      "timestamp": "2026-02-16T11:31:11.693Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen3-vl-4b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "f91d98ee-2218-4e02-94fe-442aa78ab59d",
-      "timestamp": "2026-02-16T11:31:11.875Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "qwen/qwen3-vl-4b",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
-        "additionalParams": ""
-      }
-    },
-    {
-      "id": "aafffce5-6050-4704-b22e-dd712359f9f5",
-      "timestamp": "2026-02-16T14:44:35.999Z",
-      "action": "update",
-      "changes": {
-        "provider": "lm-studio",
-        "baseUrl": "http://192.168.1.156:1234/v1",
-        "port": 1234,
-        "token": "",
-        "apiKey": "",
-        "parameters": {
-          "model": "default_model",
-          "temperature": 0.7,
-          "max_tokens": 2048,
-          "top_p": 1,
-          "frequency_penalty": 0,
-          "presence_penalty": 0
-        },
-        "endpoints": {
-          "chat": "/chat/completions",
-          "models": "/models",
-          "load": "/models/load",
-          "download": "/models/download",
-          "status": "/models/download/status/:job_id"
-        },
-        "timeout": 8000,
+        "timeout": 30000,
         "additionalParams": ""
       }
     }
-  ]
+  },
+  "ai-settings": {
+    "forceLocale": "es-ES"
+  },
+  "app-knowledge": {
+    "application": {
+      "name": "Acme Inc. Dashboard",
+      "description": "Aplicación de gestión empresarial con panel de control, gestión de tareas, usuarios, analíticas, proyectos, equipo, categorías, transacciones, configuración y asistente de IA.",
+      "baseUrl": "/dashboard",
+      "landingUrl": "/",
+      "languages": [
+        "English (en)",
+        "Spanish (es)",
+        "Danish (dk)"
+      ],
+      "auth": "Clerk (autenticación requerida para el dashboard)"
+    },
+    "navigation": {
+      "main": [
+        {
+          "label": "Dashboard",
+          "labelEs": "Panel de Control",
+          "url": "/dashboard",
+          "icon": "IconDashboard",
+          "description": "Página principal con estadísticas generales: ingresos totales, suscripciones, ventas y usuarios activos. También muestra una tabla de transacciones recientes.",
+          "descriptionEs": "Página principal con estadísticas generales: ingresos totales, suscripciones, ventas y usuarios activos. También muestra una tabla de transacciones recientes."
+        },
+        {
+          "label": "Todos",
+          "labelEs": "Tareas",
+          "url": "/dashboard/todos",
+          "icon": "IconListDetails",
+          "description": "Full CRUD task manager with data table, infinite scroll, status/priority badges. Create, edit, and delete tasks.",
+          "descriptionEs": "Gestor de tareas completo con tabla de datos, scroll infinito, badges de estado/prioridad. Crear, editar y eliminar tareas."
+        },
+        {
+          "label": "Analytics",
+          "labelEs": "Analíticas",
+          "url": "/dashboard/analytics",
+          "icon": "IconChartBar",
+          "description": "Analytics view with page views and chart area for data visualization.",
+          "descriptionEs": "Vista de analíticas con páginas vistas y área de gráfico para visualización de datos."
+        },
+        {
+          "label": "Projects",
+          "labelEs": "Proyectos",
+          "url": "/dashboard/projects",
+          "icon": "IconFolder",
+          "description": "Project cards showing name, status, and progress bar.",
+          "descriptionEs": "Tarjetas de proyectos mostrando nombre, estado y barra de progreso."
+        },
+        {
+          "label": "Team",
+          "labelEs": "Equipo",
+          "url": "/dashboard/team",
+          "icon": "IconUsers",
+          "description": "Team member cards with avatar, name, role and email.",
+          "descriptionEs": "Tarjetas de miembros del equipo con avatar, nombre, rol y email."
+        },
+        {
+          "label": "Users",
+          "labelEs": "Usuarios",
+          "url": "/dashboard/users",
+          "icon": "IconUsers",
+          "description": "Full CRUD user management with data table, infinite scroll, role badges (admin/user). Create, edit, and delete users.",
+          "descriptionEs": "Gestión completa de usuarios con tabla de datos, scroll infinito, badges de rol (admin/usuario). Crear, editar y eliminar usuarios."
+        },
+        {
+          "label": "Categories",
+          "labelEs": "Categorías",
+          "url": "/dashboard/categories",
+          "icon": "IconListDetails",
+          "description": "Full CRUD category management with color dots and color codes.",
+          "descriptionEs": "Gestión completa de categorías con puntos de color y códigos de color."
+        },
+        {
+          "label": "Transactions",
+          "labelEs": "Transacciones",
+          "url": "/dashboard/transactions",
+          "icon": "IconReport",
+          "description": "Full CRUD transaction management with customer info, status badges, amounts in USD, and dates.",
+          "descriptionEs": "Gestión completa de transacciones con info del cliente, badges de estado, montos en USD y fechas."
+        },
+        {
+          "label": "Settings",
+          "labelEs": "Configuración",
+          "url": "/dashboard/settings",
+          "icon": "IconSettings",
+          "description": "Two tabs: System (language, theme, devtools) and AI Configuration (provider, model, parameters).",
+          "descriptionEs": "Dos pestañas: Sistema (idioma, tema, devtools) y Configuración IA (proveedor, modelo, parámetros)."
+        }
+      ],
+      "secondary": [
+        {
+          "label": "Settings",
+          "labelEs": "Configuración",
+          "url": "/dashboard/settings",
+          "icon": "IconSettings"
+        },
+        {
+          "label": "Get Help",
+          "labelEs": "Obtener Ayuda",
+          "url": "/dashboard/help",
+          "icon": "IconHelp",
+          "description": "AI chat assistant with markdown rendering, code syntax highlighting, file upload, and thinking process.",
+          "descriptionEs": "Asistente de IA con renderizado markdown, resaltado de código, carga de archivos y proceso de razonamiento."
+        },
+        {
+          "label": "Search",
+          "labelEs": "Buscar",
+          "action": "Cmd+K / opens AI search sheet",
+          "icon": "IconSearch"
+        }
+      ]
+    },
+    "pages": {
+      "/dashboard": {
+        "title": "Dashboard",
+        "titleEs": "Panel de Control",
+        "features": [
+          "4 stat cards: Revenue ($45,231.89), Subscriptions (2,350), Sales (12,234), Active Now (573)",
+          "Recent Transactions table with customer, status, date, and amount",
+          "Trend indicators (up/down) for each stat"
+        ],
+        "dataSource": "API (dashboardStats + recentTransactions)",
+        "actions": [
+          "View stats",
+          "View recent transactions"
+        ]
+      },
+      "/dashboard/todos": {
+        "title": "Todos",
+        "titleEs": "Tareas",
+        "features": [
+          "Data table with infinite scroll",
+          "Status badges: pending (pendiente), in_progress (en progreso), completed (completado)",
+          "Priority badges: low (baja), medium (media), high (alta)",
+          "Due date display",
+          "Create new task via sheet/form",
+          "Edit existing tasks",
+          "Delete tasks with undo toast"
+        ],
+        "dataSource": "API (json-server /todos)",
+        "actions": [
+          "Create todo",
+          "Edit todo",
+          "Delete todo",
+          "Filter by status",
+          "Sort columns"
+        ],
+        "dataModel": {
+          "fields": [
+            "id",
+            "title",
+            "description",
+            "status",
+            "priority",
+            "dueDate",
+            "createdAt",
+            "updatedAt"
+          ],
+          "statuses": [
+            "pending",
+            "in_progress",
+            "completed"
+          ],
+          "priorities": [
+            "low",
+            "medium",
+            "high"
+          ]
+        }
+      },
+      "/dashboard/analytics": {
+        "title": "Analytics",
+        "titleEs": "Analíticas",
+        "features": [
+          "Page views card",
+          "Chart area for data visualization"
+        ],
+        "dataSource": "Static data",
+        "actions": [
+          "View analytics"
+        ]
+      },
+      "/dashboard/projects": {
+        "title": "Projects",
+        "titleEs": "Proyectos",
+        "features": [
+          "3 project cards with name, status, and progress bar"
+        ],
+        "dataSource": "Static/hardcoded data",
+        "actions": [
+          "View projects"
+        ]
+      },
+      "/dashboard/team": {
+        "title": "Team",
+        "titleEs": "Equipo",
+        "features": [
+          "3 team member cards with avatar, name, role, and email"
+        ],
+        "dataSource": "Static/hardcoded data",
+        "actions": [
+          "View team members"
+        ]
+      },
+      "/dashboard/users": {
+        "title": "Users",
+        "titleEs": "Usuarios",
+        "features": [
+          "Data table with infinite scroll",
+          "Avatar display",
+          "Role badges: admin, user",
+          "Create new user via sheet/form",
+          "Edit existing users",
+          "Delete users with undo toast"
+        ],
+        "dataSource": "API (json-server /users)",
+        "actions": [
+          "Create user",
+          "Edit user",
+          "Delete user",
+          "Filter",
+          "Sort columns"
+        ],
+        "dataModel": {
+          "fields": [
+            "id",
+            "name",
+            "email",
+            "role",
+            "avatar"
+          ],
+          "roles": [
+            "admin",
+            "user"
+          ]
+        }
+      },
+      "/dashboard/categories": {
+        "title": "Categories",
+        "titleEs": "Categorías",
+        "features": [
+          "Data table with infinite scroll",
+          "Color dot preview",
+          "Color code display",
+          "Create new category via sheet/form",
+          "Edit existing categories",
+          "Delete categories with undo toast"
+        ],
+        "dataSource": "API (json-server /categories)",
+        "actions": [
+          "Create category",
+          "Edit category",
+          "Delete category"
+        ],
+        "dataModel": {
+          "fields": [
+            "id",
+            "name",
+            "color"
+          ]
+        }
+      },
+      "/dashboard/transactions": {
+        "title": "Transactions",
+        "titleEs": "Transacciones",
+        "features": [
+          "Data table with infinite scroll",
+          "Customer name and email",
+          "Status badges: Approved, Pending, Rejected",
+          "Amount in USD currency format",
+          "Date display",
+          "Create new transaction via sheet/form",
+          "Edit existing transactions",
+          "Delete transactions with undo toast"
+        ],
+        "dataSource": "API (json-server /recentTransactions)",
+        "actions": [
+          "Create transaction",
+          "Edit transaction",
+          "Delete transaction",
+          "Filter",
+          "Sort columns"
+        ],
+        "dataModel": {
+          "fields": [
+            "id",
+            "customer.name",
+            "customer.email",
+            "status",
+            "date",
+            "amount"
+          ],
+          "statuses": [
+            "Approved",
+            "Pending",
+            "Rejected"
+          ]
+        }
+      },
+      "/dashboard/settings": {
+        "title": "Settings",
+        "titleEs": "Configuración",
+        "features": [
+          "Tab System: Language selector (en/es/dk), Theme selector (light/dark/system), Devtools toggle",
+          "Tab AI Configuration: Provider selector, model selector, parameter sliders (temperature, max tokens, top-p)",
+          "Save and reset buttons"
+        ],
+        "dataSource": "Local state + API (ai-config)",
+        "actions": [
+          "Change language",
+          "Change theme",
+          "Toggle devtools",
+          "Configure AI provider"
+        ]
+      },
+      "/dashboard/help": {
+        "title": "AI Help",
+        "titleEs": "Ayuda IA",
+        "features": [
+          "AI chat assistant with message bubbles",
+          "Markdown rendering with syntax highlighting",
+          "Thinking/reasoning process display (collapsible)",
+          "File upload capability",
+          "Provider selection (LM Studio, OpenAI, Anthropic)",
+          "Persistent message history via localStorage",
+          "Suggestion chips for common questions"
+        ],
+        "dataSource": "AI API (/api/ai/chat) + localStorage",
+        "actions": [
+          "Send message",
+          "Upload file",
+          "Select provider",
+          "Clear history"
+        ]
+      }
+    },
+    "dataOverview": {
+      "todos": {
+        "total": 1498,
+        "byStatus": {
+          "pending": 502,
+          "in_progress": 499,
+          "completed": 497
+        },
+        "byPriority": {
+          "low": "~33%",
+          "medium": "~33%",
+          "high": "~33%"
+        },
+        "url": "/dashboard/todos",
+        "apiEndpoint": "/todos"
+      },
+      "users": {
+        "total": 2,
+        "list": [
+          {
+            "name": "Admin User",
+            "email": "admin@example.com",
+            "role": "admin"
+          },
+          {
+            "name": "Test User",
+            "email": "test@example.com",
+            "role": "user"
+          }
+        ],
+        "url": "/dashboard/users",
+        "apiEndpoint": "/users"
+      },
+      "categories": {
+        "total": 4,
+        "list": [
+          "Development",
+          "Design",
+          "Marketing",
+          "Research"
+        ],
+        "url": "/dashboard/categories",
+        "apiEndpoint": "/categories"
+      },
+      "transactions": {
+        "total": 4,
+        "list": [
+          {
+            "customer": "Liam Johnson",
+            "status": "Approved",
+            "amount": 250
+          },
+          {
+            "customer": "Olivia Smith",
+            "status": "Pending",
+            "amount": 150
+          },
+          {
+            "customer": "Noah Williams",
+            "status": "Approved",
+            "amount": 350
+          },
+          {
+            "customer": "Emma Brown",
+            "status": "Rejected",
+            "amount": 450
+          }
+        ],
+        "url": "/dashboard/transactions",
+        "apiEndpoint": "/recentTransactions"
+      },
+      "dashboardStats": {
+        "revenue": {
+          "value": "$45,231.89",
+          "change": "+20.1%"
+        },
+        "subscriptions": {
+          "value": "2,350",
+          "change": "+180.1%"
+        },
+        "sales": {
+          "value": "12,234",
+          "change": "+19%"
+        },
+        "activeNow": {
+          "value": "573",
+          "change": "+201"
+        }
+      }
+    },
+    "commonQuestions": {
+      "whereToFind": {
+        "tasks": "Go to /dashboard/todos to see, create, edit, or delete tasks.",
+        "users": "Go to /dashboard/users to manage users.",
+        "transactions": "Go to /dashboard/transactions to view and manage transactions.",
+        "analytics": "Go to /dashboard/analytics to see page views and charts.",
+        "settings": "Go to /dashboard/settings to change language, theme, or AI configuration.",
+        "projects": "Go to /dashboard/projects to see project cards with progress.",
+        "team": "Go to /dashboard/team to see team member information.",
+        "categories": "Go to /dashboard/categories to manage categories.",
+        "help": "Go to /dashboard/help to chat with the AI assistant."
+      },
+      "howTo": {
+        "createTask": "You can ask me to create a task directly in this chat! Just say something like 'create a task called...' with the details and I'll prepare it for you with a confirmation button. Or go to /dashboard/todos and click the 'New' button.",
+        "editTask": "Go to /dashboard/todos, find the task in the table, and click the edit action.",
+        "deleteTask": "Go to /dashboard/todos, find the task, and click the delete action. You can undo within the toast notification.",
+        "changeLanguage": "Go to /dashboard/settings, in the System tab, use the language selector to switch between English, Spanish, or Danish.",
+        "changeTheme": "Go to /dashboard/settings, in the System tab, use the theme selector to switch between light, dark, or system.",
+        "configureAI": "Go to /dashboard/settings, click the AI Configuration tab, select your provider and model, adjust parameters.",
+        "searchApp": "Press Cmd+K (Mac) or Ctrl+K to open the AI-powered search sheet from anywhere in the dashboard.",
+        "createUser": "You can ask me to create a user directly in this chat! Just provide the name and email. Or go to /dashboard/users and click the 'New' button.",
+        "createTransaction": "You can ask me to create a transaction directly in this chat! Provide the customer name, amount and status. Or go to /dashboard/transactions and click the 'New' button.",
+        "createCategory": "You can ask me to create a category directly in this chat! Just provide the name and color. Or go to /dashboard/categories and click the 'New' button."
+      }
+    },
+    "aiCapabilities": {
+      "description": "The AI assistant can perform the following actions directly from the chat:",
+      "actions": [
+        {
+          "action": "Create Task",
+          "actionEs": "Crear Tarea",
+          "trigger": "Ask me to create a new task with a title, description, priority and due date",
+          "triggerEs": "Pídeme crear una nueva tarea con título, descripción, prioridad y fecha límite"
+        },
+        {
+          "action": "Create User",
+          "actionEs": "Crear Usuario",
+          "trigger": "Ask me to create a new user with name and email",
+          "triggerEs": "Pídeme crear un nuevo usuario con nombre y email"
+        },
+        {
+          "action": "Create Transaction",
+          "actionEs": "Crear Transacción",
+          "trigger": "Ask me to create a transaction with customer, amount and status",
+          "triggerEs": "Pídeme crear una transacción con cliente, monto y estado"
+        },
+        {
+          "action": "Create Category",
+          "actionEs": "Crear Categoría",
+          "trigger": "Ask me to create a new category with name and color",
+          "triggerEs": "Pídeme crear una nueva categoría con nombre y color"
+        }
+      ]
+    }
+  }
 }

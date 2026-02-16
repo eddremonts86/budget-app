@@ -680,7 +680,7 @@ export function HelpChatPage() {
   )
 
   const { messages, sendMessage, isLoading, stop, clear, error, setMessages } = useChat({
-    connection: fetchServerSentEvents(`/api/ai/chat?locale=${i18n.language}`),
+    connection: fetchServerSentEvents(`/api/ai/chat/completions?locale=${i18n.language}`),
     initialMessages,
   })
 

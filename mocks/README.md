@@ -5,9 +5,13 @@ Development mock server using json-server.
 ## Start
 
 ```bash
+pnpm mocks:sync    # Sync category JSON files into db.json
+pnpm ai:switch lmstudio  # Switch active AI provider and re-sync mocks
 pnpm mock          # Only mock server
 pnpm dev           # App + mock server together
 ```
+
+`pnpm mock` and `pnpm dev:mock` run `mocks:sync` automatically before starting `json-server`.
 
 ## Available Endpoints
 
@@ -30,5 +34,14 @@ pnpm dev           # App + mock server together
 
 ## Data
 
-Edit `db.json` to add/modify test data.
+Category source files are kept in separate JSON files:
+
+- `ai-settings.json`
+- `app-knowledge.json`
+- `audit-logs.json`
+- `ai-config-store.json`
+
+All source files are unified into `db.json` by `scripts/sync-mocks.ts`.
+
+Edit category files whenever possible, then run `pnpm mocks:sync`.
 Changes persist while the server is running.

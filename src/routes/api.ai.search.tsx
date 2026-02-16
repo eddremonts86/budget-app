@@ -20,6 +20,28 @@ type SearchRequestBody = {
   }
 }
 
+const buildProviderModelOptions = (
+  providerId: AiProviderId,
+  body: SearchRequestBody,
+  config: Awaited<ReturnType<typeof getActiveAiConfig>>,
+) => {
+  const options: Record<string, number> = {
+    temperature: body.params?.temperature ?? config.parameters.temperature,
+    top_p: body.params?.topP ?? config.parameters.top_p,
+    frequency_penalty: config.parameters.frequency_penalty,
+    presence_penalty: config.parameters.presence_penalty,
+  }
+
+  const maxTokens = body.params?.maxTokens ?? config.parameters.max_tokens
+  if (providerId === 'openai') {
+    options.max_output_tokens = maxTokens
+  } else {
+    options.max_tokens = maxTokens
+  }
+
+  return options
+}
+
 // Helper to format knowledge base into a readable, structured text
 function formatKnowledgeBase(knowledge: typeof appKnowledge): string {
   const mainNav = knowledge.navigation.main.map(
@@ -169,6 +191,8 @@ export const Route = createFileRoute('/api/ai/search')({
             })
           }
 
+          const modelOptions = buildProviderModelOptions(providerId, body, config)
+
           const result = await chat({
             adapter,
             stream: false,
@@ -183,13 +207,7 @@ export const Route = createFileRoute('/api/ai/search')({
                 content: body.query,
               },
             ],
-            modelOptions: {
-              temperature: body.params?.temperature ?? config.parameters.temperature,
-              max_tokens: body.params?.maxTokens ?? config.parameters.max_tokens,
-              top_p: body.params?.topP ?? config.parameters.top_p,
-              frequency_penalty: config.parameters.frequency_penalty,
-              presence_penalty: config.parameters.presence_penalty,
-            },
+            modelOptions,
           })
           return new Response(JSON.stringify({ result, providerId }), {
             status: 200,

@@ -790,5 +790,93 @@
     "providerId": "lm-studio",
     "model": "local-model",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:18:57.266Z",
+    "locale": "en",
+    "query": "que dia es hoy ?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:19:14.054Z",
+    "locale": "en",
+    "query": "que dia es hoy ?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:20:42.688Z",
+    "locale": "en",
+    "query": "ewfde...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:31:59.323Z",
+    "locale": "en",
+    "query": "que modelo eres ?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:32:18.049Z",
+    "locale": "en",
+    "query": "que?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:33:31.496Z",
+    "locale": "en",
+    "query": "que hay?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:47:38.358Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:48:10.805Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:48:53.838Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:50:31.000Z",
+    "locale": "es-ES",
+    "query": "responde breve...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T21:00:04.667Z",
+    "locale": "en",
+    "query": "hola...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
   }
 ]

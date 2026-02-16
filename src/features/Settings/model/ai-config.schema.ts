@@ -37,6 +37,11 @@ export const aiConfigSchema = z.object({
 
 export type AiConfigFormData = z.infer<typeof aiConfigSchema>
 
+export interface AiConfigStore {
+  activeProvider: AiProvider
+  providers: Record<AiProvider, AiConfigFormData>
+}
+
 export interface AiConfigAuditLog {
   id: string
   timestamp: string

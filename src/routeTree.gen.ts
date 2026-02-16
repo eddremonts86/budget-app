@@ -27,6 +27,7 @@ import { Route as DashboardDashboardProjectsRouteImport } from './routes/_dashbo
 import { Route as DashboardDashboardHelpRouteImport } from './routes/_dashboard.dashboard.help'
 import { Route as DashboardDashboardCategoriesRouteImport } from './routes/_dashboard.dashboard.categories'
 import { Route as DashboardDashboardAnalyticsRouteImport } from './routes/_dashboard.dashboard.analytics'
+import { Route as ApiAiChatCompletionsRouteImport } from './routes/api.ai.chat.completions'
 
 const LandingRoute = LandingRouteImport.update({
   id: '/_landing',
@@ -121,6 +122,11 @@ const DashboardDashboardAnalyticsRoute =
     path: '/analytics',
     getParentRoute: () => DashboardDashboardRoute,
   } as any)
+const ApiAiChatCompletionsRoute = ApiAiChatCompletionsRouteImport.update({
+  id: '/completions',
+  path: '/completions',
+  getParentRoute: () => ApiAiChatRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LandingIndexRoute
@@ -135,10 +141,11 @@ export interface FileRoutesByFullPath {
   '/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/dashboard/': typeof DashboardDashboardIndexRoute
+  '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
 }
 export interface FileRoutesByTo {
   '/': typeof LandingIndexRoute
@@ -152,10 +159,11 @@ export interface FileRoutesByTo {
   '/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
+  '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -173,10 +181,11 @@ export interface FileRoutesById {
   '/_dashboard/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/_dashboard/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
-  '/api/ai/chat': typeof ApiAiChatRoute
+  '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
+  '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -197,6 +206,7 @@ export interface FileRouteTypes {
     | '/api/ai/search'
     | '/api/ai/status'
     | '/dashboard/'
+    | '/api/ai/chat/completions'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -214,6 +224,7 @@ export interface FileRouteTypes {
     | '/api/ai/search'
     | '/api/ai/status'
     | '/dashboard'
+    | '/api/ai/chat/completions'
   id:
     | '__root__'
     | '/_dashboard'
@@ -234,13 +245,14 @@ export interface FileRouteTypes {
     | '/api/ai/search'
     | '/api/ai/status'
     | '/_dashboard/dashboard/'
+    | '/api/ai/chat/completions'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   LandingRoute: typeof LandingRouteWithChildren
   ApiAiAuditRoute: typeof ApiAiAuditRoute
-  ApiAiChatRoute: typeof ApiAiChatRoute
+  ApiAiChatRoute: typeof ApiAiChatRouteWithChildren
   ApiAiSearchRoute: typeof ApiAiSearchRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
 }
@@ -373,6 +385,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardAnalyticsRouteImport
       parentRoute: typeof DashboardDashboardRoute
     }
+    '/api/ai/chat/completions': {
+      id: '/api/ai/chat/completions'
+      path: '/completions'
+      fullPath: '/api/ai/chat/completions'
+      preLoaderRoute: typeof ApiAiChatCompletionsRouteImport
+      parentRoute: typeof ApiAiChatRoute
+    }
   }
 }
 
@@ -428,11 +447,23 @@ const LandingRouteChildren: LandingRouteChildren = {
 const LandingRouteWithChildren =
   LandingRoute._addFileChildren(LandingRouteChildren)
 
+interface ApiAiChatRouteChildren {
+  ApiAiChatCompletionsRoute: typeof ApiAiChatCompletionsRoute
+}
+
+const ApiAiChatRouteChildren: ApiAiChatRouteChildren = {
+  ApiAiChatCompletionsRoute: ApiAiChatCompletionsRoute,
+}
+
+const ApiAiChatRouteWithChildren = ApiAiChatRoute._addFileChildren(
+  ApiAiChatRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   LandingRoute: LandingRouteWithChildren,
   ApiAiAuditRoute: ApiAiAuditRoute,
-  ApiAiChatRoute: ApiAiChatRoute,
+  ApiAiChatRoute: ApiAiChatRouteWithChildren,
   ApiAiSearchRoute: ApiAiSearchRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
 }

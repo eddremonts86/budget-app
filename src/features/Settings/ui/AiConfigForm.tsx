@@ -24,6 +24,7 @@ import {
 import { Separator } from '@/components/ui/separator'
 import {
   useAiConfig,
+  useAiConfigStore,
   useUpdateAiConfig,
   useResetAiConfig,
   useTestAiConnection,
@@ -87,6 +88,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
 export function AiConfigForm() {
   const { t } = useTranslation()
   const { data: config, isLoading: isConfigLoading } = useAiConfig()
+  const { data: configStore } = useAiConfigStore()
   const updateMutation = useUpdateAiConfig()
   const resetMutation = useResetAiConfig()
   const testMutation = useTestAiConnection()
@@ -169,20 +171,52 @@ export function AiConfigForm() {
 
   const handleProviderChange = (provider: AiProvider) => {
     const defaults = PROVIDER_DEFAULTS[provider]
-    form.setFieldValue('provider', provider)
-    form.setFieldValue('baseUrl', defaults.baseUrl!)
-    form.setFieldValue('port', defaults.port!)
-    form.setFieldValue('endpoints.chat', defaults.endpoints!.chat)
-    form.setFieldValue('endpoints.models', defaults.endpoints!.models)
-    form.setFieldValue('endpoints.load', defaults.endpoints?.load ?? '')
-    form.setFieldValue('endpoints.download', defaults.endpoints?.download ?? '')
-    form.setFieldValue('endpoints.status', defaults.endpoints?.status ?? '')
-    form.setFieldValue('parameters.model', defaults.parameters!.model)
-    form.setFieldValue('parameters.temperature', defaults.parameters!.temperature!)
-    form.setFieldValue('parameters.max_tokens', defaults.parameters!.max_tokens!)
-    form.setFieldValue('parameters.top_p', defaults.parameters!.top_p!)
-    form.setFieldValue('parameters.frequency_penalty', defaults.parameters!.frequency_penalty!)
-    form.setFieldValue('parameters.presence_penalty', defaults.parameters!.presence_penalty!)
+    const saved = configStore?.providers?.[provider]
+    const nextConfig = {
+      provider,
+      baseUrl: saved?.baseUrl ?? defaults.baseUrl!,
+      port: saved?.port ?? defaults.port!,
+      token: saved?.token ?? '',
+      apiKey: saved?.apiKey ?? '',
+      endpoints: {
+        chat: saved?.endpoints?.chat ?? defaults.endpoints!.chat,
+        models: saved?.endpoints?.models ?? defaults.endpoints!.models,
+        load: saved?.endpoints?.load ?? defaults.endpoints?.load ?? '',
+        download: saved?.endpoints?.download ?? defaults.endpoints?.download ?? '',
+        status: saved?.endpoints?.status ?? defaults.endpoints?.status ?? '',
+      },
+      parameters: {
+        model: saved?.parameters?.model ?? defaults.parameters!.model,
+        temperature: saved?.parameters?.temperature ?? defaults.parameters!.temperature,
+        max_tokens: saved?.parameters?.max_tokens ?? defaults.parameters!.max_tokens,
+        top_p: saved?.parameters?.top_p ?? defaults.parameters!.top_p,
+        frequency_penalty:
+          saved?.parameters?.frequency_penalty ?? defaults.parameters!.frequency_penalty,
+        presence_penalty:
+          saved?.parameters?.presence_penalty ?? defaults.parameters!.presence_penalty,
+      },
+      timeout: saved?.timeout ?? 30000,
+      additionalParams: saved?.additionalParams ?? '',
+    }
+
+    form.setFieldValue('provider', nextConfig.provider)
+    form.setFieldValue('baseUrl', nextConfig.baseUrl)
+    form.setFieldValue('port', nextConfig.port)
+    form.setFieldValue('token', nextConfig.token)
+    form.setFieldValue('apiKey', nextConfig.apiKey)
+    form.setFieldValue('endpoints.chat', nextConfig.endpoints.chat)
+    form.setFieldValue('endpoints.models', nextConfig.endpoints.models)
+    form.setFieldValue('endpoints.load', nextConfig.endpoints.load)
+    form.setFieldValue('endpoints.download', nextConfig.endpoints.download)
+    form.setFieldValue('endpoints.status', nextConfig.endpoints.status)
+    form.setFieldValue('parameters.model', nextConfig.parameters.model)
+    form.setFieldValue('parameters.temperature', nextConfig.parameters.temperature)
+    form.setFieldValue('parameters.max_tokens', nextConfig.parameters.max_tokens)
+    form.setFieldValue('parameters.top_p', nextConfig.parameters.top_p)
+    form.setFieldValue('parameters.frequency_penalty', nextConfig.parameters.frequency_penalty)
+    form.setFieldValue('parameters.presence_penalty', nextConfig.parameters.presence_penalty)
+    form.setFieldValue('timeout', nextConfig.timeout)
+    form.setFieldValue('additionalParams', nextConfig.additionalParams)
   }
 
   if (isConfigLoading) {
@@ -316,40 +350,46 @@ export function AiConfigForm() {
                     )}
                   />
 
-                  {form.getFieldValue('provider') !== 'lm-studio' && (
-                    <form.Field
-                      name="token"
-                      children={(field) => (
-                        <Field className="sm:col-span-4">
-                          <FieldLabel htmlFor={field.name}>
-                            {['openai', 'anthropic'].includes(form.getFieldValue('provider'))
-                              ? t('settings.ai.fields.apiKey')
-                              : t('settings.ai.fields.token')}
-                          </FieldLabel>
-                          <Input
-                            id={field.name}
-                            type="password"
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder={
-                              form.getFieldValue('provider') === 'openai'
-                                ? 'sk-proj-...'
-                                : form.getFieldValue('provider') === 'anthropic'
-                                  ? 'sk-ant-...'
-                                  : 'token-...'
-                            }
-                            className="bg-muted/20"
-                          />
-                          <FieldError
-                            errors={field.state.meta.errors.map((e) =>
-                              typeof e === 'string' ? e : String(e),
-                            )}
-                          />
-                        </Field>
-                      )}
-                    />
-                  )}
+                  <form.Subscribe selector={(state) => state.values.provider}>
+                    {(provider) =>
+                      provider === 'lm-studio' ? null : (
+                        <form.Field
+                          name="token"
+                          children={(field) => {
+                            const tokenPlaceholder =
+                              {
+                                openai: 'sk-proj-...',
+                                anthropic: 'sk-ant-...',
+                              }[provider] ?? 'token-...'
+
+                            return (
+                              <Field className="sm:col-span-4">
+                                <FieldLabel htmlFor={field.name}>
+                                  {['openai', 'anthropic'].includes(provider)
+                                    ? t('settings.ai.fields.apiKey')
+                                    : t('settings.ai.fields.token')}
+                                </FieldLabel>
+                                <Input
+                                  id={field.name}
+                                  type="password"
+                                  value={field.state.value}
+                                  onBlur={field.handleBlur}
+                                  onChange={(e) => field.handleChange(e.target.value)}
+                                  placeholder={tokenPlaceholder}
+                                  className="bg-muted/20"
+                                />
+                                <FieldError
+                                  errors={field.state.meta.errors.map((e) =>
+                                    typeof e === 'string' ? e : String(e),
+                                  )}
+                                />
+                              </Field>
+                            )
+                          }}
+                        />
+                      )
+                    }
+                  </form.Subscribe>
                 </div>
               </div>
             </div>
@@ -412,76 +452,80 @@ export function AiConfigForm() {
                   )}
                 />
 
-                {form.getFieldValue('provider') === 'lm-studio' && (
-                  <>
-                    <form.Field
-                      name="endpoints.load"
-                      children={(field) => (
-                        <Field>
-                          <FieldLabel htmlFor={field.name}>
-                            {t('settings.ai.fields.loadEndpoint')}
-                          </FieldLabel>
-                          <Input
-                            id={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="bg-muted/20"
-                          />
-                          <FieldError
-                            errors={field.state.meta.errors.map((e) =>
-                              typeof e === 'string' ? e : String(e),
-                            )}
-                          />
-                        </Field>
-                      )}
-                    />
-                    <form.Field
-                      name="endpoints.download"
-                      children={(field) => (
-                        <Field>
-                          <FieldLabel htmlFor={field.name}>
-                            {t('settings.ai.fields.downloadEndpoint')}
-                          </FieldLabel>
-                          <Input
-                            id={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="bg-muted/20"
-                          />
-                          <FieldError
-                            errors={field.state.meta.errors.map((e) =>
-                              typeof e === 'string' ? e : String(e),
-                            )}
-                          />
-                        </Field>
-                      )}
-                    />
-                    <form.Field
-                      name="endpoints.status"
-                      children={(field) => (
-                        <Field className="sm:col-span-2">
-                          <FieldLabel htmlFor={field.name}>
-                            {t('settings.ai.fields.statusEndpoint')}
-                          </FieldLabel>
-                          <Input
-                            id={field.name}
-                            value={field.state.value}
-                            onBlur={field.handleBlur}
-                            onChange={(e) => field.handleChange(e.target.value)}
-                            className="bg-muted/20"
-                          />
-                          <FieldError
-                            errors={field.state.meta.errors.map((e) =>
-                              typeof e === 'string' ? e : String(e),
-                            )}
-                          />
-                        </Field>
-                      )}
-                    />
-                  </>
-                )}
+                <form.Subscribe selector={(state) => state.values.provider}>
+                  {(provider) =>
+                    provider === 'lm-studio' ? (
+                      <>
+                        <form.Field
+                          name="endpoints.load"
+                          children={(field) => (
+                            <Field>
+                              <FieldLabel htmlFor={field.name}>
+                                {t('settings.ai.fields.loadEndpoint')}
+                              </FieldLabel>
+                              <Input
+                                id={field.name}
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                className="bg-muted/20"
+                              />
+                              <FieldError
+                                errors={field.state.meta.errors.map((e) =>
+                                  typeof e === 'string' ? e : String(e),
+                                )}
+                              />
+                            </Field>
+                          )}
+                        />
+                        <form.Field
+                          name="endpoints.download"
+                          children={(field) => (
+                            <Field>
+                              <FieldLabel htmlFor={field.name}>
+                                {t('settings.ai.fields.downloadEndpoint')}
+                              </FieldLabel>
+                              <Input
+                                id={field.name}
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                className="bg-muted/20"
+                              />
+                              <FieldError
+                                errors={field.state.meta.errors.map((e) =>
+                                  typeof e === 'string' ? e : String(e),
+                                )}
+                              />
+                            </Field>
+                          )}
+                        />
+                        <form.Field
+                          name="endpoints.status"
+                          children={(field) => (
+                            <Field className="sm:col-span-2">
+                              <FieldLabel htmlFor={field.name}>
+                                {t('settings.ai.fields.statusEndpoint')}
+                              </FieldLabel>
+                              <Input
+                                id={field.name}
+                                value={field.state.value}
+                                onBlur={field.handleBlur}
+                                onChange={(e) => field.handleChange(e.target.value)}
+                                className="bg-muted/20"
+                              />
+                              <FieldError
+                                errors={field.state.meta.errors.map((e) =>
+                                  typeof e === 'string' ? e : String(e),
+                                )}
+                              />
+                            </Field>
+                          )}
+                        />
+                      </>
+                    ) : null
+                  }
+                </form.Subscribe>
               </div>
             </div>
           </div>
