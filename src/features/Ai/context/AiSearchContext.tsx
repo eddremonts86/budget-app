@@ -41,9 +41,11 @@ export function AiSearchProvider({ children }: { children: React.ReactNode }) {
     }
   }, [isPinned, setIsOpen])
 
-  return (
-    <AiSearchContext.Provider value={{ isOpen, setIsOpen, isPinned, setIsPinned }}>
-      {children}
-    </AiSearchContext.Provider>
+  // Memoize context value to prevent unnecessary re-renders in consumers
+  const value = React.useMemo(
+    () => ({ isOpen, setIsOpen, isPinned, setIsPinned }),
+    [isOpen, setIsOpen, isPinned, setIsPinned],
   )
+
+  return <AiSearchContext.Provider value={value}>{children}</AiSearchContext.Provider>
 }
