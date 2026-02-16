@@ -349,7 +349,11 @@ async function executeAction(
         return { success: true, message: `Task "${result.title}" created with ID ${result.id}` }
       }
       case 'user': {
-        const result = await usersApi.create((payload as CreateUserAction).data)
+        const userData = (payload as CreateUserAction).data
+        const result = await usersApi.create({
+          ...userData,
+          createdAt: userData.createdAt || new Date().toISOString(),
+        })
         return { success: true, message: `User "${result.name}" created with ID ${result.id}` }
       }
       case 'transaction': {

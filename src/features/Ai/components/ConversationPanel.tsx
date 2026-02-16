@@ -27,7 +27,6 @@ type DateGroup = 'today' | 'yesterday' | 'previousDays' | 'older'
 
 function getDateGroup(timestamp: number): DateGroup {
   const now = new Date()
-  const date = new Date(timestamp)
   const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime()
   const yesterdayStart = todayStart - 86_400_000
   const weekStart = todayStart - 6 * 86_400_000

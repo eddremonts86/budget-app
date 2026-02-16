@@ -98,7 +98,7 @@ const toUiMessage = (message: StoredMessage, index: number): UIMessage => ({
 
 function messagesToStored(messages: UIMessage[]): StoredMessage[] {
   return messages.map((msg) => ({
-    role: msg.role as StoredMessage['role'],
+    role: msg.role,
     content: formatMessage(msg),
     parts: msg.parts as StoredMessage['parts'],
   }))
@@ -304,6 +304,49 @@ function ThinkingProcess({ content }: { content: string }) {
   )
 }
 
+// --- Markdown component overrides (extracted to avoid re-creation on each render) ---
+
+const MarkdownP = ({ children }: { children?: React.ReactNode }) => (
+  <p className="mb-2 last:mb-0">{children}</p>
+)
+const MarkdownUl = ({ children }: { children?: React.ReactNode }) => (
+  <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>
+)
+const MarkdownOl = ({ children }: { children?: React.ReactNode }) => (
+  <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>
+)
+const MarkdownLi = ({ children }: { children?: React.ReactNode }) => (
+  <li className="pl-1">{children}</li>
+)
+const MarkdownA = ({ children, href }: { children?: React.ReactNode; href?: string }) => (
+  <a
+    href={href}
+    target="_blank"
+    rel="noopener noreferrer"
+    className="underline decoration-indigo-500/50 underline-offset-2 hover:decoration-indigo-500 transition-colors font-medium"
+  >
+    {children}
+  </a>
+)
+const MarkdownBlockquote = ({ children }: { children?: React.ReactNode }) => (
+  <blockquote className="border-l-4 border-indigo-500/30 pl-4 py-1 my-2 italic text-muted-foreground bg-indigo-500/5 rounded-r">
+    {children}
+  </blockquote>
+)
+const MarkdownTable = ({ children }: { children?: React.ReactNode }) => (
+  <div className="my-4 w-full overflow-y-auto rounded-lg border border-border/50">
+    <table className="w-full text-sm">{children}</table>
+  </div>
+)
+const MarkdownTh = ({ children }: { children?: React.ReactNode }) => (
+  <th className="border-b border-border/50 bg-muted/30 px-4 py-2 text-left font-bold">
+    {children}
+  </th>
+)
+const MarkdownTd = ({ children }: { children?: React.ReactNode }) => (
+  <td className="border-b border-border/10 px-4 py-2">{children}</td>
+)
+
 function MessageBubble({
   message,
   onImageClick,
@@ -332,7 +375,7 @@ function MessageBubble({
       className={cn('group flex w-full gap-4', isUser ? 'justify-end' : 'justify-start')}
     >
       {!isUser && (
-        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
+        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
           <Bot size={20} className="text-white" />
         </div>
       )}
@@ -352,13 +395,14 @@ function MessageBubble({
           className={cn(
             'relative overflow-hidden px-5 py-4 text-sm shadow-sm transition-all duration-300',
             isUser
-              ? 'rounded-2xl rounded-tr-sm bg-gradient-to-br from-indigo-600 to-blue-600 text-white shadow-indigo-500/10'
+              ? 'rounded-2xl rounded-tr-sm bg-linear-to-br from-indigo-600 to-blue-600 text-white shadow-indigo-500/10'
               : 'rounded-2xl rounded-tl-sm bg-card/80 border border-border/50 text-foreground backdrop-blur-md hover:bg-card/90 hover:shadow-md',
           )}
         >
-          {message.parts.map((part, idx) => {
+          {message.parts.map((part, partIndex) => {
+            const partKey = `${message.id}-part-${partIndex}`
             if (part.type === 'thinking') {
-              return <ThinkingProcess key={idx} content={part.content} />
+              return <ThinkingProcess key={partKey} content={part.content} />
             }
             if (part.type === 'text') {
               // Show error placeholder for empty AI responses
@@ -366,7 +410,7 @@ function MessageBubble({
                 if (!isUser) {
                   return (
                     <div
-                      key={idx}
+                      key={partKey}
                       className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-700 dark:text-amber-400"
                     >
                       <span className="text-base">⚠️</span>
@@ -378,7 +422,7 @@ function MessageBubble({
               }
               return (
                 <div
-                  key={idx}
+                  key={partKey}
                   className={cn(
                     'markdown-content leading-7',
                     isUser ? 'text-white/90' : 'text-foreground/90',
@@ -439,42 +483,15 @@ function MessageBubble({
                           </code>
                         )
                       },
-                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                      ul: ({ children }) => (
-                        <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>
-                      ),
-                      ol: ({ children }) => (
-                        <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>
-                      ),
-                      li: ({ children }) => <li className="pl-1">{children}</li>,
-                      a: ({ children, href }) => (
-                        <a
-                          href={href}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="underline decoration-indigo-500/50 underline-offset-2 hover:decoration-indigo-500 transition-colors font-medium"
-                        >
-                          {children}
-                        </a>
-                      ),
-                      blockquote: ({ children }) => (
-                        <blockquote className="border-l-4 border-indigo-500/30 pl-4 py-1 my-2 italic text-muted-foreground bg-indigo-500/5 rounded-r">
-                          {children}
-                        </blockquote>
-                      ),
-                      table: ({ children }) => (
-                        <div className="my-4 w-full overflow-y-auto rounded-lg border border-border/50">
-                          <table className="w-full text-sm">{children}</table>
-                        </div>
-                      ),
-                      th: ({ children }) => (
-                        <th className="border-b border-border/50 bg-muted/30 px-4 py-2 text-left font-bold">
-                          {children}
-                        </th>
-                      ),
-                      td: ({ children }) => (
-                        <td className="border-b border-border/10 px-4 py-2">{children}</td>
-                      ),
+                      p: MarkdownP,
+                      ul: MarkdownUl,
+                      ol: MarkdownOl,
+                      li: MarkdownLi,
+                      a: MarkdownA,
+                      blockquote: MarkdownBlockquote,
+                      table: MarkdownTable,
+                      th: MarkdownTh,
+                      td: MarkdownTd,
                     }}
                   >
                     {part.content}
@@ -486,15 +503,21 @@ function MessageBubble({
               const imgUrl = (part as unknown as { image: string }).image
               return (
                 <div
-                  key={idx}
+                  key={partKey}
                   className="mt-3 overflow-hidden rounded-xl border border-border/20 bg-black/5 shadow-sm"
                 >
-                  <img
-                    src={imgUrl}
-                    alt="Uploaded content"
-                    className="max-h-[300px] w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-105"
+                  <button
+                    type="button"
                     onClick={() => onImageClick(imgUrl)}
-                  />
+                    className="block w-full"
+                    title="Click to preview image"
+                  >
+                    <img
+                      src={imgUrl}
+                      alt="Uploaded content"
+                      className="max-h-75 w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-105"
+                    />
+                  </button>
                 </div>
               )
             }
@@ -533,7 +556,7 @@ function MessageBubble({
               </AvatarFallback>
             </Avatar>
           ) : (
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-zinc-100 to-zinc-200 ring-2 ring-white dark:from-zinc-800 dark:to-zinc-900 dark:ring-zinc-800">
+            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-zinc-100 to-zinc-200 ring-2 ring-white dark:from-zinc-800 dark:to-zinc-900 dark:ring-zinc-800">
               <User size={20} className="text-zinc-500" />
             </div>
           )}
@@ -556,7 +579,7 @@ function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) =
     <div className="flex h-full flex-col items-center justify-center p-8 text-center animate-in fade-in zoom-in duration-500">
       <div className="mb-8 relative">
         <div className="absolute inset-0 animate-pulse rounded-full bg-indigo-500/20 blur-xl"></div>
-        <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-gradient-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-500/30 ring-4 ring-white/10">
+        <div className="relative flex h-24 w-24 items-center justify-center rounded-3xl bg-linear-to-br from-indigo-500 to-purple-600 shadow-2xl shadow-indigo-500/30 ring-4 ring-white/10">
           <Sparkles size={48} className="text-white" />
         </div>
       </div>
@@ -569,9 +592,9 @@ function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) =
       </p>
 
       <div className="grid w-full max-w-2xl grid-cols-1 gap-4 sm:grid-cols-2">
-        {suggestions.map((s, i) => (
+        {suggestions.map((s) => (
           <button
-            key={i}
+            key={s.label}
             onClick={() => onSuggestionClick(s.label)}
             className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-4 text-left shadow-sm transition-all duration-300 hover:border-indigo-500/30 hover:bg-indigo-500/5 hover:shadow-indigo-500/10 hover:-translate-y-1"
           >
@@ -635,7 +658,7 @@ export function HelpChatPage() {
   }
 
   React.useEffect(() => {
-    if (typeof globalThis.window === 'undefined') return
+    if (globalThis.window === undefined) return
     const updateStatus = () => setIsOnline(globalThis.window.navigator.onLine)
     updateStatus()
     globalThis.window.addEventListener('online', updateStatus)
@@ -651,7 +674,7 @@ export function HelpChatPage() {
 
   // Compute initial messages from the active conversation (for first useChat mount)
   const initialMessages = React.useMemo(
-    () => (convManager.activeConv?.messages ?? []).map(toUiMessage),
+    () => (convManager.activeConv?.messages ?? []).map((msg, i) => toUiMessage(msg, i)),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [convManager.activeId],
   )
@@ -667,7 +690,7 @@ export function HelpChatPage() {
     if (!convManager.isReady) return
     if (convManager.activeConv && convManager.activeId !== loadedConvIdRef.current) {
       loadedConvIdRef.current = convManager.activeId
-      const uiMessages = convManager.activeConv.messages.map(toUiMessage)
+      const uiMessages = convManager.activeConv.messages.map((msg, i) => toUiMessage(msg, i))
       setMessages(uiMessages)
     } else if (!convManager.activeId && loadedConvIdRef.current !== null) {
       loadedConvIdRef.current = null
@@ -706,6 +729,7 @@ export function HelpChatPage() {
     if (hash === prevMsgHashRef.current) return
     prevMsgHashRef.current = hash
     convManager.saveMessages(stored)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [messages, convManager.isReady, convManager.activeId, convManager.saveMessages])
 
   // Mark when we're loading a conversation (to skip persistence during load)
@@ -716,6 +740,21 @@ export function HelpChatPage() {
     })
     return () => cancelAnimationFrame(id)
   }, [convManager.activeId])
+
+  // Filter out empty assistant messages (e.g. from error responses)
+  const visibleMessages = React.useMemo(
+    () =>
+      messages.filter((msg) => {
+        if (msg.role !== 'assistant') return true
+        // Keep if any part has content
+        return msg.parts.some((part) => {
+          if (part.type === 'text') return !!part.content?.trim()
+          if (part.type === 'thinking') return !!part.content?.trim()
+          return true // keep other part types (images, etc.)
+        })
+      }),
+    [messages],
+  )
 
   const handleClear = () => {
     clear()
@@ -797,8 +836,12 @@ export function HelpChatPage() {
   }
 
   const handleNewConversation = async () => {
-    await convManager.createNew()
-    clear()
+    const newConv = await convManager.createNew()
+    if (newConv) {
+      // Pre-set the ref so the load effect won't re-trigger for this conversation
+      loadedConvIdRef.current = newConv.id
+    }
+    setMessages([])
     prevMsgHashRef.current = ''
     setIsPanelOpen(false)
   }
@@ -828,8 +871,8 @@ export function HelpChatPage() {
     >
       <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-background/50 shadow-2xl backdrop-blur-2xl dark:border-white/5 dark:bg-black/40">
         {/* --- Dynamic Background --- */}
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-200/20 via-background/0 to-background/0 dark:from-indigo-900/20"></div>
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-purple-200/20 via-background/0 to-background/0 dark:from-purple-900/20"></div>
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-indigo-200/20 via-background/0 to-background/0 dark:from-indigo-900/20"></div>
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_bottom_left,var(--tw-gradient-stops))] from-purple-200/20 via-background/0 to-background/0 dark:from-purple-900/20"></div>
 
         {/* --- Conversation Panel --- */}
         <ConversationPanel
@@ -846,7 +889,7 @@ export function HelpChatPage() {
         {/* --- Header --- */}
         <header className="flex h-20 items-center justify-between border-b border-white/10 bg-white/40 px-8 backdrop-blur-md dark:bg-black/20">
           <div className="flex items-center gap-4">
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
               <Bot size={24} />
               <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
                 <span
@@ -924,44 +967,73 @@ export function HelpChatPage() {
           ref={scrollContainerRef}
           className="flex-1 overflow-y-auto scroll-smooth p-6 md:p-8 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-indigo-500/10 hover:scrollbar-thumb-indigo-500/20"
         >
-          {messages.length === 0 ? (
+          {visibleMessages.length === 0 && !error ? (
             <EmptyState onSuggestionClick={handleSend} />
           ) : (
             <div className="flex flex-col gap-8 mx-auto max-w-4xl">
-              {messages.map((message, index) => (
+              {visibleMessages.map((message, index) => (
                 <MessageBubble
                   key={message.id}
                   message={message}
                   onImageClick={setIsPreviewOpen}
                   userAvatar={user?.imageUrl}
                   isTyping={
-                    isLoading && index === messages.length - 1 && message.role === 'assistant'
+                    isLoading &&
+                    index === visibleMessages.length - 1 &&
+                    message.role === 'assistant'
                   }
                 />
               ))}
 
-              {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
+              {/* Inline error message */}
+              {error && !isLoading && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   className="flex items-start gap-4"
                 >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/20 ring-2 ring-background">
+                    <Bot size={20} className="text-white" />
+                  </div>
+                  <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-tl-sm border border-red-200 bg-red-50 px-5 py-4 text-sm shadow-sm dark:border-red-900/50 dark:bg-red-950/30">
+                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                      <span className="text-base">⚠️</span>
+                      <span className="font-semibold">{t('ai.chat.error')}</span>
+                    </div>
+                    <p className="text-red-600/80 dark:text-red-300/80 text-xs">
+                      {error instanceof Error ? error.message : t('ai.chat.connectionError')}
+                    </p>
+                    <button
+                      onClick={() => {
+                        const lastUserMessage = [...messages]
+                          .reverse()
+                          .find((m) => m.role === 'user')
+                        if (lastUserMessage) {
+                          // @ts-expect-error - sendMessage supports string or payload
+                          sendMessage(lastUserMessage.content)
+                        }
+                      }}
+                      className="mt-1 self-start rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-200 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60"
+                    >
+                      {t('ai.chat.retry')}
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+
+              {isLoading && visibleMessages.at(-1)?.role !== 'assistant' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-4"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
                     <Bot size={20} className="text-white" />
                   </div>
                   <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-border/40 bg-card/50 px-5 py-4 shadow-sm backdrop-blur-sm">
-                    <span
-                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
-                      style={{ animationDelay: '0ms' }}
-                    />
-                    <span
-                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
-                      style={{ animationDelay: '150ms' }}
-                    />
-                    <span
-                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
-                      style={{ animationDelay: '300ms' }}
-                    />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-0" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-150" />
+                    <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-300" />
                   </div>
                 </motion.div>
               )}
@@ -971,7 +1043,8 @@ export function HelpChatPage() {
         </div>
 
         {/* --- Input Area --- */}
-        <div
+        <section
+          aria-label="File drop zone"
           className="relative z-10 border-t border-white/10 bg-white/40 p-6 backdrop-blur-xl dark:bg-black/40"
           onDragOver={handleDragOver}
           onDrop={handleDrop}
@@ -986,9 +1059,9 @@ export function HelpChatPage() {
                   exit={{ opacity: 0, y: 10 }}
                   className="mb-4 flex gap-3 overflow-x-auto pb-2"
                 >
-                  {attachments.map((file, i) => (
+                  {attachments.map((file) => (
                     <div
-                      key={i}
+                      key={file.name}
                       className="group relative flex w-36 shrink-0 flex-col gap-2 rounded-xl border border-white/20 bg-white/50 p-2.5 shadow-sm backdrop-blur-md dark:bg-black/50"
                     >
                       <div className="flex h-20 w-full items-center justify-center rounded-lg bg-muted/50 overflow-hidden">
@@ -1006,8 +1079,9 @@ export function HelpChatPage() {
                         {file.name}
                       </span>
                       <button
-                        onClick={() => removeAttachment(i)}
+                        onClick={() => removeAttachment(attachments.indexOf(file))}
                         className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white shadow-md opacity-0 transition-all group-hover:opacity-100 hover:scale-110"
+                        title={`Remove ${file.name}`}
                       >
                         <X size={12} />
                       </button>
@@ -1025,6 +1099,7 @@ export function HelpChatPage() {
               ref={fileInputRef}
               onChange={onFileChange}
               accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.json,.md,.yaml,.yml,.xml,.log,.ts,.tsx,.js,.jsx,.py,.html,.css"
+              aria-label="Upload files"
             />
             <InputGroup className="items-end gap-2 rounded-[2rem] border-white/20 bg-white/60 p-2 shadow-xl shadow-indigo-500/5 transition-all dark:bg-black/40 has-[textarea:focus-visible]:border-indigo-500/50 has-[textarea:focus-visible]:bg-white has-[textarea:focus-visible]:ring-4 has-[textarea:focus-visible]:ring-indigo-500/10 dark:has-[textarea:focus-visible]:bg-black/60">
               <InputGroupAddon className="py-0">
@@ -1048,15 +1123,13 @@ export function HelpChatPage() {
                     if (isAgentActive) handleSend()
                   }
                 }}
-                placeholder={
-                  !isOnline
-                    ? t('ai.chat.offline')
-                    : !isAgentActive
-                      ? t('ai.chat.agentInactive')
-                      : t('ai.chat.placeholder')
-                }
+                placeholder={(() => {
+                  if (!isOnline) return t('ai.chat.offline')
+                  if (!isAgentActive) return t('ai.chat.agentInactive')
+                  return t('ai.chat.placeholder')
+                })()}
                 disabled={isLoading || !isOnline || !isAgentActive}
-                className="min-h-[44px] max-h-[160px] resize-none border-0 bg-transparent py-2.5 text-base placeholder:text-muted-foreground/50"
+                className="min-h-11 max-h-40 resize-none border-0 bg-transparent py-2.5 text-base placeholder:text-muted-foreground/50"
               />
 
               <InputGroupAddon align="inline-end" className="py-0">
@@ -1078,7 +1151,7 @@ export function HelpChatPage() {
                     className={cn(
                       'h-11 w-11 shrink-0 rounded-full shadow-lg transition-all duration-300',
                       input.trim() || attachments.length > 0
-                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/25 hover:scale-105'
+                        ? 'bg-linear-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/25 hover:scale-105'
                         : 'bg-muted text-muted-foreground hover:bg-muted/80',
                     )}
                     size="icon-sm"
@@ -1089,7 +1162,7 @@ export function HelpChatPage() {
               </InputGroupAddon>
             </InputGroup>
           </div>
-        </div>
+        </section>
 
         {/* Preview Modal */}
         <AnimatePresence>
@@ -1104,6 +1177,7 @@ export function HelpChatPage() {
               <button
                 className="absolute right-6 top-6 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors"
                 onClick={() => setIsPreviewOpen(null)}
+                title="Close preview"
               >
                 <X size={28} />
               </button>

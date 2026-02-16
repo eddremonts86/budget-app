@@ -1,5 +1,5 @@
 import 'fake-indexeddb/auto'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   createConversationObject,
   deleteAllConversations,
@@ -10,7 +10,6 @@ import {
   getConversations,
   migrateFromLocalStorage,
   saveConversation,
-  type Conversation,
   type StoredMessage,
 } from '@/shared/lib/storage/chat-storage'
 

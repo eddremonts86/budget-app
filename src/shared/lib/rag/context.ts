@@ -1,5 +1,5 @@
-import fs from 'fs/promises'
-import path from 'path'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 // ---------------------------------------------------------------------------
 // Intent Detection
@@ -348,7 +348,8 @@ function buildAppNavigationContext(knowledge: AppKnowledge, locale: string): str
   for (const item of knowledge.navigation.main) {
     const label = isSpanish ? item.labelEs : item.label
     const desc = isSpanish ? (item.descriptionEs ?? item.description) : item.description
-    lines.push(`• ${label}: ${item.url}${desc ? ` — ${desc}` : ''}`)
+    const suffix = desc ? ` — ${desc}` : ''
+    lines.push(`• ${label}: ${item.url}${suffix}`)
   }
 
   for (const item of knowledge.navigation.secondary) {
@@ -484,7 +485,7 @@ function buildDataContext(db: MockDb, intents: Intent[]): string {
       [
         `[Transactions Data — View at /dashboard/transactions]`,
         `Total Transactions: ${db.recentTransactions.length}`,
-        `Transactions: ${JSON.stringify(db.recentTransactions.map((t) => ({ customer: t.customer.name, status: t.status, amount: `$${t.amount}`, date: t.date })))}`,
+        `Transactions: ${JSON.stringify(db.recentTransactions.map((t) => ({ customer: t.customer.name, status: t.status, amount: '$' + String(t.amount), date: t.date })))}`,
       ].join('\n'),
     )
   }

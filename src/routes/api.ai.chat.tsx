@@ -38,10 +38,7 @@ export const Route = createFileRoute('/api/ai/chat')({
 
           const messages = rawMessages
             .map((msg) => {
-              const role = (msg.role === 'system' ? 'user' : msg.role) as
-                | 'user'
-                | 'assistant'
-                | 'tool'
+              const role = msg.role === 'system' ? ('user' as const) : msg.role
 
               if (Array.isArray(msg.parts)) {
                 const hasMultimodal = msg.parts.some((p) => p.type === 'image')
@@ -181,7 +178,7 @@ export const Route = createFileRoute('/api/ai/chat')({
 
               // Insert context message right before the last user message
               const lastUserIdx = messages.lastIndexOf(lastUserMessage)
-              messages.splice(lastUserIdx, 0, contextMessage as (typeof messages)[0])
+              messages.splice(lastUserIdx, 0, contextMessage as unknown as (typeof messages)[0])
             }
           }
 

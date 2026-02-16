@@ -1,6 +1,4 @@
-import fs from 'fs/promises'
-import path from 'path'
-import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 
 // We test the context module's exported functions directly
 import {
@@ -12,7 +10,7 @@ import {
   buildDataContext,
   buildActionInstructions,
 } from '@/shared/lib/rag/context'
-import type { Intent, ActionIntent, AppKnowledge, MockDb } from '@/shared/lib/rag/context'
+import type { MockDb } from '@/shared/lib/rag/context'
 
 // ---------------------------------------------------------------------------
 // Intent Detection Tests
