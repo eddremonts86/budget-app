@@ -5,6 +5,8 @@ export interface Todo {
   status: 'pending' | 'in_progress' | 'completed'
   priority: 'low' | 'medium' | 'high'
   dueDate: string
+  createdBy: string
+  assignedTo: string
   createdAt: string
   updatedAt: string
 }

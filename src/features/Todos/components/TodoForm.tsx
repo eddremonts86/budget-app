@@ -9,11 +9,13 @@ import {
   Loader2,
   MoreHorizontal,
   Save,
+  UserCircle,
   X,
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Calendar } from '@/components/ui/calendar'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
@@ -28,6 +30,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { useUsers } from '@/features/Users/api/users.queries'
 import { cn } from '@/shared/lib/utils'
 import type { Todo } from '../model/types'
 
@@ -38,20 +41,29 @@ const createTodoSchema = (t: (key: string) => string) =>
     status: z.enum(['pending', 'in_progress', 'completed']),
     priority: z.enum(['low', 'medium', 'high']),
     dueDate: z.string().min(1, t('validation.required')),
+    assignedTo: z.string().min(1, t('validation.required')),
   })
 
 type TodoFormValues = z.infer<ReturnType<typeof createTodoSchema>>
 
 type TodoFormProps = {
   defaultValues?: Partial<Todo>
+  currentUserId?: string
   onSubmit: (values: TodoFormValues) => void | Promise<void>
   onCancel: () => void
   isLoading?: boolean
 }
 
-export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoFormProps) {
+export function TodoForm({
+  defaultValues,
+  currentUserId,
+  onSubmit,
+  onCancel,
+  isLoading,
+}: TodoFormProps) {
   const { t, i18n } = useTranslation()
   const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
+  const { data: users } = useUsers()
   const locale = React.useMemo(() => {
     const language = i18n.language?.toLowerCase() ?? 'en'
     const normalized = language.split('-')[0]
@@ -66,6 +78,7 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
       status: (defaultValues?.status as TodoFormValues['status']) ?? 'pending',
       priority: (defaultValues?.priority as TodoFormValues['priority']) ?? 'medium',
       dueDate: defaultValues?.dueDate ?? new Date().toISOString().split('T')[0],
+      assignedTo: defaultValues?.assignedTo ?? currentUserId ?? '',
     },
     validators: {
       onChange: todoSchema,
@@ -330,6 +343,51 @@ export function TodoForm({ defaultValues, onSubmit, onCancel, isLoading }: TodoF
                       />
                     </PopoverContent>
                   </Popover>
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) =>
+                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
+                    )}
+                  />
+                </Field>
+              </motion.div>
+            )}
+          />
+
+          <form.Field
+            name="assignedTo"
+            children={(field) => (
+              <motion.div variants={itemVariants}>
+                <Field className="space-y-2">
+                  <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                    <UserCircle className="w-3.5 h-3.5" /> {t('todos.form.assignedToLabel')}
+                  </FieldLabel>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value)}
+                  >
+                    <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
+                      <SelectValue placeholder={t('todos.form.assignedToPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
+                      {users?.map((user) => (
+                        <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
+                          <div className="flex items-center gap-2">
+                            <Avatar className="h-5 w-5">
+                              <AvatarImage src={user.avatar} alt={user.name} />
+                              <AvatarFallback className="text-[10px]">
+                                {user.name.substring(0, 2).toUpperCase()}
+                              </AvatarFallback>
+                            </Avatar>
+                            <span>
+                              {user.id === currentUserId
+                                ? `${user.name} (${t('todos.form.assignedToSelf')})`
+                                : user.name}
+                            </span>
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FieldError
                     errors={field.state.meta.errors.map((e) =>
                       typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),

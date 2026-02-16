@@ -1,7 +1,9 @@
 import { useForm } from '@tanstack/react-form'
+import { RefreshCw } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -73,7 +75,9 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               placeholder={t('users.form.namePlaceholder')}
             />
             <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+              errors={field.state.meta.errors.map((e) =>
+                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
+              )}
             />
           </Field>
         )}
@@ -93,7 +97,9 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               placeholder={t('users.form.emailPlaceholder')}
             />
             <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+              errors={field.state.meta.errors.map((e) =>
+                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
+              )}
             />
           </Field>
         )}
@@ -117,7 +123,9 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               </SelectContent>
             </Select>
             <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+              errors={field.state.meta.errors.map((e) =>
+                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
+              )}
             />
           </Field>
         )}
@@ -126,30 +134,58 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
       <form.Field
         name="avatar"
         children={(field) => (
-          <Field>
+          <Field className="space-y-3">
             <FieldLabel htmlFor={field.name}>{t('users.form.avatarLabel')}</FieldLabel>
-            <div className="flex gap-2">
-              <Input
-                id={field.name}
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-                placeholder={t('users.form.avatarPlaceholder')}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() =>
-                  field.handleChange(
-                    `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`,
-                  )
-                }
-              >
-                {t('users.form.avatarRandom')}
-              </Button>
+            <div className="flex items-start gap-4 p-4 rounded-xl border border-border/40 bg-muted/5">
+              <Avatar className="h-16 w-16 border-2 border-background shadow-sm ring-1 ring-border/10">
+                <AvatarImage
+                  src={field.state.value}
+                  alt="Avatar preview"
+                  className="object-cover"
+                />
+                <form.Subscribe
+                  selector={(state) => state.values.name}
+                  children={(name) => (
+                    <AvatarFallback className="bg-primary/5 text-primary text-lg font-bold">
+                      {(name || '?').charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  )}
+                />
+              </Avatar>
+              <div className="flex-1 space-y-2">
+                <div className="flex gap-2">
+                  <Input
+                    id={field.name}
+                    value={field.state.value}
+                    onBlur={field.handleBlur}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder={t('users.form.avatarPlaceholder')}
+                    className="font-mono text-xs"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="icon"
+                    className="shrink-0"
+                    onClick={() =>
+                      field.handleChange(
+                        `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`,
+                      )
+                    }
+                    title={t('users.form.avatarRandom')}
+                  >
+                    <RefreshCw className="h-4 w-4" />
+                  </Button>
+                </div>
+                <p className="text-[10px] text-muted-foreground">
+                  {t('users.form.avatarHelp') || 'Paste a URL or generate a random avatar'}
+                </p>
+              </div>
             </div>
             <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+              errors={field.state.meta.errors.map((e) =>
+                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
+              )}
             />
           </Field>
         )}

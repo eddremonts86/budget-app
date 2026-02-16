@@ -27,6 +27,9 @@
     "actions": "Actions",
     "confirm": "Confirm",
     "undoWarning": "This action cannot be undone.",
+    "noPermission": "You don't have permission to perform this action.",
+    "noPermissionEdit": "You can only edit tasks you created or are assigned to.",
+    "noPermissionDelete": "You can only delete tasks you created or are assigned to.",
     "yes": "Yes",
     "no": "No",
     "submit": "Submit",
@@ -108,7 +111,22 @@
       "supportAssistant": "Support Assistant",
       "agentInactive": "The assistant is currently unavailable",
       "retry": "Retry",
-      "connectionError": "Connection error with the server"
+      "connectionError": "Connection error with the server",
+      "emptyResponse": "The AI returned an empty response. Try asking again or rephrasing your question.",
+      "fileAutoInstruction": "Analyze the attached file. If it contains a list of tasks or items, create a task for each one using CREAR TAREA action blocks.",
+      "fileAnalyzeInstruction": "Analyze the attached file and provide a summary or relevant actions.",
+      "conversations": "Conversations",
+      "newConversation": "New conversation",
+      "deleteConversation": "Delete conversation",
+      "deleteAllConversations": "Delete all",
+      "confirmDeleteConversation": "Are you sure you want to delete this conversation?",
+      "confirmDeleteAll": "Are you sure you want to delete all conversations?",
+      "noConversations": "No conversations yet",
+      "today": "Today",
+      "yesterday": "Yesterday",
+      "previousDays": "Previous 7 days",
+      "older": "Older",
+      "untitledConversation": "New conversation"
     }
   },
   "settings": {
@@ -310,7 +328,10 @@
       "priorityMedium": "Medium",
       "priorityHigh": "High",
       "dueDateLabel": "Due Date",
-      "dueDatePlaceholder": "Select date"
+      "dueDatePlaceholder": "Select date",
+      "assignedToLabel": "Assigned To",
+      "assignedToPlaceholder": "Select user",
+      "assignedToSelf": "Me"
     },
     "status": {
       "pending": "Pending",
@@ -326,6 +347,7 @@
       "title": "Task",
       "status": "Status",
       "priority": "Priority",
+      "assignedTo": "Assigned To",
       "createdAt": "Created"
     },
     "confirm": {
@@ -370,7 +392,8 @@
       "roleAdmin": "Admin",
       "avatarLabel": "Avatar URL",
       "avatarPlaceholder": "Avatar URL",
-      "avatarRandom": "Random"
+      "avatarRandom": "Random",
+      "avatarHelp": "Paste a URL or generate a random avatar"
     },
     "table": {
       "user": "User",

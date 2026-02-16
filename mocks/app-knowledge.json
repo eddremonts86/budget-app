@@ -1,0 +1,361 @@
+{
+  "application": {
+    "name": "Acme Inc. Dashboard",
+    "description": "Aplicación de gestión empresarial con panel de control, gestión de tareas, usuarios, analíticas, proyectos, equipo, categorías, transacciones, configuración y asistente de IA.",
+    "baseUrl": "/dashboard",
+    "landingUrl": "/",
+    "languages": ["English (en)", "Spanish (es)", "Danish (dk)"],
+    "auth": "Clerk (autenticación requerida para el dashboard)"
+  },
+  "navigation": {
+    "main": [
+      {
+        "label": "Dashboard",
+        "labelEs": "Panel de Control",
+        "url": "/dashboard",
+        "icon": "IconDashboard",
+        "description": "Página principal con estadísticas generales: ingresos totales, suscripciones, ventas y usuarios activos. También muestra una tabla de transacciones recientes.",
+        "descriptionEs": "Página principal con estadísticas generales: ingresos totales, suscripciones, ventas y usuarios activos. También muestra una tabla de transacciones recientes."
+      },
+      {
+        "label": "Todos",
+        "labelEs": "Tareas",
+        "url": "/dashboard/todos",
+        "icon": "IconListDetails",
+        "description": "Full CRUD task manager with data table, infinite scroll, status/priority badges. Create, edit, and delete tasks.",
+        "descriptionEs": "Gestor de tareas completo con tabla de datos, scroll infinito, badges de estado/prioridad. Crear, editar y eliminar tareas."
+      },
+      {
+        "label": "Analytics",
+        "labelEs": "Analíticas",
+        "url": "/dashboard/analytics",
+        "icon": "IconChartBar",
+        "description": "Analytics view with page views and chart area for data visualization.",
+        "descriptionEs": "Vista de analíticas con páginas vistas y área de gráfico para visualización de datos."
+      },
+      {
+        "label": "Projects",
+        "labelEs": "Proyectos",
+        "url": "/dashboard/projects",
+        "icon": "IconFolder",
+        "description": "Project cards showing name, status, and progress bar.",
+        "descriptionEs": "Tarjetas de proyectos mostrando nombre, estado y barra de progreso."
+      },
+      {
+        "label": "Team",
+        "labelEs": "Equipo",
+        "url": "/dashboard/team",
+        "icon": "IconUsers",
+        "description": "Team member cards with avatar, name, role and email.",
+        "descriptionEs": "Tarjetas de miembros del equipo con avatar, nombre, rol y email."
+      },
+      {
+        "label": "Users",
+        "labelEs": "Usuarios",
+        "url": "/dashboard/users",
+        "icon": "IconUsers",
+        "description": "Full CRUD user management with data table, infinite scroll, role badges (admin/user). Create, edit, and delete users.",
+        "descriptionEs": "Gestión completa de usuarios con tabla de datos, scroll infinito, badges de rol (admin/usuario). Crear, editar y eliminar usuarios."
+      },
+      {
+        "label": "Categories",
+        "labelEs": "Categorías",
+        "url": "/dashboard/categories",
+        "icon": "IconListDetails",
+        "description": "Full CRUD category management with color dots and color codes.",
+        "descriptionEs": "Gestión completa de categorías con puntos de color y códigos de color."
+      },
+      {
+        "label": "Transactions",
+        "labelEs": "Transacciones",
+        "url": "/dashboard/transactions",
+        "icon": "IconReport",
+        "description": "Full CRUD transaction management with customer info, status badges, amounts in USD, and dates.",
+        "descriptionEs": "Gestión completa de transacciones con info del cliente, badges de estado, montos en USD y fechas."
+      },
+      {
+        "label": "Settings",
+        "labelEs": "Configuración",
+        "url": "/dashboard/settings",
+        "icon": "IconSettings",
+        "description": "Two tabs: System (language, theme, devtools) and AI Configuration (provider, model, parameters).",
+        "descriptionEs": "Dos pestañas: Sistema (idioma, tema, devtools) y Configuración IA (proveedor, modelo, parámetros)."
+      }
+    ],
+    "secondary": [
+      {
+        "label": "Settings",
+        "labelEs": "Configuración",
+        "url": "/dashboard/settings",
+        "icon": "IconSettings"
+      },
+      {
+        "label": "Get Help",
+        "labelEs": "Obtener Ayuda",
+        "url": "/dashboard/help",
+        "icon": "IconHelp",
+        "description": "AI chat assistant with markdown rendering, code syntax highlighting, file upload, and thinking process.",
+        "descriptionEs": "Asistente de IA con renderizado markdown, resaltado de código, carga de archivos y proceso de razonamiento."
+      },
+      {
+        "label": "Search",
+        "labelEs": "Buscar",
+        "action": "Cmd+K / opens AI search sheet",
+        "icon": "IconSearch"
+      }
+    ]
+  },
+  "pages": {
+    "/dashboard": {
+      "title": "Dashboard",
+      "titleEs": "Panel de Control",
+      "features": [
+        "4 stat cards: Revenue ($45,231.89), Subscriptions (2,350), Sales (12,234), Active Now (573)",
+        "Recent Transactions table with customer, status, date, and amount",
+        "Trend indicators (up/down) for each stat"
+      ],
+      "dataSource": "API (dashboardStats + recentTransactions)",
+      "actions": ["View stats", "View recent transactions"]
+    },
+    "/dashboard/todos": {
+      "title": "Todos",
+      "titleEs": "Tareas",
+      "features": [
+        "Data table with infinite scroll",
+        "Status badges: pending (pendiente), in_progress (en progreso), completed (completado)",
+        "Priority badges: low (baja), medium (media), high (alta)",
+        "Due date display",
+        "Create new task via sheet/form",
+        "Edit existing tasks",
+        "Delete tasks with undo toast"
+      ],
+      "dataSource": "API (json-server /todos)",
+      "actions": ["Create todo", "Edit todo", "Delete todo", "Filter by status", "Sort columns"],
+      "dataModel": {
+        "fields": [
+          "id",
+          "title",
+          "description",
+          "status",
+          "priority",
+          "dueDate",
+          "createdAt",
+          "updatedAt"
+        ],
+        "statuses": ["pending", "in_progress", "completed"],
+        "priorities": ["low", "medium", "high"]
+      }
+    },
+    "/dashboard/analytics": {
+      "title": "Analytics",
+      "titleEs": "Analíticas",
+      "features": ["Page views card", "Chart area for data visualization"],
+      "dataSource": "Static data",
+      "actions": ["View analytics"]
+    },
+    "/dashboard/projects": {
+      "title": "Projects",
+      "titleEs": "Proyectos",
+      "features": ["3 project cards with name, status, and progress bar"],
+      "dataSource": "Static/hardcoded data",
+      "actions": ["View projects"]
+    },
+    "/dashboard/team": {
+      "title": "Team",
+      "titleEs": "Equipo",
+      "features": ["3 team member cards with avatar, name, role, and email"],
+      "dataSource": "Static/hardcoded data",
+      "actions": ["View team members"]
+    },
+    "/dashboard/users": {
+      "title": "Users",
+      "titleEs": "Usuarios",
+      "features": [
+        "Data table with infinite scroll",
+        "Avatar display",
+        "Role badges: admin, user",
+        "Create new user via sheet/form",
+        "Edit existing users",
+        "Delete users with undo toast"
+      ],
+      "dataSource": "API (json-server /users)",
+      "actions": ["Create user", "Edit user", "Delete user", "Filter", "Sort columns"],
+      "dataModel": {
+        "fields": ["id", "name", "email", "role", "avatar"],
+        "roles": ["admin", "user"]
+      }
+    },
+    "/dashboard/categories": {
+      "title": "Categories",
+      "titleEs": "Categorías",
+      "features": [
+        "Data table with infinite scroll",
+        "Color dot preview",
+        "Color code display",
+        "Create new category via sheet/form",
+        "Edit existing categories",
+        "Delete categories with undo toast"
+      ],
+      "dataSource": "API (json-server /categories)",
+      "actions": ["Create category", "Edit category", "Delete category"],
+      "dataModel": {
+        "fields": ["id", "name", "color"]
+      }
+    },
+    "/dashboard/transactions": {
+      "title": "Transactions",
+      "titleEs": "Transacciones",
+      "features": [
+        "Data table with infinite scroll",
+        "Customer name and email",
+        "Status badges: Approved, Pending, Rejected",
+        "Amount in USD currency format",
+        "Date display",
+        "Create new transaction via sheet/form",
+        "Edit existing transactions",
+        "Delete transactions with undo toast"
+      ],
+      "dataSource": "API (json-server /recentTransactions)",
+      "actions": [
+        "Create transaction",
+        "Edit transaction",
+        "Delete transaction",
+        "Filter",
+        "Sort columns"
+      ],
+      "dataModel": {
+        "fields": ["id", "customer.name", "customer.email", "status", "date", "amount"],
+        "statuses": ["Approved", "Pending", "Rejected"]
+      }
+    },
+    "/dashboard/settings": {
+      "title": "Settings",
+      "titleEs": "Configuración",
+      "features": [
+        "Tab System: Language selector (en/es/dk), Theme selector (light/dark/system), Devtools toggle",
+        "Tab AI Configuration: Provider selector, model selector, parameter sliders (temperature, max tokens, top-p)",
+        "Save and reset buttons"
+      ],
+      "dataSource": "Local state + API (ai-config)",
+      "actions": ["Change language", "Change theme", "Toggle devtools", "Configure AI provider"]
+    },
+    "/dashboard/help": {
+      "title": "AI Help",
+      "titleEs": "Ayuda IA",
+      "features": [
+        "AI chat assistant with message bubbles",
+        "Markdown rendering with syntax highlighting",
+        "Thinking/reasoning process display (collapsible)",
+        "File upload capability",
+        "Provider selection (LM Studio, OpenAI, Anthropic)",
+        "Persistent message history via localStorage",
+        "Suggestion chips for common questions"
+      ],
+      "dataSource": "AI API (/api/ai/chat) + localStorage",
+      "actions": ["Send message", "Upload file", "Select provider", "Clear history"]
+    }
+  },
+  "dataOverview": {
+    "todos": {
+      "total": 1498,
+      "byStatus": {
+        "pending": 502,
+        "in_progress": 499,
+        "completed": 497
+      },
+      "byPriority": {
+        "low": "~33%",
+        "medium": "~33%",
+        "high": "~33%"
+      },
+      "url": "/dashboard/todos",
+      "apiEndpoint": "/todos"
+    },
+    "users": {
+      "total": 2,
+      "list": [
+        { "name": "Admin User", "email": "admin@example.com", "role": "admin" },
+        { "name": "Test User", "email": "test@example.com", "role": "user" }
+      ],
+      "url": "/dashboard/users",
+      "apiEndpoint": "/users"
+    },
+    "categories": {
+      "total": 4,
+      "list": ["Development", "Design", "Marketing", "Research"],
+      "url": "/dashboard/categories",
+      "apiEndpoint": "/categories"
+    },
+    "transactions": {
+      "total": 4,
+      "list": [
+        { "customer": "Liam Johnson", "status": "Approved", "amount": 250 },
+        { "customer": "Olivia Smith", "status": "Pending", "amount": 150 },
+        { "customer": "Noah Williams", "status": "Approved", "amount": 350 },
+        { "customer": "Emma Brown", "status": "Rejected", "amount": 450 }
+      ],
+      "url": "/dashboard/transactions",
+      "apiEndpoint": "/recentTransactions"
+    },
+    "dashboardStats": {
+      "revenue": { "value": "$45,231.89", "change": "+20.1%" },
+      "subscriptions": { "value": "2,350", "change": "+180.1%" },
+      "sales": { "value": "12,234", "change": "+19%" },
+      "activeNow": { "value": "573", "change": "+201" }
+    }
+  },
+  "commonQuestions": {
+    "whereToFind": {
+      "tasks": "Go to /dashboard/todos to see, create, edit, or delete tasks.",
+      "users": "Go to /dashboard/users to manage users.",
+      "transactions": "Go to /dashboard/transactions to view and manage transactions.",
+      "analytics": "Go to /dashboard/analytics to see page views and charts.",
+      "settings": "Go to /dashboard/settings to change language, theme, or AI configuration.",
+      "projects": "Go to /dashboard/projects to see project cards with progress.",
+      "team": "Go to /dashboard/team to see team member information.",
+      "categories": "Go to /dashboard/categories to manage categories.",
+      "help": "Go to /dashboard/help to chat with the AI assistant."
+    },
+    "howTo": {
+      "createTask": "You can ask me to create a task directly in this chat! Just say something like 'create a task called...' with the details and I'll prepare it for you with a confirmation button. Or go to /dashboard/todos and click the 'New' button.",
+      "editTask": "Go to /dashboard/todos, find the task in the table, and click the edit action.",
+      "deleteTask": "Go to /dashboard/todos, find the task, and click the delete action. You can undo within the toast notification.",
+      "changeLanguage": "Go to /dashboard/settings, in the System tab, use the language selector to switch between English, Spanish, or Danish.",
+      "changeTheme": "Go to /dashboard/settings, in the System tab, use the theme selector to switch between light, dark, or system.",
+      "configureAI": "Go to /dashboard/settings, click the AI Configuration tab, select your provider and model, adjust parameters.",
+      "searchApp": "Press Cmd+K (Mac) or Ctrl+K to open the AI-powered search sheet from anywhere in the dashboard.",
+      "createUser": "You can ask me to create a user directly in this chat! Just provide the name and email. Or go to /dashboard/users and click the 'New' button.",
+      "createTransaction": "You can ask me to create a transaction directly in this chat! Provide the customer name, amount and status. Or go to /dashboard/transactions and click the 'New' button.",
+      "createCategory": "You can ask me to create a category directly in this chat! Just provide the name and color. Or go to /dashboard/categories and click the 'New' button."
+    }
+  },
+  "aiCapabilities": {
+    "description": "The AI assistant can perform the following actions directly from the chat:",
+    "actions": [
+      {
+        "action": "Create Task",
+        "actionEs": "Crear Tarea",
+        "trigger": "Ask me to create a new task with a title, description, priority and due date",
+        "triggerEs": "Pídeme crear una nueva tarea con título, descripción, prioridad y fecha límite"
+      },
+      {
+        "action": "Create User",
+        "actionEs": "Crear Usuario",
+        "trigger": "Ask me to create a new user with name and email",
+        "triggerEs": "Pídeme crear un nuevo usuario con nombre y email"
+      },
+      {
+        "action": "Create Transaction",
+        "actionEs": "Crear Transacción",
+        "trigger": "Ask me to create a transaction with customer, amount and status",
+        "triggerEs": "Pídeme crear una transacción con cliente, monto y estado"
+      },
+      {
+        "action": "Create Category",
+        "actionEs": "Crear Categoría",
+        "trigger": "Ask me to create a new category with name and color",
+        "triggerEs": "Pídeme crear una nueva categoría con nombre y color"
+      }
+    ]
+  }
+}

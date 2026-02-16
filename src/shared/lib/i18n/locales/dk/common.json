@@ -27,6 +27,9 @@
     "actions": "Handlinger",
     "confirm": "Bekræft",
     "undoWarning": "Denne handling kan ikke fortrydes.",
+    "noPermission": "Du har ikke tilladelse til at udføre denne handling.",
+    "noPermissionEdit": "Du kan kun redigere opgaver, du har oprettet eller er tildelt.",
+    "noPermissionDelete": "Du kan kun slette opgaver, du har oprettet eller er tildelt.",
     "yes": "Ja",
     "no": "Nej",
     "submit": "Indsend",
@@ -99,7 +102,22 @@
       "offline": "Du er offline. Opret forbindelse for at sende beskeder.",
       "error": "Vi kunne ikke nå AI-tjenesten.",
       "empty": "Start samtalen med et spørgsmål.",
-      "providers": "Udbyderstatus"
+      "providers": "Udbyderstatus",
+      "emptyResponse": "AI'en returnerede et tomt svar. Prøv at stille spørgsmålet igen eller omformuler det.",
+      "fileAutoInstruction": "Analyser den vedhæftede fil. Hvis den indeholder en liste over opgaver eller elementer, opret en opgave for hver ved hjælp af OPRET OPGAVE handlingsblokke.",
+      "fileAnalyzeInstruction": "Analyser den vedhæftede fil og giv et resumé eller relevante handlinger.",
+      "conversations": "Samtaler",
+      "newConversation": "Ny samtale",
+      "deleteConversation": "Slet samtale",
+      "deleteAllConversations": "Slet alle",
+      "confirmDeleteConversation": "Er du sikker på, at du vil slette denne samtale?",
+      "confirmDeleteAll": "Er du sikker på, at du vil slette alle samtaler?",
+      "noConversations": "Ingen samtaler endnu",
+      "today": "I dag",
+      "yesterday": "I går",
+      "previousDays": "Sidste 7 dage",
+      "older": "Ældre",
+      "untitledConversation": "Ny samtale"
     }
   },
   "settings": {
@@ -301,7 +319,10 @@
       "priorityMedium": "Mellem",
       "priorityHigh": "Høj",
       "dueDateLabel": "Forfaldsdato",
-      "dueDatePlaceholder": "Vælg dato"
+      "dueDatePlaceholder": "Vælg dato",
+      "assignedToLabel": "Tildelt til",
+      "assignedToPlaceholder": "Vælg bruger",
+      "assignedToSelf": "Mig"
     },
     "status": {
       "pending": "Afventer",
@@ -317,6 +338,7 @@
       "title": "Opgave",
       "status": "Status",
       "priority": "Prioritet",
+      "assignedTo": "Tildelt til",
       "createdAt": "Oprettet"
     },
     "confirm": {
@@ -361,7 +383,8 @@
       "roleAdmin": "Admin",
       "avatarLabel": "Avatar-URL",
       "avatarPlaceholder": "Avatar-URL",
-      "avatarRandom": "Tilfældig"
+      "avatarRandom": "Tilfældig",
+      "avatarHelp": "Indsæt en URL eller generer en tilfældig avatar"
     },
     "table": {
       "user": "Bruger",

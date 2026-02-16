@@ -30,26 +30,99 @@ async function ingest() {
     console.log(`  Processed ${file}`)
   }
 
-  // 2. Ingest DB Schema (Mock)
+  // 2. Ingest App Knowledge Base
+  try {
+    const knowledgePath = 'mocks/app-knowledge.json'
+    const knowledgeContent = await fs.readFile(knowledgePath, 'utf-8')
+    const knowledge = JSON.parse(knowledgeContent)
+
+    // Ingest navigation items individually for better retrieval
+    if (knowledge.navigation?.main) {
+      for (const item of knowledge.navigation.main) {
+        const doc = [
+          `Page: ${item.label} (${item.labelEs})`,
+          `URL: ${item.url}`,
+          `Description: ${item.description}`,
+          `Descripción: ${item.descriptionEs}`,
+        ].join('\n')
+
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`nav-${item.url}`],
+          embeddings: [embedding],
+          metadatas: [{ source: knowledgePath, type: 'navigation', url: item.url }],
+          documents: [doc],
+        })
+      }
+      console.log('  Processed navigation items')
+    }
+
+    // Ingest page details
+    if (knowledge.pages) {
+      for (const [url, page] of Object.entries(knowledge.pages)) {
+        const p = page as { title: string; titleEs: string; features: string[]; actions?: string[] }
+        const doc = [
+          `Page: ${p.title} (${p.titleEs})`,
+          `URL: ${url}`,
+          `Features: ${p.features.join('; ')}`,
+          p.actions ? `Actions: ${p.actions.join(', ')}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n')
+
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`page-${url}`],
+          embeddings: [embedding],
+          metadatas: [{ source: knowledgePath, type: 'page', url }],
+          documents: [doc],
+        })
+      }
+      console.log('  Processed page details')
+    }
+
+    // Ingest common Q&A pairs
+    if (knowledge.commonQuestions) {
+      const allQA: Array<{ key: string; answer: string }> = []
+      for (const [, answers] of Object.entries(knowledge.commonQuestions)) {
+        for (const [key, answer] of Object.entries(answers as Record<string, string>)) {
+          allQA.push({ key, answer })
+        }
+      }
+      for (const qa of allQA) {
+        const embedding = await generateEmbedding(qa.answer)
+        await collection.upsert({
+          ids: [`qa-${qa.key}`],
+          embeddings: [embedding],
+          metadatas: [{ source: knowledgePath, type: 'qa', key: qa.key }],
+          documents: [qa.answer],
+        })
+      }
+      console.log('  Processed Q&A pairs')
+    }
+
+    console.log('✅ App knowledge base ingested')
+  } catch (error) {
+    console.warn('⚠️ Could not process app-knowledge.json, skipping.', error)
+  }
+
+  // 3. Ingest DB Schema (Mock)
   try {
     const dbPath = 'mocks/db.json'
     const dbContent = await fs.readFile(dbPath, 'utf-8')
     const dbSchema = JSON.parse(dbContent)
 
-    // Flatten schema for better retrieval
-    // Assuming typical json-server structure: { "posts": [...], "comments": [...] }
     const tables = Object.keys(dbSchema)
 
     for (const table of tables) {
-      // Ensure it's an array before slicing
       if (!Array.isArray(dbSchema[table])) {
         console.warn(`  ⚠️ Skipping table ${table} as it is not an array`)
         continue
       }
 
-      const sampleData = dbSchema[table].slice(0, 3) // Take first 3 items as sample
-      const description = `Table: ${table}. Structure based on sample: ${JSON.stringify(sampleData)}`
-      
+      const sampleData = dbSchema[table].slice(0, 3)
+      const description = `Table: ${table}. Total records: ${dbSchema[table].length}. Structure based on sample: ${JSON.stringify(sampleData)}`
+
       const embedding = await generateEmbedding(description)
       await collection.upsert({
         ids: [`schema-${table}`],
@@ -63,14 +136,12 @@ async function ingest() {
     console.warn('⚠️ Could not process mocks/db.json, skipping schema ingestion.', error)
   }
 
-  // 3. Ingest Source Code (Key files)
-  // Limit to specific directories to avoid indexing everything
-  const codeFiles = await glob('src/features/**/*.tsx') // Focus on features
+  // 4. Ingest Source Code (Key files)
+  const codeFiles = await glob('src/features/**/*.tsx')
   console.log(`found ${codeFiles.length} feature files`)
 
   for (const file of codeFiles) {
     const content = await fs.readFile(file, 'utf-8')
-    // Only index if file is not too large
     if (content.length > 10000) continue
 
     const chunks = chunkText(content, 800)

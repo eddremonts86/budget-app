@@ -1,5 +1,3 @@
-import { promises as fs } from 'fs'
-import path from 'path'
 import { chat, toServerSentEventsResponse } from '@tanstack/ai'
 import { createFileRoute } from '@tanstack/react-router'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
@@ -46,23 +44,30 @@ export const Route = createFileRoute('/api/ai/chat')({
                 | 'tool'
 
               if (Array.isArray(msg.parts)) {
-                const parts = msg.parts.map((p) => {
-                  if (p.type === 'text') return { type: 'text' as const, text: p.content }
-                  if (p.type === 'image') return { type: 'image' as const, image: p.image }
-                  return { type: 'text' as const, text: '' }
-                })
+                const hasMultimodal = msg.parts.some((p) => p.type === 'image')
 
-                return {
-                  role,
-                  content: msg.parts
-                    .map((p) => {
-                      if (p.type === 'text') return p.content
-                      if (p.type === 'image') return `[Image Attached]`
-                      return ''
-                    })
-                    .join('\n'),
-                  parts,
+                const content = msg.parts
+                  .map((p) => {
+                    if (p.type === 'text') return p.content
+                    if (p.type === 'image') return `[Image Attached]`
+                    return ''
+                  })
+                  .join('\n')
+
+                // Only include parts for multimodal messages (with images).
+                // Text-only messages should use plain string content to avoid
+                // compatibility issues with smaller models that don't handle
+                // the multimodal content array format well.
+                if (hasMultimodal) {
+                  const parts = msg.parts.map((p) => {
+                    if (p.type === 'text') return { type: 'text' as const, text: p.content }
+                    if (p.type === 'image') return { type: 'image' as const, image: p.image }
+                    return { type: 'text' as const, text: '' }
+                  })
+                  return { role, content, parts }
                 }
+
+                return { role, content }
               }
 
               return {
@@ -83,31 +88,35 @@ export const Route = createFileRoute('/api/ai/chat')({
           }
 
           const url = new URL(request.url)
-          let locale = url.searchParams.get('locale') || 'en-US'
+          const locale = url.searchParams.get('locale') || 'en-US'
 
-          // Check for language override
-          try {
-            const settingsPath = path.resolve(process.cwd(), 'mocks/ai-settings.json')
-            const content = await fs.readFile(settingsPath, 'utf-8')
-            const settings = JSON.parse(content)
-            if (settings.forceLocale) {
-              locale = settings.forceLocale
-            }
-          } catch {
-            // ignore
+          // Resolve locale code to a full language name for clearer LLM instructions
+          const localeToLanguage: Record<string, string> = {
+            en: 'English',
+            'en-US': 'English',
+            'en-GB': 'English',
+            es: 'Spanish',
+            'es-ES': 'Spanish',
+            'es-MX': 'Spanish',
+            dk: 'Danish',
+            'da-DK': 'Danish',
           }
+          const languageName =
+            localeToLanguage[locale] || localeToLanguage[locale.split('-')[0]] || 'English'
 
           // Inject Mandatory Language System Prompt
-          const systemPrompt = `You are a helpful AI assistant.
-
-          Configuration:
-          - Language: ${locale}
-          - Current Time: ${new Date().toISOString()}
-
-          Instructions:
-          1. Respond ONLY in ${locale}.
-          2. Use Markdown for formatting (bold, italics, code blocks).
-          3. Be helpful and direct.`
+          const systemPrompt = [
+            `You are a helpful, knowledgeable AI assistant for the "Acme Inc." dashboard application.`,
+            `You have access to application data (users, tasks, transactions, categories) and know the app's navigation structure.`,
+            ``,
+            `RULES:`,
+            `1. LANGUAGE: Always respond in ${languageName}.`,
+            `2. Answer the question the user asked. Do NOT say "no question was provided" or give generic greetings.`,
+            `3. When application data is provided as context, use it to give specific answers with numbers.`,
+            `4. When referring to app sections, ALWAYS include the URL path (e.g., /dashboard/todos, /dashboard/users).`,
+            `5. When listing items, be specific with counts, names and details from the provided data.`,
+            `6. Use Markdown for formatting when helpful.`,
+          ].join('\n')
 
           // Ensure system message is first
           messages.unshift({
@@ -156,35 +165,23 @@ export const Route = createFileRoute('/api/ai/chat')({
             const ragContext = await retrieveContext(query)
 
             // Inject Dynamic Context
-            const dynamicContext = await injectDynamicContext(query)
+            const dynamicContext = await injectDynamicContext(query, locale)
 
-            let contextBlock = ''
+            // Inject context as a separate system message BEFORE the user message
+            // instead of modifying the user message (which confuses smaller models)
             if (ragContext || dynamicContext) {
-              contextBlock = `\n\n--- TECHNICAL CONTEXT ---\n${ragContext}\n\n--- REAL-TIME DATA ---\n${dynamicContext}\n`
-            }
+              const contextParts: string[] = []
+              if (ragContext) contextParts.push(`Documentation:\n${ragContext}`)
+              if (dynamicContext) contextParts.push(`Application Data:\n${dynamicContext}`)
 
-            // Enhance the LAST user message directly instead of adding a new one
-            // This is more robust for instruction-following models
-            const newContent = contextBlock
-              ? `Context:\n${contextBlock}\n\nQuestion:\n${query}`
-              : query
-
-            lastUserMessage.content = newContent
-
-            // Also update parts if they exist to ensure consistency for adapters that prefer parts
-            if (
-              'parts' in lastUserMessage &&
-              Array.isArray(lastUserMessage.parts) &&
-              lastUserMessage.parts.length > 0 &&
-              contextBlock // Only update parts if context was added
-            ) {
-              const textPart = lastUserMessage.parts.find((p) => p.type === 'text')
-              if (textPart && 'text' in textPart) {
-                textPart.text = newContent
-              } else {
-                // If no text part found (unlikely for a user message with content), add one
-                lastUserMessage.parts.push({ type: 'text', text: newContent })
+              const contextMessage = {
+                role: 'system' as const,
+                content: `Use the following reference information to answer the user's question accurately. Base your answer on this data when relevant:\n\n${contextParts.join('\n\n')}`,
               }
+
+              // Insert context message right before the last user message
+              const lastUserIdx = messages.lastIndexOf(lastUserMessage)
+              messages.splice(lastUserIdx, 0, contextMessage as (typeof messages)[0])
             }
           }
 
@@ -231,8 +228,9 @@ export const Route = createFileRoute('/api/ai/chat')({
             presence_penalty: config.parameters.presence_penalty,
           }
 
-          // Enable reasoning/thinking for compatible models if supported
-          if (providerId === 'anthropic' || providerId === 'lm-studio') {
+          // Enable reasoning/thinking only for Anthropic models that support it
+          // LM Studio uses the OpenAI-compatible API and does NOT support thinking mode
+          if (providerId === 'anthropic') {
             modelOptions.thinking = {
               type: 'enabled',
               budget_tokens: Math.floor((modelOptions.max_tokens ?? 2048) / 2),

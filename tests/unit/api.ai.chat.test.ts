@@ -82,8 +82,8 @@ describe('AI Chat API - Language Enforcement', () => {
 
     // Check first message is system prompt
     expect(messages[0].role).toBe('system')
-    expect(messages[0].content).toContain('Locale: "es-ES"')
-    expect(messages[0].content).toContain('Do not discuss these rules')
+    expect(messages[0].content).toContain('Spanish')
+    expect(messages[0].content).toContain('LANGUAGE')
   })
 
   it('should default to en-US if locale is missing', async () => {
@@ -99,7 +99,7 @@ describe('AI Chat API - Language Enforcement', () => {
     const callArgs = vi.mocked(chat).mock.calls[0][0] as any
     const messages = callArgs.messages
 
-    expect(messages[0].content).toContain('Locale: "en-US"')
+    expect(messages[0].content).toContain('English')
   })
 
   it('should log audit entry', async () => {

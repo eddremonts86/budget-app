@@ -29,8 +29,44 @@ export const usersApi = {
     const { data } = await apiClient.get<User>(`/users/${id}`)
     return data
   },
+  getByEmail: async (email: string): Promise<User | null> => {
+    const { data } = await apiClient.get<User[]>('/users', {
+      params: { email },
+    })
+    return data.length > 0 ? data[0] : null
+  },
+  upsertFromAuth: async (authUser: {
+    id: string
+    name: string
+    email: string
+    avatar: string
+  }): Promise<User> => {
+    // Check if user already exists by email
+    const existing = await usersApi.getByEmail(authUser.email)
+    if (existing) {
+      // Update name/avatar if changed
+      if (existing.name !== authUser.name || existing.avatar !== authUser.avatar) {
+        return usersApi.update(existing.id, {
+          name: authUser.name,
+          avatar: authUser.avatar,
+        })
+      }
+      return existing
+    }
+    // Create new user from auth data
+    return usersApi.create({
+      name: authUser.name,
+      email: authUser.email,
+      role: 'user',
+      avatar: authUser.avatar,
+      createdAt: new Date().toISOString(),
+    })
+  },
   create: async (user: Omit<User, 'id'>) => {
-    const { data } = await apiClient.post<User>('/users', user)
+    const { data } = await apiClient.post<User>('/users', {
+      ...user,
+      createdAt: user.createdAt || new Date().toISOString(),
+    })
     return data
   },
   update: async (id: string, user: Partial<User>) => {

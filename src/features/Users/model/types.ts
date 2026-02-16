@@ -4,4 +4,5 @@ export interface User {
   email: string
   role: 'admin' | 'user'
   avatar: string
+  createdAt: string
 }

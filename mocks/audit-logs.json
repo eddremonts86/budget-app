@@ -230,5 +230,349 @@
     "providerId": "lm-studio",
     "model": "deepseek/deepseek-r1-0528-qwen3-8b",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:29:57.332Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:31:30.025Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:31:38.039Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:31:56.796Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:54:18.195Z",
+    "locale": "en",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:58:38.864Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:01:20.996Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:01:32.653Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:02:14.824Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:02:47.705Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:03:22.239Z",
+    "locale": "es",
+    "query": "Cuantas tareas faltan por resolverse?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:05:17.083Z",
+    "locale": "es",
+    "query": "Cuantas tareas faltan por resolverse?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:05:53.564Z",
+    "locale": "es",
+    "query": "Donde puedo ver la lista de usuarios de la aplicac...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:07:28.776Z",
+    "locale": "es",
+    "query": "cual cres que es la tarea mas importante que debo ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:08:22.364Z",
+    "locale": "es",
+    "query": "ok dame la lista de las 7 mas importantes para hoy...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:10:49.121Z",
+    "locale": "es",
+    "query": "pero Configurar CI/CD en GitHub Actions luce como ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:12:59.456Z",
+    "locale": "es",
+    "query": "si voy a /api/tasks puedo ver que Configurar CI/CD...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:14:25.008Z",
+    "locale": "es",
+    "query": "ok dame la lista de las 7 mas importantes para hoy...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:15:43.405Z",
+    "locale": "es",
+    "query": "ok dame la lista de las 7 mas importantes para hoy...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:17:01.930Z",
+    "locale": "es",
+    "query": "mepuedes decir cual es el metal mas caro?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:14.118Z",
+    "locale": "en",
+    "query": "Donde puedo ver y gestionar las tareas? Dame la UR...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:24.100Z",
+    "locale": "en",
+    "query": "Cuantas tareas pendientes hay y donde puedo verlas...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:32.966Z",
+    "locale": "en",
+    "query": "Cuantos usuarios hay registrados? Quienes son? Don...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:44.517Z",
+    "locale": "en",
+    "query": "Como cambio el idioma de la aplicacion a español?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:55.981Z",
+    "locale": "en",
+    "query": "Dame un resumen de todas las secciones de la aplic...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:47:32.675Z",
+    "locale": "es",
+    "query": "Crea una tarea llamada \"Revisar documentación del ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:07:12.243Z",
+    "locale": "es",
+    "query": "Actualiza la tarea \"Configurar TanStack Start\" y p...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:09:57.612Z",
+    "locale": "en",
+    "query": "la tarea Revisar documentación del API debes actua...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:12:05.039Z",
+    "locale": "es",
+    "query": "Marca la tarea \"Configurar TanStack Start\" como co...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:17:23.849Z",
+    "locale": "en",
+    "query": "actualizala a pendiente, asignala a edd remonts y ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:28:42.319Z",
+    "locale": "en",
+    "query": "actualizala a pendiente, asignala a edd remonts y ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:29:01.151Z",
+    "locale": "en",
+    "query": "actualizala a pendiente, asignala a edd remonts y ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:46:44.090Z",
+    "locale": "es",
+    "query": "crea una tarea llamada \"Revisar documentación\" con...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:47:35.529Z",
+    "locale": "es",
+    "query": "actualiza la tarea \"Configurar TanStack Start\" a e...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T14:10:56.198Z",
+    "locale": "es",
+    "query": "lee este fichero y crea las tareas que contiene\n[F...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T14:53:12.004Z",
+    "locale": "en",
+    "query": "hola...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T14:53:27.475Z",
+    "locale": "en",
+    "query": "que??...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:00:31.115Z",
+    "locale": "en",
+    "query": "ok, como puedo crear un usuario?...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:02:08.261Z",
+    "locale": "en",
+    "query": "pero no deberia poder decir el nombre y email del ...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:03:43.314Z",
+    "locale": "en",
+    "query": "ok entonces ei te digo que crees un usuario de nom...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:05:07.634Z",
+    "locale": "en",
+    "query": "crea una tarea que se llame \"crear usuarios automa...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:06:54.773Z",
+    "locale": "en",
+    "query": "crea un usuario que se llame \"Antonio Miguel\" con ...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:08:05.043Z",
+    "locale": "en",
+    "query": "que hay aqui\n[Image Attached]...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
   }
 ]

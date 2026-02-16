@@ -35,6 +35,8 @@ export const todosApi = {
     const now = new Date().toISOString()
     const { data } = await apiClient.post<Todo>('/todos', {
       ...todo,
+      createdBy: todo.createdBy || '',
+      assignedTo: todo.assignedTo || todo.createdBy || '',
       createdAt: now,
       updatedAt: now,
     })

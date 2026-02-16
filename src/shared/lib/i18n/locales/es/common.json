@@ -27,6 +27,9 @@
     "actions": "Acciones",
     "confirm": "Confirmar",
     "undoWarning": "Esta acción no se puede deshacer.",
+    "noPermission": "No tienes permiso para realizar esta acción.",
+    "noPermissionEdit": "Solo puedes editar tareas que creaste o que te fueron asignadas.",
+    "noPermissionDelete": "Solo puedes eliminar tareas que creaste o que te fueron asignadas.",
     "yes": "Sí",
     "no": "No",
     "submit": "Enviar",
@@ -108,7 +111,22 @@
       "supportAssistant": "Asistente de Soporte",
       "agentInactive": "El asistente no está disponible en este momento",
       "retry": "Reintentar",
-      "connectionError": "Error de conexión con el servidor"
+      "connectionError": "Error de conexión con el servidor",
+      "emptyResponse": "La IA devolvió una respuesta vacía. Intenta preguntar de nuevo o reformula tu pregunta.",
+      "fileAutoInstruction": "Analiza el archivo adjunto. Si contiene una lista de tareas o elementos, crea una tarea para cada uno usando bloques de acción CREAR TAREA.",
+      "fileAnalyzeInstruction": "Analiza el archivo adjunto y proporciona un resumen o acciones relevantes.",
+      "conversations": "Conversaciones",
+      "newConversation": "Nueva conversación",
+      "deleteConversation": "Eliminar conversación",
+      "deleteAllConversations": "Eliminar todo",
+      "confirmDeleteConversation": "¿Estás seguro de que deseas eliminar esta conversación?",
+      "confirmDeleteAll": "¿Estás seguro de que deseas eliminar todas las conversaciones?",
+      "noConversations": "Aún no hay conversaciones",
+      "today": "Hoy",
+      "yesterday": "Ayer",
+      "previousDays": "Últimos 7 días",
+      "older": "Anteriores",
+      "untitledConversation": "Nueva conversación"
     }
   },
   "settings": {
@@ -310,7 +328,10 @@
       "priorityMedium": "Media",
       "priorityHigh": "Alta",
       "dueDateLabel": "Fecha límite",
-      "dueDatePlaceholder": "Selecciona fecha"
+      "dueDatePlaceholder": "Selecciona fecha",
+      "assignedToLabel": "Asignado a",
+      "assignedToPlaceholder": "Seleccionar usuario",
+      "assignedToSelf": "Yo"
     },
     "status": {
       "pending": "Pendiente",
@@ -326,6 +347,7 @@
       "title": "Tarea",
       "status": "Estado",
       "priority": "Prioridad",
+      "assignedTo": "Asignado a",
       "createdAt": "Creada"
     },
     "confirm": {
@@ -370,7 +392,8 @@
       "roleAdmin": "Administrador",
       "avatarLabel": "URL de avatar",
       "avatarPlaceholder": "URL de avatar",
-      "avatarRandom": "Aleatorio"
+      "avatarRandom": "Aleatorio",
+      "avatarHelp": "Pega una URL o genera un avatar aleatorio"
     },
     "table": {
       "user": "Usuario",

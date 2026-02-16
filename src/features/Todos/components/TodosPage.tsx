@@ -1,10 +1,21 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { motion } from 'framer-motion'
-import { Calendar, Clock, Flag, Loader2, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import {
+  Calendar,
+  Clock,
+  Flag,
+  Loader2,
+  MoreHorizontal,
+  Pencil,
+  Plus,
+  Trash2,
+  UserCircle,
+} from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
 import { toast } from 'sonner'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,9 +36,13 @@ import {
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableCell, TableRow } from '@/components/ui/table'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useUsers } from '@/features/Users/api/users.queries'
+import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
 import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
 import { useCreateTodo, useDeleteTodo, useInfiniteTodos, useUpdateTodo } from '../api/todos.queries'
+import { canModifyTodo } from '../model/permissions'
 import type { Todo } from '../model/types'
 import { TodoForm } from './TodoForm'
 
@@ -35,6 +50,19 @@ export function TodosPage() {
   const { t } = useTranslation()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingTodo, setEditingTodo] = React.useState<Todo | null>(null)
+  const { syncedUserId, userRole } = useSyncAuthUser()
+  const { data: users } = useUsers()
+
+  // Build a lookup map of userId → user for the assignee column
+  const userMap = React.useMemo(() => {
+    const map = new Map<string, { name: string; avatar: string }>()
+    if (users) {
+      for (const u of users) {
+        map.set(u.id, { name: u.name, avatar: u.avatar })
+      }
+    }
+    return map
+  }, [users])
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteTodos(10)
@@ -127,6 +155,44 @@ export function TodosPage() {
       },
     },
     {
+      accessorKey: 'assignedTo',
+      header: t('todos.table.assignedTo'),
+      cell: ({ row }) => {
+        const assignedTo = row.getValue('assignedTo') as string
+        const assignee = userMap.get(assignedTo)
+        if (!assignee) {
+          return (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <UserCircle className="w-4 h-4 opacity-50" />
+              <span className="text-xs">—</span>
+            </div>
+          )
+        }
+        return (
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger>
+                <div className="flex items-center gap-2">
+                  <Avatar className="h-6 w-6">
+                    <AvatarImage src={assignee.avatar} alt={assignee.name} />
+                    <AvatarFallback className="text-[10px]">
+                      {assignee.name.substring(0, 2).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <span className="text-xs font-medium text-foreground truncate max-w-[100px]">
+                    {assignee.name}
+                  </span>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{assignee.name}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+        )
+      },
+    },
+    {
       accessorKey: 'createdAt',
       header: t('todos.table.createdAt'),
       cell: ({ row }) => {
@@ -145,6 +211,7 @@ export function TodosPage() {
       id: 'actions',
       cell: ({ row }) => {
         const todo = row.original
+        const canModify = canModifyTodo(todo, syncedUserId, userRole)
 
         return (
           <DropdownMenu>
@@ -162,16 +229,36 @@ export function TodosPage() {
                 {t('common.actions')}
               </DropdownMenuLabel>
               <DropdownMenuItem
-                onClick={() => setEditingTodo(todo)}
-                className="rounded-lg m-1 gap-2 cursor-pointer focus:bg-primary/5 focus:text-primary"
+                onClick={() => {
+                  if (!canModify) {
+                    toast.warning(t('common.noPermission'), {
+                      description: t('common.noPermissionEdit'),
+                    })
+                    return
+                  }
+                  setEditingTodo(todo)
+                }}
+                className={cn(
+                  'rounded-lg m-1 gap-2 cursor-pointer focus:bg-primary/5 focus:text-primary',
+                  !canModify && 'opacity-50',
+                )}
               >
                 <Pencil className="h-4 w-4" />
                 {t('todos.actions.edit')}
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-border/40" />
               <DropdownMenuItem
-                className="text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive"
+                className={cn(
+                  'text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive',
+                  !canModify && 'opacity-50',
+                )}
                 onClick={() => {
+                  if (!canModify) {
+                    toast.warning(t('common.noPermission'), {
+                      description: t('common.noPermissionDelete'),
+                    })
+                    return
+                  }
                   toast.error(t('todos.confirm.delete'), {
                     description: t('common.undoWarning'),
                     action: {
@@ -182,7 +269,7 @@ export function TodosPage() {
                       label: t('common.cancel'),
                       onClick: () => {},
                     },
-                    duration: 10000, // Más tiempo para que el usuario decida
+                    duration: 10000,
                   })
                 }}
               >
@@ -287,8 +374,13 @@ export function TodosPage() {
           </SheetHeader>
           <div className="flex-1 overflow-y-auto p-6">
             <TodoForm
+              currentUserId={syncedUserId || ''}
               onSubmit={async (values) => {
-                await createMutation.mutateAsync(values)
+                await createMutation.mutateAsync({
+                  ...values,
+                  createdBy: syncedUserId || '',
+                  assignedTo: values.assignedTo || syncedUserId || '',
+                })
                 setIsCreateOpen(false)
               }}
               onCancel={() => setIsCreateOpen(false)}
@@ -312,6 +404,7 @@ export function TodosPage() {
             {editingTodo && (
               <TodoForm
                 defaultValues={editingTodo}
+                currentUserId={syncedUserId || ''}
                 onSubmit={async (values) => {
                   await updateMutation.mutateAsync({ id: editingTodo.id, data: values })
                   setEditingTodo(null)

@@ -4,6 +4,7 @@ import {
   IconAdjustmentsHorizontal,
   IconRobot,
 } from '@tabler/icons-react'
+import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
@@ -44,7 +45,12 @@ export function SettingsPage() {
   }
 
   return (
-    <div className="mx-auto w-full  space-y-8 px-4 py-6 md:px-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mx-auto w-full max-w-6xl space-y-8 pt-0 pb-6"
+    >
       <div className="flex flex-col gap-2">
         <h2 className="text-3xl font-bold tracking-tight text-foreground">{t('settings.title')}</h2>
         <p className="text-muted-foreground max-w-2xl">{t('settings.description')}</p>
@@ -141,6 +147,6 @@ export function SettingsPage() {
           </div>
         </div>
       </Tabs>
-    </div>
+    </motion.div>
   )
 }

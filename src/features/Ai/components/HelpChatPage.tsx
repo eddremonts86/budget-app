@@ -27,19 +27,37 @@ import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import remarkGfm from 'remark-gfm'
 import { toast } from 'sonner'
-import { Button, Textarea } from '@/components/ui'
+import {
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { useTQuery } from '@/shared/lib/query'
+import type {
+  Conversation,
+  PersistedActionState,
+  StoredMessage,
+} from '@/shared/lib/storage/chat-storage'
+import {
+  createConversationObject,
+  deleteAllConversations,
+  deleteConversation,
+  generateTitle,
+  getConversation,
+  getConversations,
+  migrateFromLocalStorage,
+  saveConversation,
+} from '@/shared/lib/storage/chat-storage'
 import { cn } from '@/shared/utils/index'
+import { ActionConfirmationCard } from './ActionConfirmationCard'
+import { ActionStatesProvider } from './ActionStatesContext'
+import { ConversationPanel } from './ConversationPanel'
 
 // --- Types ---
-
-type StoredMessage = {
-  role: UIMessage['role']
-  content: string
-  parts?: UIMessage['parts']
-}
 
 type ProviderStatus = {
   id: AiProviderId
@@ -48,22 +66,7 @@ type ProviderStatus = {
   latencyMs: number
 }
 
-const storageKey = 'ai:help:messages'
-
 // --- Helpers ---
-
-const parseStoredMessages = (): StoredMessage[] => {
-  if (typeof window === 'undefined') return []
-  try {
-    const raw = window.localStorage.getItem(storageKey)
-    if (!raw) return []
-    const parsed = JSON.parse(raw) as StoredMessage[]
-    if (!Array.isArray(parsed)) return []
-    return parsed.filter((message) => message?.role)
-  } catch {
-    return []
-  }
-}
 
 const formatContent = (content: unknown): string => {
   if (typeof content === 'string') return content
@@ -89,8 +92,173 @@ const formatMessage = (message: UIMessage): string => {
 const toUiMessage = (message: StoredMessage, index: number): UIMessage => ({
   id: `stored-${index}`,
   role: message.role,
-  parts: message.parts || [{ type: 'text', content: message.content }],
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  parts: (message.parts as any) || [{ type: 'text', content: message.content }],
 })
+
+function messagesToStored(messages: UIMessage[]): StoredMessage[] {
+  return messages.map((msg) => ({
+    role: msg.role as StoredMessage['role'],
+    content: formatMessage(msg),
+    parts: msg.parts as StoredMessage['parts'],
+  }))
+}
+
+// --- Conversation Manager Hook ---
+
+function useConversationManager(userId: string | null) {
+  const [conversations, setConversations] = React.useState<Conversation[]>([])
+  const [activeId, setActiveId] = React.useState<string | null>(null)
+  const [activeConv, setActiveConv] = React.useState<Conversation | null>(null)
+  const [isReady, setIsReady] = React.useState(false)
+
+  // Keep activeConv in a ref so callbacks always see the latest value
+  const activeConvRef = React.useRef(activeConv)
+  React.useEffect(() => {
+    activeConvRef.current = activeConv
+  }, [activeConv])
+
+  const activeIdRef = React.useRef(activeId)
+  React.useEffect(() => {
+    activeIdRef.current = activeId
+  }, [activeId])
+
+  // Initialise: migrate from localStorage + load conversations
+  React.useEffect(() => {
+    if (!userId) return
+    let cancelled = false
+    ;(async () => {
+      const migratedId = await migrateFromLocalStorage(userId)
+      const convs = await getConversations(userId)
+      if (cancelled) return
+      setConversations(convs)
+      if (migratedId) {
+        setActiveId(migratedId)
+      } else if (convs.length > 0) {
+        setActiveId(convs[0].id)
+      }
+      setIsReady(true)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [userId])
+
+  // Load the active conversation object when activeId changes
+  React.useEffect(() => {
+    if (!activeId) {
+      setActiveConv(null)
+      return
+    }
+    let cancelled = false
+    ;(async () => {
+      const conv = await getConversation(activeId)
+      if (cancelled) return
+      setActiveConv(conv ?? null)
+    })()
+    return () => {
+      cancelled = true
+    }
+  }, [activeId])
+
+  const createNew = React.useCallback(async () => {
+    if (!userId) return null
+    const conv = createConversationObject(userId)
+    await saveConversation(conv)
+    setConversations((prev) => [conv, ...prev])
+    setActiveId(conv.id)
+    return conv
+  }, [userId])
+
+  const select = React.useCallback((id: string) => {
+    setActiveId(id)
+  }, [])
+
+  const remove = React.useCallback(async (id: string) => {
+    await deleteConversation(id)
+    setConversations((prev) => {
+      const remaining = prev.filter((c) => c.id !== id)
+      // If we deleted the active conversation, switch to the next one
+      if (activeIdRef.current === id) {
+        setActiveId(remaining.length > 0 ? remaining[0].id : null)
+      }
+      return remaining
+    })
+  }, [])
+
+  const removeAll = React.useCallback(async () => {
+    if (!userId) return
+    await deleteAllConversations(userId)
+    setConversations([])
+    setActiveId(null)
+  }, [userId])
+
+  const saveMessages = React.useCallback(async (msgs: StoredMessage[]) => {
+    const conv = activeConvRef.current
+    if (!conv) return
+    const updated: Conversation = {
+      ...conv,
+      messages: msgs,
+      updatedAt: Date.now(),
+    }
+    if (!updated.title && msgs.length > 0) {
+      updated.title = generateTitle(msgs)
+    }
+    await saveConversation(updated)
+    setActiveConv(updated)
+    setConversations((prev) =>
+      prev
+        .map((c) => (c.id === updated.id ? updated : c))
+        .sort((a, b) => b.updatedAt - a.updatedAt),
+    )
+  }, [])
+
+  const saveActionState = React.useCallback(async (key: string, state: PersistedActionState) => {
+    const conv = activeConvRef.current
+    if (!conv) return
+    const newStates = { ...conv.actionStates, [key]: state }
+    const updated: Conversation = {
+      ...conv,
+      actionStates: newStates,
+      updatedAt: Date.now(),
+    }
+    await saveConversation(updated)
+    setActiveConv(updated)
+  }, [])
+
+  const clearActive = React.useCallback(async () => {
+    const conv = activeConvRef.current
+    if (!conv) return
+    const updated: Conversation = {
+      ...conv,
+      messages: [],
+      actionStates: {},
+      title: '',
+      updatedAt: Date.now(),
+    }
+    await saveConversation(updated)
+    setActiveConv(updated)
+    setConversations((prev) =>
+      prev
+        .map((c) => (c.id === updated.id ? updated : c))
+        .sort((a, b) => b.updatedAt - a.updatedAt),
+    )
+  }, [])
+
+  return {
+    conversations,
+    activeId,
+    activeConv,
+    isReady,
+    createNew,
+    select,
+    remove,
+    removeAll,
+    saveMessages,
+    saveActionState,
+    clearActive,
+  }
+}
 
 // --- Components ---
 
@@ -147,6 +315,7 @@ function MessageBubble({
   userAvatar?: string | null
   isTyping?: boolean
 }) {
+  const { t } = useTranslation()
   const isUser = message.role === 'user'
   const [copied, setCopied] = React.useState(false)
 
@@ -192,49 +361,99 @@ function MessageBubble({
               return <ThinkingProcess key={idx} content={part.content} />
             }
             if (part.type === 'text') {
+              // Show error placeholder for empty AI responses
+              if (!part.content?.trim()) {
+                if (!isUser) {
+                  return (
+                    <div
+                      key={idx}
+                      className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-700 dark:text-amber-400"
+                    >
+                      <span className="text-base">⚠️</span>
+                      <span>{t('ai.chat.emptyResponse')}</span>
+                    </div>
+                  )
+                }
+                return null
+              }
               return (
-                <div key={idx} className={cn("markdown-content leading-7", isUser ? "text-white/90" : "text-foreground/90")}>
+                <div
+                  key={idx}
+                  className={cn(
+                    'markdown-content leading-7',
+                    isUser ? 'text-white/90' : 'text-foreground/90',
+                  )}
+                >
                   <ReactMarkdown
                     remarkPlugins={[remarkGfm]}
                     components={{
                       code({ className, children, ref: _ref, ...props }) {
                         const match = /language-(\w+)/.exec(className || '')
+                        // Render action confirmation card for action code blocks
+                        if (match?.[1] === 'action') {
+                          return (
+                            <ActionConfirmationCard
+                              actionJson={String(children).replace(/\n$/, '')}
+                            />
+                          )
+                        }
                         return !String(className).includes('inline') && match ? (
                           <div className="my-4 overflow-hidden rounded-lg border border-border/50 bg-zinc-950 shadow-sm">
                             <div className="flex items-center justify-between bg-zinc-900/50 px-3 py-1.5 border-b border-border/10">
-                                <span className="text-[10px] font-mono text-zinc-400">{match[1]}</span>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-6 w-6 rounded hover:bg-white/10 text-zinc-400"
-                                  onClick={() => navigator.clipboard.writeText(String(children))}
-                                >
-                                  <Copy size={12} />
-                                </Button>
+                              <span className="text-[10px] font-mono text-zinc-400">
+                                {match[1]}
+                              </span>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-6 w-6 rounded hover:bg-white/10 text-zinc-400"
+                                onClick={() => navigator.clipboard.writeText(String(children))}
+                              >
+                                <Copy size={12} />
+                              </Button>
                             </div>
                             <SyntaxHighlighter
                               // eslint-disable-next-line @typescript-eslint/no-explicit-any
                               style={vscDarkPlus as any}
                               language={match[1]}
                               PreTag="div"
-                              customStyle={{ margin: 0, padding: '1rem', background: 'transparent' }}
+                              customStyle={{
+                                margin: 0,
+                                padding: '1rem',
+                                background: 'transparent',
+                              }}
                               {...props}
                             >
                               {String(children).replace(/\n$/, '')}
                             </SyntaxHighlighter>
                           </div>
                         ) : (
-                          <code className={cn("rounded px-1.5 py-0.5 font-mono text-xs font-medium", isUser ? "bg-white/20 text-white" : "bg-muted text-foreground")} {...props}>
+                          <code
+                            className={cn(
+                              'rounded px-1.5 py-0.5 font-mono text-xs font-medium',
+                              isUser ? 'bg-white/20 text-white' : 'bg-muted text-foreground',
+                            )}
+                            {...props}
+                          >
                             {children}
                           </code>
                         )
                       },
                       p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
-                      ul: ({ children }) => <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>,
-                      ol: ({ children }) => <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>,
+                      ul: ({ children }) => (
+                        <ul className="mb-2 ml-4 list-disc space-y-1">{children}</ul>
+                      ),
+                      ol: ({ children }) => (
+                        <ol className="mb-2 ml-4 list-decimal space-y-1">{children}</ol>
+                      ),
                       li: ({ children }) => <li className="pl-1">{children}</li>,
                       a: ({ children, href }) => (
-                        <a href={href} target="_blank" rel="noopener noreferrer" className="underline decoration-indigo-500/50 underline-offset-2 hover:decoration-indigo-500 transition-colors font-medium">
+                        <a
+                          href={href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline decoration-indigo-500/50 underline-offset-2 hover:decoration-indigo-500 transition-colors font-medium"
+                        >
                           {children}
                         </a>
                       ),
@@ -244,12 +463,18 @@ function MessageBubble({
                         </blockquote>
                       ),
                       table: ({ children }) => (
-                         <div className="my-4 w-full overflow-y-auto rounded-lg border border-border/50">
-                            <table className="w-full text-sm">{children}</table>
-                         </div>
+                        <div className="my-4 w-full overflow-y-auto rounded-lg border border-border/50">
+                          <table className="w-full text-sm">{children}</table>
+                        </div>
                       ),
-                      th: ({ children }) => <th className="border-b border-border/50 bg-muted/30 px-4 py-2 text-left font-bold">{children}</th>,
-                      td: ({ children }) => <td className="border-b border-border/10 px-4 py-2">{children}</td>,
+                      th: ({ children }) => (
+                        <th className="border-b border-border/50 bg-muted/30 px-4 py-2 text-left font-bold">
+                          {children}
+                        </th>
+                      ),
+                      td: ({ children }) => (
+                        <td className="border-b border-border/10 px-4 py-2">{children}</td>
+                      ),
                     }}
                   >
                     {part.content}
@@ -335,7 +560,7 @@ function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) =
           <Sparkles size={48} className="text-white" />
         </div>
       </div>
-      
+
       <h3 className="mb-3 text-3xl font-bold tracking-tight text-foreground sm:text-4xl">
         {t('ai.chat.empty')}
       </h3>
@@ -351,16 +576,16 @@ function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) =
             className="group relative overflow-hidden rounded-2xl border border-border/40 bg-card p-4 text-left shadow-sm transition-all duration-300 hover:border-indigo-500/30 hover:bg-indigo-500/5 hover:shadow-indigo-500/10 hover:-translate-y-1"
           >
             <div className="flex items-start gap-4">
-                <span className="text-2xl">{s.icon}</span>
-                <div>
-                    <span className="block font-semibold text-foreground group-hover:text-indigo-600 transition-colors">
-                    {s.label}
-                    </span>
-                    <span className="text-xs text-muted-foreground">{s.desc}</span>
-                </div>
+              <span className="text-2xl">{s.icon}</span>
+              <div>
+                <span className="block font-semibold text-foreground group-hover:text-indigo-600 transition-colors">
+                  {s.label}
+                </span>
+                <span className="text-xs text-muted-foreground">{s.desc}</span>
+              </div>
             </div>
             <div className="absolute right-3 top-3 opacity-0 transition-opacity group-hover:opacity-100">
-                <ArrowUp size={16} className="text-indigo-500 rotate-45" />
+              <ArrowUp size={16} className="text-indigo-500 rotate-45" />
             </div>
           </button>
         ))}
@@ -379,6 +604,7 @@ export function HelpChatPage() {
   const [attachments, setAttachments] = React.useState<File[]>([])
   const [isPreviewOpen, setIsPreviewOpen] = React.useState<string | null>(null)
   const [isOnline, setIsOnline] = React.useState(true)
+  const [isPanelOpen, setIsPanelOpen] = React.useState(false)
   const fileInputRef = React.useRef<HTMLInputElement>(null)
   const bottomRef = React.useRef<HTMLDivElement | null>(null)
   const scrollContainerRef = React.useRef<HTMLDivElement>(null)
@@ -409,26 +635,45 @@ export function HelpChatPage() {
   }
 
   React.useEffect(() => {
-    if (typeof window === 'undefined') return
-    const updateStatus = () => setIsOnline(window.navigator.onLine)
+    if (typeof globalThis.window === 'undefined') return
+    const updateStatus = () => setIsOnline(globalThis.window.navigator.onLine)
     updateStatus()
-    window.addEventListener('online', updateStatus)
-    window.addEventListener('offline', updateStatus)
+    globalThis.window.addEventListener('online', updateStatus)
+    globalThis.window.addEventListener('offline', updateStatus)
     return () => {
-      window.removeEventListener('online', updateStatus)
-      window.removeEventListener('offline', updateStatus)
+      globalThis.window.removeEventListener('online', updateStatus)
+      globalThis.window.removeEventListener('offline', updateStatus)
     }
   }, [])
 
+  const userId = user?.id ?? null
+  const convManager = useConversationManager(userId)
+
+  // Compute initial messages from the active conversation (for first useChat mount)
   const initialMessages = React.useMemo(
-    () => parseStoredMessages().map((message, index) => toUiMessage(message, index)),
-    [],
+    () => (convManager.activeConv?.messages ?? []).map(toUiMessage),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [convManager.activeId],
   )
 
-  const { messages, sendMessage, isLoading, stop, clear, error } = useChat({
+  const { messages, sendMessage, isLoading, stop, clear, error, setMessages } = useChat({
     connection: fetchServerSentEvents(`/api/ai/chat?locale=${i18n.language}`),
     initialMessages,
   })
+
+  // When the active conversation changes (user switches), load its messages
+  const loadedConvIdRef = React.useRef<string | null>(null)
+  React.useEffect(() => {
+    if (!convManager.isReady) return
+    if (convManager.activeConv && convManager.activeId !== loadedConvIdRef.current) {
+      loadedConvIdRef.current = convManager.activeId
+      const uiMessages = convManager.activeConv.messages.map(toUiMessage)
+      setMessages(uiMessages)
+    } else if (!convManager.activeId && loadedConvIdRef.current !== null) {
+      loadedConvIdRef.current = null
+      clear()
+    }
+  }, [convManager.activeConv, convManager.activeId, convManager.isReady, setMessages, clear])
 
   // Error toast
   React.useEffect(() => {
@@ -449,24 +694,34 @@ export function HelpChatPage() {
     }
   }, [error, t, sendMessage, messages])
 
-  const handleClear = () => {
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(storageKey)
-    }
-    clear()
-  }
-
+  // Persist messages to IndexedDB when they change
+  const prevMsgHashRef = React.useRef('')
+  const isLoadingConvRef = React.useRef(false)
   React.useEffect(() => {
-    if (typeof window === 'undefined') return
-    const serialized = JSON.stringify(
-      messages.map((message) => ({
-        role: message.role,
-        content: formatMessage(message),
-        parts: message.parts,
-      })),
-    )
-    window.localStorage.setItem(storageKey, serialized)
-  }, [messages])
+    if (!convManager.isReady || !convManager.activeId) return
+    if (isLoadingConvRef.current) return
+    if (messages.length === 0) return
+    const stored = messagesToStored(messages)
+    const hash = JSON.stringify(stored.map((m) => m.content))
+    if (hash === prevMsgHashRef.current) return
+    prevMsgHashRef.current = hash
+    convManager.saveMessages(stored)
+  }, [messages, convManager.isReady, convManager.activeId, convManager.saveMessages])
+
+  // Mark when we're loading a conversation (to skip persistence during load)
+  React.useEffect(() => {
+    isLoadingConvRef.current = true
+    const id = requestAnimationFrame(() => {
+      isLoadingConvRef.current = false
+    })
+    return () => cancelAnimationFrame(id)
+  }, [convManager.activeId])
+
+  const handleClear = () => {
+    clear()
+    prevMsgHashRef.current = ''
+    convManager.clearActive()
+  }
 
   // Auto-scroll
   React.useEffect(() => {
@@ -488,6 +743,11 @@ export function HelpChatPage() {
   const handleSend = async (overrideContent?: string) => {
     const trimmed = overrideContent || input.trim()
     if ((!trimmed && attachments.length === 0) || isLoading || !isOnline) return
+
+    // Auto-create a conversation if none is active
+    if (!convManager.activeId) {
+      await convManager.createNew()
+    }
 
     const parts: UIMessage['parts'] = []
     if (trimmed) parts.push({ type: 'text', content: trimmed })
@@ -512,290 +772,354 @@ export function HelpChatPage() {
       }),
     )
 
+    // When files are attached without user text, add an automatic instruction
+    if (!trimmed && attachments.length > 0) {
+      const hasTextFiles = attachments.some((f) => {
+        const ext = f.name.split('.').pop()?.toLowerCase() ?? ''
+        return ['txt', 'md', 'csv', 'json', 'yaml', 'yml', 'xml', 'log'].includes(ext)
+      })
+      const instruction = hasTextFiles
+        ? t('ai.chat.fileAutoInstruction')
+        : t('ai.chat.fileAnalyzeInstruction')
+      parts.unshift({ type: 'text', content: instruction })
+    }
+
     setInput('')
     setAttachments([])
 
     const payload =
       parts.length === 1 && parts[0].type === 'text'
         ? (parts[0] as { content: string }).content
-        : { parts }
+        : { content: parts }
 
-    // @ts-expect-error - sendMessage supports parts
+    // @ts-expect-error - sendMessage supports multimodal content objects
     sendMessage(payload)
+  }
+
+  const handleNewConversation = async () => {
+    await convManager.createNew()
+    clear()
+    prevMsgHashRef.current = ''
+    setIsPanelOpen(false)
+  }
+
+  const handleSelectConversation = (id: string) => {
+    prevMsgHashRef.current = ''
+    convManager.select(id)
+    setIsPanelOpen(false)
+  }
+
+  const handleDeleteConversation = async (id: string) => {
+    await convManager.remove(id)
+  }
+
+  const handleDeleteAll = async () => {
+    await convManager.removeAll()
+    clear()
+    prevMsgHashRef.current = ''
   }
 
   const isAgentActive = providerQuery.data?.statuses[0]?.available ?? true
 
   return (
-    <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-background/50 shadow-2xl backdrop-blur-2xl dark:border-white/5 dark:bg-black/40">
-      
-      {/* --- Dynamic Background --- */}
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-200/20 via-background/0 to-background/0 dark:from-indigo-900/20"></div>
-      <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-purple-200/20 via-background/0 to-background/0 dark:from-purple-900/20"></div>
+    <ActionStatesProvider
+      states={convManager.activeConv?.actionStates ?? {}}
+      onSaveState={convManager.saveActionState}
+    >
+      <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-background/50 shadow-2xl backdrop-blur-2xl dark:border-white/5 dark:bg-black/40">
+        {/* --- Dynamic Background --- */}
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-indigo-200/20 via-background/0 to-background/0 dark:from-indigo-900/20"></div>
+        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_bottom_left,_var(--tw-gradient-stops))] from-purple-200/20 via-background/0 to-background/0 dark:from-purple-900/20"></div>
 
-      {/* --- Header --- */}
-      <header className="flex h-20 items-center justify-between border-b border-white/10 bg-white/40 px-8 backdrop-blur-md dark:bg-black/20">
-        <div className="flex items-center gap-4">
-          <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
-            <Bot size={24} />
-            <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
-              <span
-                className={cn(
-                  'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
-                  isAgentActive ? 'bg-green-400' : 'bg-red-400',
-                )}
-              ></span>
-              <span
-                className={cn(
-                  'relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-black',
-                  isAgentActive ? 'bg-green-500' : 'bg-red-500',
-                )}
-              ></span>
-            </span>
-          </div>
-          <div>
-            <h2 className="text-lg font-bold leading-tight tracking-tight text-foreground">{t('ai.chat.title')}</h2>
-            <div className="flex items-center gap-2">
-                <span className={cn("h-1.5 w-1.5 rounded-full", isAgentActive ? "bg-green-500" : "bg-red-500")}></span>
+        {/* --- Conversation Panel --- */}
+        <ConversationPanel
+          conversations={convManager.conversations}
+          activeId={convManager.activeId}
+          onSelect={handleSelectConversation}
+          onNew={handleNewConversation}
+          onDelete={handleDeleteConversation}
+          onDeleteAll={handleDeleteAll}
+          isOpen={isPanelOpen}
+          onToggle={() => setIsPanelOpen(!isPanelOpen)}
+        />
+
+        {/* --- Header --- */}
+        <header className="flex h-20 items-center justify-between border-b border-white/10 bg-white/40 px-8 backdrop-blur-md dark:bg-black/20">
+          <div className="flex items-center gap-4">
+            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+              <Bot size={24} />
+              <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
+                <span
+                  className={cn(
+                    'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
+                    isAgentActive ? 'bg-green-400' : 'bg-red-400',
+                  )}
+                ></span>
+                <span
+                  className={cn(
+                    'relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-black',
+                    isAgentActive ? 'bg-green-500' : 'bg-red-500',
+                  )}
+                ></span>
+              </span>
+            </div>
+            <div>
+              <h2 className="text-lg font-bold leading-tight tracking-tight text-foreground">
+                {t('ai.chat.title')}
+              </h2>
+              <div className="flex items-center gap-2">
+                <span
+                  className={cn(
+                    'h-1.5 w-1.5 rounded-full',
+                    isAgentActive ? 'bg-green-500' : 'bg-red-500',
+                  )}
+                ></span>
                 <p className="text-xs font-medium text-muted-foreground">
-                {isAgentActive ? t('ai.chat.supportAssistant') : t('ai.chat.agentInactive')}
+                  {isAgentActive ? t('ai.chat.supportAssistant') : t('ai.chat.agentInactive')}
                 </p>
+              </div>
+              <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground/60 font-medium">
+                <Sparkles size={10} />
+                <span>AI can make mistakes. Verify important information.</span>
+              </div>
             </div>
           </div>
+
+          <div className="flex items-center gap-3">
+            <div
+              className={cn(
+                'hidden items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest md:flex shadow-sm',
+                isAgentActive
+                  ? 'border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-300'
+                  : 'border-destructive/20 bg-destructive/10 text-destructive',
+              )}
+            >
+              <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
+              {providerQuery.data?.statuses[0]?.id.toUpperCase() || 'SYSTEM'}
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+              onClick={handleClear}
+              disabled={messages.length === 0 || isLoading}
+              title="Clear Chat"
+            >
+              <Trash2 size={18} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-10 w-10 rounded-full hover:bg-muted"
+              title="Settings"
+              onClick={() => navigate({ to: '/dashboard/settings', search: { ia_config: true } })}
+            >
+              <Settings size={18} />
+            </Button>
+          </div>
+        </header>
+
+        {/* --- Messages --- */}
+        <div
+          ref={scrollContainerRef}
+          className="flex-1 overflow-y-auto scroll-smooth p-6 md:p-8 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-indigo-500/10 hover:scrollbar-thumb-indigo-500/20"
+        >
+          {messages.length === 0 ? (
+            <EmptyState onSuggestionClick={handleSend} />
+          ) : (
+            <div className="flex flex-col gap-8 mx-auto max-w-4xl">
+              {messages.map((message, index) => (
+                <MessageBubble
+                  key={message.id}
+                  message={message}
+                  onImageClick={setIsPreviewOpen}
+                  userAvatar={user?.imageUrl}
+                  isTyping={
+                    isLoading && index === messages.length - 1 && message.role === 'assistant'
+                  }
+                />
+              ))}
+
+              {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex items-start gap-4"
+                >
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
+                    <Bot size={20} className="text-white" />
+                  </div>
+                  <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-border/40 bg-card/50 px-5 py-4 shadow-sm backdrop-blur-sm">
+                    <span
+                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
+                      style={{ animationDelay: '0ms' }}
+                    />
+                    <span
+                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
+                      style={{ animationDelay: '150ms' }}
+                    />
+                    <span
+                      className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
+                      style={{ animationDelay: '300ms' }}
+                    />
+                  </div>
+                </motion.div>
+              )}
+              <div ref={bottomRef} className="h-4" />
+            </div>
+          )}
         </div>
 
-        <div className="flex items-center gap-3">
-          <div
-            className={cn(
-              'hidden items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest md:flex shadow-sm',
-              isAgentActive
-                ? 'border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-300'
-                : 'border-destructive/20 bg-destructive/10 text-destructive',
-            )}
-          >
-            <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
-            {providerQuery.data?.statuses[0]?.id.toUpperCase() || 'SYSTEM'}
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
-            onClick={handleClear}
-            disabled={messages.length === 0 || isLoading}
-            title="Clear Chat"
-          >
-            <Trash2 size={18} />
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="h-10 w-10 rounded-full hover:bg-muted"
-            title="Settings"
-            onClick={() => navigate({ to: '/dashboard/settings', search: { ia_config: true } })}
-          >
-            <Settings size={18} />
-          </Button>
-        </div>
-      </header>
-
-      {/* --- Messages --- */}
-      <div
-        ref={scrollContainerRef}
-        className="flex-1 overflow-y-auto scroll-smooth p-6 md:p-8 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-indigo-500/10 hover:scrollbar-thumb-indigo-500/20"
-      >
-        {messages.length === 0 ? (
-          <EmptyState onSuggestionClick={handleSend} />
-        ) : (
-          <div className="flex flex-col gap-8 mx-auto max-w-4xl">
-            {messages.map((message, index) => (
-              <MessageBubble
-                key={message.id}
-                message={message}
-                onImageClick={setIsPreviewOpen}
-                userAvatar={user?.imageUrl}
-                isTyping={
-                  isLoading && index === messages.length - 1 && message.role === 'assistant'
-                }
-              />
-            ))}
-
-            {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
-              <motion.div
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-start gap-4"
-              >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
-                  <Bot size={20} className="text-white" />
-                </div>
-                <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-border/40 bg-card/50 px-5 py-4 shadow-sm backdrop-blur-sm">
-                  <span
-                    className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
-                    style={{ animationDelay: '0ms' }}
-                  />
-                  <span
-                    className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
-                    style={{ animationDelay: '150ms' }}
-                  />
-                  <span
-                    className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60"
-                    style={{ animationDelay: '300ms' }}
-                  />
-                </div>
-              </motion.div>
-            )}
-            <div ref={bottomRef} className="h-4" />
-          </div>
-        )}
-      </div>
-
-      {/* --- Input Area --- */}
-      <div
-        className="relative z-10 border-t border-white/10 bg-white/40 p-6 backdrop-blur-xl dark:bg-black/40"
-        onDragOver={handleDragOver}
-        onDrop={handleDrop}
-      >
-        <div className="mx-auto max-w-4xl">
+        {/* --- Input Area --- */}
+        <div
+          className="relative z-10 border-t border-white/10 bg-white/40 p-6 backdrop-blur-xl dark:bg-black/40"
+          onDragOver={handleDragOver}
+          onDrop={handleDrop}
+        >
+          <div className="mx-auto max-w-4xl">
             {/* Attachments Preview */}
             <AnimatePresence>
-                {attachments.length > 0 && (
-                <motion.div 
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: 10 }}
-                    className="mb-4 flex gap-3 overflow-x-auto pb-2"
+              {attachments.length > 0 && (
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: 10 }}
+                  className="mb-4 flex gap-3 overflow-x-auto pb-2"
                 >
-                    {attachments.map((file, i) => (
+                  {attachments.map((file, i) => (
                     <div
-                        key={i}
-                        className="group relative flex w-36 shrink-0 flex-col gap-2 rounded-xl border border-white/20 bg-white/50 p-2.5 shadow-sm backdrop-blur-md dark:bg-black/50"
+                      key={i}
+                      className="group relative flex w-36 shrink-0 flex-col gap-2 rounded-xl border border-white/20 bg-white/50 p-2.5 shadow-sm backdrop-blur-md dark:bg-black/50"
                     >
-                        <div className="flex h-20 w-full items-center justify-center rounded-lg bg-muted/50 overflow-hidden">
+                      <div className="flex h-20 w-full items-center justify-center rounded-lg bg-muted/50 overflow-hidden">
                         {file.type.startsWith('image/') ? (
-                            <img
+                          <img
                             src={URL.createObjectURL(file)}
                             alt=""
                             className="h-full w-full object-cover"
-                            />
+                          />
                         ) : (
-                            <FileText size={24} className="text-indigo-500" />
+                          <FileText size={24} className="text-indigo-500" />
                         )}
-                        </div>
-                        <span className="truncate text-[10px] font-semibold text-muted-foreground px-1">
+                      </div>
+                      <span className="truncate text-[10px] font-semibold text-muted-foreground px-1">
                         {file.name}
-                        </span>
-                        <button
+                      </span>
+                      <button
                         onClick={() => removeAttachment(i)}
                         className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white shadow-md opacity-0 transition-all group-hover:opacity-100 hover:scale-110"
-                        >
+                      >
                         <X size={12} />
-                        </button>
+                      </button>
                     </div>
-                    ))}
+                  ))}
                 </motion.div>
-                )}
+              )}
             </AnimatePresence>
 
             {/* Input Bar */}
-            <div className="relative flex items-end gap-3 rounded-[2rem] border border-white/20 bg-white/60 p-2 shadow-xl shadow-indigo-500/5 transition-all focus-within:border-indigo-500/50 focus-within:bg-white focus-within:ring-4 focus-within:ring-indigo-500/10 dark:bg-black/40 dark:focus-within:bg-black/60">
             <input
-                type="file"
-                multiple
-                className="hidden"
-                ref={fileInputRef}
-                onChange={onFileChange}
-                accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx"
+              type="file"
+              multiple
+              className="hidden"
+              ref={fileInputRef}
+              onChange={onFileChange}
+              accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.json,.md,.yaml,.yml,.xml,.log,.ts,.tsx,.js,.jsx,.py,.html,.css"
             />
-            <Button
-                variant="ghost"
-                size="icon"
-                className="h-11 w-11 shrink-0 rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20"
-                onClick={() => fileInputRef.current?.click()}
-                title="Attach file"
-            >
-                <Paperclip size={20} />
-            </Button>
+            <InputGroup className="items-end gap-2 rounded-[2rem] border-white/20 bg-white/60 p-2 shadow-xl shadow-indigo-500/5 transition-all dark:bg-black/40 has-[textarea:focus-visible]:border-indigo-500/50 has-[textarea:focus-visible]:bg-white has-[textarea:focus-visible]:ring-4 has-[textarea:focus-visible]:ring-indigo-500/10 dark:has-[textarea:focus-visible]:bg-black/60">
+              <InputGroupAddon className="py-0">
+                <InputGroupButton
+                  variant="ghost"
+                  size="icon-sm"
+                  className="h-11 w-11 shrink-0 rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20"
+                  onClick={() => fileInputRef.current?.click()}
+                  title="Attach file"
+                >
+                  <Paperclip size={20} />
+                </InputGroupButton>
+              </InputGroupAddon>
 
-            <Textarea
+              <InputGroupTextarea
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
                 onKeyDown={(e) => {
-                if (e.key === 'Enter' && !e.shiftKey) {
+                  if (e.key === 'Enter' && !e.shiftKey) {
                     e.preventDefault()
                     if (isAgentActive) handleSend()
-                }
+                  }
                 }}
                 placeholder={
-                !isOnline
+                  !isOnline
                     ? t('ai.chat.offline')
                     : !isAgentActive
-                    ? t('ai.chat.agentInactive')
-                    : t('ai.chat.placeholder')
+                      ? t('ai.chat.agentInactive')
+                      : t('ai.chat.placeholder')
                 }
                 disabled={isLoading || !isOnline || !isAgentActive}
-                className="min-h-[48px] max-h-[160px] w-full resize-none border-0 bg-transparent py-3.5 text-base focus-visible:ring-0 placeholder:text-muted-foreground/50"
-            />
+                className="min-h-[44px] max-h-[160px] resize-none border-0 bg-transparent py-2.5 text-base placeholder:text-muted-foreground/50"
+              />
 
-            {isLoading ? (
-                <Button
-                variant="destructive"
-                size="icon"
-                onClick={() => stop()}
-                className="h-11 w-11 shrink-0 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-                >
-                <StopCircle size={20} />
-                </Button>
-            ) : (
-                <Button
-                onClick={() => handleSend()}
-                disabled={(!input.trim() && attachments.length === 0) || !isOnline || !isAgentActive}
-                className={cn(
-                    'h-11 w-11 shrink-0 rounded-full shadow-lg transition-all duration-300',
-                    input.trim() || attachments.length > 0
-                    ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/25 hover:scale-105'
-                    : 'bg-muted text-muted-foreground hover:bg-muted/80',
+              <InputGroupAddon align="inline-end" className="py-0">
+                {isLoading ? (
+                  <InputGroupButton
+                    variant="destructive"
+                    size="icon-sm"
+                    onClick={() => stop()}
+                    className="h-11 w-11 shrink-0 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                  >
+                    <StopCircle size={20} />
+                  </InputGroupButton>
+                ) : (
+                  <InputGroupButton
+                    onClick={() => handleSend()}
+                    disabled={
+                      (!input.trim() && attachments.length === 0) || !isOnline || !isAgentActive
+                    }
+                    className={cn(
+                      'h-11 w-11 shrink-0 rounded-full shadow-lg transition-all duration-300',
+                      input.trim() || attachments.length > 0
+                        ? 'bg-gradient-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/25 hover:scale-105'
+                        : 'bg-muted text-muted-foreground hover:bg-muted/80',
+                    )}
+                    size="icon-sm"
+                  >
+                    <ArrowUp size={20} />
+                  </InputGroupButton>
                 )}
-                size="icon"
-                >
-                <ArrowUp size={20} />
-                </Button>
-            )}
-            </div>
-            <div className="mt-3 flex justify-center items-center gap-2 text-[10px] font-medium text-muted-foreground/60">
-                <Sparkles size={10} />
-                <span>AI can make mistakes. Verify important information.</span>
-            </div>
+              </InputGroupAddon>
+            </InputGroup>
+          </div>
         </div>
-      </div>
 
-      {/* Preview Modal */}
-      <AnimatePresence>
-        {isPreviewOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
-            onClick={() => setIsPreviewOpen(null)}
-          >
-            <button
-              className="absolute right-6 top-6 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors"
+        {/* Preview Modal */}
+        <AnimatePresence>
+          {isPreviewOpen && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
               onClick={() => setIsPreviewOpen(null)}
             >
-              <X size={28} />
-            </button>
-            <motion.img
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              src={isPreviewOpen}
-              alt="Preview"
-              className="max-h-[85vh] max-w-[85vw] rounded-2xl object-contain shadow-2xl ring-1 ring-white/10"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+              <button
+                className="absolute right-6 top-6 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors"
+                onClick={() => setIsPreviewOpen(null)}
+              >
+                <X size={28} />
+              </button>
+              <motion.img
+                initial={{ scale: 0.9, opacity: 0 }}
+                animate={{ scale: 1, opacity: 1 }}
+                exit={{ scale: 0.9, opacity: 0 }}
+                src={isPreviewOpen}
+                alt="Preview"
+                className="max-h-[85vh] max-w-[85vw] rounded-2xl object-contain shadow-2xl ring-1 ring-white/10"
+                onClick={(e) => e.stopPropagation()}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
+    </ActionStatesProvider>
   )
 }

@@ -251,19 +251,29 @@ export function UsersPage() {
 
       {/* Sheets with custom styling */}
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80">
-          <SheetHeader className="pb-6 border-b border-border/40">
-            <SheetTitle className="text-2xl font-bold tracking-tight">
-              {t('users.sheet.createTitle')}
-            </SheetTitle>
-            <SheetDescription className="text-base">
-              {t('users.sheet.createDescription')}
-            </SheetDescription>
+        <SheetContent className="sm:max-w-[540px] p-0 gap-0 border-l border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl">
+          <SheetHeader className="p-6 border-b bg-muted/10">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 mt-1">
+                <UserPlus className="w-5 h-5" />
+              </div>
+              <div className="space-y-1 text-left">
+                <SheetTitle className="text-xl font-bold tracking-tight text-foreground">
+                  {t('users.sheet.createTitle')}
+                </SheetTitle>
+                <SheetDescription className="text-sm text-muted-foreground/80 leading-relaxed">
+                  {t('users.sheet.createDescription')}
+                </SheetDescription>
+              </div>
+            </div>
           </SheetHeader>
-          <div className="py-8">
+          <div className="p-6">
             <UserForm
               onSubmit={async (values) => {
-                await createMutation.mutateAsync(values)
+                await createMutation.mutateAsync({
+                  ...values,
+                  createdAt: new Date().toISOString(),
+                })
                 setIsCreateOpen(false)
               }}
               onCancel={() => setIsCreateOpen(false)}
@@ -274,16 +284,23 @@ export function UsersPage() {
       </Sheet>
 
       <Sheet open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
-        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80">
-          <SheetHeader className="pb-6 border-b border-border/40">
-            <SheetTitle className="text-2xl font-bold tracking-tight">
-              {t('users.sheet.editTitle')}
-            </SheetTitle>
-            <SheetDescription className="text-base">
-              {t('users.sheet.editDescription')}
-            </SheetDescription>
+        <SheetContent className="sm:max-w-[540px] p-0 gap-0 border-l border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl">
+          <SheetHeader className="p-6 border-b bg-muted/10">
+            <div className="flex items-start gap-4">
+              <div className="p-3 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 mt-1">
+                <Pencil className="w-5 h-5" />
+              </div>
+              <div className="space-y-1 text-left">
+                <SheetTitle className="text-xl font-bold tracking-tight text-foreground">
+                  {t('users.sheet.editTitle')}
+                </SheetTitle>
+                <SheetDescription className="text-sm text-muted-foreground/80 leading-relaxed">
+                  {t('users.sheet.editDescription')}
+                </SheetDescription>
+              </div>
+            </div>
           </SheetHeader>
-          <div className="py-8">
+          <div className="p-6">
             {editingUser && (
               <UserForm
                 defaultValues={editingUser}
