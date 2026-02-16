@@ -322,7 +322,7 @@ export function AiConfigForm() {
                       children={(field) => (
                         <Field className="sm:col-span-4">
                           <FieldLabel htmlFor={field.name}>
-                            {form.getFieldValue('provider') === 'anthropic'
+                            {['openai', 'anthropic'].includes(form.getFieldValue('provider'))
                               ? t('settings.ai.fields.apiKey')
                               : t('settings.ai.fields.token')}
                           </FieldLabel>
@@ -332,7 +332,13 @@ export function AiConfigForm() {
                             value={field.state.value}
                             onBlur={field.handleBlur}
                             onChange={(e) => field.handleChange(e.target.value)}
-                            placeholder="sk-..."
+                            placeholder={
+                              form.getFieldValue('provider') === 'openai'
+                                ? 'sk-proj-...'
+                                : form.getFieldValue('provider') === 'anthropic'
+                                  ? 'sk-ant-...'
+                                  : 'token-...'
+                            }
                             className="bg-muted/20"
                           />
                           <FieldError
