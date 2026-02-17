@@ -14,7 +14,7 @@ import {
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'

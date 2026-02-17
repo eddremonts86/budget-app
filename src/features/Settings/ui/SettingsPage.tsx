@@ -6,7 +6,7 @@ import {
 } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useSettings } from '../hooks/useSettings'

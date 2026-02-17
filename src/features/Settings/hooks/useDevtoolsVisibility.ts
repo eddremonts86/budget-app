@@ -2,11 +2,16 @@ import { useEffect, useState } from 'react'
 import { DEVTOOLS_STORAGE_KEY } from '../model'
 
 export function useDevtoolsVisibility(): boolean {
-  const [visible, setVisible] = useState<boolean>(() => {
-    if (globalThis.window === undefined) return true
+  // Initialize to false (or true) consistently for hydration
+  const [visible, setVisible] = useState<boolean>(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
     const stored = localStorage.getItem(DEVTOOLS_STORAGE_KEY)
-    return stored === null ? true : stored === 'true'
-  })
+    // Default to true if not stored
+    setVisible(stored === null ? true : stored === 'true')
+  }, [])
 
   useEffect(() => {
     function handleChange(event: Event) {
@@ -17,6 +22,10 @@ export function useDevtoolsVisibility(): boolean {
     globalThis.addEventListener('devtools-visibility-change', handleChange)
     return () => globalThis.removeEventListener('devtools-visibility-change', handleChange)
   }, [])
+
+  // During SSR and initial hydration, return false (or true, but must be consistent)
+  // We return false to avoid flashing devtools if they are disabled
+  if (!mounted) return false
 
   return visible
 }

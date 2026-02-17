@@ -1,6 +1,6 @@
 import * as Sentry from '@sentry/react'
 import type { AxiosError, AxiosInstance } from 'axios'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import type { ApiError } from '../types'
 
 /**

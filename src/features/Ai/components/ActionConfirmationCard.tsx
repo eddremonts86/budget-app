@@ -15,7 +15,7 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import { Button } from '@/components/ui'
 import { categoriesApi } from '@/features/Categories/api/categories.api'
 import { todosApi } from '@/features/Todos/api/todos.api'

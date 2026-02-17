@@ -4,7 +4,7 @@ import {
   useMutation,
   useQueryClient,
 } from '@tanstack/react-query'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import type { TQMutationOptions } from './types'
 
 /**

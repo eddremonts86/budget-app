@@ -50,7 +50,7 @@ import type {
 } from '@tanstack/react-table'
 import * as React from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import type { z } from 'zod'
 import type { schema } from '@/components/data-table.schema'
 import { Badge } from '@/components/ui/badge'

@@ -10,7 +10,7 @@ import {
 import { useForm } from '@tanstack/react-form'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'

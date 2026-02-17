@@ -18047,6 +18047,18 @@
       "createdBy": "",
       "createdAt": "2026-02-16T17:05:59.678Z",
       "updatedAt": "2026-02-16T17:05:59.678Z"
+    },
+    {
+      "id": "8a27",
+      "title": "hbjk",
+      "description": "fghjk",
+      "status": "pending",
+      "priority": "medium",
+      "dueDate": "2026-02-17",
+      "assignedTo": "user_clerk_eduardo",
+      "createdBy": "user_clerk_eduardo",
+      "createdAt": "2026-02-17T18:26:10.348Z",
+      "updatedAt": "2026-02-17T18:26:10.348Z"
     }
   ],
   "users": [
@@ -19039,6 +19051,14 @@
       "timestamp": "2026-02-16T20:50:31.000Z",
       "locale": "es-ES",
       "query": "responde breve...",
+      "providerId": "lm-studio",
+      "model": "local-model",
+      "contextLength": 0
+    },
+    {
+      "timestamp": "2026-02-16T21:00:04.667Z",
+      "locale": "en",
+      "query": "hola...",
       "providerId": "lm-studio",
       "model": "local-model",
       "contextLength": 0

@@ -14,54 +14,68 @@ interface ThemeProviderProps {
 }
 
 export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProviderProps) {
-  const [theme, setThemeState] = useState<Theme>(() => {
-    if (typeof window === 'undefined') return defaultTheme
-    return (localStorage.getItem(STORAGE_KEY) as Theme) || defaultTheme
-  })
+  // Initialize with defaultTheme to ensure server/client match initially
+  const [theme, setThemeState] = useState<Theme>(defaultTheme)
+  const [mounted, setMounted] = useState(false)
 
   const [resolvedTheme, setResolvedTheme] = useState<'dark' | 'light'>(() => {
-    if (theme === 'system') return getSystemTheme()
-    return theme
+    // Default to a safe guess or defaultTheme logic, but consistent
+    return 'light' 
   })
 
+  // Hydrate from storage on mount
   useEffect(() => {
+    setMounted(true)
+    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null
+    if (stored) {
+      setThemeState(stored)
+    }
+  }, [])
+
+  // Calculate resolved theme based on current theme state
+  useEffect(() => {
+    if (!mounted) return
+
+    const systemTheme = getSystemTheme()
+    const effectiveTheme = theme === 'system' ? systemTheme : theme
+    setResolvedTheme(effectiveTheme)
+
     const root = window.document.documentElement
-
-    // Remove previous theme classes
     root.classList.remove('light', 'dark')
-
-    // Determine the actual theme to apply
-    const effectiveTheme = theme === 'system' ? getSystemTheme() : theme
-
-    // Add the theme class
     root.classList.add(effectiveTheme)
-    // We don't set resolvedTheme here to avoid cascading renders
-    // It's already handled by the state update logic or system listener
-  }, [theme])
+  }, [theme, mounted])
 
   // Listen for system theme changes
   useEffect(() => {
-    if (theme !== 'system') return
+    if (!mounted || theme !== 'system') return
 
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
 
     const handleChange = () => {
-      const root = window.document.documentElement
       const systemTheme = getSystemTheme()
+      setResolvedTheme(systemTheme)
+      const root = window.document.documentElement
       root.classList.remove('light', 'dark')
       root.classList.add(systemTheme)
-      setResolvedTheme(systemTheme)
     }
 
     mediaQuery.addEventListener('change', handleChange)
     return () => mediaQuery.removeEventListener('change', handleChange)
-  }, [theme])
+  }, [theme, mounted])
 
   const setTheme = (newTheme: Theme) => {
     localStorage.setItem(STORAGE_KEY, newTheme)
     setThemeState(newTheme)
-    setResolvedTheme(newTheme === 'system' ? getSystemTheme() : newTheme)
   }
+
+  // Prevent rendering children until mounted to avoid hydration mismatch if children rely on theme?
+  // Or just render children with default theme initially.
+  // Standard pattern: render children, but theme might flash.
+  // To avoid mismatch, we render. But the Provider value changes.
+  // Context value change doesn't cause hydration mismatch itself, but what components render based on it might.
+  
+  // Since we are fixing hydration, we should just let it run.
+  // But wait, if we changed `theme` state initialization to be consistent, we are good.
 
   return (
     <ThemeProviderContext.Provider value={{ theme, setTheme, resolvedTheme }}>
