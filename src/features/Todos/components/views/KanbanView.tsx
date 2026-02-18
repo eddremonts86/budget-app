@@ -11,6 +11,7 @@ import {
   useSensors,
 } from '@dnd-kit/core'
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Calendar, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
@@ -27,7 +28,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { ScrollArea } from '@/components/ui/scroll-area'
 import { useUsers } from '@/features/Users/api/users.queries'
 import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
 import { cn } from '@/shared/lib/utils'
@@ -147,6 +147,9 @@ const KanbanColumn = React.memo(function KanbanColumn({
   onEdit,
   syncedUserId,
   userRole,
+  onFetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
 }: {
   id: string
   title: string
@@ -155,8 +158,34 @@ const KanbanColumn = React.memo(function KanbanColumn({
   onEdit: (todo: Todo) => void
   syncedUserId: string | null
   userRole: 'admin' | 'user'
+  onFetchNextPage: () => void
+  hasNextPage: boolean
+  isFetchingNextPage: boolean
 }) {
   const { setNodeRef } = useDroppable({ id })
+  const parentRef = React.useRef<HTMLDivElement>(null)
+
+  const rowVirtualizer = useVirtualizer({
+    count: todos.length,
+    getScrollElement: () => parentRef.current,
+    estimateSize: () => 140, // Approximate height of a card
+    overscan: 5,
+  })
+
+  // Infinite scroll trigger
+  const virtualItems = rowVirtualizer.getVirtualItems()
+
+  React.useEffect(() => {
+    const [lastItem] = [...virtualItems].reverse()
+
+    if (!lastItem) {
+      return
+    }
+
+    if (lastItem.index >= todos.length - 1 && hasNextPage && !isFetchingNextPage) {
+      onFetchNextPage()
+    }
+  }, [hasNextPage, onFetchNextPage, todos.length, isFetchingNextPage, virtualItems])
 
   return (
     <div
@@ -174,25 +203,48 @@ const KanbanColumn = React.memo(function KanbanColumn({
           </Badge>
         </h3>
       </div>
-      <ScrollArea className="flex-1 px-2 pb-2">
-        <div className="flex flex-col gap-2 py-1">
-          {todos.map((todo) => (
-            <DraggableCard
-              key={todo.id}
-              todo={todo}
-              user={userMap.get(todo.assignedTo)}
-              onEdit={onEdit}
-              syncedUserId={syncedUserId}
-              userRole={userRole}
-            />
-          ))}
-          {todos.length === 0 && (
-            <div className="h-24 rounded-xl border-2 border-dashed border-border/40 flex items-center justify-center text-muted-foreground/40 text-sm">
-              Empty
+      <div ref={parentRef} className="flex-1 px-2 pb-2 overflow-y-auto contain-strict">
+        <div
+          style={{
+            height: `${rowVirtualizer.getTotalSize()}px`,
+            width: '100%',
+            position: 'relative',
+          }}
+        >
+          {virtualItems.map((virtualItem) => (
+            <div
+              key={virtualItem.key}
+              style={{
+                position: 'absolute',
+                top: 0,
+                left: 0,
+                width: '100%',
+                height: `${virtualItem.size}px`,
+                transform: `translateY(${virtualItem.start}px)`,
+                paddingBottom: '8px', // Gap between items
+              }}
+            >
+              <DraggableCard
+                todo={todos[virtualItem.index]}
+                user={userMap.get(todos[virtualItem.index].assignedTo)}
+                onEdit={onEdit}
+                syncedUserId={syncedUserId}
+                userRole={userRole}
+              />
             </div>
-          )}
+          ))}
         </div>
-      </ScrollArea>
+        {todos.length === 0 && (
+          <div className="h-24 rounded-xl border-2 border-dashed border-border/40 flex items-center justify-center text-muted-foreground/40 text-sm">
+            Empty
+          </div>
+        )}
+        {isFetchingNextPage && todos.length > 0 && (
+          <div className="py-2 flex justify-center text-xs text-muted-foreground">
+            Loading more...
+          </div>
+        )}
+      </div>
     </div>
   )
 })
@@ -235,17 +287,20 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
   const queryClient = useQueryClient()
   const { data: users } = useUsers()
   const { syncedUserId, userRole } = useSyncAuthUser()
-  // Disable automatic invalidation to prevent refetching during drag
-  const updateMutation = useUpdateTodo({ invalidateKeys: [] })
+  // Add proper cache invalidation for todoKeys.all
+  const updateMutation = useUpdateTodo({ invalidateKeys: [todoKeys.all] })
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteTodos(10) // Fetch more for kanban
   const [activeTodo, setActiveTodo] = React.useState<Todo | null>(null)
 
   // Load more automatically for better kanban experience
+  // Removed automatic fetching on mount/update to allow scroll-based fetching
+  /*
   React.useEffect(() => {
     if (hasNextPage && !isFetchingNextPage) {
       fetchNextPage()
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  */
 
   const userMap = React.useMemo(() => {
     const map = new Map<string, { name: string; avatar: string }>()
@@ -368,6 +423,9 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
           onEdit={onEdit}
           syncedUserId={syncedUserId}
           userRole={userRole}
+          onFetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
         />
         <KanbanColumn
           id="in_progress"
@@ -377,6 +435,9 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
           onEdit={onEdit}
           syncedUserId={syncedUserId}
           userRole={userRole}
+          onFetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
         />
         <KanbanColumn
           id="completed"
@@ -386,6 +447,9 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
           onEdit={onEdit}
           syncedUserId={syncedUserId}
           userRole={userRole}
+          onFetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isFetchingNextPage={isFetchingNextPage}
         />
 
         {createPortal(

@@ -7,6 +7,7 @@ export function useDevtoolsVisibility(): boolean {
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     const stored = localStorage.getItem(DEVTOOLS_STORAGE_KEY)
     // Default to true if not stored

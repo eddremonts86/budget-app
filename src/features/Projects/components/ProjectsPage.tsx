@@ -36,6 +36,7 @@ export function ProjectsPage() {
         toast.success(t('projects.success.deleted'))
       }
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error)
       toast.error(t('projects.error.delete'))
     }
@@ -46,11 +47,11 @@ export function ProjectsPage() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full space-y-4">
+      <div className="flex items-center justify-between shrink-0">
         <h2 className="text-3xl font-bold tracking-tight">{t('projects.title')}</h2>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 flex-1 content-start min-h-0 overflow-y-auto">
         {projects?.map((project) => (
           <Card key={project.id} className="flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">

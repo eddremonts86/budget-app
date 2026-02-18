@@ -485,7 +485,7 @@ function buildDataContext(db: MockDb, intents: Intent[]): string {
       [
         `[Transactions Data — View at /dashboard/transactions]`,
         `Total Transactions: ${db.recentTransactions.length}`,
-        `Transactions: ${JSON.stringify(db.recentTransactions.map((t) => ({ customer: t.customer.name, status: t.status, amount: '$' + String(t.amount), date: t.date })))}`,
+        `Transactions: ${JSON.stringify(db.recentTransactions.map((t) => ({ customer: t.customer.name, status: t.status, amount: `$${t.amount}`, date: t.date })))}`,
       ].join('\n'),
     )
   }

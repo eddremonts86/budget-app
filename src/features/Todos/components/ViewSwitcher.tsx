@@ -1,5 +1,4 @@
 import { Calendar, Kanban, List } from 'lucide-react'
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs'
 

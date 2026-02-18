@@ -1,9 +1,9 @@
-import { useTQuery, useTQMutation } from '@/shared/lib/query'
-import { teamsApi } from './teams.api'
 import { useUsers } from '@/features/Users/api/users.queries'
-import type { Team, TeamWithUsers } from '../model/types'
 import type { User } from '@/features/Users/model/types'
 import { i18n } from '@/shared/lib/i18n'
+import { useTQuery, useTQMutation } from '@/shared/lib/query'
+import type { Team, TeamWithUsers } from '../model/types'
+import { teamsApi } from './teams.api'
 
 export const teamKeys = {
   all: ['teams'] as const,

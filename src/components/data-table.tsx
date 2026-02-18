@@ -50,7 +50,6 @@ import type {
 } from '@tanstack/react-table'
 import * as React from 'react'
 import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
-import { toast } from '@/shared/lib/toast'
 import type { z } from 'zod'
 import type { schema } from '@/components/data-table.schema'
 import { Badge } from '@/components/ui/badge'
@@ -96,6 +95,7 @@ import {
 } from '@/components/ui/table'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useIsMobile } from '@/hooks/use-mobile'
+import { toast } from '@/shared/lib/toast'
 
 // Create a separate component for the drag handle
 function DragHandle({ id }: { id: number }) {

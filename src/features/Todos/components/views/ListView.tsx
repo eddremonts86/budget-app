@@ -256,10 +256,6 @@ export function ListView({ onEdit }: ListViewProps) {
                       label: t('common.delete'),
                       onClick: () => deleteMutation.mutate(todo.id),
                     },
-                    cancel: {
-                      label: t('common.cancel'),
-                      onClick: () => {},
-                    },
                     duration: 10000,
                   })
                 }}

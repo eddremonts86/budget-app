@@ -3,7 +3,6 @@ import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
-import { toast } from '@/shared/lib/toast'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -22,6 +21,7 @@ import {
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableCell, TableRow } from '@/components/ui/table'
+import { toast } from '@/shared/lib/toast'
 import { DataTable } from '@/shared/ui/DataTable'
 import {
   useCreateCategory,
@@ -102,10 +102,6 @@ export function CategoriesPage() {
                       label: t('common.delete'),
                       onClick: () => deleteMutation.mutate(category.id),
                     },
-                    cancel: {
-                      label: t('common.cancel'),
-                      onClick: () => {},
-                    },
                     duration: 10000,
                   })
                 }}
@@ -137,8 +133,8 @@ export function CategoriesPage() {
   const totalCount = data?.pages[0]?.totalCount ?? 0
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full space-y-4">
+      <div className="flex items-center justify-between shrink-0">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">{t('categories.title')}</h2>
           <p className="text-muted-foreground">
@@ -154,31 +150,33 @@ export function CategoriesPage() {
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      ) : (
-        <DataTable columns={columns} data={allCategories} filterColumn="name">
-          {hasNextPage && (
-            <TableRow className="hover:bg-transparent border-none">
-              <TableCell colSpan={columns.length} className="py-4">
-                <div ref={ref} className="flex justify-center">
-                  <Button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    variant="outline"
-                  >
-                    {isFetchingNextPage ? t('common.loadingMore') : t('common.loadMore')}
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </DataTable>
-      )}
+      <div className="flex-1 min-h-0 flex flex-col">
+        {isLoading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <DataTable columns={columns} data={allCategories} filterColumn="name" fullHeight>
+            {hasNextPage && (
+              <TableRow className="hover:bg-transparent border-none">
+                <TableCell colSpan={columns.length} className="py-4">
+                  <div ref={ref} className="flex justify-center">
+                    <Button
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                      variant="outline"
+                    >
+                      {isFetchingNextPage ? t('common.loadingMore') : t('common.loadMore')}
+                    </Button>
+                  </div>
+                </TableCell>
+              </TableRow>
+            )}
+          </DataTable>
+        )}
+      </div>
 
       {/* Create Sheet */}
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>

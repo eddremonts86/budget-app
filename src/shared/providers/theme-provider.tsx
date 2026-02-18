@@ -25,6 +25,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
 
   // Hydrate from storage on mount
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true)
     const stored = localStorage.getItem(STORAGE_KEY) as Theme | null
     if (stored) {
@@ -38,6 +39,7 @@ export function ThemeProvider({ children, defaultTheme = 'system' }: ThemeProvid
 
     const systemTheme = getSystemTheme()
     const effectiveTheme = theme === 'system' ? systemTheme : theme
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setResolvedTheme(effectiveTheme)
 
     const root = window.document.documentElement

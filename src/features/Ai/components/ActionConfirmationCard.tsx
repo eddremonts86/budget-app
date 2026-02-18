@@ -15,7 +15,6 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { toast } from '@/shared/lib/toast'
 import { Button } from '@/components/ui'
 import { categoriesApi } from '@/features/Categories/api/categories.api'
 import { todosApi } from '@/features/Todos/api/todos.api'
@@ -23,8 +22,9 @@ import { canModifyTodo } from '@/features/Todos/model/permissions'
 import { transactionsApi } from '@/features/Transactions/api/transactions.api'
 import { usersApi } from '@/features/Users/api/users.api'
 import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
+import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/utils/index'
-import { useActionStates } from './ActionStatesContext'
+import { useActionStates } from './useActionStates'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -357,7 +357,11 @@ async function executeAction(
         return { success: true, message: `User "${result.name}" created with ID ${result.id}` }
       }
       case 'transaction': {
-        const result = await transactionsApi.create((payload as CreateTransactionAction).data)
+        const result = await transactionsApi.create({
+          ...(payload as CreateTransactionAction).data,
+          projectId: 'default',
+          userId: 'default',
+        })
         return {
           success: true,
           message: `Transaction for "${result.customer.name}" created with ID ${result.id}`,
@@ -427,7 +431,7 @@ async function executeAction(
 // Action key hashing
 // ---------------------------------------------------------------------------
 
-export function hashAction(json: string): string {
+function hashAction(json: string): string {
   let h = 0
   for (let i = 0; i < json.length; i++) {
     h = (Math.imul(31, h) + json.charCodeAt(i)) | 0
@@ -668,5 +672,4 @@ export function ActionConfirmationCard({ actionJson }: ActionConfirmationCardPro
   )
 }
 
-export { parseActionPayload }
 export type { ActionPayload }

@@ -23,9 +23,9 @@ export function DashboardPage() {
   }
 
   return (
-    <div className="flex flex-col gap-8">
+    <div className="flex flex-col h-full gap-8 overflow-y-auto">
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 shrink-0">
         {isLoadingStats ? (
           Array.from({ length: 4 }).map((_, i) => (
             <Card key={i}>

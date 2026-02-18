@@ -12,7 +12,6 @@ import {
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
-import { toast } from '@/shared/lib/toast'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -33,6 +32,7 @@ import {
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableCell, TableRow } from '@/components/ui/table'
+import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
 import { useCreateUser, useDeleteUser, useInfiniteUsers, useUpdateUser } from '../api/users.queries'
@@ -144,10 +144,6 @@ export function UsersPage() {
                       label: t('common.delete'),
                       onClick: () => deleteMutation.mutate(user.id),
                     },
-                    cancel: {
-                      label: t('common.cancel'),
-                      onClick: () => {},
-                    },
                     duration: 10000,
                   })
                 }}
@@ -189,8 +185,8 @@ export function UsersPage() {
   const totalCount = data?.pages[0]?.totalCount ?? 0
 
   return (
-    <div className="space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+    <div className="flex flex-col h-full space-y-8 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
         <div className="space-y-1">
           <h2 className="text-4xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
             {t('users.title')}
@@ -217,8 +213,8 @@ export function UsersPage() {
           <Skeleton className="h-[64px] w-full rounded-3xl" />
         </div>
       ) : (
-        <div className="relative group">
-          <DataTable columns={columns} data={allUsers} filterColumn="name">
+        <div className="relative group flex-1 min-h-0 flex flex-col">
+          <DataTable columns={columns} data={allUsers} filterColumn="name" fullHeight>
             {hasNextPage && (
               <TableRow className="hover:bg-transparent border-none">
                 <TableCell colSpan={columns.length} className="py-8">

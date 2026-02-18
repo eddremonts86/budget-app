@@ -30,7 +30,7 @@ export interface Toast {
   promise: <T>(promise: Promise<T> | (() => Promise<T>), options: PromiseOptions<T>) => Promise<T>
 }
 
-const toastBase = (message: string, options?: ToastOptions) => {
+const showToast = (message: string, options?: ToastOptions) => {
   sileo.show({
     title: message,
     description: options?.description,
@@ -41,76 +41,78 @@ const toastBase = (message: string, options?: ToastOptions) => {
   })
 }
 
-export const toast = Object.assign(toastBase, {
-  success: (message: string, options?: ToastOptions) => {
-    sileo.success({
-      title: message,
-      description: options?.description,
-      duration: options?.duration,
-      button: options?.action
-        ? { title: options.action.label, onClick: options.action.onClick }
-        : undefined,
-    })
-  },
-  error: (message: string, options?: ToastOptions) => {
-    sileo.error({
-      title: message,
-      description: options?.description,
-      duration: options?.duration,
-      button: options?.action
-        ? { title: options.action.label, onClick: options.action.onClick }
-        : undefined,
-    })
-  },
-  warning: (message: string, options?: ToastOptions) => {
-    sileo.warning({
-      title: message,
-      description: options?.description,
-      duration: options?.duration,
-      button: options?.action
-        ? { title: options.action.label, onClick: options.action.onClick }
-        : undefined,
-    })
-  },
-  info: (message: string, options?: ToastOptions) => {
-    sileo.info({
-      title: message,
-      description: options?.description,
-      duration: options?.duration,
-      button: options?.action
-        ? { title: options.action.label, onClick: options.action.onClick }
-        : undefined,
-    })
-  },
-  message: (message: string, options?: ToastOptions) => {
-    sileo.show({
-      title: message,
-      description: options?.description,
-      duration: options?.duration,
-      button: options?.action
-        ? { title: options.action.label, onClick: options.action.onClick }
-        : undefined,
-    })
-  },
-  promise: <T>(promise: Promise<T> | (() => Promise<T>), options: PromiseOptions<T>) => {
-    return sileo.promise(promise, {
-      loading: {
-        title: typeof options.loading === 'string' ? options.loading : 'Loading...',
-      },
-      success: (data: T) => {
-        const msg = typeof options.success === 'function' ? options.success(data) : options.success
-        return {
-          title: typeof msg === 'string' ? msg : 'Success',
-          description: typeof msg !== 'string' ? msg : undefined,
-        }
-      },
-      error: (err: unknown) => {
-        const msg = typeof options.error === 'function' ? options.error(err) : options.error
-        return {
-          title: typeof msg === 'string' ? msg : 'Error',
-          description: typeof msg !== 'string' ? msg : undefined,
-        }
-      },
-    })
-  },
+const success = (message: string, options?: ToastOptions) => {
+  sileo.success({
+    title: message,
+    description: options?.description,
+    duration: options?.duration,
+    button: options?.action
+      ? { title: options.action.label, onClick: options.action.onClick }
+      : undefined,
+  })
+}
+
+const error = (message: string, options?: ToastOptions) => {
+  sileo.error({
+    title: message,
+    description: options?.description,
+    duration: options?.duration,
+    button: options?.action
+      ? { title: options.action.label, onClick: options.action.onClick }
+      : undefined,
+  })
+}
+
+const warning = (message: string, options?: ToastOptions) => {
+  sileo.warning({
+    title: message,
+    description: options?.description,
+    duration: options?.duration,
+    button: options?.action
+      ? { title: options.action.label, onClick: options.action.onClick }
+      : undefined,
+  })
+}
+
+const info = (message: string, options?: ToastOptions) => {
+  sileo.info({
+    title: message,
+    description: options?.description,
+    duration: options?.duration,
+    button: options?.action
+      ? { title: options.action.label, onClick: options.action.onClick }
+      : undefined,
+  })
+}
+
+const promise = <T>(promise: Promise<T> | (() => Promise<T>), options: PromiseOptions<T>) => {
+  return sileo.promise(promise, {
+    loading: {
+      title: typeof options.loading === 'string' ? options.loading : 'Loading...',
+    },
+    success: (data: T) => {
+      const message =
+        typeof options.success === 'function' ? options.success(data) : options.success
+      return {
+        title: typeof message === 'string' ? message : 'Success',
+        description: typeof message !== 'string' ? message : undefined,
+      }
+    },
+    error: (error: unknown) => {
+      const message = typeof options.error === 'function' ? options.error(error) : options.error
+      return {
+        title: typeof message === 'string' ? message : 'Error',
+        description: typeof message !== 'string' ? message : undefined,
+      }
+    },
+  })
+}
+
+export const toast = Object.assign(showToast, {
+  success,
+  error,
+  warning,
+  info,
+  message: showToast,
+  promise,
 }) as Toast

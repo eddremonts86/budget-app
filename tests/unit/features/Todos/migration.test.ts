@@ -1,6 +1,6 @@
-import { describe, expect, it } from 'vitest'
 import fs from 'fs'
 import path from 'path'
+import { describe, expect, it } from 'vitest'
 
 const dbPath = path.resolve(process.cwd(), 'mocks/db.json')
 

@@ -146,14 +146,19 @@ const injectReferenceContext = async (messages: ChatMessage[], locale: string) =
 
   const contextMessage: ChatMessage = {
     role: 'user',
-    content:
-      "Use the following reference information to answer the user's question accurately. Base your answer on this data when relevant:\n\n" +
-      contextParts.join('\n\n'),
+    content: `Use the following reference information to answer the user's question accurately. Base your answer on this data when relevant:
+
+${contextParts.join('\n\n')}`,
   }
 
-  const lastUserIndex = messages.findLastIndex(
-    (message) => message.role === 'user' && !!message.content,
-  )
+  let lastUserIndex = -1
+  for (let i = messages.length - 1; i >= 0; i--) {
+    if (messages[i].role === 'user' && !!messages[i].content) {
+      lastUserIndex = i
+      break
+    }
+  }
+
   if (lastUserIndex >= 0) {
     messages.splice(lastUserIndex, 0, contextMessage)
   }
@@ -265,7 +270,8 @@ const parseJsonPayload = (payload: string) => {
   }
 }
 
-const updateStreamStateFromPayload = (state: LmStudioStreamState, payload: any) => {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const updateStreamStateFromPayload = (state: LmStudioStreamState, payload: Record<string, any>) => {
   if (typeof payload.model === 'string' && payload.model.length > 0) {
     state.model = payload.model
   }
@@ -414,7 +420,8 @@ const createLmStudioAgUiStream = async function* (
       const parsed = collectChunksFromBuffer(state, runId, messageId, buffer)
       buffer = parsed.remaining
       for (const chunk of parsed.chunks) {
-        yield chunk
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        yield chunk as any
       }
     }
 
@@ -422,16 +429,18 @@ const createLmStudioAgUiStream = async function* (
     if (buffer.trim().length > 0) {
       const tailChunks = processLmStudioSseEvent(state, runId, messageId, buffer)
       for (const chunk of tailChunks) {
-        yield chunk
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        yield chunk as any
       }
     }
 
     if (!state.emittedRunFinished && state.emittedRunStarted) {
-      yield buildRunFinishedChunk(runId, state.model, state.finishReason, state.usage)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      yield buildRunFinishedChunk(runId, state.model, state.finishReason, state.usage) as any
     }
   } catch (error) {
     const message = error instanceof Error ? error.message : 'Unknown LM Studio stream error'
-    yield {
+    const errorChunk = {
       type: 'RUN_ERROR',
       runId,
       model: state.model,
@@ -440,6 +449,8 @@ const createLmStudioAgUiStream = async function* (
         message,
       },
     }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    yield errorChunk as any
   } finally {
     reader.releaseLock()
   }

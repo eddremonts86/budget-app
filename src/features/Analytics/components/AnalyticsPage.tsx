@@ -5,11 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui'
 export function AnalyticsPage() {
   const { t } = useTranslation()
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full space-y-4">
+      <div className="flex items-center justify-between shrink-0">
         <h2 className="text-3xl font-bold tracking-tight">{t('analytics.title')}</h2>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 flex-1 content-start min-h-0 overflow-y-auto">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">{t('analytics.pageViews')}</CardTitle>

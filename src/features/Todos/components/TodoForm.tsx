@@ -362,7 +362,7 @@ export function TodoForm({
                               const month = String(date.getMonth() + 1).padStart(2, '0')
                               const day = String(date.getDate()).padStart(2, '0')
                               // Preserve time if exists
-                              const currentTime = field.state.value.includes('T')
+                              const currentTime = field.state.value?.includes('T')
                                 ? field.state.value.split('T')[1]
                                 : ''
                               field.handleChange(
@@ -379,14 +379,14 @@ export function TodoForm({
                         type="time"
                         className="h-12 w-32 bg-secondary/30 border-transparent hover:border-primary/30 rounded-xl"
                         value={
-                          field.state.value.includes('T')
+                          field.state.value?.includes('T')
                             ? field.state.value.split('T')[1].substring(0, 5)
                             : ''
                         }
                         onChange={(e) => {
                           const time = e.target.value
                           const datePart =
-                            field.state.value.split('T')[0] ||
+                            field.state.value?.split('T')[0] ||
                             new Date().toISOString().split('T')[0]
                           if (time) {
                             field.handleChange(`${datePart}T${time}:00`)

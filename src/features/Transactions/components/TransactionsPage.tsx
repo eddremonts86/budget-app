@@ -349,8 +349,8 @@ export function TransactionsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="flex flex-col h-full space-y-8">
+      <div className="flex items-center justify-between shrink-0">
         <h2 className="text-3xl font-bold tracking-tight">{t('transactions.title')}</h2>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
@@ -360,11 +360,13 @@ export function TransactionsPage() {
 
       {/* Pending Approval Section */}
       {currentUserId && (
-        <PendingTransactionsTable transactions={allTransactions} currentUserId={currentUserId} />
+        <div className="shrink-0">
+          <PendingTransactionsTable transactions={allTransactions} currentUserId={currentUserId} />
+        </div>
       )}
 
-      <div className="space-y-4">
-        <h3 className="text-xl font-semibold tracking-tight">Transaction History</h3>
+      <div className="flex-1 min-h-0 flex flex-col space-y-4">
+        <h3 className="text-xl font-semibold tracking-tight shrink-0">Transaction History</h3>
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-10 w-full" />
@@ -372,11 +374,11 @@ export function TransactionsPage() {
             <Skeleton className="h-10 w-full" />
           </div>
         ) : (
-          <DataTable columns={columns} data={flatData} filterColumn="customer_name" />
+          <DataTable columns={columns} data={flatData} filterColumn="customer_name" fullHeight />
         )}
 
         {/* Infinite scroll trigger */}
-        <div ref={ref} className="h-4 w-full">
+        <div ref={ref} className="h-4 w-full shrink-0">
           {isFetchingNextPage && (
             <div className="text-center text-sm text-muted-foreground">Loading more...</div>
           )}

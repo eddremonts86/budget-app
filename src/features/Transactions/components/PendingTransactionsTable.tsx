@@ -4,13 +4,13 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { useUsers } from '@/features/Users/api/users.queries'
+import { toast } from '@/shared/lib/toast'
 import { DataTable } from '@/shared/ui/DataTable'
 import {
   useUpdateTransaction,
 } from '../api/transactions.queries'
 import type { Transaction } from '../model/types'
-import { useUsers } from '@/features/Users/api/users.queries'
-import { toast } from '@/shared/lib/toast'
 
 interface PendingTransactionsTableProps {
   transactions: Transaction[]

@@ -2,22 +2,7 @@
 
 import * as React from 'react'
 import type { PersistedActionState } from '@/shared/lib/storage/chat-storage'
-
-// --- Context ---
-
-interface ActionStatesContextValue {
-  states: Record<string, PersistedActionState>
-  saveState: (key: string, state: PersistedActionState) => void
-}
-
-const ActionStatesContext = React.createContext<ActionStatesContextValue>({
-  states: {},
-  saveState: () => {},
-})
-
-export function useActionStates() {
-  return React.useContext(ActionStatesContext)
-}
+import { ActionStatesContext } from './useActionStates'
 
 // --- Provider ---
 
