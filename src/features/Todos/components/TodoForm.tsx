@@ -303,98 +303,150 @@ export function TodoForm({
             />
           </div>
 
-          <form.Field
-            name="dueDate"
-            children={(field) => (
-              <motion.div variants={itemVariants}>
-                <Field className="space-y-2">
-                  <FieldLabel
-                    htmlFor={field.name}
-                    className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2"
-                  >
-                    <CalendarIcon className="w-3.5 h-3.5" /> {t('todos.form.dueDateLabel')}
-                  </FieldLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          'h-12 w-full justify-start text-left font-normal bg-secondary/30 border-transparent hover:border-primary/30 rounded-xl px-4',
-                          !field.state.value && 'text-muted-foreground',
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
-                        {field.state.value ? (
-                          format(new Date(`${field.state.value}T00:00:00`), 'PPP', { locale })
-                        ) : (
-                          <span>{t('todos.form.dueDatePlaceholder')}</span>
-                        )}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent
-                      className="w-auto p-0 rounded-2xl border-border/40 shadow-2xl"
-                      align="start"
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form.Field
+              name="dueDate"
+              children={(field) => (
+                <motion.div variants={itemVariants}>
+                  <Field className="space-y-2">
+                    <FieldLabel
+                      htmlFor={field.name}
+                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2"
                     >
-                      <Calendar
-                        mode="single"
-                        selected={
-                          field.state.value ? new Date(`${field.state.value}T00:00:00`) : undefined
+                      <CalendarIcon className="w-3.5 h-3.5" /> {t('todos.form.dueDateLabel')}
+                    </FieldLabel>
+                    <div className="flex gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            className={cn(
+                              'h-12 w-full justify-start text-left font-normal bg-secondary/30 border-transparent hover:border-primary/30 rounded-xl px-4',
+                              !field.state.value && 'text-muted-foreground',
+                            )}
+                          >
+                            <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                            {field.state.value ? (
+                              format(
+                                new Date(
+                                  field.state.value.includes('T')
+                                    ? field.state.value
+                                    : `${field.state.value}T00:00:00`,
+                                ),
+                                'PPP',
+                                { locale },
+                              )
+                            ) : (
+                              <span>{t('todos.form.dueDatePlaceholder')}</span>
+                            )}
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent
+                          className="w-auto p-0 rounded-2xl border-border/40 shadow-2xl"
+                          align="start"
+                        >
+                          <Calendar
+                            mode="single"
+                            selected={
+                              field.state.value
+                                ? new Date(
+                                    field.state.value.includes('T')
+                                      ? field.state.value
+                                      : `${field.state.value}T00:00:00`,
+                                  )
+                                : undefined
+                            }
+                            onSelect={(date) => {
+                              if (!date) return
+                              const year = date.getFullYear()
+                              const month = String(date.getMonth() + 1).padStart(2, '0')
+                              const day = String(date.getDate()).padStart(2, '0')
+                              // Preserve time if exists
+                              const currentTime = field.state.value.includes('T')
+                                ? field.state.value.split('T')[1]
+                                : ''
+                              field.handleChange(
+                                `${year}-${month}-${day}${currentTime ? `T${currentTime}` : ''}`,
+                              )
+                            }}
+                            initialFocus
+                            locale={locale}
+                            className="rounded-2xl"
+                          />
+                        </PopoverContent>
+                      </Popover>
+                      <Input
+                        type="time"
+                        className="h-12 w-32 bg-secondary/30 border-transparent hover:border-primary/30 rounded-xl"
+                        value={
+                          field.state.value.includes('T')
+                            ? field.state.value.split('T')[1].substring(0, 5)
+                            : ''
                         }
-                        onSelect={(date) => {
-                          if (!date) return
-                          const year = date.getFullYear()
-                          const month = String(date.getMonth() + 1).padStart(2, '0')
-                          const day = String(date.getDate()).padStart(2, '0')
-                          field.handleChange(`${year}-${month}-${day}`)
+                        onChange={(e) => {
+                          const time = e.target.value
+                          const datePart =
+                            field.state.value.split('T')[0] ||
+                            new Date().toISOString().split('T')[0]
+                          if (time) {
+                            field.handleChange(`${datePart}T${time}:00`)
+                          } else {
+                            field.handleChange(datePart)
+                          }
                         }}
-                        initialFocus
-                        locale={locale}
-                        className="rounded-2xl"
                       />
-                    </PopoverContent>
-                  </Popover>
-                  <FieldError
-                    errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
-                    )}
-                  />
-                </Field>
-              </motion.div>
-            )}
-          />
+                    </div>
+                    <FieldError
+                      errors={field.state.meta.errors.map((e) =>
+                        typeof e === 'string'
+                          ? e
+                          : (e as { message?: string })?.message || String(e),
+                      )}
+                    />
+                  </Field>
+                </motion.div>
+              )}
+            />
 
-          <form.Field
-            name="projectId"
-            children={(field) => (
-              <motion.div variants={itemVariants}>
-                <Field className="space-y-2">
-                  <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
-                    <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
-                  </FieldLabel>
-                  <Select
-                    value={field.state.value}
-                    onValueChange={(value) => field.handleChange(value)}
-                  >
-                    <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
-                      <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
-                      {selectableProjects?.map((project) => (
-                        <SelectItem key={project.id} value={project.id} className="rounded-lg m-1">
-                          {project.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FieldError
-                    errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
-                    )}
-                  />
-                </Field>
-              </motion.div>
-            )}
-          />
+            <form.Field
+              name="projectId"
+              children={(field) => (
+                <motion.div variants={itemVariants}>
+                  <Field className="space-y-2">
+                    <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                      <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
+                    </FieldLabel>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => field.handleChange(value)}
+                    >
+                      <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
+                        <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
+                        {selectableProjects?.map((project) => (
+                          <SelectItem
+                            key={project.id}
+                            value={project.id}
+                            className="rounded-lg m-1"
+                          >
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldError
+                      errors={field.state.meta.errors.map((e) =>
+                        typeof e === 'string'
+                          ? e
+                          : (e as { message?: string })?.message || String(e),
+                      )}
+                    />
+                  </Field>
+                </motion.div>
+              )}
+            />
+          </div>
 
           <form.Field
             name="assignedTo"

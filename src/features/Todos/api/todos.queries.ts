@@ -12,7 +12,7 @@ export const todoKeys = {
 
 export const useInfiniteTodos = (limit = 10) => {
   return useTQInfinite(
-    todoKeys.infinite(),
+    [...todoKeys.infinite(), { limit }],
     ({ pageParam }) => todosApi.getAll({ pageParam, limit }),
     {
       initialPageParam: 1,
@@ -25,14 +25,15 @@ export const useTodo = (id: string) => {
   return useTQuery(todoKeys.detail(id), () => todosApi.getById(id))
 }
 
-export const useCreateTodo = () => {
+export const useCreateTodo = (options?: Parameters<typeof useTQMutation>[2]) => {
   return useTQMutation(['todos', 'create'], todosApi.create, {
     invalidateKeys: [todoKeys.all],
     successMessage: i18n.t('todos.toast.created'),
+    ...options,
   })
 }
 
-export const useUpdateTodo = () => {
+export const useUpdateTodo = (options?: Parameters<typeof useTQMutation>[2]) => {
   return useTQMutation(
     ['todos', 'update'],
     ({ id, data }: { id: string; data: Parameters<typeof todosApi.update>[1] }) =>
@@ -40,13 +41,15 @@ export const useUpdateTodo = () => {
     {
       invalidateKeys: [todoKeys.all],
       successMessage: i18n.t('todos.toast.updated'),
+      ...options,
     },
   )
 }
 
-export const useDeleteTodo = () => {
+export const useDeleteTodo = (options?: Parameters<typeof useTQMutation>[2]) => {
   return useTQMutation(['todos', 'delete'], todosApi.delete, {
     invalidateKeys: [todoKeys.all],
     successMessage: i18n.t('todos.toast.deleted'),
+    ...options,
   })
 }

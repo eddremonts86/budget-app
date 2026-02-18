@@ -37,6 +37,7 @@ interface DataTableProps<TData, TValue> {
   filterColumn?: string
   children?: React.ReactNode
   className?: string
+  fullHeight?: boolean
 }
 
 export function DataTable<TData, TValue>({
@@ -45,6 +46,7 @@ export function DataTable<TData, TValue>({
   filterColumn,
   children,
   className,
+  fullHeight,
 }: DataTableProps<TData, TValue>) {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -71,8 +73,8 @@ export function DataTable<TData, TValue>({
   })
 
   return (
-    <FieldGroup className="w-full space-y-6">
-      <Field className="flex flex-col md:flex-row items-center justify-between gap-4">
+    <FieldGroup className={cn('w-full space-y-6', fullHeight && 'h-full flex flex-col')}>
+      <Field className="flex flex-col md:flex-row items-center justify-between gap-4 shrink-0">
         {filterColumn && (
           <div className="relative w-full md:max-w-sm group">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
@@ -125,11 +127,12 @@ export function DataTable<TData, TValue>({
       <div
         className={cn(
           'rounded-3xl border border-border/40 bg-card/30 backdrop-blur-sm overflow-hidden shadow-sm',
+          fullHeight && 'flex-1 min-h-0 flex flex-col',
         )}
       >
         <Table
           className="border-separate border-spacing-0"
-          containerClassName={cn('overflow-y-auto', className)}
+          containerClassName={cn('overflow-y-auto', className, fullHeight && 'flex-1 h-full')}
         >
           <TableHeader className="sticky top-0 z-20 bg-secondary/95 backdrop-blur-md shadow-sm">
             {table.getHeaderGroups().map((headerGroup) => (

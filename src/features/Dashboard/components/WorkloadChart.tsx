@@ -18,13 +18,13 @@ export function WorkloadChart() {
   if (isLoading) {
     // Basic Skeleton loading
     return (
-      <Card className="col-span-7">
+      <Card className="col-span-4">
         <CardHeader>
           <div className="h-6 w-1/3 bg-muted rounded animate-pulse" />
           <div className="h-4 w-1/4 bg-muted rounded animate-pulse mt-2" />
         </CardHeader>
         <CardContent>
-          <div className="h-[350px] bg-muted rounded animate-pulse" />
+          <div className="h-[250px] bg-muted rounded animate-pulse" />
         </CardContent>
       </Card>
     )
@@ -57,7 +57,7 @@ export function WorkloadChart() {
   } satisfies ChartConfig
 
   return (
-    <Card className="col-span-7">
+    <Card className="col-span-4">
       <CardHeader>
         <CardTitle>{t('dashboard.workload.title', 'Team Workload')}</CardTitle>
         <CardDescription>
@@ -65,27 +65,24 @@ export function WorkloadChart() {
         </CardDescription>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="min-h-[180px] w-full">
+        <ChartContainer config={chartConfig} className="h-[250px] w-full">
           <BarChart
             accessibilityLayer
             data={chartData}
-            layout="vertical"
             margin={{
-              left: 20, // Add some margin for labels
+              top: 20,
             }}
             barSize={24}
           >
-            <CartesianGrid horizontal={false} />
-            <YAxis
+            <CartesianGrid vertical={false} />
+            <XAxis
               dataKey="name"
-              type="category"
               tickLine={false}
               tickMargin={10}
               axisLine={false}
-              width={100} // Increase width for names
-              tickFormatter={(value) => value} // Show full name or truncate if needed
+              tickFormatter={(value) => value}
             />
-            <XAxis dataKey="completed" type="number" hide />
+            <YAxis type="number" hide />
             <ChartTooltip cursor={false} content={<ChartTooltipContent indicator="dashed" />} />
             <ChartLegend content={<ChartLegendContent />} />
             <Bar
@@ -100,12 +97,7 @@ export function WorkloadChart() {
               fill="var(--color-inProgress)"
               radius={[0, 0, 0, 0]}
             />
-            <Bar
-              dataKey="pending"
-              stackId="a"
-              fill="var(--color-pending)"
-              radius={[0, 4, 4, 0]} // Rounded right side
-            />
+            <Bar dataKey="pending" stackId="a" fill="var(--color-pending)" radius={[4, 4, 0, 0]} />
           </BarChart>
         </ChartContainer>
       </CardContent>
