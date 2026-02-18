@@ -31,6 +31,16 @@ export const todosApi = {
     const { data } = await apiClient.get<Todo>(`/todos/${id}`)
     return data
   },
+  getByProjectId: async (projectId: string) => {
+    const { data: response } = await apiClient.get<JsonServerResponse<Todo>>('/todos', {
+      params: {
+        projectId,
+        _page: 1,
+        _per_page: 1,
+      },
+    })
+    return response.items > 0
+  },
   create: async (todo: Omit<Todo, 'id' | 'createdAt' | 'updatedAt'>) => {
     const now = new Date().toISOString()
     const { data } = await apiClient.post<Todo>('/todos', {

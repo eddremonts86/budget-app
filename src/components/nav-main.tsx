@@ -19,6 +19,7 @@ export function NavMain({
       url?: string
       icon?: Icon
       onClick?: () => void
+      badge?: React.ReactNode
     }[]
   }[]
 }) {
@@ -36,6 +37,7 @@ export function NavMain({
                       <Link to={item.url}>
                         {item.icon && <item.icon />}
                         <span>{item.title}</span>
+                        {item.badge && <div className="ml-auto">{item.badge}</div>}
                       </Link>
                     </SidebarMenuButton>
                   ) : (

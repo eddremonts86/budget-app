@@ -331,7 +331,9 @@
       "dueDatePlaceholder": "Selecciona fecha",
       "assignedToLabel": "Asignado a",
       "assignedToPlaceholder": "Seleccionar usuario",
-      "assignedToSelf": "Yo"
+      "assignedToSelf": "Yo",
+      "projectLabel": "Proyecto",
+      "projectPlaceholder": "Selecciona proyecto"
     },
     "status": {
       "pending": "Pendiente",
@@ -438,9 +440,17 @@
       "statusLabel": "Estado",
       "statusPlaceholder": "Selecciona estado",
       "statusApproved": "Aprobada",
+      "statusPending": "Pendiente",
+      "statusRejected": "Rechazada",
       "amountLabel": "Monto",
       "amountPlaceholder": "0.00",
-      "dateLabel": "Fecha"
+      "dateLabel": "Fecha",
+      "userLabel": "Usuario",
+      "userPlaceholder": "Selecciona Usuario",
+      "projectLabel": "Proyecto",
+      "projectPlaceholder": "Selecciona Proyecto",
+      "createDescription": "Crea un nuevo registro de transacción.",
+      "editDescription": "Edita los detalles de la transacción."
     },
     "table": {
       "customer": "Cliente",

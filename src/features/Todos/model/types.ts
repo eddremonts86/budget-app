@@ -7,6 +7,7 @@ export interface Todo {
   dueDate: string
   createdBy: string
   assignedTo: string
+  projectId: string
   createdAt: string
   updatedAt: string
 }

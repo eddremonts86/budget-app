@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 import { sileo } from 'sileo'
 
-type ToastOptions = {
+export type ToastOptions = {
   description?: string | ReactNode
   duration?: number
   action?: {
@@ -14,10 +14,20 @@ type ToastOptions = {
   }
 }
 
-type PromiseOptions<T> = {
+export type PromiseOptions<T> = {
   loading: string | ReactNode
   success: string | ReactNode | ((data: T) => string | ReactNode)
   error: string | ReactNode | ((error: unknown) => string | ReactNode)
+}
+
+export interface Toast {
+  (message: string, options?: ToastOptions): void
+  success: (message: string, options?: ToastOptions) => void
+  error: (message: string, options?: ToastOptions) => void
+  warning: (message: string, options?: ToastOptions) => void
+  info: (message: string, options?: ToastOptions) => void
+  message: (message: string, options?: ToastOptions) => void
+  promise: <T>(promise: Promise<T> | (() => Promise<T>), options: PromiseOptions<T>) => Promise<T>
 }
 
 const toastBase = (message: string, options?: ToastOptions) => {
@@ -103,4 +113,4 @@ export const toast = Object.assign(toastBase, {
       },
     })
   },
-})
+}) as Toast

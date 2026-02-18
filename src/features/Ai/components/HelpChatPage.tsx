@@ -26,7 +26,6 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import remarkGfm from 'remark-gfm'
-import { toast } from '@/shared/lib/toast'
 import {
   Button,
   InputGroup,
@@ -35,6 +34,7 @@ import {
   InputGroupTextarea,
 } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { useTQuery } from '@/shared/lib/query'
 import type {
@@ -52,6 +52,7 @@ import {
   migrateFromLocalStorage,
   saveConversation,
 } from '@/shared/lib/storage/chat-storage'
+import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/utils/index'
 import { ActionConfirmationCard } from './ActionConfirmationCard'
 import { ActionStatesProvider } from './ActionStatesContext'
@@ -106,7 +107,7 @@ function messagesToStored(messages: UIMessage[]): StoredMessage[] {
 
 // --- Conversation Manager Hook ---
 
-function useConversationManager(userId: string | null) {
+function useConversationManager(userId: string | null, userRole: 'admin' | 'user' = 'user') {
   const [conversations, setConversations] = React.useState<Conversation[]>([])
   const [activeId, setActiveId] = React.useState<string | null>(null)
   const [activeConv, setActiveConv] = React.useState<Conversation | null>(null)
@@ -128,8 +129,9 @@ function useConversationManager(userId: string | null) {
     if (!userId) return
     let cancelled = false
     ;(async () => {
-      const migratedId = await migrateFromLocalStorage(userId)
-      const convs = await getConversations(userId)
+      const migratedId = userId ? await migrateFromLocalStorage(userId) : null
+      // Admins fetch all, users fetch theirs
+      const convs = await getConversations(userRole === 'admin' ? undefined : (userId ?? ''))
       if (cancelled) return
       setConversations(convs)
       if (migratedId) {
@@ -142,7 +144,7 @@ function useConversationManager(userId: string | null) {
     return () => {
       cancelled = true
     }
-  }, [userId])
+  }, [userId, userRole])
 
   // Load the active conversation object when activeId changes
   React.useEffect(() => {
@@ -622,6 +624,7 @@ function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) =
 export function HelpChatPage() {
   const { t, i18n } = useTranslation()
   const { user } = useUser()
+  const { userRole, syncedUserId } = useSyncAuthUser()
   const navigate = useNavigate()
   const [input, setInput] = React.useState('')
   const [attachments, setAttachments] = React.useState<File[]>([])
@@ -670,7 +673,7 @@ export function HelpChatPage() {
   }, [])
 
   const userId = user?.id ?? null
-  const convManager = useConversationManager(userId)
+  const convManager = useConversationManager(userId, userRole)
 
   // Compute initial messages from the active conversation (for first useChat mount)
   const initialMessages = React.useMemo(
@@ -884,6 +887,8 @@ export function HelpChatPage() {
           onDeleteAll={handleDeleteAll}
           isOpen={isPanelOpen}
           onToggle={() => setIsPanelOpen(!isPanelOpen)}
+          userRole={userRole}
+          currentUserId={syncedUserId}
         />
 
         {/* --- Header --- */}

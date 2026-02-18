@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import {
   Calendar as CalendarIcon,
   Flag,
+  Folder,
   ListTodo,
   Loader2,
   MoreHorizontal,
@@ -30,6 +31,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
+import { useProjects } from '@/features/Projects/api/projects.queries'
 import { useUsers } from '@/features/Users/api/users.queries'
 import { cn } from '@/shared/lib/utils'
 import type { Todo } from '../model/types'
@@ -42,6 +44,7 @@ const createTodoSchema = (t: (key: string) => string) =>
     priority: z.enum(['low', 'medium', 'high']),
     dueDate: z.string().min(1, t('validation.required')),
     assignedTo: z.string().min(1, t('validation.required')),
+    projectId: z.string().min(1, t('validation.required')),
   })
 
 type TodoFormValues = z.infer<ReturnType<typeof createTodoSchema>>
@@ -64,6 +67,12 @@ export function TodoForm({
   const { t, i18n } = useTranslation()
   const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
   const { data: users } = useUsers()
+  const { data: projects } = useProjects()
+  const selectableProjects = React.useMemo(() => {
+    if (!projects) return []
+    return projects.filter((p) => p.status === 'active' || p.id === defaultValues?.projectId)
+  }, [projects, defaultValues?.projectId])
+
   const locale = React.useMemo(() => {
     const language = i18n.language?.toLowerCase() ?? 'en'
     const normalized = language.split('-')[0]
@@ -79,6 +88,7 @@ export function TodoForm({
       priority: (defaultValues?.priority as TodoFormValues['priority']) ?? 'medium',
       dueDate: defaultValues?.dueDate ?? new Date().toISOString().split('T')[0],
       assignedTo: defaultValues?.assignedTo ?? currentUserId ?? '',
+      projectId: defaultValues?.projectId ?? '',
     },
     validators: {
       onChange: todoSchema,
@@ -343,6 +353,39 @@ export function TodoForm({
                       />
                     </PopoverContent>
                   </Popover>
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) =>
+                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
+                    )}
+                  />
+                </Field>
+              </motion.div>
+            )}
+          />
+
+          <form.Field
+            name="projectId"
+            children={(field) => (
+              <motion.div variants={itemVariants}>
+                <Field className="space-y-2">
+                  <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                    <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
+                  </FieldLabel>
+                  <Select
+                    value={field.state.value}
+                    onValueChange={(value) => field.handleChange(value)}
+                  >
+                    <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
+                      <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
+                      {selectableProjects?.map((project) => (
+                        <SelectItem key={project.id} value={project.id} className="rounded-lg m-1">
+                          {project.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FieldError
                     errors={field.state.meta.errors.map((e) =>
                       typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),

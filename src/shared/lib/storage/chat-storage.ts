@@ -114,14 +114,20 @@ export function generateTitle(messages: StoredMessage[]): string {
 }
 
 /**
- * Returns all conversations for a user, sorted newest first.
+ * Returns all conversations. If userId is provided, filters by user.
+ * Sorted newest first.
  */
-export async function getConversations(userId: string): Promise<Conversation[]> {
+export async function getConversations(userId?: string): Promise<Conversation[]> {
   const db = await openDb()
   try {
     const store = txStore(db, 'readonly')
-    const index = store.index('userId')
-    const all = await reqToPromise(index.getAll(userId))
+    let all: Conversation[]
+    if (userId) {
+      const index = store.index('userId')
+      all = await reqToPromise(index.getAll(userId))
+    } else {
+      all = await reqToPromise(store.getAll())
+    }
     // Sort by updatedAt descending (newest first)
     return all.sort((a, b) => b.updatedAt - a.updatedAt)
   } finally {

@@ -7,4 +7,10 @@ export interface Transaction {
   status: 'Approved' | 'Pending' | 'Rejected'
   date: string
   amount: number
+  userId: string
+  projectId: string
+  assignedAdminId?: string
+  approvedBy?: string
+  approvedAt?: string
+  rejectionReason?: string
 }

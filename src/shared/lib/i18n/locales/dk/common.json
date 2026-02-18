@@ -434,9 +434,17 @@
       "statusLabel": "Status",
       "statusPlaceholder": "Vælg status",
       "statusApproved": "Godkendt",
+      "statusPending": "Afventer",
+      "statusRejected": "Afvist",
       "amountLabel": "Beløb",
       "amountPlaceholder": "0.00",
-      "dateLabel": "Dato"
+      "dateLabel": "Dato",
+      "userLabel": "Bruger",
+      "userPlaceholder": "Vælg Bruger",
+      "projectLabel": "Projekt",
+      "projectPlaceholder": "Vælg Projekt",
+      "createDescription": "Opret en ny transaktionspost.",
+      "editDescription": "Rediger transaktionsdetaljer."
     },
     "table": {
       "customer": "Kunde",

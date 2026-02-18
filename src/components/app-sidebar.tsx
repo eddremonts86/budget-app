@@ -53,6 +53,8 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
+import { useTransactions } from '@/features/Transactions/api/transactions.queries'
+import { useUsers } from '@/features/Users/api/users.queries'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { useTQMutation } from '@/shared/lib/query'
 import { cn } from '@/shared/utils'
@@ -77,6 +79,22 @@ const extractSearchText = (result: unknown) => {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
+  const { data: allTransactions = [] } = useTransactions()
+  const { data: users = [] } = useUsers()
+
+  // MOCK AUTH: Assume the logged in user is one of the admins for demonstration
+  const currentUserId = React.useMemo(() => {
+    const admin = users.find((u) => u.role === 'admin')
+    return admin ? admin.id : ''
+  }, [users])
+
+  const pendingCount = React.useMemo(() => {
+    if (!currentUserId) return 0
+    return allTransactions.filter(
+      (t) => t.status === 'Pending' && t.assignedAdminId === currentUserId,
+    ).length
+  }, [allTransactions, currentUserId])
+
   const { isOpen: isSearchOpen, setIsOpen: setIsSearchOpen, isPinned, setIsPinned } = useAiSearch()
   const [searchQuery, setSearchQuery] = React.useState('')
   const [searchResult, setSearchResult] = React.useState<SearchResultPayload | null>(null)
@@ -162,6 +180,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           title: t('sidebar.main.transactions'),
           url: '/dashboard/transactions',
           icon: IconReport,
+          badge:
+            pendingCount > 0 ? (
+              <Badge
+                variant="destructive"
+                className="rounded-full px-1.5 py-0.5 text-[10px] h-5 min-w-5 flex items-center justify-center"
+              >
+                {pendingCount}
+              </Badge>
+            ) : undefined,
         },
         {
           title: t('sidebar.main.projects'),

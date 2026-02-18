@@ -12,6 +12,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useProjects } from '@/features/Projects/api/projects.queries'
+import { useUsers } from '@/features/Users/api/users.queries'
 import type { Transaction } from '../model/types'
 
 const createTransactionSchema = (t: (key: string) => string) =>
@@ -23,6 +25,9 @@ const createTransactionSchema = (t: (key: string) => string) =>
     status: z.enum(['Approved', 'Pending', 'Rejected']),
     date: z.string().min(1, t('validation.required')),
     amount: z.coerce.number().min(0.01, t('validation.minAmount')),
+    userId: z.string().min(1, t('validation.required')),
+    projectId: z.string().min(1, t('validation.required')),
+    assignedAdminId: z.string().min(1, t('validation.required')),
   })
 
 type TransactionFormValues = z.infer<ReturnType<typeof createTransactionSchema>>
@@ -41,6 +46,11 @@ export function TransactionForm({
   isLoading,
 }: TransactionFormProps) {
   const { t } = useTranslation()
+  const { data: users = [] } = useUsers()
+  const { data: projects = [] } = useProjects()
+
+  const admins = React.useMemo(() => users.filter((u) => u.role === 'admin'), [users])
+
   const transactionSchema = React.useMemo(() => createTransactionSchema(t), [t])
   const form = useForm({
     defaultValues: {
@@ -51,6 +61,9 @@ export function TransactionForm({
       status: (defaultValues?.status as TransactionFormValues['status']) ?? 'Pending',
       date: defaultValues?.date ?? new Date().toISOString().split('T')[0],
       amount: defaultValues?.amount ?? 0,
+      userId: defaultValues?.userId ?? '',
+      projectId: defaultValues?.projectId ?? '',
+      assignedAdminId: defaultValues?.assignedAdminId ?? '',
     },
     validators: {
       onChange: transactionSchema,
@@ -110,34 +123,55 @@ export function TransactionForm({
         )}
       />
 
-      <div className="grid grid-cols-2 gap-4">
-        <form.Field
-          name="status"
-          children={(field) => (
-            <Field>
-              <FieldLabel htmlFor={field.name}>{t('transactions.form.statusLabel')}</FieldLabel>
-              <Select
-                value={field.state.value}
-                onValueChange={(value) =>
-                  field.handleChange(value as TransactionFormValues['status'])
-                }
-              >
-                <SelectTrigger id={field.name}>
-                  <SelectValue placeholder={t('transactions.form.statusPlaceholder')} />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Approved">{t('transactions.status.approved')}</SelectItem>
-                  <SelectItem value="Pending">{t('transactions.status.pending')}</SelectItem>
-                  <SelectItem value="Rejected">{t('transactions.status.rejected')}</SelectItem>
-                </SelectContent>
-              </Select>
-              <FieldError
-                errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-              />
-            </Field>
-          )}
-        />
+      <form.Field
+        name="userId"
+        children={(field) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>{t('transactions.form.userLabel')}</FieldLabel>
+            <Select value={field.state.value} onValueChange={field.handleChange}>
+              <SelectTrigger id={field.name}>
+                <SelectValue placeholder={t('transactions.form.userPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                {users.map((user) => (
+                  <SelectItem key={user.id} value={user.id}>
+                    {user.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
+          </Field>
+        )}
+      />
 
+      <form.Field
+        name="projectId"
+        children={(field) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>{t('transactions.form.projectLabel')}</FieldLabel>
+            <Select value={field.state.value} onValueChange={field.handleChange}>
+              <SelectTrigger id={field.name}>
+                <SelectValue placeholder={t('transactions.form.projectPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                {projects.map((project) => (
+                  <SelectItem key={project.id} value={project.id}>
+                    {project.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
+          </Field>
+        )}
+      />
+
+      <div className="grid grid-cols-2 gap-4">
         <form.Field
           name="amount"
           children={(field) => (
@@ -150,7 +184,26 @@ export function TransactionForm({
                 value={field.state.value}
                 onBlur={field.handleBlur}
                 onChange={(e) => field.handleChange(Number(e.target.value))}
-                placeholder={t('transactions.form.amountPlaceholder')}
+                placeholder="0.00"
+              />
+              <FieldError
+                errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+              />
+            </Field>
+          )}
+        />
+
+        <form.Field
+          name="date"
+          children={(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('transactions.form.dateLabel')}</FieldLabel>
+              <Input
+                id={field.name}
+                type="date"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e) => field.handleChange(e.target.value)}
               />
               <FieldError
                 errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
@@ -161,17 +214,25 @@ export function TransactionForm({
       </div>
 
       <form.Field
-        name="date"
+        name="status"
         children={(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>{t('transactions.form.dateLabel')}</FieldLabel>
-            <Input
-              id={field.name}
-              type="date"
+            <FieldLabel htmlFor={field.name}>{t('transactions.form.statusLabel')}</FieldLabel>
+            <Select
               value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-            />
+              onValueChange={(value) =>
+                field.handleChange(value as TransactionFormValues['status'])
+              }
+            >
+              <SelectTrigger id={field.name}>
+                <SelectValue placeholder={t('transactions.form.statusPlaceholder')} />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Pending">{t('transactions.form.statusPending')}</SelectItem>
+                <SelectItem value="Approved">{t('transactions.form.statusApproved')}</SelectItem>
+                <SelectItem value="Rejected">{t('transactions.form.statusRejected')}</SelectItem>
+              </SelectContent>
+            </Select>
             <FieldError
               errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
             />
@@ -179,12 +240,36 @@ export function TransactionForm({
         )}
       />
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+      <form.Field
+        name="assignedAdminId"
+        children={(field) => (
+          <Field>
+            <FieldLabel htmlFor={field.name}>Assigned Admin</FieldLabel>
+            <Select value={field.state.value} onValueChange={field.handleChange}>
+              <SelectTrigger id={field.name}>
+                <SelectValue placeholder="Select Admin" />
+              </SelectTrigger>
+              <SelectContent>
+                {admins.map((admin) => (
+                  <SelectItem key={admin.id} value={admin.id}>
+                    {admin.name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <FieldError
+              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
+            />
+          </Field>
+        )}
+      />
+
+      <div className="flex justify-end gap-2">
+        <Button type="button" variant="outline" onClick={onCancel}>
           {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isLoading}>
-          {isLoading ? t('common.loading') : t('transactions.actions.save')}
+          {isLoading ? t('common.loading') : t('common.save')}
         </Button>
       </div>
     </form>

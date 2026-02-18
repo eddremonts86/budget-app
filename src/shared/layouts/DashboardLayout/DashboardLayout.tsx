@@ -1,5 +1,6 @@
 import { useAuth } from '@clerk/tanstack-react-start'
 import { Outlet, redirect, useLocation } from '@tanstack/react-router'
+import { LogOut } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
@@ -10,23 +11,34 @@ import {
   BreadcrumbPage,
   BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb'
+import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AiSearchProvider } from '@/features/Ai/context/AiSearchContext'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
 import { cn } from '@/shared/utils'
+import { NotificationBell } from './NotificationBell'
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { isPinned, isOpen } = useAiSearch()
 
   return (
     <SidebarInset className="flex flex-col h-screen overflow-hidden">
-      <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12">
+      <header className="flex h-16 shrink-0 items-center gap-2 border-b transition-[width,height] ease-linear group-has-[[data-collapsible=icon]]/sidebar-wrapper:h-12 justify-between pr-4">
         <div className="flex items-center gap-2 px-4">
           <SidebarTrigger className="-ml-1" />
           <Separator orientation="vertical" className="mr-2 h-4" />
           <Breadcrumb>{children}</Breadcrumb>
+        </div>
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          <Button variant="ghost" size="icon" asChild title="Go to Landing Page">
+            <a href="/">
+              <LogOut className="h-5 w-5" />
+              <span className="sr-only">Go to Landing</span>
+            </a>
+          </Button>
         </div>
       </header>
       <div

@@ -212,25 +212,26 @@
     }
   },
   "dashboard": {
-    "error": {
-      "title": "Error",
-      "description": "An error occurred while loading the dashboard data."
-    },
+    "title": "Dashboard",
+    "description": "Welcome to your dashboard.",
     "stats": {
       "totalRevenue": "Total Revenue",
       "subscriptions": "Subscriptions",
       "sales": "Sales",
       "activeNow": "Active Now",
-      "change": "{{value}} from last month",
-      "activeNowContext": "{{value}} {{context}}"
+      "change": "{{value}} from last month"
     },
-    "recentTransactions": "Recent Transactions",
-    "recentSummary": "You made {{count}} sales this month.",
-    "table": {
-      "customer": "Customer",
-      "status": "Status",
-      "date": "Date",
-      "amount": "Amount"
+    "recentTasks": {
+      "title": "Recent Tasks",
+      "description": "Your team's latest activity."
+    },
+    "workload": {
+      "title": "Team Workload",
+      "description": "Task distribution across team members."
+    },
+    "error": {
+      "title": "Error loading dashboard",
+      "description": "We couldn't load the dashboard data. Please try again later."
     }
   },
   "analytics": {
@@ -331,7 +332,9 @@
       "dueDatePlaceholder": "Select date",
       "assignedToLabel": "Assigned To",
       "assignedToPlaceholder": "Select user",
-      "assignedToSelf": "Me"
+      "assignedToSelf": "Me",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Select project"
     },
     "status": {
       "pending": "Pending",
@@ -438,9 +441,17 @@
       "statusLabel": "Status",
       "statusPlaceholder": "Select status",
       "statusApproved": "Approved",
+      "statusPending": "Pending",
+      "statusRejected": "Rejected",
       "amountLabel": "Amount",
       "amountPlaceholder": "0.00",
-      "dateLabel": "Date"
+      "dateLabel": "Date",
+      "userLabel": "User",
+      "userPlaceholder": "Select User",
+      "projectLabel": "Project",
+      "projectPlaceholder": "Select Project",
+      "createDescription": "Create a new transaction record.",
+      "editDescription": "Edit transaction details."
     },
     "table": {
       "customer": "Customer",

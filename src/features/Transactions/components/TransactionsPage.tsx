@@ -1,9 +1,8 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import { MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Check, X, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
-import { toast } from '@/shared/lib/toast'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -22,26 +21,201 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TableCell, TableRow } from '@/components/ui/table'
+import { useProjects } from '@/features/Projects/api/projects.queries'
+import { useUsers } from '@/features/Users/api/users.queries'
+import { toast } from '@/shared/lib/toast'
 import { DataTable } from '@/shared/ui/DataTable'
 import {
   useCreateTransaction,
   useDeleteTransaction,
   useInfiniteTransactions,
   useUpdateTransaction,
+  useTransactions,
 } from '../api/transactions.queries'
 import type { Transaction } from '../model/types'
 import { TransactionForm } from './TransactionForm'
+
+interface PendingTransactionsTableProps {
+  transactions: Transaction[]
+  currentUserId: string
+}
+
+function PendingTransactionsTable({ transactions, currentUserId }: PendingTransactionsTableProps) {
+  const { t } = useTranslation()
+  const updateMutation = useUpdateTransaction()
+  const { data: users = [] } = useUsers()
+
+  const pendingTransactions = React.useMemo(() => {
+    // In a real app, we filter by assignedAdminId === currentUserId
+    // For demo, let's assume currentUserId is an admin ID or just show all pending if no filter
+    if (!currentUserId) return []
+    return transactions.filter((t) => t.status === 'Pending' && t.assignedAdminId === currentUserId)
+  }, [transactions, currentUserId])
+
+  const handleApprove = (transaction: Transaction) => {
+    // Simple confirm for now, can be a modal
+    if (confirm('Are you sure you want to approve this transaction?')) {
+      updateMutation.mutate(
+        {
+          id: transaction.id,
+          data: {
+            status: 'Approved',
+            approvedBy: currentUserId,
+            approvedAt: new Date().toISOString(),
+          },
+        },
+        {
+          onSuccess: () => toast.success('Transaction approved successfully'),
+        },
+      )
+    }
+  }
+
+  const handleReject = (transaction: Transaction) => {
+    const reason = prompt('Please provide a reason for rejection:')
+    if (reason) {
+      updateMutation.mutate(
+        {
+          id: transaction.id,
+          data: {
+            status: 'Rejected',
+            rejectionReason: reason,
+            approvedBy: currentUserId,
+            approvedAt: new Date().toISOString(),
+          },
+        },
+        {
+          onSuccess: () => toast.success('Transaction rejected successfully'),
+        },
+      )
+    }
+  }
+
+  const columns: ColumnDef<Transaction>[] = [
+    {
+      accessorKey: 'id',
+      header: 'ID',
+      cell: ({ row }) => (
+        <span className="font-mono text-xs text-muted-foreground">
+          #{row.original.id.slice(0, 8)}
+        </span>
+      ),
+    },
+    {
+      accessorKey: 'customer.name',
+      id: 'customer_name',
+      header: t('transactions.table.customer'),
+      cell: ({ row }) => (
+        <div className="flex flex-col">
+          <span className="font-medium">{row.original.customer.name}</span>
+          <span className="text-xs text-muted-foreground">{row.original.customer.email}</span>
+        </div>
+      ),
+    },
+    {
+      accessorKey: 'amount',
+      header: t('transactions.table.amount'),
+      cell: ({ row }) => {
+        const amount = parseFloat(row.getValue('amount'))
+        const formatted = new Intl.NumberFormat('en-US', {
+          style: 'currency',
+          currency: 'USD',
+        }).format(amount)
+        return <div className="font-medium">{formatted}</div>
+      },
+    },
+    {
+      accessorKey: 'userId',
+      header: t('transactions.form.userLabel'),
+      cell: ({ row }) => {
+        const user = users.find((u) => u.id === row.original.userId)
+        return user ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{user.name}</span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground text-xs">Unknown</span>
+        )
+      },
+    },
+    {
+      accessorKey: 'date',
+      header: t('transactions.table.date'),
+      cell: ({ row }) => new Date(row.getValue('date')).toLocaleDateString(),
+    },
+    {
+      id: 'actions',
+      header: t('common.actions'),
+      cell: ({ row }) => {
+        const transaction = row.original
+        return (
+          <div className="flex gap-2">
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
+              onClick={() => handleApprove(transaction)}
+            >
+              <Check className="h-4 w-4" />
+              <span className="sr-only">Approve</span>
+            </Button>
+            <Button
+              size="sm"
+              variant="outline"
+              className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
+              onClick={() => handleReject(transaction)}
+            >
+              <X className="h-4 w-4" />
+              <span className="sr-only">Reject</span>
+            </Button>
+          </div>
+        )
+      },
+    },
+  ]
+
+  if (pendingTransactions.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="space-y-4 border rounded-xl p-4 bg-muted/30">
+      <div className="flex items-center justify-between">
+        <h3 className="text-lg font-semibold flex items-center gap-2 text-orange-600">
+          Requires Your Approval
+          <Badge variant="destructive" className="rounded-full px-2">
+            {pendingTransactions.length}
+          </Badge>
+        </h3>
+      </div>
+      <DataTable columns={columns} data={pendingTransactions} />
+    </div>
+  )
+}
 
 export function TransactionsPage() {
   const { t } = useTranslation()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null)
 
+  // We need to fetch all transactions to filter pending ones for the current user
+  // In a real app, this would be a separate specific query
+  const { data: allTransactions = [] } = useTransactions()
+
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteTransactions(10)
 
+  const { data: users = [] } = useUsers()
+  const { data: projects = [] } = useProjects()
+
   const { ref, inView } = useInView()
+
+  // MOCK AUTH: Assume the logged in user is one of the admins for demonstration
+  // We'll pick the first admin found or a specific one if needed
+  const currentUserId = React.useMemo(() => {
+    const admin = users.find((u) => u.role === 'admin')
+    return admin ? admin.id : ''
+  }, [users])
 
   React.useEffect(() => {
     if (inView && hasNextPage && !isFetchingNextPage) {
@@ -56,6 +230,7 @@ export function TransactionsPage() {
   const columns: ColumnDef<Transaction>[] = [
     {
       accessorKey: 'customer.name',
+      id: 'customer_name',
       header: t('transactions.table.customer'),
       cell: ({ row }) => (
         <div className="flex flex-col">
@@ -63,6 +238,32 @@ export function TransactionsPage() {
           <span className="text-xs text-muted-foreground">{row.original.customer.email}</span>
         </div>
       ),
+    },
+    {
+      accessorKey: 'userId',
+      header: t('transactions.form.userLabel'),
+      cell: ({ row }) => {
+        const user = users.find((u) => u.id === row.original.userId)
+        return user ? (
+          <div className="flex items-center gap-2">
+            <span className="text-sm">{user.name}</span>
+          </div>
+        ) : (
+          <span className="text-muted-foreground text-xs">Unknown</span>
+        )
+      },
+    },
+    {
+      accessorKey: 'projectId',
+      header: t('transactions.form.projectLabel'),
+      cell: ({ row }) => {
+        const project = projects.find((p) => p.id === row.original.projectId)
+        return project ? (
+          <Badge variant="outline">{project.name}</Badge>
+        ) : (
+          <span className="text-muted-foreground text-xs">Unknown</span>
+        )
+      },
     },
     {
       accessorKey: 'status',
@@ -75,9 +276,9 @@ export function TransactionsPage() {
           Rejected: 'destructive',
         }
         const labels: Record<string, string> = {
-          Approved: t('transactions.status.approved'),
-          Pending: t('transactions.status.pending'),
-          Rejected: t('transactions.status.rejected'),
+          Approved: t('transactions.form.statusApproved'),
+          Pending: t('transactions.form.statusPending'),
+          Rejected: t('transactions.form.statusRejected'),
         }
         return <Badge variant={variants[status] || 'outline'}>{labels[status] || status}</Badge>
       },
@@ -114,30 +315,25 @@ export function TransactionsPage() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => setEditingTransaction(transaction)}>
+              <DropdownMenuItem
+                onClick={() => {
+                  setEditingTransaction(transaction)
+                }}
+              >
                 <Pencil className="mr-2 h-4 w-4" />
-                {t('transactions.actions.edit')}
+                {t('common.edit')}
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
-                className="text-destructive"
+                className="text-destructive focus:text-destructive"
                 onClick={() => {
-                  toast.error(t('transactions.confirm.delete'), {
-                    description: t('common.undoWarning'),
-                    action: {
-                      label: t('common.delete'),
-                      onClick: () => deleteMutation.mutate(transaction.id),
-                    },
-                    cancel: {
-                      label: t('common.cancel'),
-                      onClick: () => {},
-                    },
-                    duration: 10000,
-                  })
+                  if (confirm(t('common.undoWarning'))) {
+                    deleteMutation.mutate(transaction.id)
+                  }
                 }}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
-                {t('transactions.actions.delete')}
+                {t('common.delete')}
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -146,78 +342,62 @@ export function TransactionsPage() {
     },
   ]
 
+  const flatData = React.useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data])
+
   if (isError) {
-    return (
-      <div className="flex items-center justify-center h-[400px]">
-        <div className="text-center space-y-2">
-          <h2 className="text-2xl font-bold tracking-tight text-destructive">
-            {t('transactions.error.title')}
-          </h2>
-          <p className="text-muted-foreground">{t('transactions.error.description')}</p>
-        </div>
-      </div>
-    )
+    return <div>Error loading transactions</div>
   }
 
-  const allTransactions = data?.pages.flatMap((page) => page.data) ?? []
-  const totalCount = data?.pages[0]?.totalCount ?? 0
-
   return (
-    <div className="space-y-4">
+    <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('transactions.title')}</h2>
-          <p className="text-muted-foreground">
-            {t('transactions.summary', {
-              shown: allTransactions.length,
-              total: totalCount,
-            })}
-          </p>
-        </div>
+        <h2 className="text-3xl font-bold tracking-tight">{t('transactions.title')}</h2>
         <Button onClick={() => setIsCreateOpen(true)}>
           <Plus className="mr-2 h-4 w-4" />
-          {t('transactions.actions.add')}
+          {t('transactions.actions.create')}
         </Button>
       </div>
 
-      {isLoading ? (
-        <div className="space-y-2">
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-          <Skeleton className="h-10 w-full" />
-        </div>
-      ) : (
-        <DataTable columns={columns} data={allTransactions} filterColumn="customer_name">
-          {hasNextPage && (
-            <TableRow className="hover:bg-transparent border-none">
-              <TableCell colSpan={columns.length} className="py-4">
-                <div ref={ref} className="flex justify-center">
-                  <Button
-                    onClick={() => fetchNextPage()}
-                    disabled={isFetchingNextPage}
-                    variant="outline"
-                  >
-                    {isFetchingNextPage ? t('common.loadingMore') : t('common.loadMore')}
-                  </Button>
-                </div>
-              </TableCell>
-            </TableRow>
-          )}
-        </DataTable>
+      {/* Pending Approval Section */}
+      {currentUserId && (
+        <PendingTransactionsTable transactions={allTransactions} currentUserId={currentUserId} />
       )}
 
-      {/* Create Sheet */}
+      <div className="space-y-4">
+        <h3 className="text-xl font-semibold tracking-tight">Transaction History</h3>
+        {isLoading ? (
+          <div className="space-y-2">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </div>
+        ) : (
+          <DataTable columns={columns} data={flatData} filterColumn="customer_name" />
+        )}
+
+        {/* Infinite scroll trigger */}
+        <div ref={ref} className="h-4 w-full">
+          {isFetchingNextPage && (
+            <div className="text-center text-sm text-muted-foreground">Loading more...</div>
+          )}
+        </div>
+      </div>
+
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent className="sm:max-w-[540px]">
-          <SheetHeader>
-            <SheetTitle>{t('transactions.actions.add')}</SheetTitle>
-            <SheetDescription>{t('transactions.title')}</SheetDescription>
+        <SheetContent>
+          <SheetHeader className="shrink-0">
+            <SheetTitle>{t('transactions.actions.create')}</SheetTitle>
+            <SheetDescription>{t('transactions.form.createDescription')}</SheetDescription>
           </SheetHeader>
-          <div className="py-6">
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
             <TransactionForm
-              onSubmit={async (values) => {
-                await createMutation.mutateAsync(values)
-                setIsCreateOpen(false)
+              onSubmit={(values) => {
+                createMutation.mutate(values, {
+                  onSuccess: () => {
+                    setIsCreateOpen(false)
+                    toast.success(t('transactions.toast.created'))
+                  },
+                })
               }}
               onCancel={() => setIsCreateOpen(false)}
               isLoading={createMutation.isPending}
@@ -226,23 +406,29 @@ export function TransactionsPage() {
         </SheetContent>
       </Sheet>
 
-      {/* Edit Sheet */}
       <Sheet
         open={!!editingTransaction}
         onOpenChange={(open) => !open && setEditingTransaction(null)}
       >
-        <SheetContent className="sm:max-w-[540px]">
-          <SheetHeader>
+        <SheetContent>
+          <SheetHeader className="shrink-0">
             <SheetTitle>{t('transactions.actions.edit')}</SheetTitle>
-            <SheetDescription>{t('transactions.title')}</SheetDescription>
+            <SheetDescription>{t('transactions.form.editDescription')}</SheetDescription>
           </SheetHeader>
-          <div className="py-6">
+          <div className="flex-1 overflow-y-auto px-4 pb-4">
             {editingTransaction && (
               <TransactionForm
                 defaultValues={editingTransaction}
-                onSubmit={async (values) => {
-                  await updateMutation.mutateAsync({ id: editingTransaction.id, data: values })
-                  setEditingTransaction(null)
+                onSubmit={(values) => {
+                  updateMutation.mutate(
+                    { id: editingTransaction.id, data: values },
+                    {
+                      onSuccess: () => {
+                        setEditingTransaction(null)
+                        toast.success(t('transactions.toast.updated'))
+                      },
+                    },
+                  )
                 }}
                 onCancel={() => setEditingTransaction(null)}
                 isLoading={updateMutation.isPending}
