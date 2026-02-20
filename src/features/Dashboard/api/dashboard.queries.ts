@@ -15,7 +15,17 @@ export const dashboardKeys = {
 }
 
 export const useDashboardStats = () => {
-  return useTQuery(dashboardKeys.stats(), () => getDashboardStatsFn())
+  return useTQuery(dashboardKeys.stats(), async () => {
+    console.log('useDashboardStats: calling getDashboardStatsFn')
+    try {
+      const result = await getDashboardStatsFn()
+      console.log('useDashboardStats: result', result)
+      return result
+    } catch (error) {
+      console.error('useDashboardStats: error', error)
+      throw error
+    }
+  })
 }
 
 export const useRecentTransactions = () => {

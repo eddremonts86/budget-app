@@ -1,5 +1,3 @@
-import { promises as fs } from 'fs'
-import path from 'path'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/api/ai/config-store')({
@@ -7,6 +5,9 @@ export const Route = createFileRoute('/api/ai/config-store')({
   server: {
     handlers: {
       GET: async () => {
+        const { promises: fs } = await import('fs')
+        const path = await import('path')
+
         try {
           const configPath = path.resolve(process.cwd(), 'src/server/data/ai-config-store.json')
           const content = await fs.readFile(configPath, 'utf-8')
@@ -24,6 +25,9 @@ export const Route = createFileRoute('/api/ai/config-store')({
         }
       },
       POST: async ({ request }: { request: Request }) => {
+        const { promises: fs } = await import('fs')
+        const path = await import('path')
+
         try {
           const body = await request.json()
           const configPath = path.resolve(process.cwd(), 'src/server/data/ai-config-store.json')
@@ -43,6 +47,9 @@ export const Route = createFileRoute('/api/ai/config-store')({
       },
       PUT: async ({ request }: { request: Request }) => {
         // Handle PUT same as POST for compatibility
+        const { promises: fs } = await import('fs')
+        const path = await import('path')
+
         try {
           const body = await request.json()
           const configPath = path.resolve(process.cwd(), 'src/server/data/ai-config-store.json')

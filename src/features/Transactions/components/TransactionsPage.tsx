@@ -45,9 +45,11 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
   const { data: users = [] } = useUsers()
 
   const pendingTransactions = React.useMemo(() => {
-    if (!currentUserId) return []
-    return transactions.filter((t) => t.status === 'Pending' && t.assignedAdminId === currentUserId)
-  }, [transactions, currentUserId])
+    // Show all pending transactions for demo purposes
+    // if (!currentUserId) return []
+    // return transactions.filter((t) => t.status === 'Pending' && t.assignedAdminId === currentUserId)
+    return transactions.filter((t) => t.status === 'Pending')
+  }, [transactions])
 
   const handleApprove = (transaction: Transaction) => {
     if (!currentUserId) return
@@ -210,10 +212,12 @@ export function TransactionsPage() {
   const { syncedUserId: currentUserId, userRole } = useCurrentUser()
 
   const displayedTransactions = React.useMemo(() => {
-    if (!currentUserId) return []
-    if (userRole === 'admin') return allTransactions
-    return allTransactions.filter((t) => t.userId === currentUserId)
-  }, [allTransactions, currentUserId, userRole])
+    // Show all transactions for demo purposes
+    // if (!currentUserId) return []
+    // if (userRole === 'admin') return allTransactions
+    // return allTransactions.filter((t) => t.userId === currentUserId)
+    return allTransactions
+  }, [allTransactions])
 
   const createMutation = useCreateTransaction()
   const updateMutation = useUpdateTransaction()

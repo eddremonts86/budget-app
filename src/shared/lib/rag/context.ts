@@ -1,7 +1,6 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import { desc } from 'drizzle-orm'
-import { db } from '@/shared/lib/db'
 import { todos, users, transactions, categories } from '@/shared/lib/db/schema'
 
 // ---------------------------------------------------------------------------
@@ -415,6 +414,9 @@ async function fetchDynamicContext(intents: Intent[]): Promise<string | null> {
   const sections: string[] = []
 
   try {
+    const { getDb } = await import('@/shared/lib/db')
+    const db = getDb()
+
     if (intents.includes('users')) {
       const [allUsers, totalUsers] = await Promise.all([
         db.select().from(users).limit(10),

@@ -218,7 +218,7 @@ importers:
         version: 1.31.8(typescript@5.9.3)
       '@percy/playwright':
         specifier: ^1.0.10
-        version: 1.0.10(playwright-core@1.58.1)
+        version: 1.0.10(playwright-core@1.58.2)
       '@playwright/test':
         specifier: ^1.58.1
         version: 1.58.1
@@ -279,6 +279,9 @@ importers:
       jsdom:
         specifier: ^27.0.0
         version: 27.4.0
+      playwright:
+        specifier: ^1.58.2
+        version: 1.58.2
       prettier:
         specifier: ^3.8.1
         version: 3.8.1
@@ -6571,8 +6574,18 @@ packages:
     engines: {node: '>=18'}
     hasBin: true
 
+  playwright-core@1.58.2:
+    resolution: {integrity: sha512-yZkEtftgwS8CsfYo7nm0KE8jsvm6i/PTgVtB8DL726wNf6H2IMsDuxCpJj59KDaxCtSnrWan2AeDqM7JBaultg==}
+    engines: {node: '>=18'}
+    hasBin: true
+
   playwright@1.58.1:
     resolution: {integrity: sha512-+2uTZHxSCcxjvGc5C891LrS1/NlxglGxzrC4seZiVjcYVQfUa87wBL6rTDqzGjuoWNjnBzRqKmF6zRYGMvQUaQ==}
+    engines: {node: '>=18'}
+    hasBin: true
+
+  playwright@1.58.2:
+    resolution: {integrity: sha512-vA30H8Nvkq/cPBnNw4Q8TWz1EJyqgpuinBcHET0YVJVFldr8JDNiU9LaWAE1KqSkRYazuaBhTpB5ZzShOezQ6A==}
     engines: {node: '>=18'}
     hasBin: true
 
@@ -9529,9 +9542,9 @@ snapshots:
       - supports-color
       - typescript
 
-  '@percy/playwright@1.0.10(playwright-core@1.58.1)':
+  '@percy/playwright@1.0.10(playwright-core@1.58.2)':
     dependencies:
-      playwright-core: 1.58.1
+      playwright-core: 1.58.2
 
   '@percy/sdk-utils@1.31.8':
     dependencies:
@@ -14554,9 +14567,17 @@ snapshots:
 
   playwright-core@1.58.1: {}
 
+  playwright-core@1.58.2: {}
+
   playwright@1.58.1:
     dependencies:
       playwright-core: 1.58.1
+    optionalDependencies:
+      fsevents: 2.3.2
+
+  playwright@1.58.2:
+    dependencies:
+      playwright-core: 1.58.2
     optionalDependencies:
       fsevents: 2.3.2
 

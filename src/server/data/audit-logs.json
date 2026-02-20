@@ -894,5 +894,13 @@
     "providerId": "lm-studio",
     "model": "local-model",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-20T14:17:39.027Z",
+    "locale": "en",
+    "query": "holaaaaaa...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
   }
 ]
