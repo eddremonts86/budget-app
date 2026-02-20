@@ -2,12 +2,6 @@ import { createServerFn } from '@tanstack/react-start'
 import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
 import appKnowledge from '@/server/data/app-knowledge.json'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
-// import { getActiveAiConfig, validateAiConfig } from '@/shared/lib/ai/server/config-store'
-// import {
-//   detectBestProvider,
-//   getProvider,
-//   getProviderHeaders,
-// } from '@/shared/lib/ai/server/providers'
 
 // --- Helpers ---
 
