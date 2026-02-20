@@ -1,4 +1,5 @@
 import { render, screen, fireEvent } from '@testing-library/react'
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import * as dashboardQueries from '@/features/Dashboard/api/dashboard.queries'
 import { UpcomingTodosList } from '@/features/Dashboard/components/UpcomingTodosList'

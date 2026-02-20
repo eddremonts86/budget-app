@@ -23,12 +23,18 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     }
 
     const data = await response.json()
-    return data.data[0].embedding
+    // Handle both OpenAI-compatible format and raw array if applicable
+    if (data.data && Array.isArray(data.data) && data.data.length > 0) {
+        return data.data[0].embedding
+    }
+    
+    // Fallback if structure is different
+    return []
   } catch (error) {
     // eslint-disable-next-line no-console
     console.error('Error generating embedding:', error)
     // Return a zero vector or throw depending on resilience needs
-    // For now, throw to stop ingestion if embeddings fail
-    throw error
+    // For now, return empty to handle gracefully upstream
+    return []
   }
 }

@@ -1,5 +1,6 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { ConversationPanel } from '@/features/Ai/components/ConversationPanel'
 import type { Conversation } from '@/shared/lib/storage/chat-storage'
 
 // Mock dependencies
@@ -32,7 +33,7 @@ vi.mock('framer-motion', () => ({
       children,
       ...props
     }: React.PropsWithChildren<React.ButtonHTMLAttributes<HTMLButtonElement>>) => {
-      const { initial, animate, ...rest } = props as Record<string, unknown>
+      const { initial: _initial, animate: _animate, ...rest } = props as Record<string, unknown>
       return (
         <button {...(rest as React.ButtonHTMLAttributes<HTMLButtonElement>)}>{children}</button>
       )
@@ -41,11 +42,23 @@ vi.mock('framer-motion', () => ({
       children,
       ...props
     }: React.PropsWithChildren<React.HTMLAttributes<HTMLDivElement>>) => {
-      const { initial, animate, exit, transition, ...rest } = props as Record<string, unknown>
+      const {
+        initial: _initial,
+        animate: _animate,
+        exit: _exit,
+        transition: _transition,
+        ...rest
+      } = props as Record<string, unknown>
       return <div {...(rest as React.HTMLAttributes<HTMLDivElement>)}>{children}</div>
     },
     aside: ({ children, ...props }: React.PropsWithChildren<React.HTMLAttributes<HTMLElement>>) => {
-      const { initial, animate, exit, transition, ...rest } = props as Record<string, unknown>
+      const {
+        initial: _initial,
+        animate: _animate,
+        exit: _exit,
+        transition: _transition,
+        ...rest
+      } = props as Record<string, unknown>
       return <aside {...(rest as React.HTMLAttributes<HTMLElement>)}>{children}</aside>
     },
   },
@@ -65,7 +78,6 @@ vi.mock('@/shared/utils/index', () => ({
 }))
 
 // Must import AFTER mocks
-import { ConversationPanel } from '@/features/Ai/components/ConversationPanel'
 
 function createTestConversation(overrides: Partial<Conversation> = {}): Conversation {
   const now = Date.now()

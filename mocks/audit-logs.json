@@ -878,5 +878,13 @@
     "providerId": "lm-studio",
     "model": "local-model",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-19T11:40:58.661Z",
+    "locale": "en",
+    "query": "dime cuantas transacciones tengo esperando por apr...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
   }
 ]

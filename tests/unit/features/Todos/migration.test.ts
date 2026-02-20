@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import fs from 'fs'
 import path from 'path'
 import { describe, expect, it } from 'vitest'
@@ -16,7 +17,7 @@ describe('Migration Verification', () => {
 
   it('should distribute tasks evenly among projects', () => {
     const distribution: Record<string, number> = {}
-    projects.forEach((p: any) => distribution[p.id] = 0)
+    projects.forEach((p: any) => (distribution[p.id] = 0))
 
     todos.forEach((t: any) => {
       distribution[t.projectId]++
@@ -30,8 +31,8 @@ describe('Migration Verification', () => {
   })
 
   it('should have renamed example tasks', () => {
-    const exampleTasks = todos.filter((t: any) => 
-      t.title.toLowerCase().includes('tarea de ejemplo')
+    const exampleTasks = todos.filter((t: any) =>
+      t.title.toLowerCase().includes('tarea de ejemplo'),
     )
     expect(exampleTasks.length).toBe(0)
   })

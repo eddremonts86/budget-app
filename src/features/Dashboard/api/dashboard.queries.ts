@@ -1,5 +1,10 @@
 import { useTQuery } from '@/shared/lib/query'
-import { dashboardApi } from './dashboard.api'
+import {
+  getDashboardStatsFn,
+  getRecentTransactionsFn,
+  getUpcomingTodosFn,
+  getUsersWorkloadFn,
+} from './dashboard.fn'
 
 export const dashboardKeys = {
   all: ['dashboard'] as const,
@@ -10,41 +15,30 @@ export const dashboardKeys = {
 }
 
 export const useDashboardStats = () => {
-  return useTQuery(dashboardKeys.stats(), dashboardApi.getStats)
+  return useTQuery(dashboardKeys.stats(), () => getDashboardStatsFn())
 }
 
 export const useRecentTransactions = () => {
-  return useTQuery(dashboardKeys.transactions(), dashboardApi.getRecentTransactions)
+  return useTQuery(dashboardKeys.transactions(), () => getRecentTransactionsFn())
 }
 
 export const useUpcomingTodos = () => {
-  return useTQuery(dashboardKeys.upcomingTodos(), dashboardApi.getUpcomingTodos, {
+  return useTQuery(dashboardKeys.upcomingTodos(), () => getUpcomingTodosFn(), {
     select: (data) => {
-      // Filter tasks due in the next 7 days
-      const now = new Date()
-      const nextWeek = new Date()
-      nextWeek.setDate(now.getDate() + 7)
+      return data.sort((a, b) => {
+        // Sort by priority first (high > medium > low)
+        const priorityWeight = { high: 3, medium: 2, low: 1 }
+        const pA = priorityWeight[a.priority as keyof typeof priorityWeight] || 0
+        const pB = priorityWeight[b.priority as keyof typeof priorityWeight] || 0
+        if (pA !== pB) return pB - pA
 
-      return data
-        .filter((todo) => {
-          if (!todo.dueDate) return false
-          const dueDate = new Date(todo.dueDate)
-          return dueDate >= now && dueDate <= nextWeek
-        })
-        .sort((a, b) => {
-          // Sort by priority first (high > medium > low)
-          const priorityWeight = { high: 3, medium: 2, low: 1 }
-          const pA = priorityWeight[a.priority as keyof typeof priorityWeight] || 0
-          const pB = priorityWeight[b.priority as keyof typeof priorityWeight] || 0
-          if (pA !== pB) return pB - pA
-
-          // Then by date
-          return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
-        })
+        // Then by date
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      })
     },
   })
 }
 
 export const useUsersWorkload = () => {
-  return useTQuery(dashboardKeys.usersWorkload(), dashboardApi.getUsersWorkload)
+  return useTQuery(dashboardKeys.usersWorkload(), () => getUsersWorkloadFn())
 }

@@ -72,6 +72,23 @@ services:
       IS_PERSISTENT: 'TRUE'
       ANONYMIZED_TELEMETRY: 'FALSE'
 
+  db:
+    image: postgres:15-alpine
+    container_name: tanstack-template-db
+    ports:
+      - '5432:5432'
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: tanstack_template
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U postgres']
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
   lmstudio:
     image: lmstudio/llmster-preview:cpu
     container_name: tanstack-template-lmstudio
@@ -85,3 +102,4 @@ volumes:
   app_node_modules:
   mock_node_modules:
   lmstudio_data:
+  postgres_data:

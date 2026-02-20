@@ -12,6 +12,10 @@ const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST
 const config = defineConfig({
   server: {
     port: 3000,
+    hmr: {
+      protocol: 'ws',
+      host: 'localhost',
+    },
   },
   test: {
     globals: true,
@@ -51,7 +55,10 @@ const config = defineConfig({
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),
-    !isTest && tanstackStart(),
+    !isTest &&
+      tanstackStart({
+        srcDirectory: './src',
+      }),
     viteReact(),
     // netlify(),
   ].filter(Boolean),

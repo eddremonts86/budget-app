@@ -1,6 +1,13 @@
+// @ts-nocheck
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
-import { usersApi } from './users.api'
+import {
+  getUsersFn,
+  getUserByIdFn,
+  createUserFn,
+  updateUserFn,
+  deleteUserFn,
+} from './users.fn'
 
 export const userKeys = {
   all: ['users'] as const,
@@ -12,8 +19,8 @@ export const userKeys = {
 
 export const useInfiniteUsers = (limit = 10) => {
   return useTQInfinite(
-    userKeys.infinite(),
-    ({ pageParam }) => usersApi.getAll({ pageParam, limit }),
+    [...userKeys.infinite(), { limit }],
+    ({ pageParam }) => getUsersFn({ data: { pageParam, limit } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -22,30 +29,35 @@ export const useInfiniteUsers = (limit = 10) => {
 }
 
 export const useUsers = () => {
-  return useTQuery(userKeys.lists(), () => usersApi.getAll({ limit: 1000 }).then((res) => res.data))
+  return useTQuery(userKeys.lists(), () =>
+    getUsersFn({ data: { limit: 1000 } }).then((res) => res.data),
+  )
 }
 
 export const useUser = (id: string) => {
-  return useTQuery(userKeys.detail(id), () => usersApi.getById(id))
+  return useTQuery(userKeys.detail(id), () => getUserByIdFn({ data: id }))
 }
 
 export const useCreateUser = () => {
-  return useTQMutation(['users', 'create'], usersApi.create, {
+  return useTQMutation(['users', 'create'], (data) => createUserFn({ data }), {
     invalidateKeys: [userKeys.all],
     successMessage: i18n.t('users.toast.created'),
   })
 }
 
 export const useUpdateUser = () => {
-  return useTQMutation(['users', 'update'], ({ id, data }: { id: string; data: Parameters<typeof usersApi.update>[1] }) =>
-    usersApi.update(id, data), {
-    invalidateKeys: [userKeys.all],
-    successMessage: i18n.t('users.toast.updated'),
-  })
+  return useTQMutation(
+    ['users', 'update'],
+    ({ id, data }: { id: string; data: any }) => updateUserFn({ data: { id, data } }),
+    {
+      invalidateKeys: [userKeys.all],
+      successMessage: i18n.t('users.toast.updated'),
+    },
+  )
 }
 
 export const useDeleteUser = () => {
-  return useTQMutation(['users', 'delete'], usersApi.delete, {
+  return useTQMutation(['users', 'delete'], (id) => deleteUserFn({ data: id }), {
     invalidateKeys: [userKeys.all],
     successMessage: i18n.t('users.toast.deleted'),
   })

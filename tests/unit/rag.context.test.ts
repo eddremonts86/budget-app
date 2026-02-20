@@ -1,6 +1,4 @@
 import { describe, it, expect } from 'vitest'
-
-// We test the context module's exported functions directly
 import {
   injectDynamicContext,
   detectIntent,
