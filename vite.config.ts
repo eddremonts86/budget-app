@@ -5,6 +5,7 @@ import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
+import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST
@@ -52,6 +53,7 @@ const config = defineConfig({
   plugins: [
     devtools(),
     tailwindcss(),
+    nodePolyfills(),
     viteTsConfigPaths({
       projects: ['./tsconfig.json'],
     }),

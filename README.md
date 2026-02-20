@@ -11,12 +11,15 @@
 Este proyecto utiliza PostgreSQL y Drizzle ORM. Para comenzar:
 
 1.  **Iniciar Base de Datos**:
+
     ```bash
     pnpm db:up
     ```
-    *Asegúrate de que Docker Desktop esté corriendo antes de ejecutar este comando.*
+
+    _Asegúrate de que Docker Desktop esté corriendo antes de ejecutar este comando._
 
 2.  **Sincronizar Esquema**:
+
     ```bash
     pnpm db:push
     ```
@@ -25,11 +28,11 @@ Este proyecto utiliza PostgreSQL y Drizzle ORM. Para comenzar:
     ```bash
     pnpm db:seed
     ```
-    *Esto migrará los datos desde `mocks/db.json` a tu base de datos local.*
+    _Esto insertará datos de prueba estáticos en tu base de datos local._
 
 ## Scripts Disponibles
 
-- `pnpm dev`: Inicia el servidor de desarrollo y el servidor mock (json-server).
+- `pnpm dev`: Inicia el servidor de desarrollo.
 - `pnpm db:up`: Levanta el contenedor de PostgreSQL.
 - `pnpm db:down`: Detiene y elimina los contenedores.
 - `pnpm db:generate`: Genera migraciones SQL con Drizzle Kit.
@@ -38,4 +41,5 @@ Este proyecto utiliza PostgreSQL y Drizzle ORM. Para comenzar:
 ---
 
 ## 17. Gestión de Proyectos y Tareas
+
 ...

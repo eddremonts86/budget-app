@@ -15,7 +15,6 @@ Este documento es la referencia principal para:
 ## Qué incluye el stack
 
 - **app**: TanStack Start / Vite (puerto `3000`)
-- **mock**: `json-server` con `mocks/db.json` (puerto `3001`)
 - **chromadb**: base vectorial para RAG (puerto `8000`)
 - **lmstudio**: LM Studio headless (`llmster`) para inferencia local (puerto `1234`)
 
@@ -24,7 +23,6 @@ Este documento es la referencia principal para:
 ```text
 Browser/UI (localhost:3000)
 	└─ App TanStack Start (service: app)
-			├─ Mock API (service: mock, localhost:3001)
 			├─ ChromaDB (service: chromadb, localhost:8000)
 			└─ LM Studio / OpenAI-compatible API (service: lmstudio, localhost:1234)
 ```
@@ -88,7 +86,6 @@ pnpm docker:down
 ## URLs de prueba
 
 - App: `http://localhost:3000`
-- Mock API: `http://localhost:3001/todos`
 - ChromaDB heartbeat: `http://localhost:8000/api/v2/heartbeat`
 - LM Studio models: `http://localhost:1234/v1/models`
 
@@ -144,7 +141,6 @@ Archivo recomendado para Docker local: `.env.docker`.
 
 Variables relevantes:
 
-- `VITE_API_URL=http://mock:3001`
 - `CHROMADB_URL=http://chromadb:8000`
 - `VITE_AI_BASE_URL=http://lmstudio:1234/v1`
 - `VITE_AI_LMSTUDIO_BASE_URL=http://lmstudio:1234/v1`
@@ -153,7 +149,7 @@ Variables relevantes:
 
 Notas:
 
-- En Docker, los servicios se comunican por nombre (`mock`, `chromadb`, `lmstudio`).
+- En Docker, los servicios se comunican por nombre (`chromadb`, `lmstudio`).
 - El frontend se expone por `localhost`, pero internamente usa la red de Compose.
 - `AI_LMSTUDIO_MODEL=local-model` debe coincidir con el identificador cargado en LM Studio.
 
@@ -293,7 +289,6 @@ Usa `/api/v2/heartbeat` (ya estandarizado en scripts de verificación).
 
 - Chroma persiste en `./chroma_data`.
 - LM Studio persiste en volumen nombrado `lmstudio_data`.
-- `json-server` usa `mocks/db.json` como fuente de datos.
 
 Implicación práctica:
 

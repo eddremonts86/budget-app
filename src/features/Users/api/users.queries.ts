@@ -1,12 +1,13 @@
-// @ts-nocheck
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
+import type { User } from '../model/types'
 import {
-  getUsersFn,
-  getUserByIdFn,
+  type UserInput,
   createUserFn,
-  updateUserFn,
   deleteUserFn,
+  getUserByIdFn,
+  getUsersFn,
+  updateUserFn,
 } from './users.fn'
 
 export const userKeys = {
@@ -30,7 +31,7 @@ export const useInfiniteUsers = (limit = 10) => {
 
 export const useUsers = () => {
   return useTQuery(userKeys.lists(), () =>
-    getUsersFn({ data: { limit: 1000 } }).then((res) => res.data),
+    getUsersFn({ data: { limit: 1000 } }).then((res: { data: User[] }) => res.data),
   )
 }
 
@@ -39,7 +40,7 @@ export const useUser = (id: string) => {
 }
 
 export const useCreateUser = () => {
-  return useTQMutation(['users', 'create'], (data) => createUserFn({ data }), {
+  return useTQMutation(['users', 'create'], (data: UserInput) => createUserFn({ data }), {
     invalidateKeys: [userKeys.all],
     successMessage: i18n.t('users.toast.created'),
   })
@@ -48,7 +49,8 @@ export const useCreateUser = () => {
 export const useUpdateUser = () => {
   return useTQMutation(
     ['users', 'update'],
-    ({ id, data }: { id: string; data: any }) => updateUserFn({ data: { id, data } }),
+    ({ id, data }: { id: string; data: Partial<UserInput> }) =>
+      updateUserFn({ data: { id, data } }),
     {
       invalidateKeys: [userKeys.all],
       successMessage: i18n.t('users.toast.updated'),
@@ -57,7 +59,7 @@ export const useUpdateUser = () => {
 }
 
 export const useDeleteUser = () => {
-  return useTQMutation(['users', 'delete'], (id) => deleteUserFn({ data: id }), {
+  return useTQMutation(['users', 'delete'], (id: string) => deleteUserFn({ data: id }), {
     invalidateKeys: [userKeys.all],
     successMessage: i18n.t('users.toast.deleted'),
   })

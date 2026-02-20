@@ -2,7 +2,6 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { Check, X, MoreHorizontal, Pencil, Plus, Trash2 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useInView } from 'react-intersection-observer'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -23,12 +22,12 @@ import {
 import { Skeleton } from '@/components/ui/skeleton'
 import { useProjects } from '@/features/Projects/api/projects.queries'
 import { useUsers } from '@/features/Users/api/users.queries'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { toast } from '@/shared/lib/toast'
 import { DataTable } from '@/shared/ui/DataTable'
 import {
   useCreateTransaction,
   useDeleteTransaction,
-  useInfiniteTransactions,
   useUpdateTransaction,
   useTransactions,
 } from '../api/transactions.queries'
@@ -37,7 +36,7 @@ import { TransactionForm } from './TransactionForm'
 
 interface PendingTransactionsTableProps {
   transactions: Transaction[]
-  currentUserId: string
+  currentUserId: string | null
 }
 
 function PendingTransactionsTable({ transactions, currentUserId }: PendingTransactionsTableProps) {
@@ -46,14 +45,12 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
   const { data: users = [] } = useUsers()
 
   const pendingTransactions = React.useMemo(() => {
-    // In a real app, we filter by assignedAdminId === currentUserId
-    // For demo, let's assume currentUserId is an admin ID or just show all pending if no filter
     if (!currentUserId) return []
     return transactions.filter((t) => t.status === 'Pending' && t.assignedAdminId === currentUserId)
   }, [transactions, currentUserId])
 
   const handleApprove = (transaction: Transaction) => {
-    // Simple confirm for now, can be a modal
+    if (!currentUserId) return
     if (confirm('Are you sure you want to approve this transaction?')) {
       updateMutation.mutate(
         {
@@ -72,6 +69,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
   }
 
   const handleReject = (transaction: Transaction) => {
+    if (!currentUserId) return
     const reason = prompt('Please provide a reason for rejection:')
     if (reason) {
       updateMutation.mutate(
@@ -200,28 +198,22 @@ export function TransactionsPage() {
 
   // We need to fetch all transactions to filter pending ones for the current user
   // In a real app, this would be a separate specific query
-  const { data: allTransactions = [] } = useTransactions()
+  const { data: allTransactions = [], isLoading, isError } = useTransactions()
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteTransactions(10)
+  // Infinite scroll removed in favor of client-side role filtering
+  // const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+  //   useInfiniteTransactions(10)
 
   const { data: users = [] } = useUsers()
   const { data: projects = [] } = useProjects()
 
-  const { ref, inView } = useInView()
+  const { syncedUserId: currentUserId, userRole } = useCurrentUser()
 
-  // MOCK AUTH: Assume the logged in user is one of the admins for demonstration
-  // We'll pick the first admin found or a specific one if needed
-  const currentUserId = React.useMemo(() => {
-    const admin = users.find((u) => u.role === 'admin')
-    return admin ? admin.id : ''
-  }, [users])
-
-  React.useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
+  const displayedTransactions = React.useMemo(() => {
+    if (!currentUserId) return []
+    if (userRole === 'admin') return allTransactions
+    return allTransactions.filter((t) => t.userId === currentUserId)
+  }, [allTransactions, currentUserId, userRole])
 
   const createMutation = useCreateTransaction()
   const updateMutation = useUpdateTransaction()
@@ -342,8 +334,6 @@ export function TransactionsPage() {
     },
   ]
 
-  const flatData = React.useMemo(() => data?.pages.flatMap((page) => page.data) ?? [], [data])
-
   if (isError) {
     return <div>Error loading transactions</div>
   }
@@ -374,15 +364,13 @@ export function TransactionsPage() {
             <Skeleton className="h-10 w-full" />
           </div>
         ) : (
-          <DataTable columns={columns} data={flatData} filterColumn="customer_name" fullHeight />
+          <DataTable
+            columns={columns}
+            data={displayedTransactions}
+            filterColumn="customer_name"
+            fullHeight
+          />
         )}
-
-        {/* Infinite scroll trigger */}
-        <div ref={ref} className="h-4 w-full shrink-0">
-          {isFetchingNextPage && (
-            <div className="text-center text-sm text-muted-foreground">Loading more...</div>
-          )}
-        </div>
       </div>
 
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -394,12 +382,20 @@ export function TransactionsPage() {
           <div className="flex-1 overflow-y-auto px-4 pb-4">
             <TransactionForm
               onSubmit={(values) => {
-                createMutation.mutate(values, {
-                  onSuccess: () => {
-                    setIsCreateOpen(false)
-                    toast.success(t('transactions.toast.created'))
+                const { customer, ...rest } = values
+                createMutation.mutate(
+                  {
+                    ...rest,
+                    customerName: customer.name,
+                    customerEmail: customer.email,
                   },
-                })
+                  {
+                    onSuccess: () => {
+                      setIsCreateOpen(false)
+                      toast.success(t('transactions.toast.created'))
+                    },
+                  },
+                )
               }}
               onCancel={() => setIsCreateOpen(false)}
               isLoading={createMutation.isPending}

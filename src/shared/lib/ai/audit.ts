@@ -12,7 +12,7 @@ export interface AuditEntry {
 
 export async function logAudit(entry: AuditEntry) {
   try {
-    const logPath = path.resolve(process.cwd(), 'mocks/audit-logs.json')
+    const logPath = path.resolve(process.cwd(), 'src/server/data/audit-logs.json')
     
     // Ensure directory exists
     await fs.mkdir(path.dirname(logPath), { recursive: true })

@@ -29,7 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useUsers } from '@/features/Users/api/users.queries'
-import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { cn } from '@/shared/lib/utils'
 import { todoKeys, useDeleteTodo, useInfiniteTodos, useUpdateTodo } from '../../api/todos.queries'
 import { canModifyTodo } from '../../model/permissions'
@@ -226,7 +226,11 @@ const KanbanColumn = React.memo(function KanbanColumn({
             >
               <DraggableCard
                 todo={todos[virtualItem.index]}
-                user={userMap.get(todos[virtualItem.index].assignedTo)}
+                user={
+                  todos[virtualItem.index].assignedTo
+                    ? userMap.get(todos[virtualItem.index].assignedTo!)
+                    : undefined
+                }
                 onEdit={onEdit}
                 syncedUserId={syncedUserId}
                 userRole={userRole}
@@ -286,7 +290,7 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const { data: users } = useUsers()
-  const { syncedUserId, userRole } = useSyncAuthUser()
+  const { syncedUserId, userRole } = useCurrentUser()
   // Add proper cache invalidation for todoKeys.all
   const updateMutation = useUpdateTodo({ invalidateKeys: [todoKeys.all] })
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteTodos(10) // Fetch more for kanban
@@ -306,7 +310,7 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
     const map = new Map<string, { name: string; avatar: string }>()
     if (users) {
       for (const u of users) {
-        map.set(u.id, { name: u.name, avatar: u.avatar })
+        map.set(u.id, { name: u.name, avatar: u.avatar || '' })
       }
     }
     return map
@@ -457,7 +461,7 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
             {activeTodo ? (
               <KanbanCard
                 todo={activeTodo}
-                user={userMap.get(activeTodo.assignedTo)}
+                user={activeTodo.assignedTo ? userMap.get(activeTodo.assignedTo) : undefined}
                 onEdit={onEdit}
                 isOverlay
                 syncedUserId={syncedUserId}

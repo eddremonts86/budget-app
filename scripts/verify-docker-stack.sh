@@ -27,12 +27,10 @@ check_url() {
 }
 
 require_container app
-require_container mock
 require_container chromadb
 require_container lmstudio
 
 check_url app "http://localhost:3000"
-check_url mock "http://localhost:3001/todos"
 check_url chromadb "http://localhost:8000/api/v2/heartbeat"
 check_url lmstudio "http://localhost:1234/v1/models"
 

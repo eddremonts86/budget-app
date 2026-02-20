@@ -3,7 +3,7 @@
 import { useUser } from '@clerk/tanstack-react-start'
 import { fetchServerSentEvents, useChat, type UIMessage } from '@tanstack/ai-react'
 import { useNavigate } from '@tanstack/react-router'
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import {
   ArrowUp,
   Bot,
@@ -34,7 +34,7 @@ import {
   InputGroupTextarea,
 } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { useTQuery } from '@/shared/lib/query'
 import type {
@@ -290,7 +290,7 @@ function ThinkingProcess({ content }: { content: string }) {
       </button>
       <AnimatePresence>
         {isExpanded && (
-          <motion.div
+          <m.div
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: 'auto', opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
@@ -299,7 +299,7 @@ function ThinkingProcess({ content }: { content: string }) {
             <div className="border-t border-indigo-500/10 bg-black/5 px-4 py-3 text-xs text-muted-foreground/90 font-mono whitespace-pre-wrap leading-relaxed dark:bg-white/5">
               {content}
             </div>
-          </motion.div>
+          </m.div>
         )}
       </AnimatePresence>
     </div>
@@ -371,7 +371,7 @@ function MessageBubble({
   }
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 15, scale: 0.98 }}
       animate={{ opacity: 1, y: 0, scale: 1 }}
       className={cn('group flex w-full gap-4', isUser ? 'justify-end' : 'justify-start')}
@@ -564,7 +564,7 @@ function MessageBubble({
           )}
         </div>
       )}
-    </motion.div>
+    </m.div>
   )
 }
 
@@ -624,7 +624,7 @@ function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) =
 export function HelpChatPage() {
   const { t, i18n } = useTranslation()
   const { user } = useUser()
-  const { userRole, syncedUserId } = useSyncAuthUser()
+  const { userRole, syncedUserId } = useCurrentUser()
   const navigate = useNavigate()
   const [input, setInput] = React.useState('')
   const [attachments, setAttachments] = React.useState<File[]>([])
@@ -872,333 +872,335 @@ export function HelpChatPage() {
       states={convManager.activeConv?.actionStates ?? {}}
       onSaveState={convManager.saveActionState}
     >
-      <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-background/50 shadow-2xl backdrop-blur-2xl dark:border-white/5 dark:bg-black/40">
-        {/* --- Dynamic Background --- */}
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-indigo-200/20 via-background/0 to-background/0 dark:from-indigo-900/20"></div>
-        <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_bottom_left,var(--tw-gradient-stops))] from-purple-200/20 via-background/0 to-background/0 dark:from-purple-900/20"></div>
+      <LazyMotion features={domAnimation}>
+        <div className="relative flex h-full flex-col overflow-hidden rounded-[2rem] border border-white/20 bg-background/50 shadow-2xl backdrop-blur-2xl dark:border-white/5 dark:bg-black/40">
+          {/* --- Dynamic Background --- */}
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-indigo-200/20 via-background/0 to-background/0 dark:from-indigo-900/20"></div>
+          <div className="absolute inset-0 -z-10 bg-[radial-gradient(circle_at_bottom_left,var(--tw-gradient-stops))] from-purple-200/20 via-background/0 to-background/0 dark:from-purple-900/20"></div>
 
-        {/* --- Conversation Panel --- */}
-        <ConversationPanel
-          conversations={convManager.conversations}
-          activeId={convManager.activeId}
-          onSelect={handleSelectConversation}
-          onNew={handleNewConversation}
-          onDelete={handleDeleteConversation}
-          onDeleteAll={handleDeleteAll}
-          isOpen={isPanelOpen}
-          onToggle={() => setIsPanelOpen(!isPanelOpen)}
-          userRole={userRole}
-          currentUserId={syncedUserId}
-        />
+          {/* --- Conversation Panel --- */}
+          <ConversationPanel
+            conversations={convManager.conversations}
+            activeId={convManager.activeId}
+            onSelect={handleSelectConversation}
+            onNew={handleNewConversation}
+            onDelete={handleDeleteConversation}
+            onDeleteAll={handleDeleteAll}
+            isOpen={isPanelOpen}
+            onToggle={() => setIsPanelOpen(!isPanelOpen)}
+            userRole={userRole}
+            currentUserId={syncedUserId}
+          />
 
-        {/* --- Header --- */}
-        <header className="flex h-20 items-center justify-between border-b border-white/10 bg-white/40 px-8 backdrop-blur-md dark:bg-black/20">
-          <div className="flex items-center gap-4">
-            <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
-              <Bot size={24} />
-              <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
-                <span
-                  className={cn(
-                    'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
-                    isAgentActive ? 'bg-green-400' : 'bg-red-400',
-                  )}
-                ></span>
-                <span
-                  className={cn(
-                    'relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-black',
-                    isAgentActive ? 'bg-green-500' : 'bg-red-500',
-                  )}
-                ></span>
-              </span>
-            </div>
-            <div>
-              <h2 className="text-lg font-bold leading-tight tracking-tight text-foreground">
-                {t('ai.chat.title')}
-              </h2>
-              <div className="flex items-center gap-2">
-                <span
-                  className={cn(
-                    'h-1.5 w-1.5 rounded-full',
-                    isAgentActive ? 'bg-green-500' : 'bg-red-500',
-                  )}
-                ></span>
-                <p className="text-xs font-medium text-muted-foreground">
-                  {isAgentActive ? t('ai.chat.supportAssistant') : t('ai.chat.agentInactive')}
-                </p>
+          {/* --- Header --- */}
+          <header className="flex h-20 items-center justify-between border-b border-white/10 bg-white/40 px-8 backdrop-blur-md dark:bg-black/20">
+            <div className="flex items-center gap-4">
+              <div className="relative flex h-12 w-12 items-center justify-center rounded-2xl bg-linear-to-br from-indigo-500 to-purple-600 text-white shadow-lg shadow-indigo-500/25">
+                <Bot size={24} />
+                <span className="absolute -bottom-1 -right-1 flex h-3.5 w-3.5">
+                  <span
+                    className={cn(
+                      'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
+                      isAgentActive ? 'bg-green-400' : 'bg-red-400',
+                    )}
+                  ></span>
+                  <span
+                    className={cn(
+                      'relative inline-flex h-3.5 w-3.5 rounded-full border-2 border-white dark:border-black',
+                      isAgentActive ? 'bg-green-500' : 'bg-red-500',
+                    )}
+                  ></span>
+                </span>
               </div>
-              <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground/60 font-medium">
-                <Sparkles size={10} />
-                <span>AI can make mistakes. Verify important information.</span>
+              <div>
+                <h2 className="text-lg font-bold leading-tight tracking-tight text-foreground">
+                  {t('ai.chat.title')}
+                </h2>
+                <div className="flex items-center gap-2">
+                  <span
+                    className={cn(
+                      'h-1.5 w-1.5 rounded-full',
+                      isAgentActive ? 'bg-green-500' : 'bg-red-500',
+                    )}
+                  ></span>
+                  <p className="text-xs font-medium text-muted-foreground">
+                    {isAgentActive ? t('ai.chat.supportAssistant') : t('ai.chat.agentInactive')}
+                  </p>
+                </div>
+                <div className="flex items-center gap-1.5 mt-0.5 text-[10px] text-muted-foreground/60 font-medium">
+                  <Sparkles size={10} />
+                  <span>AI can make mistakes. Verify important information.</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div className="flex items-center gap-3">
-            <div
-              className={cn(
-                'hidden items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest md:flex shadow-sm',
-                isAgentActive
-                  ? 'border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-300'
-                  : 'border-destructive/20 bg-destructive/10 text-destructive',
-              )}
-            >
-              <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
-              {providerQuery.data?.statuses[0]?.id.toUpperCase() || 'SYSTEM'}
+            <div className="flex items-center gap-3">
+              <div
+                className={cn(
+                  'hidden items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest md:flex shadow-sm',
+                  isAgentActive
+                    ? 'border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-300'
+                    : 'border-destructive/20 bg-destructive/10 text-destructive',
+                )}
+              >
+                <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
+                {providerQuery.data?.statuses[0]?.id.toUpperCase() || 'SYSTEM'}
+              </div>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
+                onClick={handleClear}
+                disabled={messages.length === 0 || isLoading}
+                title="Clear Chat"
+              >
+                <Trash2 size={18} />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 rounded-full hover:bg-muted"
+                title="Settings"
+                onClick={() => navigate({ to: '/dashboard/settings', search: { ia_config: true } })}
+              >
+                <Settings size={18} />
+              </Button>
             </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full hover:bg-destructive/10 hover:text-destructive transition-colors"
-              onClick={handleClear}
-              disabled={messages.length === 0 || isLoading}
-              title="Clear Chat"
-            >
-              <Trash2 size={18} />
-            </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="h-10 w-10 rounded-full hover:bg-muted"
-              title="Settings"
-              onClick={() => navigate({ to: '/dashboard/settings', search: { ia_config: true } })}
-            >
-              <Settings size={18} />
-            </Button>
-          </div>
-        </header>
+          </header>
 
-        {/* --- Messages --- */}
-        <div
-          ref={scrollContainerRef}
-          className="flex-1 overflow-y-auto scroll-smooth p-6 md:p-8 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-indigo-500/10 hover:scrollbar-thumb-indigo-500/20"
-        >
-          {visibleMessages.length === 0 && !error ? (
-            <EmptyState onSuggestionClick={handleSend} />
-          ) : (
-            <div className="flex flex-col gap-8 mx-auto max-w-4xl">
-              {visibleMessages.map((message, index) => (
-                <MessageBubble
-                  key={message.id}
-                  message={message}
-                  onImageClick={setIsPreviewOpen}
-                  userAvatar={user?.imageUrl}
-                  isTyping={
-                    isLoading &&
-                    index === visibleMessages.length - 1 &&
-                    message.role === 'assistant'
-                  }
-                />
-              ))}
+          {/* --- Messages --- */}
+          <div
+            ref={scrollContainerRef}
+            className="flex-1 overflow-y-auto scroll-smooth p-6 md:p-8 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-indigo-500/10 hover:scrollbar-thumb-indigo-500/20"
+          >
+            {visibleMessages.length === 0 && !error ? (
+              <EmptyState onSuggestionClick={handleSend} />
+            ) : (
+              <div className="flex flex-col gap-8 mx-auto max-w-4xl">
+                {visibleMessages.map((message, index) => (
+                  <MessageBubble
+                    key={message.id}
+                    message={message}
+                    onImageClick={setIsPreviewOpen}
+                    userAvatar={user?.imageUrl}
+                    isTyping={
+                      isLoading &&
+                      index === visibleMessages.length - 1 &&
+                      message.role === 'assistant'
+                    }
+                  />
+                ))}
 
-              {/* Inline error message */}
-              {error && !isLoading && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-start gap-4"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/20 ring-2 ring-background">
-                    <Bot size={20} className="text-white" />
-                  </div>
-                  <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-tl-sm border border-red-200 bg-red-50 px-5 py-4 text-sm shadow-sm dark:border-red-900/50 dark:bg-red-950/30">
-                    <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
-                      <span className="text-base">⚠️</span>
-                      <span className="font-semibold">{t('ai.chat.error')}</span>
+                {/* Inline error message */}
+                {error && !isLoading && (
+                  <m.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-red-500 to-rose-600 shadow-lg shadow-red-500/20 ring-2 ring-background">
+                      <Bot size={20} className="text-white" />
                     </div>
-                    <p className="text-red-600/80 dark:text-red-300/80 text-xs">
-                      {error instanceof Error ? error.message : t('ai.chat.connectionError')}
-                    </p>
-                    <button
-                      onClick={() => {
-                        const lastUserMessage = [...messages]
-                          .reverse()
-                          .find((m) => m.role === 'user')
-                        if (lastUserMessage) {
-                          // @ts-expect-error - sendMessage supports string or payload
-                          sendMessage(lastUserMessage.content)
-                        }
-                      }}
-                      className="mt-1 self-start rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-200 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60"
-                    >
-                      {t('ai.chat.retry')}
-                    </button>
-                  </div>
-                </motion.div>
-              )}
-
-              {isLoading && visibleMessages.at(-1)?.role !== 'assistant' && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="flex items-start gap-4"
-                >
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
-                    <Bot size={20} className="text-white" />
-                  </div>
-                  <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-border/40 bg-card/50 px-5 py-4 shadow-sm backdrop-blur-sm">
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-0" />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-150" />
-                    <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-300" />
-                  </div>
-                </motion.div>
-              )}
-              <div ref={bottomRef} className="h-4" />
-            </div>
-          )}
-        </div>
-
-        {/* --- Input Area --- */}
-        <section
-          aria-label="File drop zone"
-          className="relative z-10 border-t border-white/10 bg-white/40 p-6 backdrop-blur-xl dark:bg-black/40"
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <div className="mx-auto max-w-4xl">
-            {/* Attachments Preview */}
-            <AnimatePresence>
-              {attachments.length > 0 && (
-                <motion.div
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 10 }}
-                  className="mb-4 flex gap-3 overflow-x-auto pb-2"
-                >
-                  {attachments.map((file) => (
-                    <div
-                      key={file.name}
-                      className="group relative flex w-36 shrink-0 flex-col gap-2 rounded-xl border border-white/20 bg-white/50 p-2.5 shadow-sm backdrop-blur-md dark:bg-black/50"
-                    >
-                      <div className="flex h-20 w-full items-center justify-center rounded-lg bg-muted/50 overflow-hidden">
-                        {file.type.startsWith('image/') ? (
-                          <img
-                            src={URL.createObjectURL(file)}
-                            alt=""
-                            className="h-full w-full object-cover"
-                          />
-                        ) : (
-                          <FileText size={24} className="text-indigo-500" />
-                        )}
+                    <div className="flex max-w-[85%] flex-col gap-2 rounded-2xl rounded-tl-sm border border-red-200 bg-red-50 px-5 py-4 text-sm shadow-sm dark:border-red-900/50 dark:bg-red-950/30">
+                      <div className="flex items-center gap-2 text-red-600 dark:text-red-400">
+                        <span className="text-base">⚠️</span>
+                        <span className="font-semibold">{t('ai.chat.error')}</span>
                       </div>
-                      <span className="truncate text-[10px] font-semibold text-muted-foreground px-1">
-                        {file.name}
-                      </span>
+                      <p className="text-red-600/80 dark:text-red-300/80 text-xs">
+                        {error instanceof Error ? error.message : t('ai.chat.connectionError')}
+                      </p>
                       <button
-                        onClick={() => removeAttachment(attachments.indexOf(file))}
-                        className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white shadow-md opacity-0 transition-all group-hover:opacity-100 hover:scale-110"
-                        title={`Remove ${file.name}`}
+                        onClick={() => {
+                          const lastUserMessage = [...messages]
+                            .reverse()
+                            .find((m) => m.role === 'user')
+                          if (lastUserMessage) {
+                            // @ts-expect-error - sendMessage supports string or payload
+                            sendMessage(lastUserMessage.content)
+                          }
+                        }}
+                        className="mt-1 self-start rounded-lg bg-red-100 px-3 py-1.5 text-xs font-medium text-red-700 transition-colors hover:bg-red-200 dark:bg-red-900/40 dark:text-red-300 dark:hover:bg-red-900/60"
                       >
-                        <X size={12} />
+                        {t('ai.chat.retry')}
                       </button>
                     </div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            {/* Input Bar */}
-            <input
-              type="file"
-              multiple
-              className="hidden"
-              ref={fileInputRef}
-              onChange={onFileChange}
-              accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.json,.md,.yaml,.yml,.xml,.log,.ts,.tsx,.js,.jsx,.py,.html,.css"
-              aria-label="Upload files"
-            />
-            <InputGroup className="items-end gap-2 rounded-[2rem] border-white/20 bg-white/60 p-2 shadow-xl shadow-indigo-500/5 transition-all dark:bg-black/40 has-[textarea:focus-visible]:border-indigo-500/50 has-[textarea:focus-visible]:bg-white has-[textarea:focus-visible]:ring-4 has-[textarea:focus-visible]:ring-indigo-500/10 dark:has-[textarea:focus-visible]:bg-black/60">
-              <InputGroupAddon className="py-0">
-                <InputGroupButton
-                  variant="ghost"
-                  size="icon-sm"
-                  className="h-11 w-11 shrink-0 rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Attach file"
-                >
-                  <Paperclip size={20} />
-                </InputGroupButton>
-              </InputGroupAddon>
-
-              <InputGroupTextarea
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' && !e.shiftKey) {
-                    e.preventDefault()
-                    if (isAgentActive) handleSend()
-                  }
-                }}
-                placeholder={(() => {
-                  if (!isOnline) return t('ai.chat.offline')
-                  if (!isAgentActive) return t('ai.chat.agentInactive')
-                  return t('ai.chat.placeholder')
-                })()}
-                disabled={isLoading || !isOnline || !isAgentActive}
-                className="min-h-11 max-h-40 resize-none border-0 bg-transparent py-2.5 text-base placeholder:text-muted-foreground/50"
-              />
-
-              <InputGroupAddon align="inline-end" className="py-0">
-                {isLoading ? (
-                  <InputGroupButton
-                    variant="destructive"
-                    size="icon-sm"
-                    onClick={() => stop()}
-                    className="h-11 w-11 shrink-0 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all"
-                  >
-                    <StopCircle size={20} />
-                  </InputGroupButton>
-                ) : (
-                  <InputGroupButton
-                    onClick={() => handleSend()}
-                    disabled={
-                      (!input.trim() && attachments.length === 0) || !isOnline || !isAgentActive
-                    }
-                    className={cn(
-                      'h-11 w-11 shrink-0 rounded-full shadow-lg transition-all duration-300',
-                      input.trim() || attachments.length > 0
-                        ? 'bg-linear-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/25 hover:scale-105'
-                        : 'bg-muted text-muted-foreground hover:bg-muted/80',
-                    )}
-                    size="icon-sm"
-                  >
-                    <ArrowUp size={20} />
-                  </InputGroupButton>
+                  </m.div>
                 )}
-              </InputGroupAddon>
-            </InputGroup>
-          </div>
-        </section>
 
-        {/* Preview Modal */}
-        <AnimatePresence>
-          {isPreviewOpen && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
-              onClick={() => setIsPreviewOpen(null)}
-            >
-              <button
-                className="absolute right-6 top-6 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors"
-                onClick={() => setIsPreviewOpen(null)}
-                title="Close preview"
-              >
-                <X size={28} />
-              </button>
-              <motion.img
-                initial={{ scale: 0.9, opacity: 0 }}
-                animate={{ scale: 1, opacity: 1 }}
-                exit={{ scale: 0.9, opacity: 0 }}
-                src={isPreviewOpen}
-                alt="Preview"
-                className="max-h-[85vh] max-w-[85vw] rounded-2xl object-contain shadow-2xl ring-1 ring-white/10"
-                onClick={(e) => e.stopPropagation()}
+                {isLoading && visibleMessages.at(-1)?.role !== 'assistant' && (
+                  <m.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex items-start gap-4"
+                  >
+                    <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-linear-to-br from-indigo-500 to-purple-600 shadow-lg shadow-indigo-500/20 ring-2 ring-background">
+                      <Bot size={20} className="text-white" />
+                    </div>
+                    <div className="flex items-center gap-1.5 rounded-2xl rounded-tl-sm border border-border/40 bg-card/50 px-5 py-4 shadow-sm backdrop-blur-sm">
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-0" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-150" />
+                      <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 delay-300" />
+                    </div>
+                  </m.div>
+                )}
+                <div ref={bottomRef} className="h-4" />
+              </div>
+            )}
+          </div>
+
+          {/* --- Input Area --- */}
+          <section
+            aria-label="File drop zone"
+            className="relative z-10 border-t border-white/10 bg-white/40 p-6 backdrop-blur-xl dark:bg-black/40"
+            onDragOver={handleDragOver}
+            onDrop={handleDrop}
+          >
+            <div className="mx-auto max-w-4xl">
+              {/* Attachments Preview */}
+              <AnimatePresence>
+                {attachments.length > 0 && (
+                  <m.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 10 }}
+                    className="mb-4 flex gap-3 overflow-x-auto pb-2"
+                  >
+                    {attachments.map((file) => (
+                      <div
+                        key={file.name}
+                        className="group relative flex w-36 shrink-0 flex-col gap-2 rounded-xl border border-white/20 bg-white/50 p-2.5 shadow-sm backdrop-blur-md dark:bg-black/50"
+                      >
+                        <div className="flex h-20 w-full items-center justify-center rounded-lg bg-muted/50 overflow-hidden">
+                          {file.type.startsWith('image/') ? (
+                            <img
+                              src={URL.createObjectURL(file)}
+                              alt=""
+                              className="h-full w-full object-cover"
+                            />
+                          ) : (
+                            <FileText size={24} className="text-indigo-500" />
+                          )}
+                        </div>
+                        <span className="truncate text-[10px] font-semibold text-muted-foreground px-1">
+                          {file.name}
+                        </span>
+                        <button
+                          onClick={() => removeAttachment(attachments.indexOf(file))}
+                          className="absolute -right-2 -top-2 flex h-6 w-6 items-center justify-center rounded-full bg-destructive text-white shadow-md opacity-0 transition-all group-hover:opacity-100 hover:scale-110"
+                          title={`Remove ${file.name}`}
+                        >
+                          <X size={12} />
+                        </button>
+                      </div>
+                    ))}
+                  </m.div>
+                )}
+              </AnimatePresence>
+
+              {/* Input Bar */}
+              <input
+                type="file"
+                multiple
+                className="hidden"
+                ref={fileInputRef}
+                onChange={onFileChange}
+                accept="image/*,application/pdf,.doc,.docx,.xls,.xlsx,.txt,.csv,.json,.md,.yaml,.yml,.xml,.log,.ts,.tsx,.js,.jsx,.py,.html,.css"
+                aria-label="Upload files"
               />
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </div>
+              <InputGroup className="items-end gap-2 rounded-[2rem] border-white/20 bg-white/60 p-2 shadow-xl shadow-indigo-500/5 transition-all dark:bg-black/40 has-[textarea:focus-visible]:border-indigo-500/50 has-[textarea:focus-visible]:bg-white has-[textarea:focus-visible]:ring-4 has-[textarea:focus-visible]:ring-indigo-500/10 dark:has-[textarea:focus-visible]:bg-black/60">
+                <InputGroupAddon className="py-0">
+                  <InputGroupButton
+                    variant="ghost"
+                    size="icon-sm"
+                    className="h-11 w-11 shrink-0 rounded-full text-muted-foreground hover:bg-indigo-50 hover:text-indigo-600 dark:hover:bg-indigo-900/20"
+                    onClick={() => fileInputRef.current?.click()}
+                    title="Attach file"
+                  >
+                    <Paperclip size={20} />
+                  </InputGroupButton>
+                </InputGroupAddon>
+
+                <InputGroupTextarea
+                  value={input}
+                  onChange={(e) => setInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                      e.preventDefault()
+                      if (isAgentActive) handleSend()
+                    }
+                  }}
+                  placeholder={(() => {
+                    if (!isOnline) return t('ai.chat.offline')
+                    if (!isAgentActive) return t('ai.chat.agentInactive')
+                    return t('ai.chat.placeholder')
+                  })()}
+                  disabled={isLoading || !isOnline || !isAgentActive}
+                  className="min-h-11 max-h-40 resize-none border-0 bg-transparent py-2.5 text-base placeholder:text-muted-foreground/50"
+                />
+
+                <InputGroupAddon align="inline-end" className="py-0">
+                  {isLoading ? (
+                    <InputGroupButton
+                      variant="destructive"
+                      size="icon-sm"
+                      onClick={() => stop()}
+                      className="h-11 w-11 shrink-0 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all"
+                    >
+                      <StopCircle size={20} />
+                    </InputGroupButton>
+                  ) : (
+                    <InputGroupButton
+                      onClick={() => handleSend()}
+                      disabled={
+                        (!input.trim() && attachments.length === 0) || !isOnline || !isAgentActive
+                      }
+                      className={cn(
+                        'h-11 w-11 shrink-0 rounded-full shadow-lg transition-all duration-300',
+                        input.trim() || attachments.length > 0
+                          ? 'bg-linear-to-br from-indigo-500 to-purple-600 text-white hover:shadow-indigo-500/25 hover:scale-105'
+                          : 'bg-muted text-muted-foreground hover:bg-muted/80',
+                      )}
+                      size="icon-sm"
+                    >
+                      <ArrowUp size={20} />
+                    </InputGroupButton>
+                  )}
+                </InputGroupAddon>
+              </InputGroup>
+            </div>
+          </section>
+
+          {/* Preview Modal */}
+          <AnimatePresence>
+            {isPreviewOpen && (
+              <m.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 backdrop-blur-md p-6"
+                onClick={() => setIsPreviewOpen(null)}
+              >
+                <button
+                  className="absolute right-6 top-6 rounded-full bg-white/10 p-3 text-white hover:bg-white/20 transition-colors"
+                  onClick={() => setIsPreviewOpen(null)}
+                  title="Close preview"
+                >
+                  <X size={28} />
+                </button>
+                <m.img
+                  initial={{ scale: 0.9, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  exit={{ scale: 0.9, opacity: 0 }}
+                  src={isPreviewOpen}
+                  alt="Preview"
+                  className="max-h-[85vh] max-w-[85vw] rounded-2xl object-contain shadow-2xl ring-1 ring-white/10"
+                  onClick={(e: React.MouseEvent<HTMLImageElement>) => e.stopPropagation()}
+                />
+              </m.div>
+            )}
+          </AnimatePresence>
+        </div>
+      </LazyMotion>
     </ActionStatesProvider>
   )
 }

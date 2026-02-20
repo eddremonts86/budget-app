@@ -5,7 +5,7 @@ import type {
   AiProvider,
 } from '@/features/Settings/model/ai-config.schema'
 
-const API_URL = process.env.API_URL_INTERNAL || process.env.VITE_API_URL || 'http://localhost:3001'
+const API_URL = process.env.API_URL_INTERNAL || process.env.VITE_API_URL || 'http://localhost:3000'
 const LMSTUDIO_BASE_URL =
   process.env.AI_BASE_URL_INTERNAL ||
   process.env.VITE_AI_LMSTUDIO_BASE_URL ||

@@ -10,10 +10,11 @@ import {
   Badge,
   CardFooter,
 } from '@/components/ui'
-import { todosApi } from '@/features/Todos/api/todos.api'
+import { getTodosByProjectIdFn } from '@/features/Todos/api/todos.fn'
 import { toast } from '@/shared/lib/toast'
-import { projectsApi } from '../api/projects.api'
+import { deleteProjectFn } from '../api/projects.fn'
 import { useProjects, projectsKeys } from '../api/projects.queries'
+import type { Project } from '../model/types'
 
 export function ProjectsPage() {
   const { t } = useTranslation()
@@ -23,7 +24,8 @@ export function ProjectsPage() {
   const handleDelete = async (id: string, name: string) => {
     try {
       // Check if project has associated tasks
-      const hasTasks = await todosApi.getByProjectId(id)
+      const projectTasks = await getTodosByProjectIdFn({ data: id })
+      const hasTasks = projectTasks && projectTasks.length > 0
 
       if (hasTasks) {
         toast.error(t('projects.error.hasTasks', { name }))
@@ -31,7 +33,7 @@ export function ProjectsPage() {
       }
 
       if (window.confirm(t('projects.confirm.delete', { name }))) {
-        await projectsApi.delete(id)
+        await deleteProjectFn({ data: id })
         queryClient.invalidateQueries({ queryKey: projectsKeys.all })
         toast.success(t('projects.success.deleted'))
       }
@@ -52,7 +54,7 @@ export function ProjectsPage() {
         <h2 className="text-3xl font-bold tracking-tight">{t('projects.title')}</h2>
       </div>
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 flex-1 content-start min-h-0 overflow-y-auto">
-        {projects?.map((project) => (
+        {projects?.map((project: Project) => (
           <Card key={project.id} className="flex flex-col h-full">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
               <CardTitle className="text-base font-semibold leading-tight">
@@ -77,7 +79,7 @@ export function ProjectsPage() {
                 {project.description}
               </div>
               <div className="flex flex-wrap gap-1.5">
-                {project.technologies.map((tech) => (
+                {project.technologies.map((tech: string) => (
                   <Badge key={tech} variant="secondary" className="px-2 py-0.5 text-xs font-normal">
                     {tech}
                   </Badge>

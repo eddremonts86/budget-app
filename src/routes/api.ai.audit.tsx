@@ -8,14 +8,14 @@ export const Route = createFileRoute('/api/ai/audit')({
     handlers: {
       GET: async () => {
         try {
-          const logPath = path.resolve(process.cwd(), 'mocks/audit-logs.json')
+          const logPath = path.resolve(process.cwd(), 'src/server/data/audit-logs.json')
           const content = await fs.readFile(logPath, 'utf-8')
           const logs = JSON.parse(content)
 
           // Also read settings
           let settings = {}
           try {
-            const settingsPath = path.resolve(process.cwd(), 'mocks/ai-settings.json')
+            const settingsPath = path.resolve(process.cwd(), 'src/server/data/ai-settings.json')
             const settingsContent = await fs.readFile(settingsPath, 'utf-8')
             settings = JSON.parse(settingsContent)
           } catch {
@@ -34,7 +34,7 @@ export const Route = createFileRoute('/api/ai/audit')({
       POST: async ({ request }: { request: Request }) => {
         try {
           const body = await request.json()
-          const settingsPath = path.resolve(process.cwd(), 'mocks/ai-settings.json')
+          const settingsPath = path.resolve(process.cwd(), 'src/server/data/ai-settings.json')
 
           // Merge with existing
           let current = {}

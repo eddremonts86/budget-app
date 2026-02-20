@@ -1,6 +1,13 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
-import { transactionsApi } from './transactions.api'
+import {
+  type TransactionInput,
+  createTransactionFn,
+  deleteTransactionFn,
+  getTransactionByIdFn,
+  getTransactionsFn,
+  updateTransactionFn,
+} from './transactions.fn'
 
 export const transactionKeys = {
   all: ['transactions'] as const,
@@ -12,8 +19,8 @@ export const transactionKeys = {
 
 export const useInfiniteTransactions = (limit = 10) => {
   return useTQInfinite(
-    transactionKeys.infinite(),
-    ({ pageParam }) => transactionsApi.getAll({ pageParam, limit }),
+    [...transactionKeys.infinite(), { limit }],
+    ({ pageParam }) => getTransactionsFn({ data: { pageParam, limit } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -23,37 +30,44 @@ export const useInfiniteTransactions = (limit = 10) => {
 
 export const useTransactions = () => {
   return useTQuery(transactionKeys.lists(), () =>
-    transactionsApi.getAll({ limit: 1000 }).then((res) => res.data),
+    getTransactionsFn({ data: { limit: 1000 } }).then((res) => res.data),
   )
 }
 
 export const useTransaction = (id: string) => {
-  return useTQuery(transactionKeys.detail(id), () => transactionsApi.getById(id))
+  return useTQuery(transactionKeys.detail(id), () => getTransactionByIdFn({ data: id }))
 }
 
 export const useCreateTransaction = () => {
-  return useTQMutation(['transactions', 'create'], transactionsApi.create, {
-    invalidateKeys: [transactionKeys.all],
-    successMessage: i18n.t('transactions.toast.created'),
-  })
+  return useTQMutation(
+    ['transactions', 'create'],
+    (data: TransactionInput) => createTransactionFn({ data }),
+    {
+      invalidateKeys: [transactionKeys.all],
+      successMessage: i18n.t('transactions.toast.created'),
+    },
+  )
 }
 
 export const useUpdateTransaction = () => {
-  return useTQMutation(['transactions', 'update'], ({
-    id,
-    data,
-  }: {
-    id: string
-    data: Parameters<typeof transactionsApi.update>[1]
-  }) => transactionsApi.update(id, data), {
-    invalidateKeys: [transactionKeys.all],
-    successMessage: i18n.t('transactions.toast.updated'),
-  })
+  return useTQMutation(
+    ['transactions', 'update'],
+    ({ id, data }: { id: string; data: Partial<TransactionInput> }) =>
+      updateTransactionFn({ data: { id, data } }),
+    {
+      invalidateKeys: [transactionKeys.all],
+      successMessage: i18n.t('transactions.toast.updated'),
+    },
+  )
 }
 
 export const useDeleteTransaction = () => {
-  return useTQMutation(['transactions', 'delete'], transactionsApi.delete, {
-    invalidateKeys: [transactionKeys.all],
-    successMessage: i18n.t('transactions.toast.deleted'),
-  })
+  return useTQMutation(
+    ['transactions', 'delete'],
+    (id: string) => deleteTransactionFn({ data: id }),
+    {
+      invalidateKeys: [transactionKeys.all],
+      successMessage: i18n.t('transactions.toast.deleted'),
+    },
+  )
 }

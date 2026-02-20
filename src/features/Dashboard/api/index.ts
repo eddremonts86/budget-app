@@ -1,2 +1,2 @@
-export * from './dashboard.api'
+export * from './dashboard.fn'
 export * from './dashboard.queries'

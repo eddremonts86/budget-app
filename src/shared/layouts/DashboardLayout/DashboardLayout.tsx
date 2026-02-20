@@ -16,9 +16,70 @@ import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { AiSearchProvider } from '@/features/Ai/context/AiSearchContext'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
-import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
+import { UserProvider } from '@/features/Users/context/UserContext'
 import { cn } from '@/shared/utils'
 import { NotificationBell } from './NotificationBell'
+
+export function DashboardLayout() {
+  const { isLoaded, userId } = useAuth()
+  const { pathname } = useLocation()
+  const { t } = useTranslation()
+  const isE2E = import.meta.env.VITE_E2E === 'true'
+
+  // Get current page title from pathname
+  const segments = pathname.split('/').filter(Boolean)
+  const lastSegment = segments[segments.length - 1] || 'dashboard'
+  const pageTitle = t(`sidebar.main.${lastSegment}`, {
+    defaultValue: lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1),
+  })
+
+  if (!isE2E && isLoaded && !userId) {
+    throw redirect({
+      to: '/',
+    })
+  }
+
+  if (!isE2E && !isLoaded) {
+    return (
+      <div className="flex h-screen items-center justify-center">
+        <p>Loading...</p>
+      </div>
+    )
+  }
+
+  return (
+    <UserProvider>
+      <AiSearchProvider>
+        <SidebarProvider>
+          <AppSidebar />
+          <DashboardContent>
+            <BreadcrumbList>
+              <BreadcrumbItem className="hidden md:block">
+                <BreadcrumbLink href="/dashboard">{t('sidebar.main.dashboard')}</BreadcrumbLink>
+              </BreadcrumbItem>
+              {segments.length > 1 && (
+                <>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
+              {segments.length === 1 && segments[0] === 'dashboard' && (
+                <>
+                  <BreadcrumbSeparator className="hidden md:block" />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{t('sidebar.main.dashboard')}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
+            </BreadcrumbList>
+          </DashboardContent>
+        </SidebarProvider>
+      </AiSearchProvider>
+    </UserProvider>
+  )
+}
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { isPinned, isOpen } = useAiSearch()
@@ -50,67 +111,5 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         <Outlet />
       </div>
     </SidebarInset>
-  )
-}
-
-export function DashboardLayout() {
-  const { isLoaded, userId } = useAuth()
-  const { pathname } = useLocation()
-  const { t } = useTranslation()
-  const isE2E = import.meta.env.VITE_E2E === 'true'
-
-  // Sync authenticated Clerk user into mock DB
-  useSyncAuthUser()
-
-  // Get current page title from pathname
-  const segments = pathname.split('/').filter(Boolean)
-  const lastSegment = segments[segments.length - 1] || 'dashboard'
-  const pageTitle = t(`sidebar.main.${lastSegment}`, {
-    defaultValue: lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1),
-  })
-
-  if (!isE2E && isLoaded && !userId) {
-    throw redirect({
-      to: '/',
-    })
-  }
-
-  if (!isE2E && !isLoaded) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <p>Loading...</p>
-      </div>
-    )
-  }
-
-  return (
-    <AiSearchProvider>
-      <SidebarProvider>
-        <AppSidebar />
-        <DashboardContent>
-          <BreadcrumbList>
-            <BreadcrumbItem className="hidden md:block">
-              <BreadcrumbLink href="/dashboard">{t('sidebar.main.dashboard')}</BreadcrumbLink>
-            </BreadcrumbItem>
-            {segments.length > 1 && (
-              <>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>{pageTitle}</BreadcrumbPage>
-                </BreadcrumbItem>
-              </>
-            )}
-            {segments.length === 1 && segments[0] === 'dashboard' && (
-              <>
-                <BreadcrumbSeparator className="hidden md:block" />
-                <BreadcrumbItem>
-                  <BreadcrumbPage>Overview</BreadcrumbPage>
-                </BreadcrumbItem>
-              </>
-            )}
-          </BreadcrumbList>
-        </DashboardContent>
-      </SidebarProvider>
-    </AiSearchProvider>
   )
 }

@@ -7,7 +7,7 @@ import {
   getProvider,
   getProviderHeaders,
 } from '@/shared/lib/ai/server/providers'
-import appKnowledge from '../../mocks/app-knowledge.json'
+import appKnowledge from '@/server/data/app-knowledge.json'
 
 type SearchRequestBody = {
   query: string

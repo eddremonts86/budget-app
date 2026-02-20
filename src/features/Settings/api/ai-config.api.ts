@@ -7,8 +7,8 @@ import type {
   AiProvider,
 } from '../model/ai-config.schema'
 
-const AI_CONFIG_STORE_ENDPOINT = '/ai-config-store'
-const AUDIT_LOGS_ENDPOINT = '/audit-logs'
+const AI_CONFIG_STORE_ENDPOINT = '/api/ai/config-store'
+const AUDIT_LOGS_ENDPOINT = '/api/ai/audit'
 
 const PROVIDERS = new Set<AiProvider>(['openai', 'anthropic', 'lm-studio'])
 

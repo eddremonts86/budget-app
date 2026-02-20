@@ -1,4 +1,3 @@
-import { spawnSync } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 
@@ -41,22 +40,12 @@ const main = async () => {
   }
 
   const workspaceRoot = process.cwd()
-  const storePath = path.join(workspaceRoot, 'mocks', 'ai-config-store.json')
+  const storePath = path.join(workspaceRoot, 'src/server/data', 'ai-config-store.json')
 
   const store = await readStore(storePath)
   store.activeProvider = provider
 
   await fs.writeFile(storePath, `${JSON.stringify(store, null, 2)}\n`, 'utf-8')
-
-  const sync = spawnSync('pnpm', ['mocks:sync'], {
-    cwd: workspaceRoot,
-    stdio: 'inherit',
-    shell: false,
-  })
-
-  if (sync.status !== 0) {
-    process.exit(sync.status ?? 1)
-  }
 
   process.stdout.write(`activeProvider set to ${provider}\n`)
 }

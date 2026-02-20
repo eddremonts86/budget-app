@@ -129,7 +129,7 @@
         "Edit existing tasks",
         "Delete tasks with undo toast"
       ],
-      "dataSource": "API (json-server /todos)",
+      "dataSource": "API (Drizzle ORM /todos)",
       "actions": ["Create todo", "Edit todo", "Delete todo", "Filter by status", "Sort columns"],
       "dataModel": {
         "fields": [
@@ -178,7 +178,7 @@
         "Edit existing users",
         "Delete users with undo toast"
       ],
-      "dataSource": "API (json-server /users)",
+      "dataSource": "API (Drizzle ORM /users)",
       "actions": ["Create user", "Edit user", "Delete user", "Filter", "Sort columns"],
       "dataModel": {
         "fields": ["id", "name", "email", "role", "avatar"],
@@ -196,7 +196,7 @@
         "Edit existing categories",
         "Delete categories with undo toast"
       ],
-      "dataSource": "API (json-server /categories)",
+      "dataSource": "API (Drizzle ORM /categories)",
       "actions": ["Create category", "Edit category", "Delete category"],
       "dataModel": {
         "fields": ["id", "name", "color"]
@@ -215,7 +215,7 @@
         "Edit existing transactions",
         "Delete transactions with undo toast"
       ],
-      "dataSource": "API (json-server /recentTransactions)",
+      "dataSource": "API (Drizzle ORM /recentTransactions)",
       "actions": [
         "Create transaction",
         "Edit transaction",

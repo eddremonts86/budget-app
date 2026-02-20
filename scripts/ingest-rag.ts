@@ -142,7 +142,7 @@ async function ingest() {
 
   // 5. Ingest App Knowledge Base
   try {
-    const knowledgePath = 'mocks/app-knowledge.json'
+    const knowledgePath = 'src/server/data/app-knowledge.json'
     const knowledgeContent = await fs.readFile(knowledgePath, 'utf-8')
     const knowledge = JSON.parse(knowledgeContent)
 

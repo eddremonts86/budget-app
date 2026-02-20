@@ -1,5 +1,5 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import {
   Calendar,
   Clock,
@@ -29,7 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useUsers } from '@/features/Users/api/users.queries'
-import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
@@ -43,7 +43,7 @@ interface ListViewProps {
 
 export function ListView({ onEdit }: ListViewProps) {
   const { t } = useTranslation()
-  const { syncedUserId, userRole } = useSyncAuthUser()
+  const { syncedUserId, userRole } = useCurrentUser()
   const { data: users } = useUsers()
 
   // Build a lookup map of userId → user for the assignee column
@@ -51,7 +51,7 @@ export function ListView({ onEdit }: ListViewProps) {
     const map = new Map<string, { name: string; avatar: string }>()
     if (users) {
       for (const u of users) {
-        map.set(u.id, { name: u.name, avatar: u.avatar })
+        map.set(u.id, { name: u.name, avatar: u.avatar || '' })
       }
     }
     return map
@@ -149,8 +149,8 @@ export function ListView({ onEdit }: ListViewProps) {
       accessorKey: 'assignedTo',
       header: t('todos.table.assignedTo'),
       cell: ({ row }) => {
-        const assignedTo = row.getValue('assignedTo') as string
-        const assignee = userMap.get(assignedTo)
+        const assignedTo = row.getValue('assignedTo') as string | null
+        const assignee = assignedTo ? userMap.get(assignedTo) : undefined
         if (!assignee) {
           return (
             <div className="flex items-center gap-2 text-muted-foreground">
@@ -272,7 +272,7 @@ export function ListView({ onEdit }: ListViewProps) {
 
   if (isError) {
     return (
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="flex items-center justify-center h-[400px]"
@@ -289,7 +289,7 @@ export function ListView({ onEdit }: ListViewProps) {
             {t('todos.error.retry')}
           </Button>
         </div>
-      </motion.div>
+      </m.div>
     )
   }
 

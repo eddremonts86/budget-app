@@ -52,9 +52,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { searchAiFn } from '@/features/Ai/api/search.fn'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import { useTransactions } from '@/features/Transactions/api/transactions.queries'
-import { useUsers } from '@/features/Users/api/users.queries'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { useTQMutation } from '@/shared/lib/query'
 import { cn } from '@/shared/utils'
@@ -80,13 +81,7 @@ const extractSearchText = (result: unknown) => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
   const { data: allTransactions = [] } = useTransactions()
-  const { data: users = [] } = useUsers()
-
-  // MOCK AUTH: Assume the logged in user is one of the admins for demonstration
-  const currentUserId = React.useMemo(() => {
-    const admin = users.find((u) => u.role === 'admin')
-    return admin ? admin.id : ''
-  }, [users])
+  const { syncedUserId: currentUserId } = useCurrentUser()
 
   const pendingCount = React.useMemo(() => {
     if (!currentUserId) return 0
@@ -135,16 +130,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   >(
     ['ai', 'search'],
     async ({ query, providerId }) => {
-      const res = await fetch('/api/ai/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query, providerId }),
-      })
-      const data = (await res.json()) as SearchResultPayload & { error?: string }
-      if (!res.ok) {
-        throw new Error(data.error ?? 'SEARCH_FAILED')
-      }
-      return data
+      const response = await searchAiFn({ data: { query, providerId } })
+      return response as SearchResultPayload
     },
     {
       showSuccessToast: false,
@@ -259,7 +246,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton asChild className="data-[slot=sidebar-menu-button]:!p-1.5">
-              <a href="#">
+              <a href="/">
                 <IconInnerShadowTop className="!size-5" />
                 <span className="text-base font-semibold">Acme Inc.</span>
               </a>
@@ -349,7 +336,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     onChange={(event) => setSearchQuery(event.target.value)}
                     placeholder={t('ai.search.placeholder')}
                     className="h-10"
-                    autoFocus
                   />
                   <InputGroupAddon align="inline-end">
                     <kbd className="pointer-events-none flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground opacity-100">

@@ -1,17 +1,12 @@
-import fs from 'fs'
-import path from 'path'
-import { fileURLToPath } from 'url'
 import * as dotenv from 'dotenv'
 import { drizzle } from 'drizzle-orm/postgres-js'
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable no-console */
 import postgres from 'postgres'
 import * as schema from '../src/shared/lib/db/schema'
+import * as seedData from './seed-data'
 
 dotenv.config()
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
 
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
@@ -24,9 +19,6 @@ const db = drizzle(client, { schema })
 async function seed() {
   console.log('🌱 Seeding database...')
 
-  const dbPath = path.join(__dirname, '../mocks/db.json')
-  const data = JSON.parse(fs.readFileSync(dbPath, 'utf-8'))
-
   try {
     // Clear existing data
     console.log('Cleaning existing data...')
@@ -38,35 +30,26 @@ async function seed() {
     await db.delete(schema.teams)
 
     // Insert Users
-    if (data.users && data.users.length > 0) {
-      console.log(`Inserting ${data.users.length} users...`)
+    if (seedData.users.length > 0) {
+      console.log(`Inserting ${seedData.users.length} users...`)
 
       await db.insert(schema.users).values(
-        data.users.map((u: any) => ({
-          id: u.id,
-          name: u.name,
-          email: u.email,
-          role: u.role,
-          avatar: u.avatar,
+        seedData.users.map((u: any) => ({
+          ...u,
           createdAt: u.createdAt ? new Date(u.createdAt) : new Date(),
         })),
       )
     }
 
     // Insert Projects
-    if (data.projects && data.projects.length > 0) {
-      console.log(`Inserting ${data.projects.length} projects...`)
+    if (seedData.projects.length > 0) {
+      console.log(`Inserting ${seedData.projects.length} projects...`)
 
       await db.insert(schema.projects).values(
-        data.projects.map((p: any) => ({
-          id: p.id,
-          name: p.name,
-          description: p.description,
+        seedData.projects.map((p: any) => ({
+          ...p,
           startDate: p.startDate ? new Date(p.startDate) : null,
           endDate: p.endDate ? new Date(p.endDate) : null,
-          technologies: p.technologies,
-          status: p.status,
-          team: p.team,
           createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
           updatedAt: p.updatedAt ? new Date(p.updatedAt) : new Date(),
         })),
@@ -74,20 +57,13 @@ async function seed() {
     }
 
     // Insert Todos
-    if (data.todos && data.todos.length > 0) {
-      console.log(`Inserting ${data.todos.length} todos...`)
+    if (seedData.todos.length > 0) {
+      console.log(`Inserting ${seedData.todos.length} todos...`)
 
       await db.insert(schema.todos).values(
-        data.todos.map((t: any) => ({
-          id: t.id,
-          title: t.title,
-          description: t.description,
-          status: t.status,
-          priority: t.priority,
+        seedData.todos.map((t: any) => ({
+          ...t,
           dueDate: t.dueDate ? new Date(t.dueDate) : null,
-          createdBy: t.createdBy,
-          assignedTo: t.assignedTo,
-          projectId: t.projectId,
           createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
           updatedAt: t.updatedAt ? new Date(t.updatedAt) : new Date(),
         })),
@@ -95,14 +71,14 @@ async function seed() {
     }
 
     // Insert Transactions
-    if (data.transactions && data.transactions.length > 0) {
-      console.log(`Inserting ${data.transactions.length} transactions...`)
+    if (seedData.transactions.length > 0) {
+      console.log(`Inserting ${seedData.transactions.length} transactions...`)
 
       await db.insert(schema.transactions).values(
-        data.transactions.map((t: any) => ({
+        seedData.transactions.map((t: any) => ({
           id: t.id,
-          customerName: t.customer?.name || 'Unknown',
-          customerEmail: t.customer?.email || 'unknown@example.com',
+          customerName: t.customerName || 'Unknown',
+          customerEmail: t.customerEmail || 'unknown@example.com',
           status: t.status,
           date: t.date ? new Date(t.date) : new Date(),
           amount: t.amount,
@@ -117,28 +93,19 @@ async function seed() {
     }
 
     // Insert Categories
-    if (data.categories && data.categories.length > 0) {
-      console.log(`Inserting ${data.categories.length} categories...`)
+    if (seedData.categories.length > 0) {
+      console.log(`Inserting ${seedData.categories.length} categories...`)
 
-      await db.insert(schema.categories).values(
-        data.categories.map((c: any) => ({
-          id: c.id,
-          name: c.name,
-          color: c.color,
-        })),
-      )
+      await db.insert(schema.categories).values(seedData.categories)
     }
 
     // Insert Teams
-    if (data.teams && data.teams.length > 0) {
-      console.log(`Inserting ${data.teams.length} teams...`)
+    if (seedData.teams.length > 0) {
+      console.log(`Inserting ${seedData.teams.length} teams...`)
 
       await db.insert(schema.teams).values(
-        data.teams.map((t: any) => ({
-          id: t.id,
-          name: t.name,
-          description: t.description,
-          members: t.members,
+        seedData.teams.map((t: any) => ({
+          ...t,
           createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
           updatedAt: t.updatedAt ? new Date(t.updatedAt) : new Date(),
         })),

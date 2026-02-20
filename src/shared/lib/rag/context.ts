@@ -1,5 +1,8 @@
 import fs from 'node:fs/promises'
 import path from 'node:path'
+import { desc } from 'drizzle-orm'
+import { db } from '@/shared/lib/db'
+import { todos, users, transactions, categories } from '@/shared/lib/db/schema'
 
 // ---------------------------------------------------------------------------
 // Intent Detection
@@ -331,7 +334,7 @@ async function loadAppKnowledge(): Promise<AppKnowledge | null> {
   if (cachedKnowledge) return cachedKnowledge
 
   try {
-    const knowledgePath = path.resolve(process.cwd(), 'mocks/app-knowledge.json')
+    const knowledgePath = path.resolve(process.cwd(), 'src/server/data/app-knowledge.json')
     const content = await fs.readFile(knowledgePath, 'utf-8')
     const data = JSON.parse(content)
     cachedKnowledge = data as AppKnowledge
@@ -405,156 +408,109 @@ function buildCommonAnswersContext(knowledge: AppKnowledge, intents: Intent[]): 
 }
 
 // ---------------------------------------------------------------------------
-// Dynamic Context (data from mock DB)
+// Dynamic Context (data from DB)
 // ---------------------------------------------------------------------------
 
-interface MockDb {
-  todos?: Array<{
-    id: string
-    title: string
-    description: string
-    status: string
-    priority: string
-    dueDate: string
-    createdBy: string
-    assignedTo: string
-    createdAt: string
-    updatedAt: string
-  }>
-  users?: Array<{
-    id: string
-    name: string
-    email: string
-    role: string
-    avatar: string
-    createdAt: string
-  }>
-  categories?: Array<{
-    id: string
-    name: string
-    color: string
-  }>
-  recentTransactions?: Array<{
-    id: string
-    customer: { name: string; email: string }
-    status: string
-    date: string
-    amount: number
-  }>
-  dashboardStats?: {
-    revenue: { value: number; change: number; trend: string }
-    subscriptions: { value: number; change: number; trend: string }
-    sales: { value: number; change: number; trend: string }
-    activeNow: { value: number; change: number; trend: string }
-  }
-}
-
-let cachedDb: MockDb | null = null
-
-async function loadMockDb(): Promise<MockDb | null> {
-  if (cachedDb) return cachedDb
-
-  try {
-    const mockDbPath = path.resolve(process.cwd(), 'mocks/db.json')
-    const content = await fs.readFile(mockDbPath, 'utf-8')
-    cachedDb = JSON.parse(content) as MockDb
-    return cachedDb
-  } catch {
-    return null
-  }
-}
-
-function buildDataContext(db: MockDb, intents: Intent[]): string {
+async function fetchDynamicContext(intents: Intent[]): Promise<string | null> {
   const sections: string[] = []
 
-  if (intents.includes('users') && db.users) {
-    sections.push(
-      [
-        `[Users Data — View at /dashboard/users]`,
-        `Total Users: ${db.users.length}`,
-        `Users: ${JSON.stringify(db.users.map((u) => ({ name: u.name, email: u.email, role: u.role })))}`,
-      ].join('\n'),
-    )
-  }
+  try {
+    if (intents.includes('users')) {
+      const [allUsers, totalUsers] = await Promise.all([
+        db.select().from(users).limit(10),
+        db.$count(users),
+      ])
 
-  if (
-    (intents.includes('transactions') || intents.includes('dashboard')) &&
-    db.recentTransactions
-  ) {
-    sections.push(
-      [
-        `[Transactions Data — View at /dashboard/transactions]`,
-        `Total Transactions: ${db.recentTransactions.length}`,
-        `Transactions: ${JSON.stringify(db.recentTransactions.map((t) => ({ customer: t.customer.name, status: t.status, amount: `$${t.amount}`, date: t.date })))}`,
-      ].join('\n'),
-    )
-  }
-
-  if (intents.includes('todos') && db.todos) {
-    const statusCounts: Record<string, number> = {}
-    const priorityCounts: Record<string, number> = {}
-    for (const todo of db.todos) {
-      const status = todo.status || 'unknown'
-      statusCounts[status] = (statusCounts[status] || 0) + 1
-      const priority = todo.priority || 'unknown'
-      priorityCounts[priority] = (priorityCounts[priority] || 0) + 1
+      sections.push(
+        [
+          `[Users Data — View at /dashboard/users]`,
+          `Total Users: ${totalUsers}`,
+          `Users: ${JSON.stringify(allUsers.map((u) => ({ name: u.name, email: u.email, role: u.role })))}`,
+        ].join('\n'),
+      )
     }
 
-    // Get high-priority pending tasks as "important for today"
-    const highPriorityPending = db.todos
-      .filter((t) => t.priority === 'high' && t.status === 'pending')
-      .slice(0, 10)
+    if (intents.includes('transactions') || intents.includes('dashboard')) {
+      const [recentTransactions, totalTransactions] = await Promise.all([
+        db.select().from(transactions).orderBy(desc(transactions.date)).limit(10),
+        db.$count(transactions),
+      ])
 
-    sections.push(
-      [
-        `[Tasks/Todos Data — View at /dashboard/todos]`,
-        `Total Tasks: ${db.todos.length}`,
-        `Tasks by Status: ${JSON.stringify(statusCounts)}`,
-        `Tasks by Priority: ${JSON.stringify(priorityCounts)}`,
-        highPriorityPending.length > 0
-          ? `High-Priority Pending Tasks (most important): ${JSON.stringify(highPriorityPending.map((t) => ({ id: t.id, title: t.title, priority: t.priority, dueDate: t.dueDate })))}`
-          : '',
-        `Sample Tasks: ${JSON.stringify(db.todos.slice(0, 5).map((t) => ({ id: t.id, title: t.title, status: t.status, priority: t.priority, dueDate: t.dueDate })))}`,
-      ]
-        .filter(Boolean)
-        .join('\n'),
-    )
+      sections.push(
+        [
+          `[Transactions Data — View at /dashboard/transactions]`,
+          `Total Transactions: ${totalTransactions}`,
+          `Transactions: ${JSON.stringify(recentTransactions.map((t) => ({ customer: t.customerName, status: t.status, amount: `$${t.amount}`, date: t.date.toISOString() })))}`,
+        ].join('\n'),
+      )
+    }
+
+    if (intents.includes('todos')) {
+      const allTodos = await db.select().from(todos)
+      const statusCounts: Record<string, number> = {}
+      const priorityCounts: Record<string, number> = {}
+
+      for (const todo of allTodos) {
+        const status = todo.status || 'unknown'
+        statusCounts[status] = (statusCounts[status] || 0) + 1
+        const priority = todo.priority || 'unknown'
+        priorityCounts[priority] = (priorityCounts[priority] || 0) + 1
+      }
+
+      // Get high-priority pending tasks as "important for today"
+      const highPriorityPending = allTodos
+        .filter((t) => t.priority === 'high' && t.status === 'pending')
+        .slice(0, 10)
+
+      sections.push(
+        [
+          `[Tasks/Todos Data — View at /dashboard/todos]`,
+          `Total Tasks: ${allTodos.length}`,
+          `Tasks by Status: ${JSON.stringify(statusCounts)}`,
+          `Tasks by Priority: ${JSON.stringify(priorityCounts)}`,
+          highPriorityPending.length > 0
+            ? `High-Priority Pending Tasks (most important): ${JSON.stringify(highPriorityPending.map((t) => ({ id: t.id, title: t.title, priority: t.priority, dueDate: t.dueDate?.toISOString() })))}`
+            : '',
+          `Sample Tasks: ${JSON.stringify(allTodos.slice(0, 5).map((t) => ({ id: t.id, title: t.title, status: t.status, priority: t.priority, dueDate: t.dueDate?.toISOString() })))}`,
+        ]
+          .filter(Boolean)
+          .join('\n'),
+      )
+    }
+
+    if (intents.includes('categories')) {
+      const [allCategories, totalCategories] = await Promise.all([
+        db.select().from(categories),
+        db.$count(categories),
+      ])
+
+      sections.push(
+        [
+          `[Categories Data — View at /dashboard/categories]`,
+          `Total Categories: ${totalCategories}`,
+          `Categories: ${JSON.stringify(allCategories.map((c) => ({ name: c.name, color: c.color })))}`,
+        ].join('\n'),
+      )
+    }
+
+    // Dashboard stats skipped for now as they require complex aggregation
+    // If needed, we can add simple counts here
+
+    if (intents.includes('status')) {
+      sections.push(
+        [
+          `[System Status]`,
+          `Time: ${new Date().toISOString()}`,
+          `Environment: ${process.env.NODE_ENV}`,
+        ].join('\n'),
+      )
+    }
+
+    return sections.length > 0 ? sections.join('\n\n') : null
+  } catch (error) {
+    console.error('Error fetching dynamic context from DB:', error)
+    return null
   }
-
-  if (intents.includes('categories') && db.categories) {
-    sections.push(
-      [
-        `[Categories Data — View at /dashboard/categories]`,
-        `Total Categories: ${db.categories.length}`,
-        `Categories: ${JSON.stringify(db.categories.map((c) => ({ name: c.name, color: c.color })))}`,
-      ].join('\n'),
-    )
-  }
-
-  if (intents.includes('dashboard') && db.dashboardStats) {
-    const s = db.dashboardStats
-    sections.push(
-      [
-        `[Dashboard Stats — View at /dashboard]`,
-        `Revenue: $${s.revenue.value.toLocaleString()} (${s.revenue.trend === 'up' ? '+' : '-'}${s.revenue.change}%)`,
-        `Subscriptions: ${s.subscriptions.value.toLocaleString()} (${s.subscriptions.trend === 'up' ? '+' : '-'}${s.subscriptions.change}%)`,
-        `Sales: ${s.sales.value.toLocaleString()} (${s.sales.trend === 'up' ? '+' : '-'}${s.sales.change}%)`,
-        `Active Now: ${s.activeNow.value}`,
-      ].join('\n'),
-    )
-  }
-
-  if (intents.includes('status')) {
-    sections.push(
-      [
-        `[System Status]`,
-        `Time: ${new Date().toISOString()}`,
-        `Environment: ${process.env.NODE_ENV}`,
-      ].join('\n'),
-    )
-  }
-
-  return sections.join('\n\n')
 }
 
 // ---------------------------------------------------------------------------
@@ -697,13 +653,10 @@ export async function injectDynamicContext(query: string, locale: string = 'en')
       }
     }
 
-    // 2. Inject dynamic data from mock DB for data-related intents
+    // 2. Inject dynamic data from DB for data-related intents
     if (intents.length > 0) {
-      const db = await loadMockDb()
-      if (db) {
-        const dataCtx = buildDataContext(db, intents)
-        if (dataCtx) contextParts.push(dataCtx)
-      }
+      const dataCtx = await fetchDynamicContext(intents)
+      if (dataCtx) contextParts.push(dataCtx)
     }
 
     // 3. Inject action instructions when user wants to perform a CRUD operation
@@ -724,9 +677,8 @@ export {
   detectIntent,
   detectActionIntent,
   loadAppKnowledge,
-  loadMockDb,
-  buildDataContext,
+  fetchDynamicContext,
   buildAppNavigationContext,
   buildActionInstructions,
 }
-export type { Intent, ActionIntent, ActionType, ActionEntity, AppKnowledge, MockDb }
+export type { Intent, ActionIntent, ActionType, ActionEntity, AppKnowledge }

@@ -1,133 +1,55 @@
 'use client'
 
-import {
-  AlertTriangle,
-  Check,
-  CreditCard,
-  ListTodo,
-  Loader2,
-  Lock,
-  Pencil,
-  Tag,
-  Trash2,
-  UserPlus,
-  X,
-} from 'lucide-react'
+import { ListTodo } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui'
-import { categoriesApi } from '@/features/Categories/api/categories.api'
-import { todosApi } from '@/features/Todos/api/todos.api'
+import {
+  createCategoryFn,
+  deleteCategoryFn,
+  updateCategoryFn,
+  type CategoryInput,
+} from '@/features/Categories/api/categories.fn'
+import {
+  createTodoFn,
+  deleteTodoFn,
+  getTodoByIdFn,
+  updateTodoFn,
+  type CreateTodoInput,
+  type UpdateTodoInput,
+} from '@/features/Todos/api/todos.fn'
 import { canModifyTodo } from '@/features/Todos/model/permissions'
-import { transactionsApi } from '@/features/Transactions/api/transactions.api'
-import { usersApi } from '@/features/Users/api/users.api'
-import { useSyncAuthUser } from '@/features/Users/hooks/useSyncAuthUser'
+import {
+  createTransactionFn,
+  deleteTransactionFn,
+  updateTransactionFn,
+  type TransactionInput,
+} from '@/features/Transactions/api/transactions.fn'
+import {
+  createUserFn,
+  deleteUserFn,
+  updateUserFn,
+  type UserInput,
+} from '@/features/Users/api/users.fn'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/utils/index'
+import { ActionCardContent } from './action-card/ActionCardContent'
+import { ActionCardFooter } from './action-card/ActionCardFooter'
+import { ActionCardHeader } from './action-card/ActionCardHeader'
+import {
+  DELETE_VISUAL,
+  ENTITY_CONFIGS,
+  ENTITY_ICONS,
+  UPDATE_VISUAL,
+  getActionVerb,
+  getEntityKey,
+  hashAction,
+  humanizeField,
+  humanizeValue,
+  parseActionPayload,
+  type CreateTodoAction,
+} from './ActionConfirmationCard.utils'
 import { useActionStates } from './useActionStates'
-
-// ---------------------------------------------------------------------------
-// Types
-// ---------------------------------------------------------------------------
-
-interface CreateTodoAction {
-  type: 'create_todo'
-  data: {
-    title: string
-    description: string
-    status: 'pending' | 'in_progress' | 'completed'
-    priority: 'low' | 'medium' | 'high'
-    dueDate: string
-    assignedTo?: string
-  }
-}
-
-interface UpdateTodoAction {
-  type: 'update_todo'
-  id: string
-  data: Partial<CreateTodoAction['data']>
-}
-
-interface DeleteTodoAction {
-  type: 'delete_todo'
-  id: string
-}
-
-interface CreateUserAction {
-  type: 'create_user'
-  data: {
-    name: string
-    email: string
-    role: 'admin' | 'user'
-    avatar: string
-    createdAt?: string
-  }
-}
-
-interface UpdateUserAction {
-  type: 'update_user'
-  id: string
-  data: Partial<CreateUserAction['data']>
-}
-
-interface DeleteUserAction {
-  type: 'delete_user'
-  id: string
-}
-
-interface CreateTransactionAction {
-  type: 'create_transaction'
-  data: {
-    customer: { name: string; email: string }
-    status: 'Approved' | 'Pending' | 'Rejected'
-    date: string
-    amount: number
-  }
-}
-
-interface UpdateTransactionAction {
-  type: 'update_transaction'
-  id: string
-  data: Partial<CreateTransactionAction['data']>
-}
-
-interface DeleteTransactionAction {
-  type: 'delete_transaction'
-  id: string
-}
-
-interface CreateCategoryAction {
-  type: 'create_category'
-  data: {
-    name: string
-    color: string
-  }
-}
-
-interface UpdateCategoryAction {
-  type: 'update_category'
-  id: string
-  data: Partial<CreateCategoryAction['data']>
-}
-
-interface DeleteCategoryAction {
-  type: 'delete_category'
-  id: string
-}
-
-type ActionPayload =
-  | CreateTodoAction
-  | UpdateTodoAction
-  | DeleteTodoAction
-  | CreateUserAction
-  | UpdateUserAction
-  | DeleteUserAction
-  | CreateTransactionAction
-  | UpdateTransactionAction
-  | DeleteTransactionAction
-  | CreateCategoryAction
-  | UpdateCategoryAction
-  | DeleteCategoryAction
 
 // ---------------------------------------------------------------------------
 // Props
@@ -138,314 +60,12 @@ interface ActionConfirmationCardProps {
 }
 
 // ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
-type ActionVerb = 'create' | 'update' | 'delete'
-
-function getActionVerb(type: string): ActionVerb {
-  if (type.startsWith('update_')) return 'update'
-  if (type.startsWith('delete_')) return 'delete'
-  return 'create'
-}
-
-function getEntityKey(type: string): string {
-  return type.replace(/^(create_|update_|delete_)/, '')
-}
-
-function parseActionPayload(json: string): ActionPayload | null {
-  try {
-    const parsed = JSON.parse(json)
-    if (!parsed || typeof parsed.type !== 'string') return null
-
-    const verb = getActionVerb(parsed.type)
-
-    if (verb === 'create' && parsed.data) {
-      return parsed as ActionPayload
-    }
-    if (verb === 'update' && parsed.id && parsed.data) {
-      return parsed as ActionPayload
-    }
-    if (verb === 'delete' && parsed.id) {
-      return parsed as ActionPayload
-    }
-    return null
-  } catch {
-    return null
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Human-readable labels
-// ---------------------------------------------------------------------------
-
-const STATUS_LABELS: Record<string, Record<string, string>> = {
-  en: { pending: 'Pending', in_progress: 'In Progress', completed: 'Completed' },
-  es: { pending: 'Pendiente', in_progress: 'En Progreso', completed: 'Completado' },
-}
-
-const PRIORITY_LABELS: Record<string, Record<string, string>> = {
-  en: { low: 'Low', medium: 'Medium', high: 'High' },
-  es: { low: 'Baja', medium: 'Media', high: 'Alta' },
-}
-
-const FIELD_LABELS: Record<string, Record<string, string>> = {
-  en: {
-    title: 'Title',
-    description: 'Description',
-    status: 'Status',
-    priority: 'Priority',
-    dueDate: 'Due Date',
-    assignedTo: 'Assigned To',
-    name: 'Name',
-    email: 'Email',
-    role: 'Role',
-    color: 'Color',
-    amount: 'Amount',
-    date: 'Date',
-    customer: 'Customer',
-  },
-  es: {
-    title: 'Título',
-    description: 'Descripción',
-    status: 'Estado',
-    priority: 'Prioridad',
-    dueDate: 'Fecha límite',
-    assignedTo: 'Asignado a',
-    name: 'Nombre',
-    email: 'Correo',
-    role: 'Rol',
-    color: 'Color',
-    amount: 'Monto',
-    date: 'Fecha',
-    customer: 'Cliente',
-  },
-}
-
-function humanizeValue(key: string, value: unknown, lang: string): string {
-  const l = lang.startsWith('es') ? 'es' : 'en'
-  if (key === 'status' && typeof value === 'string' && STATUS_LABELS[l][value]) {
-    return STATUS_LABELS[l][value]
-  }
-  if (key === 'priority' && typeof value === 'string' && PRIORITY_LABELS[l][value]) {
-    return PRIORITY_LABELS[l][value]
-  }
-  if (key === 'dueDate' && typeof value === 'string') {
-    try {
-      return new Date(value).toLocaleDateString(l === 'es' ? 'es-ES' : 'en-US', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-      })
-    } catch {
-      return String(value)
-    }
-  }
-  if (key === 'amount' && typeof value === 'number') {
-    return `$${value.toLocaleString()}`
-  }
-  if (key === 'customer' && typeof value === 'object' && value !== null) {
-    return (value as { name: string }).name
-  }
-  if (typeof value === 'object') return JSON.stringify(value)
-  return String(value)
-}
-
-function humanizeField(key: string, lang: string): string {
-  const l = lang.startsWith('es') ? 'es' : 'en'
-  return FIELD_LABELS[l][key] || key
-}
-
-// ---------------------------------------------------------------------------
-// Visual Configuration
-// ---------------------------------------------------------------------------
-
-const ENTITY_ICONS = {
-  todo: ListTodo,
-  user: UserPlus,
-  transaction: CreditCard,
-  category: Tag,
-} as const
-
-interface EntityConfig {
-  labels: Record<ActionVerb, { en: string; es: string }>
-  color: string
-  bgColor: string
-  borderColor: string
-}
-
-const ENTITY_CONFIGS: Record<string, EntityConfig> = {
-  todo: {
-    labels: {
-      create: { en: 'Create Task', es: 'Crear Tarea' },
-      update: { en: 'Update Task', es: 'Actualizar Tarea' },
-      delete: { en: 'Delete Task', es: 'Eliminar Tarea' },
-    },
-    color: 'from-blue-500 to-indigo-600',
-    bgColor: 'bg-blue-50 dark:bg-blue-950/30',
-    borderColor: 'border-blue-200 dark:border-blue-800',
-  },
-  user: {
-    labels: {
-      create: { en: 'Create User', es: 'Crear Usuario' },
-      update: { en: 'Update User', es: 'Actualizar Usuario' },
-      delete: { en: 'Delete User', es: 'Eliminar Usuario' },
-    },
-    color: 'from-emerald-500 to-green-600',
-    bgColor: 'bg-emerald-50 dark:bg-emerald-950/30',
-    borderColor: 'border-emerald-200 dark:border-emerald-800',
-  },
-  transaction: {
-    labels: {
-      create: { en: 'Create Transaction', es: 'Crear Transacción' },
-      update: { en: 'Update Transaction', es: 'Actualizar Transacción' },
-      delete: { en: 'Delete Transaction', es: 'Eliminar Transacción' },
-    },
-    color: 'from-amber-500 to-orange-600',
-    bgColor: 'bg-amber-50 dark:bg-amber-950/30',
-    borderColor: 'border-amber-200 dark:border-amber-800',
-  },
-  category: {
-    labels: {
-      create: { en: 'Create Category', es: 'Crear Categoría' },
-      update: { en: 'Update Category', es: 'Actualizar Categoría' },
-      delete: { en: 'Delete Category', es: 'Eliminar Categoría' },
-    },
-    color: 'from-purple-500 to-violet-600',
-    bgColor: 'bg-purple-50 dark:bg-purple-950/30',
-    borderColor: 'border-purple-200 dark:border-purple-800',
-  },
-} as const
-
-const DELETE_VISUAL = {
-  color: 'from-red-500 to-rose-600',
-  bgColor: 'bg-red-50 dark:bg-red-950/30',
-  borderColor: 'border-red-200 dark:border-red-800',
-}
-
-const UPDATE_VISUAL = {
-  color: 'from-cyan-500 to-teal-600',
-  bgColor: 'bg-cyan-50 dark:bg-cyan-950/30',
-  borderColor: 'border-cyan-200 dark:border-cyan-800',
-}
-
-// ---------------------------------------------------------------------------
-// Executor
-// ---------------------------------------------------------------------------
-
-async function executeAction(
-  payload: ActionPayload,
-): Promise<{ success: boolean; message: string }> {
-  const verb = getActionVerb(payload.type)
-  const entity = getEntityKey(payload.type)
-
-  // CREATE
-  if (verb === 'create' && 'data' in payload) {
-    switch (entity) {
-      case 'todo': {
-        const result = await todosApi.create(
-          (payload as CreateTodoAction).data as Parameters<typeof todosApi.create>[0],
-        )
-        return { success: true, message: `Task "${result.title}" created with ID ${result.id}` }
-      }
-      case 'user': {
-        const userData = (payload as CreateUserAction).data
-        const result = await usersApi.create({
-          ...userData,
-          createdAt: userData.createdAt || new Date().toISOString(),
-        })
-        return { success: true, message: `User "${result.name}" created with ID ${result.id}` }
-      }
-      case 'transaction': {
-        const result = await transactionsApi.create({
-          ...(payload as CreateTransactionAction).data,
-          projectId: 'default',
-          userId: 'default',
-        })
-        return {
-          success: true,
-          message: `Transaction for "${result.customer.name}" created with ID ${result.id}`,
-        }
-      }
-      case 'category': {
-        const result = await categoriesApi.create((payload as CreateCategoryAction).data)
-        return { success: true, message: `Category "${result.name}" created with ID ${result.id}` }
-      }
-    }
-  }
-
-  // UPDATE
-  if (verb === 'update' && 'id' in payload && 'data' in payload) {
-    const { id } = payload as { id: string; data: Record<string, unknown> }
-    switch (entity) {
-      case 'todo': {
-        const result = await todosApi.update(id, (payload as UpdateTodoAction).data)
-        return { success: true, message: `Task "${result.title}" updated (ID: ${result.id})` }
-      }
-      case 'user': {
-        const result = await usersApi.update(id, (payload as UpdateUserAction).data)
-        return { success: true, message: `User "${result.name}" updated (ID: ${result.id})` }
-      }
-      case 'transaction': {
-        const result = await transactionsApi.update(id, (payload as UpdateTransactionAction).data)
-        return { success: true, message: `Transaction updated (ID: ${result.id})` }
-      }
-      case 'category': {
-        const result = await categoriesApi.update(id, (payload as UpdateCategoryAction).data)
-        return { success: true, message: `Category "${result.name}" updated (ID: ${result.id})` }
-      }
-    }
-  }
-
-  // DELETE
-  if (verb === 'delete' && 'id' in payload) {
-    const { id } = payload as { id: string }
-    switch (entity) {
-      case 'todo': {
-        await todosApi.delete(id)
-        return { success: true, message: `Task deleted (ID: ${id})` }
-      }
-      case 'user': {
-        await usersApi.delete(id)
-        return { success: true, message: `User deleted (ID: ${id})` }
-      }
-      case 'transaction': {
-        await transactionsApi.delete(id)
-        return { success: true, message: `Transaction deleted (ID: ${id})` }
-      }
-      case 'category': {
-        await categoriesApi.delete(id)
-        return { success: true, message: `Category deleted (ID: ${id})` }
-      }
-    }
-  }
-
-  return { success: false, message: 'Unknown action type' }
-}
-
-// ---------------------------------------------------------------------------
-// Component
-// ---------------------------------------------------------------------------
-
-// ---------------------------------------------------------------------------
-// Action key hashing
-// ---------------------------------------------------------------------------
-
-function hashAction(json: string): string {
-  let h = 0
-  for (let i = 0; i < json.length; i++) {
-    h = (Math.imul(31, h) + json.charCodeAt(i)) | 0
-  }
-  return String(h)
-}
-
-// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
 export function ActionConfirmationCard({ actionJson }: ActionConfirmationCardProps) {
   const { i18n } = useTranslation()
-  const { syncedUserId, userRole } = useSyncAuthUser()
+  const { syncedUserId, userRole } = useCurrentUser()
   const { states: actionStates, saveState: saveActionState } = useActionStates()
 
   const actionKey = React.useMemo(() => hashAction(actionJson), [actionJson])
@@ -486,8 +106,8 @@ export function ActionConfirmationCard({ actionJson }: ActionConfirmationCardPro
     // Permission check for todo update/delete
     if (entity === 'todo' && (verb === 'update' || verb === 'delete') && 'id' in payload) {
       try {
-        const todo = await todosApi.getById((payload as { id: string }).id)
-        if (!canModifyTodo(todo, syncedUserId, userRole)) {
+        const todo = await getTodoByIdFn({ data: (payload as { id: string }).id })
+        if (todo && !canModifyTodo(todo, syncedUserId, userRole)) {
           const deniedMsg = isSpanish
             ? 'No tienes permiso. Solo puedes modificar tareas que creaste o que te fueron asignadas.'
             : 'Permission denied. You can only modify tasks you created or are assigned to.'
@@ -502,37 +122,137 @@ export function ActionConfirmationCard({ actionJson }: ActionConfirmationCardPro
           return
         }
       } catch {
-        // If we can't fetch the todo, proceed — the API will handle errors
+        // Continue if todo not found (might be already deleted) or other error
       }
     }
 
     setStatus('loading')
     try {
-      const result = await executeAction(payload)
-      if (result.success) {
+      const actionResult = await performAction()
+      if (actionResult.success) {
         setStatus('success')
-        setResultMessage(result.message)
-        saveActionState(actionKey, { status: 'success', message: result.message })
-        toast.success(isSpanish ? '¡Acción completada!' : 'Action completed!', {
-          description: result.message,
+        setResultMessage(
+          actionResult.message || (isSpanish ? 'Acción completada' : 'Action completed'),
+        )
+        saveActionState(actionKey, {
+          status: 'success',
+          message: actionResult.message || (isSpanish ? 'Acción completada' : 'Action completed'),
+        })
+        toast.success(isSpanish ? 'Éxito' : 'Success', {
+          description:
+            actionResult.message || (isSpanish ? 'Acción completada' : 'Action completed'),
         })
       } else {
         setStatus('error')
-        setResultMessage(result.message)
-        saveActionState(actionKey, { status: 'error', message: result.message })
-        toast.error(isSpanish ? 'Error al ejecutar' : 'Execution error', {
-          description: result.message,
+        setResultMessage(
+          actionResult.message || (isSpanish ? 'Error al ejecutar' : 'Error executing action'),
+        )
+        saveActionState(actionKey, {
+          status: 'error',
+          message:
+            actionResult.message || (isSpanish ? 'Error al ejecutar' : 'Error executing action'),
+        })
+        toast.error('Error', {
+          description:
+            actionResult.message || (isSpanish ? 'Error al ejecutar' : 'Error executing action'),
         })
       }
-    } catch (err) {
-      const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+    } catch {
       setStatus('error')
-      setResultMessage(errorMsg)
-      saveActionState(actionKey, { status: 'error', message: errorMsg })
-      toast.error(isSpanish ? 'Error al ejecutar' : 'Execution error', {
-        description: errorMsg,
+      setResultMessage(isSpanish ? 'Error inesperado' : 'Unexpected error')
+      saveActionState(actionKey, {
+        status: 'error',
+        message: isSpanish ? 'Error inesperado' : 'Unexpected error',
+      })
+      toast.error('Error', {
+        description: isSpanish ? 'Error inesperado' : 'Unexpected error',
       })
     }
+  }
+
+  const performAction = async (): Promise<{ success: boolean; message?: string }> => {
+    // CREATE
+    if (verb === 'create' && 'data' in payload) {
+      const { data } = payload as { data: unknown }
+      switch (entity) {
+        case 'todo': {
+          const todoPayload = data as CreateTodoAction['data']
+          const todoData = {
+            ...todoPayload,
+            createdBy: syncedUserId || 'system',
+            projectId: todoPayload.projectId || '',
+          } as CreateTodoInput
+
+          const newTodo = await createTodoFn({
+            data: todoData,
+          })
+          return { success: true, message: `Task created: ${newTodo.title}` }
+        }
+        case 'user': {
+          const userData = data as UserInput
+          const newUser = await createUserFn({ data: userData })
+          return { success: true, message: `User created: ${newUser.name}` }
+        }
+        case 'transaction': {
+          const txData = data as TransactionInput
+          const newTx = await createTransactionFn({ data: txData })
+          return { success: true, message: `Transaction created for ${newTx.customer.name}` }
+        }
+        case 'category': {
+          const catData = data as CategoryInput
+          const newCat = await createCategoryFn({ data: catData })
+          return { success: true, message: `Category created: ${newCat.name}` }
+        }
+      }
+    }
+
+    // UPDATE
+    if (verb === 'update' && 'id' in payload && 'data' in payload) {
+      const { id, data } = payload as { id: string; data: unknown }
+      switch (entity) {
+        case 'todo': {
+          await updateTodoFn({ data: { id, data: data as UpdateTodoInput } })
+          return { success: true, message: `Task updated (ID: ${id})` }
+        }
+        case 'user': {
+          await updateUserFn({ data: { id, data: data as Partial<UserInput> } })
+          return { success: true, message: `User updated (ID: ${id})` }
+        }
+        case 'transaction': {
+          await updateTransactionFn({ data: { id, data: data as Partial<TransactionInput> } })
+          return { success: true, message: `Transaction updated (ID: ${id})` }
+        }
+        case 'category': {
+          await updateCategoryFn({ data: { id, data: data as Partial<CategoryInput> } })
+          return { success: true, message: `Category updated (ID: ${id})` }
+        }
+      }
+    }
+
+    // DELETE
+    if (verb === 'delete' && 'id' in payload) {
+      const { id } = payload as { id: string }
+      switch (entity) {
+        case 'todo': {
+          await deleteTodoFn({ data: id })
+          return { success: true, message: `Task deleted (ID: ${id})` }
+        }
+        case 'user': {
+          await deleteUserFn({ data: id })
+          return { success: true, message: `User deleted (ID: ${id})` }
+        }
+        case 'transaction': {
+          await deleteTransactionFn({ data: id })
+          return { success: true, message: `Transaction deleted (ID: ${id})` }
+        }
+        case 'category': {
+          await deleteCategoryFn({ data: id })
+          return { success: true, message: `Category deleted (ID: ${id})` }
+        }
+      }
+    }
+
+    return { success: false, message: 'Unknown action type' }
   }
 
   // Build data entries for preview (human-readable)
@@ -579,97 +299,33 @@ export function ActionConfirmationCard({ actionJson }: ActionConfirmationCardPro
       )}
     >
       {/* Header */}
-      <div
-        className={cn(
-          'flex items-center gap-2 px-4 py-2.5 text-white bg-gradient-to-r',
-          visualConfig.color,
-        )}
-      >
-        {verb === 'delete' ? (
-          <Trash2 size={16} />
-        ) : verb === 'update' ? (
-          <Pencil size={16} />
-        ) : (
-          <EntityIcon size={16} />
-        )}
-        <span className="text-xs font-bold uppercase tracking-wider">{label}</span>
-      </div>
+      <ActionCardHeader
+        verb={verb}
+        label={label}
+        visualConfig={visualConfig}
+        EntityIcon={EntityIcon}
+      />
 
-      {/* Data Preview */}
-      {dataEntries.length > 0 && (
-        <div className={cn('px-4 py-3 space-y-1.5', visualConfig.bgColor)}>
-          {dataEntries.map(([key, value]) => (
-            <div key={key} className="flex items-start gap-2 text-xs">
-              <span className="font-semibold text-muted-foreground min-w-[90px] capitalize">
-                {key}:
-              </span>
-              <span className="text-foreground">{value}</span>
-            </div>
-          ))}
-        </div>
-      )}
+      {/* Content */}
+      <ActionCardContent
+        dataEntries={dataEntries}
+        visualConfig={visualConfig}
+        warningText={warningText}
+        status={status}
+      />
 
-      {/* Warning for delete */}
-      {warningText && status === 'idle' && (
-        <div className="px-4 py-2 bg-red-50 dark:bg-red-950/20 border-t border-red-200/30 flex items-center gap-2">
-          <AlertTriangle size={14} className="text-red-500" />
-          <span className="text-[11px] text-red-600 dark:text-red-400 font-medium">
-            {warningText}
-          </span>
-        </div>
-      )}
-
-      {/* Action Footer */}
-      <div className="px-4 py-2.5 border-t border-border/30 flex items-center gap-2 bg-background/50">
-        {status === 'idle' && (
-          <>
-            <Button
-              size="sm"
-              onClick={handleConfirm}
-              className={cn(
-                'gap-1.5 text-xs font-semibold bg-gradient-to-r text-white',
-                visualConfig.color,
-              )}
-            >
-              {verb === 'delete' ? <Trash2 size={14} /> : <Check size={14} />}
-              {confirmText}
-            </Button>
-            <span className="text-[10px] text-muted-foreground">
-              {isSpanish ? 'Haz clic para ejecutar esta acción' : 'Click to execute this action'}
-            </span>
-          </>
-        )}
-
-        {status === 'loading' && (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Loader2 size={14} className="animate-spin" />
-            {isSpanish ? 'Ejecutando...' : 'Executing...'}
-          </div>
-        )}
-
-        {status === 'success' && (
-          <div className="flex items-center gap-2 text-xs text-green-600 dark:text-green-400">
-            <Check size={14} />
-            <span className="font-medium">{resultMessage}</span>
-          </div>
-        )}
-
-        {status === 'error' && (
-          <div className="flex items-center gap-2 text-xs text-red-600 dark:text-red-400">
-            <X size={14} />
-            <span className="font-medium">{resultMessage}</span>
-          </div>
-        )}
-
-        {status === 'denied' && (
-          <div className="flex items-center gap-2 text-xs text-amber-600 dark:text-amber-400">
-            <Lock size={14} />
-            <span className="font-medium">{resultMessage}</span>
-          </div>
-        )}
-      </div>
+      {/* Footer */}
+      <ActionCardFooter
+        status={status}
+        verb={verb}
+        visualConfig={visualConfig}
+        onConfirm={handleConfirm}
+        onCancel={() => setStatus('denied')}
+        resultMessage={resultMessage}
+        confirmText={confirmText}
+        cancelText={isSpanish ? 'Cancelar' : 'Cancel'}
+        isSpanish={isSpanish}
+      />
     </div>
   )
 }
-
-export type { ActionPayload }

@@ -1,14 +1,46 @@
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, vi, beforeEach } from 'vitest'
 import {
   injectDynamicContext,
   detectIntent,
   detectActionIntent,
   loadAppKnowledge,
   buildAppNavigationContext,
-  buildDataContext,
   buildActionInstructions,
 } from '@/shared/lib/rag/context'
-import type { MockDb } from '@/shared/lib/rag/context'
+
+vi.mock('@/shared/lib/db', () => {
+  const mockSelect = {
+    from: vi.fn().mockReturnThis(),
+    orderBy: vi.fn().mockReturnThis(),
+    limit: vi.fn().mockReturnThis(),
+    where: vi.fn().mockReturnThis(),
+    then: vi.fn((resolve) => resolve([])),
+  }
+
+  const mockDb = {
+    select: vi.fn(() => mockSelect),
+    $count: vi.fn().mockResolvedValue(0),
+  }
+
+  return {
+    db: mockDb,
+  }
+})
+
+vi.mock('@/shared/lib/db/schema', () => ({
+  users: { name: 'users' },
+  transactions: { date: 'date' },
+  todos: { status: 'status', priority: 'priority' },
+  categories: { name: 'categories' },
+}))
+
+vi.mock('drizzle-orm', () => ({
+  desc: vi.fn(),
+}))
+
+beforeEach(() => {
+  vi.clearAllMocks()
+})
 
 // ---------------------------------------------------------------------------
 // Intent Detection Tests
@@ -166,8 +198,8 @@ describe('injectDynamicContext', () => {
 
   it('should include dashboard stats when queried', async () => {
     const context = await injectDynamicContext('Show revenue and sales', 'en')
-    expect(context).toContain('Revenue:')
-    expect(context).toContain('Sales:')
+    expect(context).toContain('Revenue')
+    expect(context).toContain('Sales')
     expect(context).toContain('/dashboard')
   })
 
@@ -297,115 +329,6 @@ describe('buildAppNavigationContext', () => {
     expect(context).toContain('Todos')
     expect(context).toContain('Users')
     expect(context).toContain('Transactions')
-  })
-})
-
-// ---------------------------------------------------------------------------
-// Data Context Builder Tests
-// ---------------------------------------------------------------------------
-
-describe('buildDataContext', () => {
-  const mockDb: MockDb = {
-    todos: [
-      {
-        id: '1',
-        title: 'Test Task',
-        description: 'desc',
-        status: 'pending',
-        priority: 'high',
-        dueDate: '2026-01-01',
-        createdBy: 'user_1',
-        assignedTo: 'user_1',
-        createdAt: '2026-01-01',
-        updatedAt: '2026-01-01',
-      },
-      {
-        id: '2',
-        title: 'Done Task',
-        description: 'done',
-        status: 'completed',
-        priority: 'low',
-        dueDate: '2026-01-02',
-        createdBy: 'user_1',
-        assignedTo: 'user_2',
-        createdAt: '2026-01-02',
-        updatedAt: '2026-01-02',
-      },
-    ],
-    users: [
-      {
-        id: '1',
-        name: 'Admin',
-        email: 'admin@test.com',
-        role: 'admin',
-        avatar: '',
-        createdAt: '2026-01-01T00:00:00.000Z',
-      },
-    ],
-    categories: [{ id: '1', name: 'Dev', color: '#000' }],
-    recentTransactions: [
-      {
-        id: '1',
-        customer: { name: 'John', email: 'john@test.com' },
-        status: 'Approved',
-        date: '2023-01-01',
-        amount: 100,
-      },
-    ],
-    dashboardStats: {
-      revenue: { value: 45000, change: 20, trend: 'up' },
-      subscriptions: { value: 2350, change: 180, trend: 'up' },
-      sales: { value: 12000, change: 19, trend: 'up' },
-      activeNow: { value: 573, change: 201, trend: 'up' },
-    },
-  }
-
-  it('should include todo data with status counts and URL', () => {
-    const context = buildDataContext(mockDb, ['todos'])
-    expect(context).toContain('/dashboard/todos')
-    expect(context).toContain('Total Tasks: 2')
-    expect(context).toContain('"pending":1')
-    expect(context).toContain('"completed":1')
-  })
-
-  it('should include high-priority pending tasks', () => {
-    const context = buildDataContext(mockDb, ['todos'])
-    expect(context).toContain('High-Priority Pending Tasks')
-    expect(context).toContain('Test Task')
-  })
-
-  it('should include user data with URL', () => {
-    const context = buildDataContext(mockDb, ['users'])
-    expect(context).toContain('/dashboard/users')
-    expect(context).toContain('Total Users: 1')
-    expect(context).toContain('Admin')
-  })
-
-  it('should include transaction data with URL', () => {
-    const context = buildDataContext(mockDb, ['transactions'])
-    expect(context).toContain('/dashboard/transactions')
-    expect(context).toContain('Total Transactions: 1')
-    expect(context).toContain('John')
-  })
-
-  it('should include dashboard stats with URL', () => {
-    const context = buildDataContext(mockDb, ['dashboard'])
-    expect(context).toContain('/dashboard')
-    expect(context).toContain('Revenue:')
-    expect(context).toContain('Sales:')
-  })
-
-  it('should include category data with URL', () => {
-    const context = buildDataContext(mockDb, ['categories'])
-    expect(context).toContain('/dashboard/categories')
-    expect(context).toContain('Total Categories: 1')
-  })
-
-  it('should handle multiple intents', () => {
-    const context = buildDataContext(mockDb, ['todos', 'users', 'transactions'])
-    expect(context).toContain('/dashboard/todos')
-    expect(context).toContain('/dashboard/users')
-    expect(context).toContain('/dashboard/transactions')
   })
 })
 

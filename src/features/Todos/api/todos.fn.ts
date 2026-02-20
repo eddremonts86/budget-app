@@ -1,13 +1,13 @@
-// @ts-nocheck
 import { createServerFn } from '@tanstack/react-start'
-import { eq, desc, and } from 'drizzle-orm'
+import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
-import { requireAuth } from '@/shared/lib/auth/server'
+// import { requireAuth } from '@/shared/lib/auth/server'
 import { db } from '@/shared/lib/db'
 import { todos } from '@/shared/lib/db/schema'
 import { syncRagDocument, deleteRagDocument } from '@/shared/lib/rag/sync'
+import type { Todo } from '../model/types'
 
-const todoSchema = z.object({
+export const todoSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
   status: z.enum(['pending', 'in_progress', 'completed']),
@@ -17,39 +17,44 @@ const todoSchema = z.object({
   assignedTo: z.string().optional(),
 })
 
-export const getTodosFn = createServerFn({ method: 'GET' })
-  .validator((d: { pageParam?: number; limit?: number } = {}) => d)
-  .handler(async ({ data }) => {
-    // await requireAuth() // Uncomment when auth is ready
-    const page = data.pageParam || 1
-    const limit = data.limit || 10
-    const offset = (page - 1) * limit
+export type CreateTodoInput = z.infer<typeof todoSchema>
+export type UpdateTodoInput = Partial<CreateTodoInput>
 
-    const [items, total] = await Promise.all([
-      db.select().from(todos).limit(limit).offset(offset).orderBy(desc(todos.createdAt)),
-      db.$count(todos),
-    ])
+export const getTodosFn = createServerFn({ method: 'GET' }).handler(async ({ data }) => {
+  // await requireAuth() // Uncomment when auth is ready
+  const { pageParam, limit: limitParam } =
+    (data as unknown as { pageParam?: number; limit?: number }) || {}
+  const page = pageParam || 1
+  const limit = limitParam || 10
+  const offset = (page - 1) * limit
 
-    const totalPages = Math.ceil(total / limit)
-    const nextPage = page < totalPages ? page + 1 : undefined
+  const [items, total] = await Promise.all([
+    db.select().from(todos).limit(limit).offset(offset).orderBy(desc(todos.createdAt)),
+    db.$count(todos),
+  ])
 
-    return {
-      data: items.map((item) => ({
-        ...item,
-        dueDate: item.dueDate ? item.dueDate.toISOString() : '',
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-      })),
-      nextPage,
-      totalCount: total,
-    }
-  })
+  const totalPages = Math.ceil(total / limit)
+  const nextPage = page < totalPages ? page + 1 : undefined
 
-export const getTodoByIdFn = createServerFn({ method: 'GET' })
-  .validator((id: string) => id)
-  .handler(async ({ data: id }) => {
+  return {
+    data: items.map((item) => ({
+      ...item,
+      dueDate: item.dueDate ? item.dueDate.toISOString() : '',
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    })),
+    nextPage,
+    totalCount: total,
+  }
+})
+
+export const getTodoByIdFn = createServerFn({ method: 'GET' }).handler(
+  async ({ data: id }: { data: unknown }) => {
     // await requireAuth()
-    const result = await db.select().from(todos).where(eq(todos.id, id))
+    const result = await db
+      .select()
+      .from(todos)
+      .where(eq(todos.id, id as string))
     if (!result.length) return null
     const item = result[0]
     return {
@@ -58,24 +63,47 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
     }
-  })
+  },
+) as unknown as (opts: { data: string }) => Promise<Todo | null>
 
-export const createTodoFn = createServerFn({ method: 'POST' })
-  .validator(todoSchema)
-  .handler(async ({ data }) => {
+export const getTodosByProjectIdFn = createServerFn({ method: 'GET' }).handler(
+  async ({ data: projectId }: { data: unknown }) => {
+    // await requireAuth()
+    const result = await db
+      .select()
+      .from(todos)
+      .where(eq(todos.projectId, projectId as string))
+    return result.map((item) => ({
+      ...item,
+      dueDate: item.dueDate ? item.dueDate.toISOString() : '',
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
+    }))
+  },
+) as unknown as (opts: { data: string }) => Promise<Todo[]>
+
+export const createTodoFn = createServerFn({ method: 'POST' }).handler(
+  async ({ data }: { data: unknown }) => {
+    // Manual validation
+    const parsed = todoSchema.safeParse(data)
+    if (!parsed.success) {
+      throw new Error(`Invalid input: ${parsed.error.message}`)
+    }
+    const input = parsed.data
+
     const userId = 'user_1' // await requireAuth()
 
     const [newItem] = await db
       .insert(todos)
       .values({
         id: crypto.randomUUID(),
-        title: data.title,
-        description: data.description,
-        status: data.status,
-        priority: data.priority,
-        dueDate: data.dueDate ? new Date(data.dueDate) : null,
-        projectId: data.projectId,
-        assignedTo: data.assignedTo || userId,
+        title: input.title,
+        description: input.description,
+        status: input.status,
+        priority: input.priority,
+        dueDate: input.dueDate ? new Date(input.dueDate) : null,
+        projectId: input.projectId,
+        assignedTo: input.assignedTo || userId,
         createdBy: userId,
       })
       .returning()
@@ -90,13 +118,15 @@ export const createTodoFn = createServerFn({ method: 'POST' })
       createdAt: newItem.createdAt.toISOString(),
       updatedAt: newItem.updatedAt.toISOString(),
     }
-  })
+  },
+) as unknown as (opts: { data: CreateTodoInput }) => Promise<Todo>
 
-export const updateTodoFn = createServerFn({ method: 'POST' })
-  .validator((d: { id: string; data: Partial<z.infer<typeof todoSchema>> }) => d)
-  .handler(async ({ data }) => {
-    // await requireAuth()
-    const { id, data: updateData } = data
+export const updateTodoFn = createServerFn({ method: 'POST' }).handler(
+  async ({ data }: { data: unknown }) => {
+    const { id, data: updateData } = data as {
+      id: string
+      data: Partial<z.infer<typeof todoSchema>>
+    }
 
     const [updatedItem] = await db
       .update(todos)
@@ -109,8 +139,10 @@ export const updateTodoFn = createServerFn({ method: 'POST' })
       .returning()
 
     // Sync to RAG
-    const doc = `Task: ${updatedItem.title}. Status: ${updatedItem.status}. Priority: ${updatedItem.priority}. Assigned to: ${updatedItem.assignedTo || 'Unassigned'}. Due: ${updatedItem.dueDate || 'No date'}. Description: ${updatedItem.description || ''}`
-    await syncRagDocument('todo', updatedItem.id, doc)
+    if (updatedItem) {
+      const doc = `Task: ${updatedItem.title}. Status: ${updatedItem.status}. Priority: ${updatedItem.priority}. Assigned to: ${updatedItem.assignedTo || 'Unassigned'}. Due: ${updatedItem.dueDate || 'No date'}. Description: ${updatedItem.description || ''}`
+      await syncRagDocument('todo', updatedItem.id, doc)
+    }
 
     return {
       ...updatedItem,
@@ -118,16 +150,13 @@ export const updateTodoFn = createServerFn({ method: 'POST' })
       createdAt: updatedItem.createdAt.toISOString(),
       updatedAt: updatedItem.updatedAt.toISOString(),
     }
-  })
+  },
+) as unknown as (opts: { data: { id: string; data: UpdateTodoInput } }) => Promise<Todo>
 
-export const deleteTodoFn = createServerFn({ method: 'POST' })
-  .validator((id: string) => id)
-  .handler(async ({ data: id }) => {
-    // await requireAuth()
-    await db.delete(todos).where(eq(todos.id, id))
-    
-    // Remove from RAG
-    await deleteRagDocument('todo', id)
-    
+export const deleteTodoFn = createServerFn({ method: 'POST' }).handler(
+  async ({ data: id }: { data: unknown }) => {
+    await db.delete(todos).where(eq(todos.id, id as string))
+    await deleteRagDocument('todo', id as string)
     return { success: true }
-  })
+  },
+) as unknown as (opts: { data: string }) => Promise<{ success: boolean }>

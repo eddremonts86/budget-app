@@ -16,6 +16,7 @@ import { Route as DashboardDashboardRouteImport } from './routes/_dashboard.dash
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard.dashboard.index'
 import { Route as ApiAiStatusRouteImport } from './routes/api.ai.status'
 import { Route as ApiAiSearchRouteImport } from './routes/api.ai.search'
+import { Route as ApiAiConfigStoreRouteImport } from './routes/api.ai.config-store'
 import { Route as ApiAiChatRouteImport } from './routes/api.ai.chat'
 import { Route as ApiAiAuditRouteImport } from './routes/api.ai.audit'
 import { Route as DashboardDashboardUsersRouteImport } from './routes/_dashboard.dashboard.users'
@@ -60,6 +61,11 @@ const ApiAiStatusRoute = ApiAiStatusRouteImport.update({
 const ApiAiSearchRoute = ApiAiSearchRouteImport.update({
   id: '/api/ai/search',
   path: '/api/ai/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiConfigStoreRoute = ApiAiConfigStoreRouteImport.update({
+  id: '/api/ai/config-store',
+  path: '/api/ai/config-store',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiChatRoute = ApiAiChatRouteImport.update({
@@ -142,6 +148,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRouteWithChildren
+  '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/dashboard/': typeof DashboardDashboardIndexRoute
@@ -160,6 +167,7 @@ export interface FileRoutesByTo {
   '/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRouteWithChildren
+  '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
@@ -182,6 +190,7 @@ export interface FileRoutesById {
   '/_dashboard/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRouteWithChildren
+  '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
@@ -203,6 +212,7 @@ export interface FileRouteTypes {
     | '/dashboard/users'
     | '/api/ai/audit'
     | '/api/ai/chat'
+    | '/api/ai/config-store'
     | '/api/ai/search'
     | '/api/ai/status'
     | '/dashboard/'
@@ -221,6 +231,7 @@ export interface FileRouteTypes {
     | '/dashboard/users'
     | '/api/ai/audit'
     | '/api/ai/chat'
+    | '/api/ai/config-store'
     | '/api/ai/search'
     | '/api/ai/status'
     | '/dashboard'
@@ -242,6 +253,7 @@ export interface FileRouteTypes {
     | '/_dashboard/dashboard/users'
     | '/api/ai/audit'
     | '/api/ai/chat'
+    | '/api/ai/config-store'
     | '/api/ai/search'
     | '/api/ai/status'
     | '/_dashboard/dashboard/'
@@ -253,6 +265,7 @@ export interface RootRouteChildren {
   LandingRoute: typeof LandingRouteWithChildren
   ApiAiAuditRoute: typeof ApiAiAuditRoute
   ApiAiChatRoute: typeof ApiAiChatRouteWithChildren
+  ApiAiConfigStoreRoute: typeof ApiAiConfigStoreRoute
   ApiAiSearchRoute: typeof ApiAiSearchRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
 }
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ai/search'
       fullPath: '/api/ai/search'
       preLoaderRoute: typeof ApiAiSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/config-store': {
+      id: '/api/ai/config-store'
+      path: '/api/ai/config-store'
+      fullPath: '/api/ai/config-store'
+      preLoaderRoute: typeof ApiAiConfigStoreRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/chat': {
@@ -464,6 +484,7 @@ const rootRouteChildren: RootRouteChildren = {
   LandingRoute: LandingRouteWithChildren,
   ApiAiAuditRoute: ApiAiAuditRoute,
   ApiAiChatRoute: ApiAiChatRouteWithChildren,
+  ApiAiConfigStoreRoute: ApiAiConfigStoreRoute,
   ApiAiSearchRoute: ApiAiSearchRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
 }
