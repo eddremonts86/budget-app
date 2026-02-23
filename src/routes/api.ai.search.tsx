@@ -1,6 +1,7 @@
 import { formatKnowledgeBase, type SearchRequestBody } from '@/features/Ai/api/search.fn'
 import appKnowledge from '@/server/data/app-knowledge.json'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
+import { retrieveContext } from '@/shared/lib/rag/retrieval'
 import { chat, toServerSentEventsResponse } from '@tanstack/ai'
 import { createFileRoute } from '@tanstack/react-router'
 
@@ -15,7 +16,7 @@ const normalizeIncomingMessages = (query: string, systemPrompt: string): any[] =
   ]
 }
 
-const buildSystemPrompt = () => {
+const buildSystemPrompt = (ragContext: string = '') => {
   const formattedKnowledge = formatKnowledgeBase(appKnowledge)
   return [
     'You are a helpful assistant for the "Acme Inc. Dashboard".',
@@ -23,6 +24,9 @@ const buildSystemPrompt = () => {
     '',
     '### Knowledge Base',
     formattedKnowledge,
+    '',
+    ragContext ? '### Retrieved Context (RAG)' : '',
+    ragContext,
     '',
     '### Instructions',
     '1. Answer the user query based ONLY on the knowledge base provided above.',
@@ -103,7 +107,15 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
       })
     }
 
-    const systemPrompt = buildSystemPrompt()
+    // Retrieve RAG context
+    let ragContext = ''
+    try {
+      ragContext = await retrieveContext(query)
+    } catch (error) {
+      console.warn('Failed to retrieve RAG context:', error)
+    }
+
+    const systemPrompt = buildSystemPrompt(ragContext)
     const messages = normalizeIncomingMessages(query, systemPrompt)
 
     const adapter = provider.buildAdapter(finalConfig)(body.model ?? finalConfig.parameters.model)

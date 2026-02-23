@@ -91,6 +91,7 @@ export {
 } from './drawer'
 export { Avatar, AvatarFallback, AvatarImage } from './avatar'
 export { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from './chart'
+export { Progress } from './progress'
 export {
   Sidebar,
   SidebarContent,

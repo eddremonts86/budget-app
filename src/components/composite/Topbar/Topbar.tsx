@@ -46,9 +46,9 @@ export const Topbar = memo(function Topbar() {
   const dashboardItem = useMemo<NavItem>(() => getDashboardItem(), [])
 
   return (
-    <header className="fixed top-0 left-0 right-0 z-50 border-b bg-background/80 backdrop-blur-md">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-8">
+    <header className="fixed top-0 left-0 right-0 z-50 border-b border-border/50 bg-background/70 backdrop-blur-sm shadow-sm">
+      <div className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
+        <div className="flex items-center gap-6">
           <Link
             to="/"
             className="flex items-center gap-2"
@@ -58,16 +58,16 @@ export const Topbar = memo(function Topbar() {
           >
             <motion.div
               whileHover={{ rotate: 20, scale: 1.1 }}
-              className="p-1.5 rounded-lg bg-primary/10 text-primary"
+              className="p-1.5 rounded-lg bg-primary/15 text-primary"
             >
               <Rocket className="w-6 h-6" />
             </motion.div>
-            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
+            <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent tracking-tight">
               {t('app.brand')}
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-6">
+          <nav className="hidden md:flex items-center gap-5">
             {navItems.map((item) => (
               <NavLink key={item.id} item={item} onClick={handleScroll} />
             ))}
@@ -131,8 +131,8 @@ export const Topbar = memo(function Topbar() {
           </div>
         </div>
 
-        <div className="flex items-center gap-4">
-          <div className="hidden sm:flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          <div className="hidden sm:flex items-center gap-3">
             <LanguageSelector />
             <ThemeToggle />
           </div>

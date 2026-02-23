@@ -1,37 +1,40 @@
+import {
+  IconAdjustments,
+  IconDeviceFloppy,
+  IconFileText,
+  IconLoader2,
+  IconPlugConnected,
+  IconRefresh,
+  IconSettings,
+  IconWorldCheck,
+  IconPlayerPlay,
+} from '@tabler/icons-react'
+import { useForm } from '@tanstack/react-form'
+import * as React from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/shared/lib/toast'
 import {
-    IconAdjustments,
-    IconDeviceFloppy,
-    IconLoader2,
-    IconPlugConnected,
-    IconRefresh,
-    IconSettings,
-    IconWorldCheck,
-} from '@tabler/icons-react'
-import { useForm } from '@tanstack/react-form'
-import * as React from 'react'
-import { useTranslation } from 'react-i18next'
-import {
-    useAiConfig,
-    useAiConfigStore,
-    useAiProviderStatuses,
-    useResetAiConfig,
-    useTestAiConnection,
-    useUpdateAiConfig
+  useAiConfig,
+  useAiConfigStore,
+  useAiProviderStatuses,
+  useResetAiConfig,
+  useTestAiConnection,
+  useUpdateAiConfig,
 } from '../api/ai-config.queries'
 import { type AiConfigFormData, type AiProvider } from '../model/ai-config.schema'
+import { AnthropicIcon, LlamaCppIcon, LMStudioIcon, OllamaIcon, OpenAIIcon } from './AiIcons'
 import { AiLanguageAudit } from './AiLanguageAudit'
 
 const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
@@ -279,174 +282,524 @@ export function AiConfigForm() {
       className="space-y-6"
     >
       <Tabs defaultValue="status" className="w-full space-y-6">
-        <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="status">{t('settings.ai.sections.status')}</TabsTrigger>
-          <TabsTrigger value="configurations">
+        <TabsList
+          variant="line"
+          className="grid w-full grid-cols-3 border-b rounded-none h-auto p-0 bg-transparent"
+        >
+          <TabsTrigger
+            value="status"
+            className="rounded-none shadow-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent px-4 py-2 flex items-center justify-center gap-2"
+          >
+            <IconWorldCheck className="size-4" />
+            {t('settings.ai.sections.status')}
+          </TabsTrigger>
+          <TabsTrigger
+            value="configurations"
+            className="rounded-none shadow-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent px-4 py-2 flex items-center justify-center gap-2"
+          >
+            <IconSettings className="size-4" />
             {t('settings.ai.sections.configurations') || 'Configurations'}
           </TabsTrigger>
-          <TabsTrigger value="logs">{t('settings.ai.sections.logs') || 'Logs'}</TabsTrigger>
+          <TabsTrigger
+            value="logs"
+            className="rounded-none shadow-none bg-transparent data-[state=active]:shadow-none data-[state=active]:bg-transparent px-4 py-2 flex items-center justify-center gap-2"
+          >
+            <IconFileText className="size-4" />
+            {t('settings.ai.sections.logs') || 'Logs'}
+          </TabsTrigger>
         </TabsList>
         <TabsContent value="status" className="mt-0">
           {/* Status Section */}
-        <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-          <div className="flex flex-col space-y-1.5 p-6 pb-4">
-            <div className="flex items-center gap-2">
-              <IconWorldCheck className="size-5 text-primary" />
-              <h3 className="text-xl font-semibold leading-none tracking-tight">
-                {t('settings.ai.sections.status')}
-              </h3>
+          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+            <div className="flex flex-col space-y-1.5 p-6 pb-4">
+              <div className="flex items-center gap-2">
+                <IconWorldCheck className="size-5 text-primary" />
+                <h3 className="text-xl font-semibold leading-none tracking-tight">
+                  {t('settings.ai.sections.status')} & Priority
+                </h3>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                Current system status and intelligent fallback priority sequence.
+              </p>
             </div>
-            <p className="text-sm text-muted-foreground">
-              {t('settings.ai.sections.statusDescription')}
-            </p>
-          </div>
-          <div className="p-6 pt-0">
-            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-              {providerStatuses?.map((status: any) => {
-                const isActive = config?.provider === status.id
-                const isLocal = ['llama-cpp', 'ollama', 'lm-studio'].includes(status.id)
-                const isAvailable = status.available
-                const hasModels = (status.modelCount || 0) > 0
+            <div className="p-6 pt-0">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+                {[
+                  {
+                    id: 'llama-cpp',
+                    title: 'Llama.cpp',
+                    description:
+                      'High-performance inference engine for running LLMs locally on standard hardware.',
+                    Icon: LlamaCppIcon,
+                  },
+                  {
+                    id: 'ollama',
+                    title: 'Ollama',
+                    description:
+                      'Streamlined local LLM runner supporting Llama 3, Mistral, and other open-source models.',
+                    Icon: OllamaIcon,
+                  },
+                  {
+                    id: 'lm-studio',
+                    title: 'LM Studio',
+                    description:
+                      'User-friendly desktop application for discovering, downloading, and running local LLMs.',
+                    Icon: LMStudioIcon,
+                  },
+                  {
+                    id: 'openai',
+                    title: 'OpenAI',
+                    description:
+                      'Industry-leading GPT-4 models providing state-of-the-art reasoning and generation.',
+                    Icon: OpenAIIcon,
+                  },
+                  {
+                    id: 'anthropic',
+                    title: 'Anthropic',
+                    description:
+                      'Enterprise-grade Claude models focused on safety, reliability, and large context windows.',
+                    Icon: AnthropicIcon,
+                  },
+                ].map((provider, index) => {
+                  const status = providerStatuses?.find((s) => s.id === provider.id)
+                  const isActive = config?.provider === provider.id
+                  const isAvailable = status?.available
+                  const isError = status?.status === 'error' || status?.status === 'unreachable'
 
-                return (
-                  <div
-                    key={status.id}
-                    onClick={() => handleProviderChange(status.id as AiProvider)}
-                    className={`flex cursor-pointer items-center justify-between rounded-md border p-3 transition-colors hover:bg-muted/50 ${
-                      isActive ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className="relative">
+                  return (
+                    <div
+                      key={provider.id}
+                      onClick={() => handleProviderChange(provider.id as AiProvider)}
+                      className={`group relative flex flex-col items-center text-center p-6 rounded-xl border transition-all duration-300 cursor-pointer hover:-translate-y-1 ${
+                        isActive
+                          ? 'bg-black/80 border-primary shadow-md ring-1 ring-primary/20'
+                          : 'bg-black/40 hover:bg-black/60 hover:border-primary/50 hover:shadow-md'
+                      }`}
+                    >
+                      {/* Priority Index */}
+                      <div className="absolute top-3 left-4 text-xs font-bold text-muted-foreground/20 font-mono text-lg">
+                        {String(index + 1).padStart(2, '0')}
+                      </div>
+
+                      {/* Status Indicator */}
+                      <div className="absolute top-3 right-4 flex flex-col items-end gap-1">
                         <div
-                          className={`size-2.5 rounded-full ${
-                            status.status === 'available'
-                              ? 'bg-green-500'
-                              : status.status === 'error' || status.status === 'unreachable'
-                                ? 'bg-red-500'
-                                : 'bg-yellow-500'
+                          className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-medium border ${
+                            isAvailable
+                              ? 'bg-green-500/10 text-green-600 border-green-500/20'
+                              : isError
+                                ? 'bg-red-500/10 text-red-600 border-red-500/20'
+                                : 'bg-yellow-500/10 text-yellow-600 border-yellow-500/20'
                           }`}
+                        >
+                          <div
+                            className={`size-1.5 rounded-full ${
+                              isAvailable
+                                ? 'bg-green-500'
+                                : isError
+                                  ? 'bg-red-500'
+                                  : 'bg-yellow-500'
+                            }`}
+                          />
+                          {status?.latencyMs ? `${status.latencyMs}ms` : 'N/A'}
+                        </div>
+                      </div>
+
+                      {/* Icon */}
+                      <div
+                        className={`mb-4 mt-2 p-4 rounded-2xl transition-colors duration-300 ${
+                          isActive
+                            ? 'bg-background shadow-sm'
+                            : 'bg-muted/10 group-hover:bg-primary/5'
+                        }`}
+                      >
+                        <provider.Icon
+                          className={`size-12 transition-colors duration-300 ${
+                            isActive
+                              ? 'text-primary'
+                              : 'text-foreground/80 group-hover:text-primary'
+                          }`}
+                          aria-label={`${provider.title} logo`}
                         />
+                      </div>
+
+                      {/* Title & Active Badge */}
+                      <div className="mb-2 flex flex-col items-center gap-2">
+                        <h4
+                          className={`text-lg font-semibold font-sans tracking-tight ${
+                            isActive ? 'text-primary' : 'text-foreground'
+                          }`}
+                        >
+                          {provider.title}
+                        </h4>
                         {isActive && (
-                          <span className="absolute -top-1 -right-1 flex h-2 w-2">
-                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
-                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                          <span className="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-primary text-primary-foreground">
+                            ACTIVE
                           </span>
                         )}
                       </div>
-                      <div className="flex flex-col">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-sm font-medium capitalize">{status.label}</span>
-                          {isActive && (
-                            <span className="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-wider">
-                              {t('settings.ai.messages.active')}
-                            </span>
-                          )}
-                        </div>
-                        <div className="flex flex-col gap-0.5">
-                          <span className="text-xs text-muted-foreground">
-                            {status.latencyMs ? `${status.latencyMs}ms` : 'N/A'}
+
+                      {/* Description */}
+                      <p className="text-xs text-muted-foreground leading-relaxed mb-4 line-clamp-3">
+                        {provider.description}
+                      </p>
+
+                      {/* Footer Info */}
+                      <div className="mt-auto w-full pt-3 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground font-medium">
+                        <span>
+                          {status?.modelCount ? `${status.modelCount} models` : 'No models'}
+                        </span>
+                        {isActive && (
+                          <Button
+                            size="icon"
+                            variant="secondary"
+                            className="size-7 shadow-sm hover:scale-105 transition-transform"
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              handleTestConnection()
+                            }}
+                            title="Test Connection"
+                          >
+                            <IconPlayerPlay className="size-3.5 fill-current" />
+                          </Button>
+                        )}
+                        {!isActive && status?.message && !isAvailable && (
+                          <span
+                            className="text-red-500 max-w-[80px] truncate"
+                            title={status.message}
+                          >
+                            {status.message}
                           </span>
-                          {status.message && status.status !== 'available' && (
-                            <span className="text-[10px] text-red-500 font-medium">
-                              {status.message}
-                            </span>
-                          )}
-                          {isLocal && isAvailable && !hasModels && (
-                            <span className="text-[10px] text-yellow-600 font-medium">
-                              {t('settings.ai.messages.noModels')}
-                            </span>
-                          )}
-                        </div>
+                        )}
                       </div>
                     </div>
-                    {typeof status.modelCount === 'number' && (
-                      <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
-                        {t('settings.ai.messages.modelsCount', { count: status.modelCount })}
-                      </span>
-                    )}
-                  </div>
-                )
-              })}
-              {!providerStatuses?.length && (
-                <div className="col-span-full text-center text-sm text-muted-foreground">
-                  {t('settings.ai.messages.checkingStatus')}
-                </div>
-              )}
-            </div>
-            <div className="mt-6 rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">
-              <p className="font-medium mb-3">{t('settings.ai.sections.fallback')}:</p>
-              <div className="flex flex-wrap gap-3 items-center">
-                <span className="bg-background border px-3 py-1 rounded shadow-sm">1. Llama.cpp</span>
-                <span className="text-muted-foreground/60">→</span>
-                <span className="bg-background border px-3 py-1 rounded shadow-sm">2. Ollama</span>
-                <span className="text-muted-foreground/60">→</span>
-                <span className="bg-background border px-3 py-1 rounded shadow-sm">3. LM Studio</span>
-                <span className="text-muted-foreground/60">→</span>
-                <span className="bg-background border px-3 py-1 rounded shadow-sm">4. OpenAI</span>
-                <span className="text-muted-foreground/60">→</span>
-                <span className="bg-background border px-3 py-1 rounded shadow-sm">5. Anthropic</span>
+                  )
+                })}
               </div>
-              <p className="mt-3 opacity-75 text-xs">{t('settings.ai.messages.fallbackDescription')}</p>
             </div>
           </div>
-            </div>
-          </TabsContent>
+        </TabsContent>
 
         <TabsContent value="configurations" className="mt-0">
           <div className="grid gap-6 md:grid-cols-2">
             {/* Left Column: Provider & Connection */}
-        <div className="space-y-6">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="flex flex-col space-y-1.5 p-6 pb-4">
-              <div className="flex items-center gap-2">
-                <IconSettings className="size-5 text-primary" />
-                <h3 className="text-xl font-semibold leading-none tracking-tight">
-                  {t('settings.ai.fields.provider')}
-                </h3>
-              </div>
-              <p className="text-sm text-muted-foreground">{t('settings.ai.description')}</p>
-            </div>
-            <div className="p-6 pt-0 space-y-6">
-              <form.Field
-                name="provider"
-                children={(field) => (
-                  <Field>
-                    <FieldLabel>{t('settings.ai.fields.provider')}</FieldLabel>
-                    <Select value={field.state.value} onValueChange={handleProviderChange}>
-                      <SelectTrigger className="w-full sm:max-w-xs">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="llama-cpp">Llama.cpp</SelectItem>
-                        <SelectItem value="ollama">Ollama</SelectItem>
-                        <SelectItem value="lm-studio">
-                          {t('settings.ai.providers.lm-studio')}
-                        </SelectItem>
-                        <SelectItem value="openai">{t('settings.ai.providers.openai')}</SelectItem>
-                        <SelectItem value="anthropic">
-                          {t('settings.ai.providers.anthropic')}
-                        </SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </Field>
-                )}
-              />
-
-              <Separator className="opacity-50" />
-
-              <div className="space-y-4">
-                <div className="flex items-center gap-2 font-medium text-sm text-muted-foreground uppercase tracking-wider">
-                  <IconPlugConnected className="size-4" />
-                  {t('settings.ai.sections.connection')}
+            <div className="space-y-6">
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div className="flex flex-col space-y-1.5 p-6 pb-4">
+                  <div className="flex items-center gap-2">
+                    <IconSettings className="size-5 text-primary" />
+                    <h3 className="text-xl font-semibold leading-none tracking-tight">
+                      {t('settings.ai.fields.provider')}
+                    </h3>
+                  </div>
+                  <p className="text-sm text-muted-foreground">{t('settings.ai.description')}</p>
                 </div>
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                <div className="p-6 pt-0 space-y-6">
                   <form.Field
-                    name="baseUrl"
+                    name="provider"
                     children={(field) => (
-                      <Field className="sm:col-span-3">
+                      <Field>
+                        <FieldLabel>{t('settings.ai.fields.provider')}</FieldLabel>
+                        <Select value={field.state.value} onValueChange={handleProviderChange}>
+                          <SelectTrigger className="w-full sm:max-w-xs">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="llama-cpp">Llama.cpp</SelectItem>
+                            <SelectItem value="ollama">Ollama</SelectItem>
+                            <SelectItem value="lm-studio">
+                              {t('settings.ai.providers.lm-studio')}
+                            </SelectItem>
+                            <SelectItem value="openai">
+                              {t('settings.ai.providers.openai')}
+                            </SelectItem>
+                            <SelectItem value="anthropic">
+                              {t('settings.ai.providers.anthropic')}
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </Field>
+                    )}
+                  />
+
+                  <Separator className="opacity-50" />
+
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 font-medium text-sm text-muted-foreground uppercase tracking-wider">
+                      <IconPlugConnected className="size-4" />
+                      {t('settings.ai.sections.connection')}
+                    </div>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
+                      <form.Field
+                        name="baseUrl"
+                        children={(field) => (
+                          <Field className="sm:col-span-3">
+                            <FieldLabel htmlFor={field.name}>
+                              {t('settings.ai.fields.baseUrl')}
+                            </FieldLabel>
+                            <Input
+                              id={field.name}
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(e.target.value)}
+                              className="bg-muted/20"
+                            />
+                            <FieldError
+                              errors={field.state.meta.errors.map((e) =>
+                                typeof e === 'string' ? e : String(e),
+                              )}
+                            />
+                          </Field>
+                        )}
+                      />
+
+                      <form.Field
+                        name="port"
+                        children={(field) => (
+                          <Field>
+                            <FieldLabel htmlFor={field.name}>
+                              {t('settings.ai.fields.port')}
+                            </FieldLabel>
+                            <Input
+                              id={field.name}
+                              type="number"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(Number(e.target.value))}
+                              className="bg-muted/20"
+                            />
+                            <FieldError
+                              errors={field.state.meta.errors.map((e) =>
+                                typeof e === 'string' ? e : String(e),
+                              )}
+                            />
+                          </Field>
+                        )}
+                      />
+
+                      <form.Field
+                        name="timeout"
+                        children={(field) => (
+                          <Field>
+                            <FieldLabel htmlFor={field.name}>
+                              {t('settings.ai.fields.timeout')}
+                            </FieldLabel>
+                            <Input
+                              id={field.name}
+                              type="number"
+                              value={field.state.value}
+                              onBlur={field.handleBlur}
+                              onChange={(e) => field.handleChange(Number(e.target.value))}
+                              className="bg-muted/20"
+                            />
+                            <FieldError
+                              errors={field.state.meta.errors.map((e) =>
+                                typeof e === 'string' ? e : String(e),
+                              )}
+                            />
+                          </Field>
+                        )}
+                      />
+
+                      <form.Subscribe selector={(state) => state.values.provider}>
+                        {(provider) =>
+                          ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? null : (
+                            <form.Field
+                              name="token"
+                              children={(field) => {
+                                const tokenPlaceholder =
+                                  {
+                                    openai: 'sk-proj-...',
+                                    anthropic: 'sk-ant-...',
+                                  }[provider as 'openai' | 'anthropic'] ?? 'token-...'
+
+                                return (
+                                  <Field className="sm:col-span-4">
+                                    <FieldLabel htmlFor={field.name}>
+                                      {['openai', 'anthropic'].includes(provider)
+                                        ? t('settings.ai.fields.apiKey')
+                                        : t('settings.ai.fields.token')}
+                                    </FieldLabel>
+                                    <Input
+                                      id={field.name}
+                                      type="password"
+                                      value={field.state.value}
+                                      onBlur={field.handleBlur}
+                                      onChange={(e) => field.handleChange(e.target.value)}
+                                      placeholder={tokenPlaceholder}
+                                      className="bg-muted/20"
+                                    />
+                                    <FieldError
+                                      errors={field.state.meta.errors.map((e) =>
+                                        typeof e === 'string' ? e : String(e),
+                                      )}
+                                    />
+                                  </Field>
+                                )
+                              }}
+                            />
+                          )
+                        }
+                      </form.Subscribe>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+                <div className="flex flex-col space-y-1.5 p-6 pb-4">
+                  <div className="flex items-center gap-2">
+                    <IconPlugConnected className="size-5 text-primary" />
+                    <h3 className="text-xl font-semibold leading-none tracking-tight">
+                      {t('settings.ai.sections.endpoints')}
+                    </h3>
+                  </div>
+                </div>
+                <div className="p-6 pt-0">
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <form.Field
+                      name="endpoints.chat"
+                      children={(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {t('settings.ai.fields.chatEndpoint')}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="bg-muted/20"
+                          />
+                          <FieldError
+                            errors={field.state.meta.errors.map((e) =>
+                              typeof e === 'string' ? e : String(e),
+                            )}
+                          />
+                        </Field>
+                      )}
+                    />
+
+                    <form.Field
+                      name="endpoints.models"
+                      children={(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {t('settings.ai.fields.modelsEndpoint')}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(e.target.value)}
+                            className="bg-muted/20"
+                          />
+                          <FieldError
+                            errors={field.state.meta.errors.map((e) =>
+                              typeof e === 'string' ? e : String(e),
+                            )}
+                          />
+                        </Field>
+                      )}
+                    />
+
+                    <form.Subscribe selector={(state) => state.values.provider}>
+                      {(provider) =>
+                        ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? (
+                          <>
+                            <form.Field
+                              name="endpoints.load"
+                              children={(field) => (
+                                <Field>
+                                  <FieldLabel htmlFor={field.name}>
+                                    {t('settings.ai.fields.loadEndpoint')}
+                                  </FieldLabel>
+                                  <Input
+                                    id={field.name}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    className="bg-muted/20"
+                                  />
+                                  <FieldError
+                                    errors={field.state.meta.errors.map((e) =>
+                                      typeof e === 'string' ? e : String(e),
+                                    )}
+                                  />
+                                </Field>
+                              )}
+                            />
+                            <form.Field
+                              name="endpoints.download"
+                              children={(field) => (
+                                <Field>
+                                  <FieldLabel htmlFor={field.name}>
+                                    {t('settings.ai.fields.downloadEndpoint')}
+                                  </FieldLabel>
+                                  <Input
+                                    id={field.name}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    className="bg-muted/20"
+                                  />
+                                  <FieldError
+                                    errors={field.state.meta.errors.map((e) =>
+                                      typeof e === 'string' ? e : String(e),
+                                    )}
+                                  />
+                                </Field>
+                              )}
+                            />
+                            <form.Field
+                              name="endpoints.status"
+                              children={(field) => (
+                                <Field className="sm:col-span-2">
+                                  <FieldLabel htmlFor={field.name}>
+                                    {t('settings.ai.fields.statusEndpoint')}
+                                  </FieldLabel>
+                                  <Input
+                                    id={field.name}
+                                    value={field.state.value}
+                                    onBlur={field.handleBlur}
+                                    onChange={(e) => field.handleChange(e.target.value)}
+                                    className="bg-muted/20"
+                                  />
+                                  <FieldError
+                                    errors={field.state.meta.errors.map((e) =>
+                                      typeof e === 'string' ? e : String(e),
+                                    )}
+                                  />
+                                </Field>
+                              )}
+                            />
+                          </>
+                        ) : null
+                      }
+                    </form.Subscribe>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column: Parameters & Actions */}
+            <div className="space-y-6">
+              <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full">
+                <div className="flex flex-col space-y-1.5 p-6 pb-4">
+                  <div className="flex items-center gap-2">
+                    <IconAdjustments className="size-5 text-primary" />
+                    <h3 className="text-xl font-semibold leading-none tracking-tight">
+                      {t('settings.ai.sections.parameters')}
+                    </h3>
+                  </div>
+                </div>
+                <div className="p-6 pt-0 space-y-4">
+                  <form.Field
+                    name="parameters.model"
+                    children={(field) => (
+                      <Field>
                         <FieldLabel htmlFor={field.name}>
-                          {t('settings.ai.fields.baseUrl')}
+                          {t('settings.ai.fields.model')}
                         </FieldLabel>
                         <Input
                           id={field.name}
@@ -464,34 +817,67 @@ export function AiConfigForm() {
                     )}
                   />
 
-                  <form.Field
-                    name="port"
-                    children={(field) => (
-                      <Field>
-                        <FieldLabel htmlFor={field.name}>{t('settings.ai.fields.port')}</FieldLabel>
-                        <Input
-                          id={field.name}
-                          type="number"
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(Number(e.target.value))}
-                          className="bg-muted/20"
-                        />
-                        <FieldError
-                          errors={field.state.meta.errors.map((e) =>
-                            typeof e === 'string' ? e : String(e),
-                          )}
-                        />
-                      </Field>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <form.Field
+                      name="parameters.temperature"
+                      children={(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {t('settings.ai.fields.temperature')}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="2"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(Number(e.target.value))}
+                            className="bg-muted/20"
+                          />
+                          <FieldError
+                            errors={field.state.meta.errors.map((e) =>
+                              typeof e === 'string' ? e : String(e),
+                            )}
+                          />
+                        </Field>
+                      )}
+                    />
+                    <form.Field
+                      name="parameters.top_p"
+                      children={(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {t('settings.ai.fields.topP')}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            type="number"
+                            step="0.05"
+                            min="0"
+                            max="1"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(Number(e.target.value))}
+                            className="bg-muted/20"
+                          />
+                          <FieldError
+                            errors={field.state.meta.errors.map((e) =>
+                              typeof e === 'string' ? e : String(e),
+                            )}
+                          />
+                        </Field>
+                      )}
+                    />
+                  </div>
 
                   <form.Field
-                    name="timeout"
+                    name="parameters.max_tokens"
                     children={(field) => (
                       <Field>
                         <FieldLabel htmlFor={field.name}>
-                          {t('settings.ai.fields.timeout')}
+                          {t('settings.ai.fields.maxTokens')}
                         </FieldLabel>
                         <Input
                           id={field.name}
@@ -510,424 +896,133 @@ export function AiConfigForm() {
                     )}
                   />
 
-                  <form.Subscribe selector={(state) => state.values.provider}>
-                    {(provider) =>
-                      ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? null : (
-                        <form.Field
-                          name="token"
-                          children={(field) => {
-                            const tokenPlaceholder =
-                              {
-                                openai: 'sk-proj-...',
-                                anthropic: 'sk-ant-...',
-                              }[provider as 'openai' | 'anthropic'] ?? 'token-...'
-
-                            return (
-                              <Field className="sm:col-span-4">
-                                <FieldLabel htmlFor={field.name}>
-                                  {['openai', 'anthropic'].includes(provider)
-                                    ? t('settings.ai.fields.apiKey')
-                                    : t('settings.ai.fields.token')}
-                                </FieldLabel>
-                                <Input
-                                  id={field.name}
-                                  type="password"
-                                  value={field.state.value}
-                                  onBlur={field.handleBlur}
-                                  onChange={(e) => field.handleChange(e.target.value)}
-                                  placeholder={tokenPlaceholder}
-                                  className="bg-muted/20"
-                                />
-                                <FieldError
-                                  errors={field.state.meta.errors.map((e) =>
-                                    typeof e === 'string' ? e : String(e),
-                                  )}
-                                />
-                              </Field>
-                            )
-                          }}
-                        />
-                      )
-                    }
-                  </form.Subscribe>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
-            <div className="flex flex-col space-y-1.5 p-6 pb-4">
-              <div className="flex items-center gap-2">
-                <IconPlugConnected className="size-5 text-primary" />
-                <h3 className="text-xl font-semibold leading-none tracking-tight">
-                  {t('settings.ai.sections.endpoints')}
-                </h3>
-              </div>
-            </div>
-            <div className="p-6 pt-0">
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <form.Field
-                  name="endpoints.chat"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {t('settings.ai.fields.chatEndpoint')}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-muted/20"
-                      />
-                      <FieldError
-                        errors={field.state.meta.errors.map((e) =>
-                          typeof e === 'string' ? e : String(e),
-                        )}
-                      />
-                    </Field>
-                  )}
-                />
-
-                <form.Field
-                  name="endpoints.models"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {t('settings.ai.fields.modelsEndpoint')}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        className="bg-muted/20"
-                      />
-                      <FieldError
-                        errors={field.state.meta.errors.map((e) =>
-                          typeof e === 'string' ? e : String(e),
-                        )}
-                      />
-                    </Field>
-                  )}
-                />
-
-                <form.Subscribe selector={(state) => state.values.provider}>
-                  {(provider) =>
-                    ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? (
-                      <>
-                        <form.Field
-                          name="endpoints.load"
-                          children={(field) => (
-                            <Field>
-                              <FieldLabel htmlFor={field.name}>
-                                {t('settings.ai.fields.loadEndpoint')}
-                              </FieldLabel>
-                              <Input
-                                id={field.name}
-                                value={field.state.value}
-                                onBlur={field.handleBlur}
-                                onChange={(e) => field.handleChange(e.target.value)}
-                                className="bg-muted/20"
-                              />
-                              <FieldError
-                                errors={field.state.meta.errors.map((e) =>
-                                  typeof e === 'string' ? e : String(e),
-                                )}
-                              />
-                            </Field>
-                          )}
-                        />
-                        <form.Field
-                          name="endpoints.download"
-                          children={(field) => (
-                            <Field>
-                              <FieldLabel htmlFor={field.name}>
-                                {t('settings.ai.fields.downloadEndpoint')}
-                              </FieldLabel>
-                              <Input
-                                id={field.name}
-                                value={field.state.value}
-                                onBlur={field.handleBlur}
-                                onChange={(e) => field.handleChange(e.target.value)}
-                                className="bg-muted/20"
-                              />
-                              <FieldError
-                                errors={field.state.meta.errors.map((e) =>
-                                  typeof e === 'string' ? e : String(e),
-                                )}
-                              />
-                            </Field>
-                          )}
-                        />
-                        <form.Field
-                          name="endpoints.status"
-                          children={(field) => (
-                            <Field className="sm:col-span-2">
-                              <FieldLabel htmlFor={field.name}>
-                                {t('settings.ai.fields.statusEndpoint')}
-                              </FieldLabel>
-                              <Input
-                                id={field.name}
-                                value={field.state.value}
-                                onBlur={field.handleBlur}
-                                onChange={(e) => field.handleChange(e.target.value)}
-                                className="bg-muted/20"
-                              />
-                              <FieldError
-                                errors={field.state.meta.errors.map((e) =>
-                                  typeof e === 'string' ? e : String(e),
-                                )}
-                              />
-                            </Field>
-                          )}
-                        />
-                      </>
-                    ) : null
-                  }
-                </form.Subscribe>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Right Column: Parameters & Actions */}
-        <div className="space-y-6">
-          <div className="rounded-lg border bg-card text-card-foreground shadow-sm h-full">
-            <div className="flex flex-col space-y-1.5 p-6 pb-4">
-              <div className="flex items-center gap-2">
-                <IconAdjustments className="size-5 text-primary" />
-                <h3 className="text-xl font-semibold leading-none tracking-tight">
-                  {t('settings.ai.sections.parameters')}
-                </h3>
-              </div>
-            </div>
-            <div className="p-6 pt-0 space-y-4">
-              <form.Field
-                name="parameters.model"
-                children={(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>{t('settings.ai.fields.model')}</FieldLabel>
-                    <Input
-                      id={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      className="bg-muted/20"
-                    />
-                    <FieldError
-                      errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string' ? e : String(e),
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <form.Field
+                      name="parameters.frequency_penalty"
+                      children={(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {t('settings.ai.fields.frequencyPenalty')}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            type="number"
+                            step="0.1"
+                            min="-2"
+                            max="2"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(Number(e.target.value))}
+                            className="bg-muted/20"
+                          />
+                          <FieldError
+                            errors={field.state.meta.errors.map((e) =>
+                              typeof e === 'string' ? e : String(e),
+                            )}
+                          />
+                        </Field>
                       )}
                     />
-                  </Field>
-                )}
-              />
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <form.Field
-                  name="parameters.temperature"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {t('settings.ai.fields.temperature')}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="number"
-                        step="0.1"
-                        min="0"
-                        max="2"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
-                        className="bg-muted/20"
-                      />
-                      <FieldError
-                        errors={field.state.meta.errors.map((e) =>
-                          typeof e === 'string' ? e : String(e),
-                        )}
-                      />
-                    </Field>
-                  )}
-                />
-                <form.Field
-                  name="parameters.top_p"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>{t('settings.ai.fields.topP')}</FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="number"
-                        step="0.05"
-                        min="0"
-                        max="1"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
-                        className="bg-muted/20"
-                      />
-                      <FieldError
-                        errors={field.state.meta.errors.map((e) =>
-                          typeof e === 'string' ? e : String(e),
-                        )}
-                      />
-                    </Field>
-                  )}
-                />
-              </div>
-
-              <form.Field
-                name="parameters.max_tokens"
-                children={(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>
-                      {t('settings.ai.fields.maxTokens')}
-                    </FieldLabel>
-                    <Input
-                      id={field.name}
-                      type="number"
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(Number(e.target.value))}
-                      className="bg-muted/20"
-                    />
-                    <FieldError
-                      errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string' ? e : String(e),
+                    <form.Field
+                      name="parameters.presence_penalty"
+                      children={(field) => (
+                        <Field>
+                          <FieldLabel htmlFor={field.name}>
+                            {t('settings.ai.fields.presencePenalty')}
+                          </FieldLabel>
+                          <Input
+                            id={field.name}
+                            type="number"
+                            step="0.1"
+                            min="-2"
+                            max="2"
+                            value={field.state.value}
+                            onBlur={field.handleBlur}
+                            onChange={(e) => field.handleChange(Number(e.target.value))}
+                            className="bg-muted/20"
+                          />
+                          <FieldError
+                            errors={field.state.meta.errors.map((e) =>
+                              typeof e === 'string' ? e : String(e),
+                            )}
+                          />
+                        </Field>
                       )}
                     />
-                  </Field>
-                )}
-              />
+                  </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <form.Field
-                  name="parameters.frequency_penalty"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {t('settings.ai.fields.frequencyPenalty')}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="number"
-                        step="0.1"
-                        min="-2"
-                        max="2"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
-                        className="bg-muted/20"
-                      />
-                      <FieldError
-                        errors={field.state.meta.errors.map((e) =>
-                          typeof e === 'string' ? e : String(e),
-                        )}
-                      />
-                    </Field>
-                  )}
-                />
-                <form.Field
-                  name="parameters.presence_penalty"
-                  children={(field) => (
-                    <Field>
-                      <FieldLabel htmlFor={field.name}>
-                        {t('settings.ai.fields.presencePenalty')}
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        type="number"
-                        step="0.1"
-                        min="-2"
-                        max="2"
-                        value={field.state.value}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => field.handleChange(Number(e.target.value))}
-                        className="bg-muted/20"
-                      />
-                      <FieldError
-                        errors={field.state.meta.errors.map((e) =>
-                          typeof e === 'string' ? e : String(e),
-                        )}
-                      />
-                    </Field>
-                  )}
-                />
-              </div>
-
-              <form.Field
-                name="additionalParams"
-                children={(field) => (
-                  <Field>
-                    <FieldLabel htmlFor={field.name}>
-                      {t('settings.ai.fields.additionalParams')}
-                    </FieldLabel>
-                    <Input
-                      id={field.name}
-                      value={field.state.value}
-                      onBlur={field.handleBlur}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                      placeholder='{"key": "value"}'
-                      className="bg-muted/20"
-                    />
-                    <FieldError
-                      errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string' ? e : String(e),
-                      )}
-                    />
-                  </Field>
-                )}
-              />
-
-              <Separator className="my-2" />
-
-              <div className="flex flex-col gap-2 pt-2">
-                <Button
-                  type="submit"
-                  className="w-full shadow-md"
-                  disabled={updateMutation.isPending || !form.state.canSubmit}
-                >
-                  {updateMutation.isPending ? (
-                    <IconLoader2 className="mr-2 size-4 animate-spin" />
-                  ) : (
-                    <IconDeviceFloppy className="mr-2 size-4" />
-                  )}
-                  {t('settings.ai.actions.save')}
-                </Button>
-
-                <div className="flex flex-col gap-2 sm:flex-row">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={handleTestConnection}
-                    disabled={testMutation.isPending}
-                    className="h-auto w-full flex-1 whitespace-normal py-2 text-xs sm:w-auto"
-                  >
-                    {testMutation.isPending ? (
-                      <IconLoader2 className="mr-1 size-3 animate-spin" />
-                    ) : (
-                      <IconWorldCheck className="mr-1 size-3" />
+                  <form.Field
+                    name="additionalParams"
+                    children={(field) => (
+                      <Field>
+                        <FieldLabel htmlFor={field.name}>
+                          {t('settings.ai.fields.additionalParams')}
+                        </FieldLabel>
+                        <Input
+                          id={field.name}
+                          value={field.state.value}
+                          onBlur={field.handleBlur}
+                          onChange={(e) => field.handleChange(e.target.value)}
+                          placeholder='{"key": "value"}'
+                          className="bg-muted/20"
+                        />
+                        <FieldError
+                          errors={field.state.meta.errors.map((e) =>
+                            typeof e === 'string' ? e : String(e),
+                          )}
+                        />
+                      </Field>
                     )}
-                    {t('settings.ai.actions.test')}
-                  </Button>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleReset}
-                    disabled={resetMutation.isPending}
-                    className="h-auto w-full flex-1 whitespace-normal py-2 text-xs text-muted-foreground hover:text-destructive sm:w-auto"
-                  >
-                    <IconRefresh className="mr-1 size-3" />
-                    {t('settings.ai.actions.reset')}
-                  </Button>
+                  />
+
+                  <Separator className="my-2" />
+
+                  <div className="flex flex-col gap-2 pt-2">
+                    <Button
+                      type="submit"
+                      className="w-full shadow-md"
+                      disabled={updateMutation.isPending || !form.state.canSubmit}
+                    >
+                      {updateMutation.isPending ? (
+                        <IconLoader2 className="mr-2 size-4 animate-spin" />
+                      ) : (
+                        <IconDeviceFloppy className="mr-2 size-4" />
+                      )}
+                      {t('settings.ai.actions.save')}
+                    </Button>
+
+                    <div className="flex flex-col gap-2 sm:flex-row">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={handleTestConnection}
+                        disabled={testMutation.isPending}
+                        className="h-auto w-full flex-1 whitespace-normal py-2 text-xs sm:w-auto"
+                      >
+                        {testMutation.isPending ? (
+                          <IconLoader2 className="mr-1 size-3 animate-spin" />
+                        ) : (
+                          <IconWorldCheck className="mr-1 size-3" />
+                        )}
+                        {t('settings.ai.actions.test')}
+                      </Button>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={handleReset}
+                        disabled={resetMutation.isPending}
+                        className="h-auto w-full flex-1 whitespace-normal py-2 text-xs text-muted-foreground hover:text-destructive sm:w-auto"
+                      >
+                        <IconRefresh className="mr-1 size-3" />
+                        {t('settings.ai.actions.reset')}
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-          </div>
           </div>
         </TabsContent>
 

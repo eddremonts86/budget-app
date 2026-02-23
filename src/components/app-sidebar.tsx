@@ -1,62 +1,62 @@
+import {
+  IconChartBar,
+  IconDashboard,
+  IconFolder,
+  IconHelp,
+  IconInnerShadowTop,
+  IconListDetails,
+  IconReport,
+  IconSearch,
+  IconSettings,
+  IconUsers,
+} from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
+import {
+  AlertCircle,
+  ChevronRight,
+  Loader2,
+  Navigation,
+  Pin,
+  PinOff,
+  Search,
+  Sparkles,
+  WifiOff,
+  X,
+} from 'lucide-react'
+import * as React from 'react'
+import { useTranslation } from 'react-i18next'
+import ReactMarkdown from 'react-markdown'
+import remarkGfm from 'remark-gfm'
 import { NavMain } from '@/components/nav-main'
 import { NavSecondary } from '@/components/nav-secondary'
 import { NavUser } from '@/components/nav-user'
 import {
-    Badge,
-    Button,
-    InputGroup,
-    InputGroupAddon,
-    InputGroupButton,
-    InputGroupInput,
-    Sheet,
-    SheetContent,
-    SheetDescription,
-    SheetHeader,
-    SheetTitle,
+  Badge,
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupInput,
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
 } from '@/components/ui'
 import {
-    Sidebar,
-    SidebarContent,
-    SidebarFooter,
-    SidebarHeader,
-    SidebarMenu,
-    SidebarMenuButton,
-    SidebarMenuItem,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import { useTransactions } from '@/features/Transactions/api/transactions.queries'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { cn } from '@/shared/utils'
-import {
-    IconChartBar,
-    IconDashboard,
-    IconFolder,
-    IconHelp,
-    IconInnerShadowTop,
-    IconListDetails,
-    IconReport,
-    IconSearch,
-    IconSettings,
-    IconUsers,
-} from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
-import {
-    AlertCircle,
-    ChevronRight,
-    Loader2,
-    Navigation,
-    Pin,
-    PinOff,
-    Search,
-    Sparkles,
-    WifiOff,
-    X,
-} from 'lucide-react'
-import * as React from 'react'
-import { useTranslation } from 'react-i18next'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
 
 type SearchResultPayload = {
   result: unknown
@@ -207,15 +207,30 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           url: '/dashboard',
           icon: IconDashboard,
         },
-        {
-          title: t('sidebar.main.analytics'),
-          url: '/dashboard/analytics',
-          icon: IconChartBar,
-        },
       ],
     },
     {
       title: 'General',
+      items: [
+        {
+          title: t('sidebar.main.todos'),
+          url: '/dashboard/todos',
+          icon: IconListDetails,
+        },
+        {
+          title: t('sidebar.main.categories'),
+          url: '/dashboard/categories',
+          icon: IconListDetails,
+        },
+        {
+          title: t('sidebar.main.projects'),
+          url: '/dashboard/projects',
+          icon: IconFolder,
+        },
+      ],
+    },
+    {
+      title: 'Management',
       items: [
         {
           title: t('sidebar.main.transactions'),
@@ -232,24 +247,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
             ) : undefined,
         },
         {
-          title: t('sidebar.main.projects'),
-          url: '/dashboard/projects',
-          icon: IconFolder,
-        },
-      ],
-    },
-    {
-      title: 'Management',
-      items: [
-        {
-          title: t('sidebar.main.todos'),
-          url: '/dashboard/todos',
-          icon: IconListDetails,
-        },
-        {
-          title: t('sidebar.main.categories'),
-          url: '/dashboard/categories',
-          icon: IconListDetails,
+          title: t('sidebar.main.analytics'),
+          url: '/dashboard/analytics',
+          icon: IconChartBar,
         },
       ],
     },
@@ -440,19 +440,50 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <div className="text-sm leading-relaxed text-foreground/90">
                       {searchResult?.result ? (
                         <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4">
-                          <ReactMarkdown 
+                          <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
-                              h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2" {...props} />,
-                              h2: ({node, ...props}) => <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />,
-                              h3: ({node, ...props}) => <h3 className="text-base font-medium mt-2 mb-1" {...props} />,
-                              ul: ({node, ...props}) => <ul className="list-disc pl-5 my-2 space-y-1" {...props} />,
-                              ol: ({node, ...props}) => <ol className="list-decimal pl-5 my-2 space-y-1" {...props} />,
-                              li: ({node, ...props}) => <li className="text-sm leading-relaxed" {...props} />,
-                              p: ({node, ...props}) => <p className="text-sm leading-relaxed mb-2" {...props} />,
-                              a: ({node, ...props}) => <a className="text-primary hover:underline font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
-                              code: ({node, ...props}) => <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono" {...props} />,
-                              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary/20 pl-4 italic my-2" {...props} />,
+                              h1: ({ node: _node, ...props }) => (
+                                <h1 className="text-xl font-bold mt-4 mb-2" {...props} />
+                              ),
+                              h2: ({ node: _node, ...props }) => (
+                                <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />
+                              ),
+                              h3: ({ node: _node, ...props }) => (
+                                <h3 className="text-base font-medium mt-2 mb-1" {...props} />
+                              ),
+                              ul: ({ node: _node, ...props }) => (
+                                <ul className="list-disc pl-5 my-2 space-y-1" {...props} />
+                              ),
+                              ol: ({ node: _node, ...props }) => (
+                                <ol className="list-decimal pl-5 my-2 space-y-1" {...props} />
+                              ),
+                              li: ({ node: _node, ...props }) => (
+                                <li className="text-sm leading-relaxed" {...props} />
+                              ),
+                              p: ({ node: _node, ...props }) => (
+                                <p className="text-sm leading-relaxed mb-2" {...props} />
+                              ),
+                              a: ({ node: _node, ...props }) => (
+                                <a
+                                  className="text-primary hover:underline font-medium"
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  {...props}
+                                />
+                              ),
+                              code: ({ node: _node, ...props }) => (
+                                <code
+                                  className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono"
+                                  {...props}
+                                />
+                              ),
+                              blockquote: ({ node: _node, ...props }) => (
+                                <blockquote
+                                  className="border-l-4 border-primary/20 pl-4 italic my-2"
+                                  {...props}
+                                />
+                              ),
                             }}
                           >
                             {extractSearchText(searchResult.result)}

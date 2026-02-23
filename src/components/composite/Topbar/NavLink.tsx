@@ -10,13 +10,17 @@ interface NavLinkProps {
 }
 
 export const NavLink = memo(({ item, onClick, className }: NavLinkProps) => {
-  const baseStyles = 'text-sm font-medium text-muted-foreground hover:text-primary transition-colors'
+  const baseStyles =
+    'text-sm font-medium text-foreground/80 hover:text-primary transition-colors'
 
   if (item.to) {
     return (
       <Link
         to={item.to as '/'}
         className={cn(baseStyles, className)}
+        activeProps={{
+          className: 'text-foreground font-semibold',
+        }}
         onClick={(e) => onClick(e as unknown as React.MouseEvent<HTMLAnchorElement>, item.id)}
       >
         {item.label}

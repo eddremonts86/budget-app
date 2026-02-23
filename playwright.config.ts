@@ -61,7 +61,7 @@ export default defineConfig({
   ),
 
   webServer: {
-    command: 'VITE_E2E=true pnpm dev:server',
+    command: 'VITE_E2E=true npm run dev:server',
     url: 'http://localhost:3000',
     reuseExistingServer: !process.env.CI,
     timeout: 120 * 1000,

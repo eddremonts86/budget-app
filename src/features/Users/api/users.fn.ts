@@ -15,8 +15,23 @@ export const userSchema = z.object({
 
 export type UserInput = z.infer<typeof userSchema>
 
-export const getUsersFn = createServerFn({ method: 'GET' })
-  .handler(async ({ data }: { data?: { pageParam?: number; limit?: number } }) => {
+export const getUsersFn = createServerFn({ method: 'GET' }).handler(
+  async ({ data }: { data?: { pageParam?: number; limit?: number } }) => {
+    if (process.env.VITE_E2E === 'true') {
+      return {
+        data: Array.from({ length: 5 }).map((_, i) => ({
+          id: i.toString(),
+          name: `User ${i}`,
+          email: `user${i}@example.com`,
+          role: 'user' as const,
+          avatar: null,
+          createdAt: new Date().toISOString(),
+        })),
+        nextPage: undefined,
+        totalCount: 5,
+      }
+    }
+
     try {
       console.log('getUsersFn: Starting...')
       const { getDb } = await import('@/shared/lib/db')
@@ -50,10 +65,22 @@ export const getUsersFn = createServerFn({ method: 'GET' })
       console.error('Error in getUsersFn:', error)
       throw error
     }
-  })
+  },
+)
 
 export const getUserByIdFn = createServerFn({ method: 'GET' }).handler(
   async ({ data: id }: { data: unknown }) => {
+    if (process.env.VITE_E2E === 'true') {
+      return {
+        id: (id as string) || '1',
+        name: 'User 1',
+        email: 'user1@example.com',
+        role: 'user' as const,
+        avatar: null,
+        createdAt: new Date().toISOString(),
+      }
+    }
+
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
     const result = await db
@@ -71,6 +98,17 @@ export const getUserByIdFn = createServerFn({ method: 'GET' }).handler(
 
 export const getUserByEmailFn = createServerFn({ method: 'GET' }).handler(
   async ({ data: email }: { data: unknown }) => {
+    if (process.env.VITE_E2E === 'true') {
+      return {
+        id: '1',
+        name: 'User 1',
+        email: (email as string) || 'user1@example.com',
+        role: 'user' as const,
+        avatar: null,
+        createdAt: new Date().toISOString(),
+      }
+    }
+
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
     const result = await db
@@ -88,6 +126,18 @@ export const getUserByEmailFn = createServerFn({ method: 'GET' }).handler(
 
 export const createUserFn = createServerFn({ method: 'POST' }).handler(
   async ({ data }: { data: unknown }) => {
+    if (process.env.VITE_E2E === 'true') {
+      const input = data as UserInput
+      return {
+        id: crypto.randomUUID(),
+        name: input.name,
+        email: input.email,
+        role: input.role || 'user',
+        avatar: input.avatar,
+        createdAt: new Date().toISOString(),
+      }
+    }
+
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
     // Manual validation
@@ -117,6 +167,21 @@ export const createUserFn = createServerFn({ method: 'POST' }).handler(
 
 export const updateUserFn = createServerFn({ method: 'POST' }).handler(
   async ({ data }: { data: unknown }) => {
+    if (process.env.VITE_E2E === 'true') {
+      const { id, data: updateData } = data as {
+        id: string
+        data: Partial<UserInput>
+      }
+      return {
+        id,
+        name: updateData.name || 'User 1',
+        email: updateData.email || 'user1@example.com',
+        role: updateData.role || 'user',
+        avatar: updateData.avatar || null,
+        createdAt: new Date().toISOString(),
+      }
+    }
+
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
     const { id, data: updateData } = data as {
@@ -143,6 +208,10 @@ export const updateUserFn = createServerFn({ method: 'POST' }).handler(
 
 export const deleteUserFn = createServerFn({ method: 'POST' }).handler(
   async ({ data: id }: { data: unknown }) => {
+    if (process.env.VITE_E2E === 'true') {
+      return { success: true }
+    }
+
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
     await db.delete(users).where(eq(users.id, id as string))
@@ -152,6 +221,18 @@ export const deleteUserFn = createServerFn({ method: 'POST' }).handler(
 
 export const upsertUserFn = createServerFn({ method: 'POST' }).handler(
   async ({ data }: { data: unknown }) => {
+    if (process.env.VITE_E2E === 'true') {
+      const input = data as UserInput & { id: string }
+      return {
+        id: input.id,
+        name: input.name,
+        email: input.email,
+        role: (input.role as 'admin' | 'user') || 'user',
+        avatar: input.avatar,
+        createdAt: new Date().toISOString(),
+      }
+    }
+
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
     const input = data as UserInput & { id: string }

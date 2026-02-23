@@ -1,4 +1,4 @@
-import { IconUsers, IconCreditCard, IconActivity, IconCurrencyDollar } from '@tabler/icons-react'
+import { IconActivity, IconCurrencyDollar, IconListCheck, IconFolder } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from '@/components/ui'
 import { useDashboardStats } from '../api/dashboard.queries'
@@ -52,62 +52,62 @@ export function DashboardPage() {
                 <div className="text-2xl font-bold">
                   ${stats?.revenue?.value?.toLocaleString() ?? '0'}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {t('dashboard.stats.change', {
-                    value: `${(stats?.revenue?.change ?? 0) > 0 ? '+' : ''}${
-                      stats?.revenue?.change ?? 0
-                    }%`,
-                  })}
-                </p>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>
+                    {t('dashboard.stats.change', {
+                      value: `${(stats?.revenue?.change ?? 0) > 0 ? '+' : ''}${
+                        stats?.revenue?.change ?? 0
+                      }%`,
+                    })}
+                  </p>
+                  <p>
+                    {t('dashboard.stats.periodDays', {
+                      defaultValue: 'Last {{days}} days',
+                      days: stats?.revenue?.periodDays ?? 30,
+                    })}
+                    : ${stats?.revenue?.periodTotal?.toLocaleString() ?? '0'}
+                  </p>
+                  <p>
+                    {t('dashboard.stats.pendingApproval', { defaultValue: 'Pending approval' })}: $
+                    {stats?.revenue?.pendingApprovalTotal?.toLocaleString() ?? '0'}
+                  </p>
+                </div>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('dashboard.stats.subscriptions')}
-                </CardTitle>
-                <IconUsers className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+                <IconFolder className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(stats?.subscriptions?.value ?? 0) > 0 ? '+' : ''}
-                  {stats?.subscriptions?.value?.toLocaleString() ?? '0'}
+                  {stats?.activeProjects?.value?.toLocaleString() ?? '0'}
                 </div>
-                <p className="text-xs text-muted-foreground">
-                  {t('dashboard.stats.change', {
-                    value: `${(stats?.subscriptions?.change ?? 0) > 0 ? '+' : ''}${
-                      stats?.subscriptions?.change ?? 0
-                    }%`,
-                  })}
-                </p>
+                <p className="text-xs text-muted-foreground">{stats?.activeProjects?.context}</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">{t('dashboard.stats.sales')}</CardTitle>
-                <IconCreditCard className="h-4 w-4 text-muted-foreground" />
+                <CardTitle className="text-sm font-medium">Completed Tasks</CardTitle>
+                <IconListCheck className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(stats?.sales?.value ?? 0) > 0 ? '+' : ''}
-                  {stats?.sales?.value?.toLocaleString() ?? '0'}
+                  {stats?.completedTasks?.value?.toLocaleString() ?? '0'}
                 </div>
-                <p className="text-xs text-muted-foreground">{stats?.sales?.context}</p>
+                <p className="text-xs text-muted-foreground">{stats?.completedTasks?.context}</p>
               </CardContent>
             </Card>
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('dashboard.stats.activeNow')}
-                </CardTitle>
+                <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
                 <IconActivity className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
                 <div className="text-2xl font-bold">
-                  {(stats?.activeNow?.value ?? 0) > 0 ? '+' : ''}
-                  {stats?.activeNow?.value?.toLocaleString() ?? '0'}
+                  {stats?.pendingTasks?.value?.toLocaleString() ?? '0'}
                 </div>
-                <p className="text-xs text-muted-foreground">{stats?.activeNow?.context}</p>
+                <p className="text-xs text-muted-foreground">{stats?.pendingTasks?.context}</p>
               </CardContent>
             </Card>
           </>

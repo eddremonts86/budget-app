@@ -16,6 +16,8 @@ services:
       - ./ia-config:/app/ia-config:ro
       - app_node_modules:/app/node_modules
     depends_on:
+      lmstudio:
+        condition: service_healthy
       chromadb:
         condition: service_started
       ollama:
@@ -34,6 +36,21 @@ services:
       timeout: 10s
       retries: 5
       start_period: 25s
+
+  lmstudio:
+    image: lmstudio/llmster-preview:cpu
+    platform: linux/amd64
+    container_name: tanstack-template-lmstudio
+    ports:
+      - '1234:1234'
+    volumes:
+      - lmstudio_data:/root/.cache/lm-studio/models
+    healthcheck:
+      test: ['CMD-SHELL', 'lms status || exit 1']
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
 
   chromadb:
     image: chromadb/chroma:latest
