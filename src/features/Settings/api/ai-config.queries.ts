@@ -6,6 +6,7 @@ export const aiConfigKeys = {
   all: ['ai-config'] as const,
   detail: () => [...aiConfigKeys.all, 'detail'] as const,
   store: () => [...aiConfigKeys.all, 'store'] as const,
+  status: () => [...aiConfigKeys.all, 'status'] as const,
 }
 
 export const useAiConfig = () => {
@@ -14,6 +15,12 @@ export const useAiConfig = () => {
 
 export const useAiConfigStore = () => {
   return useTQuery(aiConfigKeys.store(), () => aiConfigApi.getConfigStore())
+}
+
+export const useAiProviderStatuses = () => {
+  return useTQuery(aiConfigKeys.status(), () => aiConfigApi.getProviderStatuses(), {
+    refetchInterval: 30000, // Check status every 30 seconds
+  })
 }
 
 export const useUpdateAiConfig = () => {

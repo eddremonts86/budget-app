@@ -1,24 +1,62 @@
 'use client'
 
+import {
+    Button,
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupTextarea,
+} from '@/components/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { aiConfigApi } from '@/features/Settings/api/ai-config.api'
+import { useAiConfigStore } from '@/features/Settings/api/ai-config.queries'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
+import type { AiProviderId } from '@/shared/lib/ai/ai-config'
+import { useTQuery } from '@/shared/lib/query'
+import type {
+    Conversation,
+    PersistedActionState,
+    StoredMessage,
+} from '@/shared/lib/storage/chat-storage'
+import {
+    createConversationObject,
+    deleteAllConversations,
+    deleteConversation,
+    generateTitle,
+    getConversation,
+    getConversations,
+    migrateFromLocalStorage,
+    saveConversation,
+} from '@/shared/lib/storage/chat-storage'
+import { toast } from '@/shared/lib/toast'
+import { cn } from '@/shared/utils/index'
 import { useUser } from '@clerk/tanstack-react-start'
 import { fetchServerSentEvents, useChat, type UIMessage } from '@tanstack/ai-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import {
-  ArrowUp,
-  Bot,
-  Check,
-  ChevronDown,
-  ChevronUp,
-  Copy,
-  FileText,
-  Paperclip,
-  Sparkles,
-  StopCircle,
-  Trash2,
-  User,
-  X,
-  Settings,
+    ArrowUp,
+    Bot,
+    Check,
+    ChevronDown,
+    ChevronUp,
+    Copy,
+    FileText,
+    Paperclip,
+    Settings,
+    Sparkles,
+    StopCircle,
+    Trash2,
+    User,
+    X,
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -26,34 +64,6 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
 import remarkGfm from 'remark-gfm'
-import {
-  Button,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from '@/components/ui'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
-import type { AiProviderId } from '@/shared/lib/ai/ai-config'
-import { useTQuery } from '@/shared/lib/query'
-import type {
-  Conversation,
-  PersistedActionState,
-  StoredMessage,
-} from '@/shared/lib/storage/chat-storage'
-import {
-  createConversationObject,
-  deleteAllConversations,
-  deleteConversation,
-  generateTitle,
-  getConversation,
-  getConversations,
-  migrateFromLocalStorage,
-  saveConversation,
-} from '@/shared/lib/storage/chat-storage'
-import { toast } from '@/shared/lib/toast'
-import { cn } from '@/shared/utils/index'
 import { ActionConfirmationCard } from './ActionConfirmationCard'
 import { ActionStatesProvider } from './ActionStatesContext'
 import { ConversationPanel } from './ConversationPanel'
@@ -94,7 +104,9 @@ const toUiMessage = (message: StoredMessage, index: number): UIMessage => ({
   id: `stored-${index}`,
   role: message.role,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  parts: (message.parts as any) || [{ type: 'text', content: message.content }],
+  parts: (Array.isArray(message.parts)
+    ? message.parts
+    : [{ type: 'text', content: message.content }]) as any,
 })
 
 function messagesToStored(messages: UIMessage[]): StoredMessage[] {
@@ -401,11 +413,12 @@ function MessageBubble({
               : 'rounded-2xl rounded-tl-sm bg-card/80 border border-border/50 text-foreground backdrop-blur-md hover:bg-card/90 hover:shadow-md',
           )}
         >
-          {message.parts.map((part, partIndex) => {
-            const partKey = `${message.id}-part-${partIndex}`
-            if (part.type === 'thinking') {
-              return <ThinkingProcess key={partKey} content={part.content} />
-            }
+          {Array.isArray(message.parts)
+            ? message.parts.map((part, partIndex) => {
+                const partKey = `${message.id}-part-${partIndex}`
+                if (part.type === 'thinking') {
+                  return <ThinkingProcess key={partKey} content={part.content} />
+                }
             if (part.type === 'text') {
               // Show error placeholder for empty AI responses
               if (!part.content?.trim()) {
@@ -523,8 +536,25 @@ function MessageBubble({
                 </div>
               )
             }
+            // @ts-expect-error - tool calls
+            if (part.type === 'tool-invocation') {
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              const toolName = (part as any).toolCall?.toolName
+              return (
+                <div
+                  key={partKey}
+                  className="rounded-lg border border-border/50 bg-background/50 p-3 text-sm"
+                >
+                  <div className="flex items-center gap-2 text-muted-foreground">
+                    <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                    Using tool: <span className="font-mono text-xs">{toolName}</span>
+                  </div>
+                </div>
+              )
+            }
             return null
-          })}
+          })
+            : null}
           {isTyping && (
             <div className="mt-2 flex items-center gap-1.5">
               <span className="h-2 w-2 animate-bounce rounded-full bg-indigo-500/60 [animation-delay:-0.3s]" />
@@ -750,11 +780,14 @@ export function HelpChatPage() {
       messages.filter((msg) => {
         if (msg.role !== 'assistant') return true
         // Keep if any part has content
-        return msg.parts.some((part) => {
-          if (part.type === 'text') return !!part.content?.trim()
-          if (part.type === 'thinking') return !!part.content?.trim()
-          return true // keep other part types (images, etc.)
-        })
+        return (
+          Array.isArray(msg.parts) &&
+          msg.parts.some((part) => {
+            if (part.type === 'text') return !!part.content?.trim()
+            if (part.type === 'thinking') return !!part.content?.trim()
+            return true // keep other part types (images, etc.)
+          })
+        )
       }),
     [messages],
   )
@@ -781,6 +814,27 @@ export function HelpChatPage() {
     },
     { cache: 'realtime', refetchInterval: 20000 },
   )
+
+  const { data: configStore } = useAiConfigStore()
+  const queryClient = useQueryClient()
+
+  const setActiveProviderMutation = useMutation({
+    mutationFn: (provider: string) => aiConfigApi.setActiveProvider(provider as any),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['ai-config'] })
+      queryClient.invalidateQueries({ queryKey: ['ai', 'status'] })
+      toast.success(t('settings.ai.messages.saved') || 'Provider updated')
+    },
+    onError: (error) => {
+      toast.error(t('settings.ai.messages.error') || 'Failed to update provider', {
+        description: error instanceof Error ? error.message : 'Unknown error',
+      })
+    },
+  })
+
+  const handleProviderChange = (value: string) => {
+    setActiveProviderMutation.mutate(value)
+  }
 
   const handleSend = async (overrideContent?: string) => {
     const trimmed = overrideContent || input.trim()
@@ -865,7 +919,13 @@ export function HelpChatPage() {
     prevMsgHashRef.current = ''
   }
 
-  const isAgentActive = providerQuery.data?.statuses[0]?.available ?? true
+  const isAgentActive = React.useMemo(() => {
+    if (!providerQuery.data?.statuses) return true
+    const activeId = configStore?.activeProvider
+    if (!activeId) return providerQuery.data.statuses[0]?.available ?? true
+    const status = providerQuery.data.statuses.find((s) => s.id === activeId)
+    return status?.available ?? true
+  }, [providerQuery.data, configStore?.activeProvider])
 
   return (
     <ActionStatesProvider
@@ -935,16 +995,37 @@ export function HelpChatPage() {
             </div>
 
             <div className="flex items-center gap-3">
-              <div
-                className={cn(
-                  'hidden items-center gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest md:flex shadow-sm',
-                  isAgentActive
-                    ? 'border-indigo-200 bg-indigo-50 text-indigo-600 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-300'
-                    : 'border-destructive/20 bg-destructive/10 text-destructive',
-                )}
-              >
-                <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
-                {providerQuery.data?.statuses[0]?.id.toUpperCase() || 'SYSTEM'}
+              <div className="hidden md:flex">
+                <Select
+                  value={configStore?.activeProvider}
+                  onValueChange={handleProviderChange}
+                  disabled={isLoading || setActiveProviderMutation.isPending}
+                >
+                  <SelectTrigger
+                    className={cn(
+                      'h-8 gap-2 rounded-full border px-3 py-1.5 text-[10px] font-bold uppercase tracking-widest shadow-sm transition-colors',
+                      isAgentActive
+                        ? 'border-indigo-200 bg-indigo-50 text-indigo-600 hover:bg-indigo-100 dark:border-indigo-900/50 dark:bg-indigo-900/20 dark:text-indigo-300 dark:hover:bg-indigo-900/40'
+                        : 'border-destructive/20 bg-destructive/10 text-destructive hover:bg-destructive/20',
+                    )}
+                  >
+                    <div className="flex items-center gap-2">
+                      <span className="h-1.5 w-1.5 rounded-full bg-current"></span>
+                      <SelectValue placeholder="SYSTEM" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent align="end">
+                    {Object.keys(configStore?.providers || {}).map((provider) => (
+                      <SelectItem
+                        key={provider}
+                        value={provider}
+                        className="text-xs font-medium uppercase"
+                      >
+                        {provider}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <Button
                 variant="ghost"

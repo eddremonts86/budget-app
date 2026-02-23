@@ -1,7 +1,5 @@
-import fs from 'node:fs/promises'
-import path from 'node:path'
+import { categories, todos, transactions, users } from '@/shared/lib/db/schema'
 import { desc } from 'drizzle-orm'
-import { todos, users, transactions, categories } from '@/shared/lib/db/schema'
 
 // ---------------------------------------------------------------------------
 // Intent Detection
@@ -333,6 +331,9 @@ async function loadAppKnowledge(): Promise<AppKnowledge | null> {
   if (cachedKnowledge) return cachedKnowledge
 
   try {
+    const { default: fs } = await import('node:fs/promises')
+    const { default: path } = await import('node:path')
+
     const knowledgePath = path.resolve(process.cwd(), 'src/server/data/app-knowledge.json')
     const content = await fs.readFile(knowledgePath, 'utf-8')
     const data = JSON.parse(content)
@@ -676,11 +677,6 @@ export async function injectDynamicContext(query: string, locale: string = 'en')
 
 // Export for testing
 export {
-  detectIntent,
-  detectActionIntent,
-  loadAppKnowledge,
-  fetchDynamicContext,
-  buildAppNavigationContext,
-  buildActionInstructions,
+    buildActionInstructions, buildAppNavigationContext, detectActionIntent, detectIntent, fetchDynamicContext, loadAppKnowledge
 }
-export type { Intent, ActionIntent, ActionType, ActionEntity, AppKnowledge }
+export type { ActionEntity, ActionIntent, ActionType, AppKnowledge, Intent }

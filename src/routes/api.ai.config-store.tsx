@@ -5,41 +5,50 @@ export const Route = createFileRoute('/api/ai/config-store')({
   server: {
     handlers: {
       GET: async () => {
-        const { promises: fs } = await import('fs')
-        const path = await import('path')
-
         try {
-          const configPath = path.resolve(process.cwd(), 'src/server/data/ai-config-store.json')
-          const content = await fs.readFile(configPath, 'utf-8')
-          const config = JSON.parse(content)
+          console.log('[ConfigStore] GET request received')
+          const { readAiConfig } = await import('@/server/utils/ai-config-helper')
 
-          return new Response(JSON.stringify(config), {
-            headers: { 'Content-Type': 'application/json' },
-          })
+          try {
+            const config = await readAiConfig()
+            return new Response(JSON.stringify(config), {
+              headers: { 'Content-Type': 'application/json' },
+            })
+          } catch (readError) {
+             console.error('[ConfigStore] File read error:', readError)
+             // Fallback
+             return new Response(JSON.stringify({ activeProvider: 'llama-cpp', providers: {} }), {
+               headers: { 'Content-Type': 'application/json' },
+             })
+          }
         } catch (error) {
           console.error('Failed to read ai-config-store:', error)
-          return new Response(JSON.stringify({ activeProvider: 'lm-studio', providers: {} }), {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          const errorStack = error instanceof Error ? error.stack : ''
+          return new Response(JSON.stringify({
+            activeProvider: 'lm-studio',
+            providers: {},
+            _debug_error: errorMessage,
+            _debug_stack: errorStack
+          }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
           })
         }
       },
       POST: async ({ request }: { request: Request }) => {
-        const { promises: fs } = await import('fs')
-        const path = await import('path')
-
         try {
+          const { writeAiConfig } = await import('@/server/utils/ai-config-helper')
           const body = await request.json()
-          const configPath = path.resolve(process.cwd(), 'src/server/data/ai-config-store.json')
-
-          await fs.writeFile(configPath, JSON.stringify(body, null, 2))
+          await writeAiConfig(body)
 
           return new Response(JSON.stringify(body), {
             headers: { 'Content-Type': 'application/json' },
           })
         } catch (error) {
           console.error('Failed to write ai-config-store:', error)
-          return new Response(JSON.stringify({ error: 'Failed to save config' }), {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return new Response(JSON.stringify({ error: 'Failed to save config', details: errorMessage }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
           })
@@ -47,21 +56,18 @@ export const Route = createFileRoute('/api/ai/config-store')({
       },
       PUT: async ({ request }: { request: Request }) => {
         // Handle PUT same as POST for compatibility
-        const { promises: fs } = await import('fs')
-        const path = await import('path')
-
         try {
+          const { writeAiConfig } = await import('@/server/utils/ai-config-helper')
           const body = await request.json()
-          const configPath = path.resolve(process.cwd(), 'src/server/data/ai-config-store.json')
-
-          await fs.writeFile(configPath, JSON.stringify(body, null, 2))
+          await writeAiConfig(body)
 
           return new Response(JSON.stringify(body), {
             headers: { 'Content-Type': 'application/json' },
           })
         } catch (error) {
           console.error('Failed to write ai-config-store:', error)
-          return new Response(JSON.stringify({ error: 'Failed to save config' }), {
+          const errorMessage = error instanceof Error ? error.message : String(error)
+          return new Response(JSON.stringify({ error: 'Failed to save config', details: errorMessage }), {
             status: 500,
             headers: { 'Content-Type': 'application/json' },
           })

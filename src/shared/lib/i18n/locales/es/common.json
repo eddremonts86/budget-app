@@ -161,54 +161,45 @@
       "error": "Error al guardar la configuración. Inténtalo de nuevo."
     },
     "ai": {
-      "title": "Configuración de IA",
-      "description": "Configura los parámetros del servicio de IA, incluyendo la URL base, el token de acceso y los endpoints.",
       "sections": {
+        "status": "Estado del Sistema",
+        "configurations": "Configuraciones",
+        "logs": "Registros",
+        "statusDescription": "Verifica la disponibilidad de tus modelos locales y remotos.",
+        "fallback": "Prioridad de Respaldo del Sistema",
         "connection": "Detalles de Conexión",
         "parameters": "Parámetros del Modelo",
         "endpoints": "Configuración de Endpoints"
       },
-      "tabs": {
-        "system": "Sistema",
-        "ai": "IA"
-      },
-      "providers": {
-        "openai": "OpenAI",
-        "anthropic": "Anthropic",
-        "lm-studio": "LM Studio"
+      "messages": {
+        "saved": "Configuración guardada correctamente",
+        "reset": "Configuración restaurada a valores por defecto",
+        "testSuccess": "Conexión exitosa con el proveedor",
+        "testError": "No se pudo conectar con el proveedor",
+        "checkingStatus": "Verificando estado de los servicios...",
+        "fallbackDescription": "El sistema intentará automáticamente usar el siguiente proveedor disponible si el activo falla.",
+        "active": "Activo",
+        "noModels": "No se encontraron modelos",
+        "modelsCount": "{{count}} modelos"
       },
       "fields": {
-        "provider": "Proveedor de IA",
+        "provider": "Proveedor IA",
         "baseUrl": "URL Base",
-        "port": "Puerto",
-        "token": "Token de Acceso (opcional)",
-        "apiKey": "Clave API",
-        "model": "ID del Modelo",
+        "token": "API Token",
+        "model": "Modelo",
+        "maxTokens": "Max Tokens",
         "temperature": "Temperatura",
-        "maxTokens": "Máximo de Tokens",
         "topP": "Top P",
         "frequencyPenalty": "Penalización de Frecuencia",
         "presencePenalty": "Penalización de Presencia",
-        "chatEndpoint": "Endpoint de Chat",
-        "modelsEndpoint": "Endpoint de Modelos",
-        "loadEndpoint": "Endpoint de Carga",
-        "downloadEndpoint": "Endpoint de Descarga",
-        "statusEndpoint": "Endpoint de Estado",
-        "timeout": "Tiempo de Espera (ms)",
         "additionalParams": "Parámetros Adicionales (JSON)"
       },
       "actions": {
-        "save": "Guardar Configuración",
-        "reset": "Restablecer Valores",
+        "save": "Guardar Cambios",
         "test": "Probar Conexión",
-        "confirmReset": "¿Estás seguro de que deseas restablecer la configuración de IA a los valores por defecto?"
+        "reset": "Restaurar"
       },
-      "messages": {
-        "saved": "Configuración de IA guardada correctamente.",
-        "reset": "Configuración de IA restablecida.",
-        "testSuccess": "Conexión con el servicio de IA establecida correctamente.",
-        "testError": "Error al conectar con el servicio de IA."
-      }
+      "description": "Configura los proveedores de Inteligencia Artificial para el chat y los agentes."
     }
   },
   "dashboard": {

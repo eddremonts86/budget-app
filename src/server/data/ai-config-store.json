@@ -1,11 +1,59 @@
 {
   "activeProvider": "lm-studio",
   "providers": {
+    "llama-cpp": {
+      "provider": "llama-cpp",
+      "baseUrl": "http://localhost:8080/v1",
+      "port": 8080,
+      "token": "",
+      "apiKey": "",
+      "parameters": {
+        "model": "llama-3.2-1b-instruct-q4_k_m.gguf",
+        "temperature": 0.7,
+        "max_tokens": 2048,
+        "top_p": 0.9,
+        "frequency_penalty": 0,
+        "presence_penalty": 0
+      },
+      "endpoints": {
+        "chat": "/chat/completions",
+        "models": "/models",
+        "load": "",
+        "download": "",
+        "status": ""
+      },
+      "timeout": 30000,
+      "additionalParams": ""
+    },
+    "ollama": {
+      "provider": "ollama",
+      "baseUrl": "http://localhost:11434/v1",
+      "port": 11434,
+      "token": "",
+      "apiKey": "",
+      "parameters": {
+        "model": "llama3.2",
+        "temperature": 0.7,
+        "max_tokens": 2048,
+        "top_p": 0.9,
+        "frequency_penalty": 0,
+        "presence_penalty": 0
+      },
+      "endpoints": {
+        "chat": "/chat/completions",
+        "models": "/models",
+        "load": "/api/pull",
+        "download": "/api/pull",
+        "status": ""
+      },
+      "timeout": 30000,
+      "additionalParams": ""
+    },
     "openai": {
       "provider": "openai",
       "baseUrl": "https://api.openai.com/v1",
       "port": 443,
-      "token": "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",
+      "token": "",
       "apiKey": "",
       "parameters": {
         "model": "gpt-4o",
@@ -22,7 +70,7 @@
         "download": "",
         "status": ""
       },
-      "timeout": 8000,
+      "timeout": 30000,
       "additionalParams": ""
     },
     "anthropic": {
@@ -41,7 +89,7 @@
       },
       "endpoints": {
         "chat": "/messages",
-        "models": "/models",
+        "models": "/messages",
         "load": "",
         "download": "",
         "status": ""

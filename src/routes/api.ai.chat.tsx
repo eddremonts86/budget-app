@@ -1,7 +1,7 @@
-import { chat, toServerSentEventsResponse } from '@tanstack/ai'
-import { createFileRoute } from '@tanstack/react-router'
 import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
+import { chat, toServerSentEventsResponse } from '@tanstack/ai'
+import { createFileRoute } from '@tanstack/react-router'
 
 type ChatRequestBody = {
   messages: Array<{
@@ -88,6 +88,7 @@ const normalizeIncomingMessages = (rawMessages: ChatRequestBody['messages']): Ch
         return {
           role,
           content: msg.content || '',
+          parts: [{ type: 'text' as const, text: msg.content || '' }],
         }
       }
 
@@ -101,7 +102,11 @@ const normalizeIncomingMessages = (rawMessages: ChatRequestBody['messages']): Ch
         .join('\n')
 
       if (!hasMultimodal) {
-        return { role, content }
+        return {
+          role,
+          content,
+          parts: [{ type: 'text' as const, text: content }],
+        }
       }
 
       const parts = msg.parts.map((part) => {
@@ -113,6 +118,38 @@ const normalizeIncomingMessages = (rawMessages: ChatRequestBody['messages']): Ch
       return { role, content, parts }
     })
     .filter((msg) => msg.content.length > 0 || (Array.isArray(msg.parts) && msg.parts.length > 0))
+}
+
+const consolidateMessages = (messages: ChatMessage[]): ChatMessage[] => {
+  const result: ChatMessage[] = []
+
+  for (const message of messages) {
+    if (result.length === 0) {
+      result.push(message)
+      continue
+    }
+
+    const last = result[result.length - 1]
+    if (last.role === message.role) {
+      // Merge content
+      const newContent = `${last.content}\n\n${message.content}`
+
+      // Merge parts if they exist
+      let newParts: ChatMessage['parts'] = []
+      const lastParts = last.parts || [{ type: 'text' as const, text: last.content }]
+      const messageParts = message.parts || [{ type: 'text' as const, text: message.content }]
+      newParts = [...lastParts, ...messageParts]
+
+      result[result.length - 1] = {
+        role: last.role,
+        content: newContent,
+        parts: newParts,
+      }
+    } else {
+      result.push(message)
+    }
+  }
+  return result
 }
 
 const findLastUserQuery = (messages: ChatMessage[]) => {
@@ -506,8 +543,8 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
   try {
     const [
       { logAudit },
-      { getActiveAiConfig, validateAiConfig },
-      { detectBestProvider, getProvider },
+      { getActiveAiConfig, getAllAiConfigs, validateAiConfig },
+      { detectBestProvider, getProvider, probeProvider },
     ] = await Promise.all([
       import('@/shared/lib/ai/audit'),
       import('@/shared/lib/ai/server/config-store'),
@@ -539,31 +576,52 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
     const config = await getActiveAiConfig()
     const validation = validateAiConfig(config)
 
-    if (!validation.valid) {
-      return new Response(
-        JSON.stringify({
-          error: 'CONFIG_INVALID',
-          message: validation.error,
-          provider: config.provider,
-        }),
-        {
-          status: 400,
-          headers: { 'Content-Type': 'application/json' },
-        },
-      )
+    // Fallback logic
+    let providerId: AiProviderId | undefined = body.providerId ?? config.provider
+    let finalConfig = config
+
+    if (providerId) {
+      // Check if the requested provider is actually available
+      const allConfigs = await getAllAiConfigs()
+      const targetConfig = allConfigs.providers[providerId]
+
+      if (targetConfig) {
+        const status = await probeProvider(targetConfig)
+        if (!status.available) {
+          // eslint-disable-next-line no-console
+          console.warn(
+            `[AI] Provider ${providerId} is unavailable (${status.message}). Attempting fallback...`,
+          )
+          providerId = undefined // Trigger fallback
+        } else {
+          // If available, make sure we use its config (in case body.providerId differed from active config)
+          finalConfig = targetConfig
+        }
+      }
     }
 
-    const detection = await detectBestProvider()
-    const providerId = body.providerId ?? config.provider ?? detection.provider ?? null
+    if (!providerId) {
+      const detection = await detectBestProvider()
+      providerId = detection.provider ?? undefined
+
+      if (providerId) {
+        const allConfigs = await getAllAiConfigs()
+        finalConfig = allConfigs.providers[providerId]
+      }
+    }
 
     if (!providerId) {
-      return new Response(JSON.stringify({ error: 'NO_PROVIDER_CONFIGURED' }), {
-        status: 400,
+      return new Response(JSON.stringify({ error: 'NO_PROVIDER_AVAILABLE' }), {
+        status: 503,
         headers: { 'Content-Type': 'application/json' },
       })
     }
 
     const lastUserQuery = await injectReferenceContext(messages, locale)
+
+    // Consolidate messages to merge consecutive user/assistant messages
+    // This is crucial for providers like Anthropic that disallow consecutive user messages
+    const consolidatedMessages = consolidateMessages(messages)
 
     // Audit Log
     logAudit({
@@ -571,7 +629,7 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
       locale,
       query: lastUserQuery ? `${String(lastUserQuery).slice(0, 50)}...` : 'No content',
       providerId: providerId || 'unknown',
-      model: body.model ?? config.parameters.model ?? 'unknown',
+      model: body.model ?? finalConfig.parameters.model ?? 'unknown',
       contextLength: 0,
       // eslint-disable-next-line no-console
     }).catch((err) => console.error('Audit log failed:', err))
@@ -585,23 +643,25 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
     }
 
     if (providerId === 'lm-studio') {
-      return await streamLmStudioChat(config, body, messages)
+      return await streamLmStudioChat(finalConfig, body, consolidatedMessages)
     }
 
-    const adapter = provider.buildAdapter(config)(body.model ?? config.parameters.model)
+    const adapter = provider.buildAdapter(finalConfig)(body.model ?? finalConfig.parameters.model)
 
-    const modelOptions = buildModelOptions(providerId, body, config)
+    const modelOptions = buildModelOptions(providerId, body, finalConfig)
 
     const stream = chat({
       adapter,
-      messages,
+      messages: consolidatedMessages,
       conversationId: body.conversationId,
       modelOptions: modelOptions as Parameters<typeof chat>[0]['modelOptions'],
     })
     return toServerSentEventsResponse(stream)
   } catch (error) {
+    console.error('[AI Chat Error]', error)
     const message = error instanceof Error ? error.message : 'UNKNOWN_ERROR'
-    return new Response(JSON.stringify({ error: message }), {
+    const stack = error instanceof Error ? error.stack : undefined
+    return new Response(JSON.stringify({ error: message, stack }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     })

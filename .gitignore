@@ -75,3 +75,6 @@ count.txt
 /playwright-report/
 /blob-report/
 /playwright/.cache/
+
+# AI Models
+models/*.gguf

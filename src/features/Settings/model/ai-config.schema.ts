@@ -1,6 +1,12 @@
 import { z } from 'zod'
 
-export const aiProviderSchema = z.enum(['openai', 'anthropic', 'lm-studio'])
+export const aiProviderSchema = z.enum([
+  'llama-cpp',
+  'ollama',
+  'lm-studio',
+  'openai',
+  'anthropic',
+])
 export type AiProvider = z.infer<typeof aiProviderSchema>
 
 export const aiParametersSchema = z.object({

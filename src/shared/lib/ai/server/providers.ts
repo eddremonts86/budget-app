@@ -1,9 +1,9 @@
+import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
 import type { AnyTextAdapter } from '@tanstack/ai'
 import { createAnthropicChat } from '@tanstack/ai-anthropic'
 import { createOpenaiChat } from '@tanstack/ai-openai'
-import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
-import { type AiProviderId } from '../ai-config'
-import { getActiveAiConfig } from './config-store'
+import { type AiProviderId, aiConfig } from '../ai-config'
+import { getAllAiConfigs } from './config-store'
 
 export type AiProviderStatus = {
   id: AiProviderId
@@ -12,6 +12,7 @@ export type AiProviderStatus = {
   status: 'available' | 'auth_required' | 'unreachable' | 'error'
   latencyMs: number
   message?: string
+  modelCount?: number
 }
 
 type ProviderRegistryItem = {
@@ -34,6 +35,32 @@ const normalizeOpenAiBaseUrl = (baseUrl: string) => {
   }
   return url
 }
+
+registerProvider({
+  id: 'llama-cpp',
+  label: 'Llama.cpp',
+  buildAdapter: (config) => {
+    const baseUrl = normalizeOpenAiBaseUrl(config.baseUrl)
+    return (model) =>
+      createOpenaiChat(model as Parameters<typeof createOpenaiChat>[0], config.apiKey || '', {
+        baseURL: baseUrl,
+        defaultHeaders: getProviderHeaders(config),
+      })
+  },
+})
+
+registerProvider({
+  id: 'ollama',
+  label: 'Ollama',
+  buildAdapter: (config) => {
+    const baseUrl = normalizeOpenAiBaseUrl(config.baseUrl)
+    return (model) =>
+      createOpenaiChat(model as Parameters<typeof createOpenaiChat>[0], config.apiKey || 'ollama', {
+        baseURL: baseUrl,
+        defaultHeaders: getProviderHeaders(config),
+      })
+  },
+})
 
 registerProvider({
   id: 'lm-studio',
@@ -134,8 +161,44 @@ export const probeProvider = async (config: AiConfigFormData): Promise<AiProvide
     )
     const latencyMs = Date.now() - start
     if (res.ok) {
-      return { id, label, available: true, status: 'available', latencyMs }
+      let modelCount = 0
+      try {
+        const data = await res.json()
+        if (data && Array.isArray(data.data)) {
+          modelCount = data.data.length
+        } else if (Array.isArray(data)) {
+          modelCount = data.length
+        }
+      } catch {
+        // Ignore JSON parse error
+      }
+
+      if (modelCount === 0 && id !== 'anthropic') {
+        return {
+          id,
+          label,
+          available: false,
+          status: 'error',
+          latencyMs,
+          modelCount,
+          message: 'NO_MODELS_FOUND',
+        }
+      }
+
+      return { id, label, available: true, status: 'available', latencyMs, modelCount }
     }
+
+    // Handle 405 Method Not Allowed (used for Anthropic probe on /v1/messages)
+    if (res.status === 405) {
+      return {
+        id,
+        label,
+        available: true,
+        status: 'available',
+        latencyMs,
+      }
+    }
+
     if (res.status === 401 || res.status === 403) {
       return {
         id,
@@ -168,13 +231,33 @@ export const probeProvider = async (config: AiConfigFormData): Promise<AiProvide
 }
 
 export const listProviderStatuses = async (): Promise<AiProviderStatus[]> => {
-  const config = await getActiveAiConfig()
-  const status = await probeProvider(config)
-  return [status]
+  const allConfigs = await getAllAiConfigs()
+  const statuses: AiProviderStatus[] = []
+
+  for (const providerId of aiConfig.providerPriority) {
+    const config = allConfigs.providers[providerId]
+    if (!config) continue
+    statuses.push(await probeProvider(config))
+  }
+
+  return statuses
 }
 
 export const detectBestProvider = async () => {
-  const config = await getActiveAiConfig()
-  const status = await probeProvider(config)
-  return { statuses: [status], provider: status.available ? status.id : null }
+  const allConfigs = await getAllAiConfigs()
+  const statuses: AiProviderStatus[] = []
+
+  for (const providerId of aiConfig.providerPriority) {
+    const config = allConfigs.providers[providerId]
+    if (!config) continue
+
+    const status = await probeProvider(config)
+    statuses.push(status)
+
+    if (status.available) {
+      return { statuses, provider: providerId }
+    }
+  }
+
+  return { statuses, provider: null }
 }

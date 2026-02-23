@@ -20,6 +20,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { cn } from '@/shared/lib/utils'
 
 interface AuditLog {
   timestamp: string
@@ -29,7 +30,11 @@ interface AuditLog {
   model: string
 }
 
-export function AiLanguageAudit() {
+interface AiLanguageAuditProps {
+  className?: string
+}
+
+export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
   const queryClient = useQueryClient()
   const { data, refetch, isRefetching } = useQuery({
     queryKey: ['ai-audit'],
@@ -61,7 +66,7 @@ export function AiLanguageAudit() {
   })
 
   return (
-    <Card className="mt-8 overflow-hidden border-border/60 shadow-sm transition-all hover:shadow-md">
+    <Card className={cn("mt-8 overflow-hidden border-border/60 shadow-sm transition-all hover:shadow-md", className)}>
       <CardHeader className="border-b bg-muted/40 pb-4">
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div>

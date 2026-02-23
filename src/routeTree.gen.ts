@@ -14,6 +14,7 @@ import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as LandingIndexRouteImport } from './routes/_landing.index'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard.dashboard'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard.dashboard.index'
+import { Route as ApiAiTestConnectionRouteImport } from './routes/api.ai.test-connection'
 import { Route as ApiAiStatusRouteImport } from './routes/api.ai.status'
 import { Route as ApiAiSearchRouteImport } from './routes/api.ai.search'
 import { Route as ApiAiConfigStoreRouteImport } from './routes/api.ai.config-store'
@@ -52,6 +53,11 @@ const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardDashboardRoute,
+} as any)
+const ApiAiTestConnectionRoute = ApiAiTestConnectionRouteImport.update({
+  id: '/api/ai/test-connection',
+  path: '/api/ai/test-connection',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiStatusRoute = ApiAiStatusRouteImport.update({
   id: '/api/ai/status',
@@ -151,6 +157,7 @@ export interface FileRoutesByFullPath {
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
+  '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/dashboard/': typeof DashboardDashboardIndexRoute
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
 }
@@ -170,6 +177,7 @@ export interface FileRoutesByTo {
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
+  '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
 }
@@ -193,6 +201,7 @@ export interface FileRoutesById {
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
+  '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
 }
@@ -215,6 +224,7 @@ export interface FileRouteTypes {
     | '/api/ai/config-store'
     | '/api/ai/search'
     | '/api/ai/status'
+    | '/api/ai/test-connection'
     | '/dashboard/'
     | '/api/ai/chat/completions'
   fileRoutesByTo: FileRoutesByTo
@@ -234,6 +244,7 @@ export interface FileRouteTypes {
     | '/api/ai/config-store'
     | '/api/ai/search'
     | '/api/ai/status'
+    | '/api/ai/test-connection'
     | '/dashboard'
     | '/api/ai/chat/completions'
   id:
@@ -256,6 +267,7 @@ export interface FileRouteTypes {
     | '/api/ai/config-store'
     | '/api/ai/search'
     | '/api/ai/status'
+    | '/api/ai/test-connection'
     | '/_dashboard/dashboard/'
     | '/api/ai/chat/completions'
   fileRoutesById: FileRoutesById
@@ -268,6 +280,7 @@ export interface RootRouteChildren {
   ApiAiConfigStoreRoute: typeof ApiAiConfigStoreRoute
   ApiAiSearchRoute: typeof ApiAiSearchRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
+  ApiAiTestConnectionRoute: typeof ApiAiTestConnectionRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -306,6 +319,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardDashboardIndexRouteImport
       parentRoute: typeof DashboardDashboardRoute
+    }
+    '/api/ai/test-connection': {
+      id: '/api/ai/test-connection'
+      path: '/api/ai/test-connection'
+      fullPath: '/api/ai/test-connection'
+      preLoaderRoute: typeof ApiAiTestConnectionRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/ai/status': {
       id: '/api/ai/status'
@@ -487,6 +507,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiConfigStoreRoute: ApiAiConfigStoreRoute,
   ApiAiSearchRoute: ApiAiSearchRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
+  ApiAiTestConnectionRoute: ApiAiTestConnectionRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

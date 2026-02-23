@@ -164,6 +164,11 @@
       "title": "AI Configuration",
       "description": "Configure AI service parameters, including base URL, access token, and endpoints.",
       "sections": {
+        "status": "System Status",
+        "configurations": "Configurations",
+        "logs": "Logs",
+        "statusDescription": "Check the availability of your local and remote models.",
+        "fallback": "System Fallback Priority",
         "connection": "Connection Details",
         "parameters": "Model Parameters",
         "endpoints": "Endpoints Configuration"
@@ -207,8 +212,13 @@
         "saved": "AI configuration saved successfully.",
         "reset": "AI configuration reset.",
         "testSuccess": "Successfully connected to AI service.",
-        "testError": "Failed to connect to AI service."
-      }
+        "testError": "Failed to connect to AI service.",
+        "checkingStatus": "Checking service status...",
+        "fallbackDescription": "The system will automatically try the next available provider if the active one fails.",
+        "active": "Active",
+         "noModels": "No models found",
+         "modelsCount": "{{count}} models"
+       }
     }
   },
   "dashboard": {

@@ -1,18 +1,17 @@
-import {
-  IconLoader2,
-  IconSettings,
-  IconAdjustmentsHorizontal,
-  IconRobot,
-} from '@tabler/icons-react'
-import { motion } from 'framer-motion'
-import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/shared/lib/toast'
+import {
+    IconAdjustmentsHorizontal,
+    IconLoader2,
+    IconRobot,
+    IconSettings,
+} from '@tabler/icons-react'
+import { motion } from 'framer-motion'
+import { useTranslation } from 'react-i18next'
 import { useSettings } from '../hooks/useSettings'
 import type { Theme } from '../model'
 import { AiConfigForm } from './AiConfigForm'
-import { AiLanguageAudit } from './AiLanguageAudit'
 import { DevtoolsToggle } from './DevtoolsToggle'
 import { LanguageSelector } from './LanguageSelector'
 import { ThemeSelector } from './ThemeSelector'
@@ -79,7 +78,7 @@ export function SettingsPage() {
 
           <div className="flex-1">
             <TabsContent value="system" className="mt-0 space-y-8 outline-none">
-              <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              <div className="grid grid-cols-1 gap-6">
                 <section className="space-y-6">
                   <div className="rounded-xl border bg-card p-6 shadow-sm ring-1 ring-border/5">
                     <div className="mb-6 flex items-center gap-2">
@@ -142,7 +141,6 @@ export function SettingsPage() {
 
             <TabsContent value="ai" className="mt-0 outline-none">
               <AiConfigForm />
-              <AiLanguageAudit />
             </TabsContent>
           </div>
         </div>

@@ -1,37 +1,78 @@
+import { Button } from '@/components/ui/button'
+import { Field, FieldError, FieldLabel } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 import {
-  IconLoader2,
-  IconRefresh,
-  IconWorldCheck,
-  IconDeviceFloppy,
-  IconSettings,
-  IconPlugConnected,
-  IconAdjustments,
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select'
+import { Separator } from '@/components/ui/separator'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { toast } from '@/shared/lib/toast'
+import {
+    IconAdjustments,
+    IconDeviceFloppy,
+    IconLoader2,
+    IconPlugConnected,
+    IconRefresh,
+    IconSettings,
+    IconWorldCheck,
 } from '@tabler/icons-react'
 import { useForm } from '@tanstack/react-form'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/ui/button'
-import { Field, FieldLabel, FieldError } from '@/components/ui/field'
-import { Input } from '@/components/ui/input'
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
-import { toast } from '@/shared/lib/toast'
-import {
-  useAiConfig,
-  useAiConfigStore,
-  useUpdateAiConfig,
-  useResetAiConfig,
-  useTestAiConnection,
+    useAiConfig,
+    useAiConfigStore,
+    useAiProviderStatuses,
+    useResetAiConfig,
+    useTestAiConnection,
+    useUpdateAiConfig
 } from '../api/ai-config.queries'
 import { type AiConfigFormData, type AiProvider } from '../model/ai-config.schema'
+import { AiLanguageAudit } from './AiLanguageAudit'
 
 const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
+  'llama-cpp': {
+    baseUrl: 'http://localhost:8080/v1',
+    port: 8080,
+    endpoints: {
+      chat: '/chat/completions',
+      models: '/models',
+      load: '',
+      download: '',
+      status: '',
+    },
+    parameters: {
+      model: 'llama-3.2-1b-instruct-q4_k_m.gguf',
+      temperature: 0.7,
+      max_tokens: 2048,
+      top_p: 0.9,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    },
+  },
+  ollama: {
+    baseUrl: 'http://localhost:11434/v1',
+    port: 11434,
+    endpoints: {
+      chat: '/chat/completions',
+      models: '/models',
+      load: '/api/pull',
+      download: '/api/pull',
+      status: '',
+    },
+    parameters: {
+      model: 'llama3.2',
+      temperature: 0.7,
+      max_tokens: 2048,
+      top_p: 0.9,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    },
+  },
   openai: {
     baseUrl: 'https://api.openai.com/v1',
     port: 443,
@@ -53,7 +94,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
     port: 443,
     endpoints: {
       chat: '/messages',
-      models: '/models',
+      models: '/messages',
     },
     parameters: {
       model: 'claude-3-5-sonnet-20240620',
@@ -75,7 +116,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       status: '/models/download/status/:job_id',
     },
     parameters: {
-      model: 'local-model',
+      model: 'llama3.2:latest',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -92,6 +133,7 @@ export function AiConfigForm() {
   const updateMutation = useUpdateAiConfig()
   const resetMutation = useResetAiConfig()
   const testMutation = useTestAiConnection()
+  const { data: providerStatuses } = useAiProviderStatuses()
 
   const defaultValues: AiConfigFormData = React.useMemo(() => {
     return {
@@ -236,9 +278,125 @@ export function AiConfigForm() {
       }}
       className="space-y-6"
     >
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Left Column: Provider & Connection */}
-        <div className="lg:col-span-2 space-y-6">
+      <Tabs defaultValue="status" className="w-full space-y-6">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="status">{t('settings.ai.sections.status')}</TabsTrigger>
+          <TabsTrigger value="configurations">
+            {t('settings.ai.sections.configurations') || 'Configurations'}
+          </TabsTrigger>
+          <TabsTrigger value="logs">{t('settings.ai.sections.logs') || 'Logs'}</TabsTrigger>
+        </TabsList>
+        <TabsContent value="status" className="mt-0">
+          {/* Status Section */}
+        <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
+          <div className="flex flex-col space-y-1.5 p-6 pb-4">
+            <div className="flex items-center gap-2">
+              <IconWorldCheck className="size-5 text-primary" />
+              <h3 className="text-xl font-semibold leading-none tracking-tight">
+                {t('settings.ai.sections.status')}
+              </h3>
+            </div>
+            <p className="text-sm text-muted-foreground">
+              {t('settings.ai.sections.statusDescription')}
+            </p>
+          </div>
+          <div className="p-6 pt-0">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+              {providerStatuses?.map((status: any) => {
+                const isActive = config?.provider === status.id
+                const isLocal = ['llama-cpp', 'ollama', 'lm-studio'].includes(status.id)
+                const isAvailable = status.available
+                const hasModels = (status.modelCount || 0) > 0
+
+                return (
+                  <div
+                    key={status.id}
+                    onClick={() => handleProviderChange(status.id as AiProvider)}
+                    className={`flex cursor-pointer items-center justify-between rounded-md border p-3 transition-colors hover:bg-muted/50 ${
+                      isActive ? 'border-primary bg-primary/5 ring-1 ring-primary' : ''
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="relative">
+                        <div
+                          className={`size-2.5 rounded-full ${
+                            status.status === 'available'
+                              ? 'bg-green-500'
+                              : status.status === 'error' || status.status === 'unreachable'
+                                ? 'bg-red-500'
+                                : 'bg-yellow-500'
+                          }`}
+                        />
+                        {isActive && (
+                          <span className="absolute -top-1 -right-1 flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                          </span>
+                        )}
+                      </div>
+                      <div className="flex flex-col">
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-sm font-medium capitalize">{status.label}</span>
+                          {isActive && (
+                            <span className="text-[10px] font-semibold bg-primary/10 text-primary px-1.5 py-0.5 rounded uppercase tracking-wider">
+                              {t('settings.ai.messages.active')}
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="text-xs text-muted-foreground">
+                            {status.latencyMs ? `${status.latencyMs}ms` : 'N/A'}
+                          </span>
+                          {status.message && status.status !== 'available' && (
+                            <span className="text-[10px] text-red-500 font-medium">
+                              {status.message}
+                            </span>
+                          )}
+                          {isLocal && isAvailable && !hasModels && (
+                            <span className="text-[10px] text-yellow-600 font-medium">
+                              {t('settings.ai.messages.noModels')}
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    {typeof status.modelCount === 'number' && (
+                      <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-full">
+                        {t('settings.ai.messages.modelsCount', { count: status.modelCount })}
+                      </span>
+                    )}
+                  </div>
+                )
+              })}
+              {!providerStatuses?.length && (
+                <div className="col-span-full text-center text-sm text-muted-foreground">
+                  {t('settings.ai.messages.checkingStatus')}
+                </div>
+              )}
+            </div>
+            <div className="mt-6 rounded-lg bg-muted/40 p-4 text-sm text-muted-foreground">
+              <p className="font-medium mb-3">{t('settings.ai.sections.fallback')}:</p>
+              <div className="flex flex-wrap gap-3 items-center">
+                <span className="bg-background border px-3 py-1 rounded shadow-sm">1. Llama.cpp</span>
+                <span className="text-muted-foreground/60">→</span>
+                <span className="bg-background border px-3 py-1 rounded shadow-sm">2. Ollama</span>
+                <span className="text-muted-foreground/60">→</span>
+                <span className="bg-background border px-3 py-1 rounded shadow-sm">3. LM Studio</span>
+                <span className="text-muted-foreground/60">→</span>
+                <span className="bg-background border px-3 py-1 rounded shadow-sm">4. OpenAI</span>
+                <span className="text-muted-foreground/60">→</span>
+                <span className="bg-background border px-3 py-1 rounded shadow-sm">5. Anthropic</span>
+              </div>
+              <p className="mt-3 opacity-75 text-xs">{t('settings.ai.messages.fallbackDescription')}</p>
+            </div>
+          </div>
+            </div>
+          </TabsContent>
+
+        <TabsContent value="configurations" className="mt-0">
+          <div className="grid gap-6 md:grid-cols-2">
+            {/* Left Column: Provider & Connection */}
+        <div className="space-y-6">
           <div className="rounded-lg border bg-card text-card-foreground shadow-sm">
             <div className="flex flex-col space-y-1.5 p-6 pb-4">
               <div className="flex items-center gap-2">
@@ -260,12 +418,14 @@ export function AiConfigForm() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectItem value="llama-cpp">Llama.cpp</SelectItem>
+                        <SelectItem value="ollama">Ollama</SelectItem>
+                        <SelectItem value="lm-studio">
+                          {t('settings.ai.providers.lm-studio')}
+                        </SelectItem>
                         <SelectItem value="openai">{t('settings.ai.providers.openai')}</SelectItem>
                         <SelectItem value="anthropic">
                           {t('settings.ai.providers.anthropic')}
-                        </SelectItem>
-                        <SelectItem value="lm-studio">
-                          {t('settings.ai.providers.lm-studio')}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -352,7 +512,7 @@ export function AiConfigForm() {
 
                   <form.Subscribe selector={(state) => state.values.provider}>
                     {(provider) =>
-                      provider === 'lm-studio' ? null : (
+                      ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? null : (
                         <form.Field
                           name="token"
                           children={(field) => {
@@ -360,7 +520,7 @@ export function AiConfigForm() {
                               {
                                 openai: 'sk-proj-...',
                                 anthropic: 'sk-ant-...',
-                              }[provider] ?? 'token-...'
+                              }[provider as 'openai' | 'anthropic'] ?? 'token-...'
 
                             return (
                               <Field className="sm:col-span-4">
@@ -454,7 +614,7 @@ export function AiConfigForm() {
 
                 <form.Subscribe selector={(state) => state.values.provider}>
                   {(provider) =>
-                    provider === 'lm-studio' ? (
+                    ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? (
                       <>
                         <form.Field
                           name="endpoints.load"
@@ -767,8 +927,14 @@ export function AiConfigForm() {
               </div>
             </div>
           </div>
-        </div>
-      </div>
+          </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="logs" className="mt-0 space-y-4">
+          <AiLanguageAudit className="mt-0" />
+        </TabsContent>
+      </Tabs>
     </form>
   )
 }

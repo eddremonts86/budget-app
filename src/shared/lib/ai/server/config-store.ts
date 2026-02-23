@@ -1,9 +1,9 @@
-import axios from 'axios'
 import type {
   AiConfigFormData,
   AiConfigStore,
   AiProvider,
 } from '@/features/Settings/model/ai-config.schema'
+import axios from 'axios'
 
 const API_URL = process.env.API_URL_INTERNAL || process.env.VITE_API_URL || 'http://localhost:3000'
 const LMSTUDIO_BASE_URL =
@@ -12,9 +12,83 @@ const LMSTUDIO_BASE_URL =
   process.env.VITE_AI_BASE_URL
 const LMSTUDIO_MODEL = process.env.AI_LMSTUDIO_MODEL || process.env.LMSTUDIO_IDENTIFIER
 
-const PROVIDERS = new Set<AiProvider>(['openai', 'anthropic', 'lm-studio'])
+const LLAMA_CPP_BASE_URL =
+  process.env.AI_LLAMA_CPP_BASE_URL ||
+  process.env.VITE_AI_LLAMA_CPP_BASE_URL ||
+  'http://localhost:8080/v1'
+
+const OLLAMA_BASE_URL =
+  process.env.AI_OLLAMA_BASE_URL ||
+  process.env.VITE_AI_OLLAMA_BASE_URL ||
+  'http://localhost:11434/v1'
+
+const LLAMA_CPP_MODEL =
+  process.env.AI_LLAMA_CPP_MODEL ||
+  process.env.VITE_AI_LLAMA_CPP_MODEL ||
+  'llama-3.2-1b-instruct-q4_k_m.gguf'
+
+const OLLAMA_MODEL =
+  process.env.AI_OLLAMA_MODEL ||
+  process.env.VITE_AI_OLLAMA_MODEL ||
+  'llama3.2'
+
+const PROVIDERS = new Set<AiProvider>([
+  'llama-cpp',
+  'ollama',
+  'lm-studio',
+  'openai',
+  'anthropic',
+])
 
 const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
+  'llama-cpp': {
+    provider: 'llama-cpp',
+    baseUrl: LLAMA_CPP_BASE_URL,
+    port: 8080,
+    token: '',
+    apiKey: '',
+    parameters: {
+      model: LLAMA_CPP_MODEL,
+      temperature: 0.7,
+      max_tokens: 2048,
+      top_p: 0.9,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    },
+    endpoints: {
+      chat: '/chat/completions',
+      models: '/models',
+      load: '',
+      download: '',
+      status: '',
+    },
+    timeout: 30000,
+    additionalParams: '',
+  },
+  ollama: {
+    provider: 'ollama',
+    baseUrl: OLLAMA_BASE_URL,
+    port: 11434,
+    token: '',
+    apiKey: '',
+    parameters: {
+      model: OLLAMA_MODEL,
+      temperature: 0.7,
+      max_tokens: 2048,
+      top_p: 0.9,
+      frequency_penalty: 0,
+      presence_penalty: 0,
+    },
+    endpoints: {
+      chat: '/chat/completions',
+      models: '/models',
+      load: '/api/pull',
+      download: '/api/pull',
+      status: '',
+    },
+    timeout: 30000,
+    additionalParams: '',
+  },
   openai: {
     provider: 'openai',
     baseUrl: 'https://api.openai.com/v1',
@@ -65,12 +139,12 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
   },
   'lm-studio': {
     provider: 'lm-studio',
-    baseUrl: LMSTUDIO_BASE_URL || 'http://localhost:1234/v1',
+    baseUrl: 'http://localhost:1234/v1',
     port: 1234,
     token: '',
     apiKey: '',
     parameters: {
-      model: LMSTUDIO_MODEL || 'local-model',
+      model: 'llama3.2:latest',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -107,6 +181,11 @@ const normalizeConfig = (
     ? { ...fallback.endpoints, ...config.endpoints }
     : fallback.endpoints
 
+  // Fix for LM Studio requiring a valid model name (not local-model)
+  if (provider === 'lm-studio' && mergedParameters.model === 'local-model') {
+    mergedParameters.model = 'llama3.2:latest'
+  }
+
   return {
     ...fallback,
     ...config,
@@ -123,11 +202,13 @@ const normalizeStore = (store?: Partial<AiConfigStore> | null): AiConfigStore =>
   const activeProvider =
     store?.activeProvider && PROVIDERS.has(store.activeProvider)
       ? store.activeProvider
-      : 'lm-studio'
+      : 'llama-cpp'
 
   return {
     activeProvider,
     providers: {
+      'llama-cpp': normalizeConfig(store?.providers?.['llama-cpp'], 'llama-cpp'),
+      ollama: normalizeConfig(store?.providers?.ollama, 'ollama'),
       openai: normalizeConfig(store?.providers?.openai, 'openai'),
       anthropic: normalizeConfig(store?.providers?.anthropic, 'anthropic'),
       'lm-studio': normalizeConfig(store?.providers?.['lm-studio'], 'lm-studio'),
@@ -156,11 +237,20 @@ const withLmStudioRuntimeOverrides = (config: AiConfigFormData): AiConfigFormDat
  */
 export async function getActiveAiConfig(): Promise<AiConfigFormData> {
   try {
-    const { data } = await axios.get<AiConfigStore>(`${API_URL}/ai-config-store`)
+    const { data } = await axios.get<AiConfigStore>(`${API_URL}/api/ai/config-store`)
     const store = normalizeStore(data)
     return withLmStudioRuntimeOverrides(store.providers[store.activeProvider])
   } catch {
-    return buildDefaultConfig('lm-studio')
+    return buildDefaultConfig('llama-cpp')
+  }
+}
+
+export async function getAllAiConfigs(): Promise<AiConfigStore> {
+  try {
+    const { data } = await axios.get<AiConfigStore>(`${API_URL}/api/ai/config-store`)
+    return normalizeStore(data)
+  } catch {
+    return normalizeStore(null)
   }
 }
 

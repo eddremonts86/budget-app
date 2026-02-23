@@ -1,64 +1,62 @@
+import { NavMain } from '@/components/nav-main'
+import { NavSecondary } from '@/components/nav-secondary'
+import { NavUser } from '@/components/nav-user'
 import {
-  IconChartBar,
-  IconDashboard,
-  IconFolder,
-  IconHelp,
-  IconInnerShadowTop,
-  IconListDetails,
-  IconReport,
-  IconSearch,
-  IconSettings,
-  IconUsers,
+    Badge,
+    Button,
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput,
+    Sheet,
+    SheetContent,
+    SheetDescription,
+    SheetHeader,
+    SheetTitle,
+} from '@/components/ui'
+import {
+    Sidebar,
+    SidebarContent,
+    SidebarFooter,
+    SidebarHeader,
+    SidebarMenu,
+    SidebarMenuButton,
+    SidebarMenuItem,
+} from '@/components/ui/sidebar'
+import { useAiSearch } from '@/features/Ai/context/useAiSearch'
+import { useTransactions } from '@/features/Transactions/api/transactions.queries'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
+import type { AiProviderId } from '@/shared/lib/ai/ai-config'
+import { cn } from '@/shared/utils'
+import {
+    IconChartBar,
+    IconDashboard,
+    IconFolder,
+    IconHelp,
+    IconInnerShadowTop,
+    IconListDetails,
+    IconReport,
+    IconSearch,
+    IconSettings,
+    IconUsers,
 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import {
-  AlertCircle,
-  ChevronRight,
-  Loader2,
-  Navigation,
-  Pin,
-  PinOff,
-  Search,
-  Sparkles,
-  WifiOff,
-  X,
+    AlertCircle,
+    ChevronRight,
+    Loader2,
+    Navigation,
+    Pin,
+    PinOff,
+    Search,
+    Sparkles,
+    WifiOff,
+    X,
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { NavMain } from '@/components/nav-main'
-import { NavSecondary } from '@/components/nav-secondary'
-import { NavUser } from '@/components/nav-user'
-import {
-  Badge,
-  Button,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupInput,
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui'
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarFooter,
-  SidebarHeader,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from '@/components/ui/sidebar'
-import { searchAiFn } from '@/features/Ai/api/search.fn'
-import { useAiSearch } from '@/features/Ai/context/useAiSearch'
-import { useTransactions } from '@/features/Transactions/api/transactions.queries'
-import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
-import type { AiProviderId } from '@/shared/lib/ai/ai-config'
-import { useTQMutation } from '@/shared/lib/query'
-import { cn } from '@/shared/utils'
 
 type SearchResultPayload = {
   result: unknown
@@ -94,6 +92,8 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const [searchQuery, setSearchQuery] = React.useState('')
   const [searchResult, setSearchResult] = React.useState<SearchResultPayload | null>(null)
   const [isOnline, setIsOnline] = React.useState(true)
+  const [isSearching, setIsSearching] = React.useState(false)
+  const [searchError, setSearchError] = React.useState<string | null>(null)
 
   React.useEffect(() => {
     if (typeof window === 'undefined') return
@@ -123,22 +123,76 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     return () => window.removeEventListener('keydown', handleKeydown)
   }, [setIsSearchOpen])
 
-  const searchMutation = useTQMutation<
-    SearchResultPayload,
-    Error,
-    { query: string; providerId?: AiProviderId }
-  >(
-    ['ai', 'search'],
-    async ({ query, providerId }) => {
-      const response = await searchAiFn({ data: { query, providerId } })
-      return response as SearchResultPayload
-    },
-    {
-      showSuccessToast: false,
-      retry: 1,
-      onSuccess: (data) => setSearchResult(data),
-    },
-  )
+  const handleSearch = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!searchQuery.trim()) return
+
+    setIsSearching(true)
+    setSearchError(null)
+    setSearchResult({ result: '', providerId: undefined })
+
+    try {
+      const response = await fetch('/api/ai/search', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ query: searchQuery }),
+      })
+
+      if (!response.ok) {
+        throw new Error((await response.text()) || 'Search failed')
+      }
+
+      if (!response.body) return
+
+      const reader = response.body.getReader()
+      const decoder = new TextDecoder()
+      let accumulatedText = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        const chunk = decoder.decode(value, { stream: true })
+        const lines = chunk.split('\n')
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const data = line.slice(6)
+            if (data === '[DONE]') continue
+
+            try {
+              const parsed = JSON.parse(data)
+              // Handle various delta formats from different providers/adapters
+              let text = ''
+              if (typeof parsed.text === 'string') text = parsed.text
+              else if (typeof parsed.delta === 'string') text = parsed.delta
+              else if (typeof parsed.content === 'string') text = parsed.content
+              else if (typeof parsed === 'string') text = parsed
+              // Handle OpenAI standard format
+              else if (Array.isArray(parsed.choices) && parsed.choices[0]?.delta?.content) {
+                text = parsed.choices[0].delta.content
+              }
+
+              if (text) {
+                accumulatedText += text
+                setSearchResult((prev) => ({
+                  result: accumulatedText,
+                  providerId: prev?.providerId, // Provider ID might need a separate event or response header
+                }))
+              }
+            } catch {
+              // Ignore parse errors
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error(error)
+      setSearchError(error instanceof Error ? error.message : 'Unknown error')
+    } finally {
+      setIsSearching(false)
+    }
+  }
   const navMain = [
     {
       title: 'Dashboard',
@@ -317,14 +371,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <div className="flex flex-1 flex-col overflow-hidden">
             <form
               className="flex shrink-0 flex-col gap-4 border-b p-4 bg-background"
-              onSubmit={(event) => {
-                event.preventDefault()
-                const trimmed = searchQuery.trim()
-                if (!trimmed || !isOnline || searchMutation.isPending) return
-                searchMutation.mutate({
-                  query: trimmed,
-                })
-              }}
+              onSubmit={handleSearch}
             >
               <div className="flex flex-col gap-3">
                 <InputGroup>
@@ -345,12 +392,12 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <InputGroupAddon align="inline-end" className="p-0">
                     <InputGroupButton
                       type="submit"
-                      disabled={!isOnline || searchMutation.isPending || !searchQuery.trim()}
+                      disabled={!isOnline || isSearching || !searchQuery.trim()}
                       variant="default"
                       className="h-full w-20 rounded-l-none border-l-0 hover:bg-primary/90 transition-all shadow-none"
                       title={t('ai.search.cta')}
                     >
-                      {searchMutation.isPending ? (
+                      {isSearching ? (
                         <Loader2 className="size-4 animate-spin" />
                       ) : (
                         <span className="font-medium">{t('ai.search.cta')}</span>
@@ -365,7 +412,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     {t('ai.search.offline')}
                   </div>
                 )}
-                {searchMutation.error && (
+                {searchError && (
                   <div className="flex items-center gap-2 text-xs text-destructive">
                     <AlertCircle className="size-3" />
                     {t('ai.search.error')}
@@ -393,7 +440,21 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                     <div className="text-sm leading-relaxed text-foreground/90">
                       {searchResult?.result ? (
                         <div className="prose prose-sm dark:prose-invert max-w-none [&>p]:mb-2 [&>ul]:list-disc [&>ul]:pl-4 [&>ol]:list-decimal [&>ol]:pl-4">
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                          <ReactMarkdown 
+                            remarkPlugins={[remarkGfm]}
+                            components={{
+                              h1: ({node, ...props}) => <h1 className="text-xl font-bold mt-4 mb-2" {...props} />,
+                              h2: ({node, ...props}) => <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />,
+                              h3: ({node, ...props}) => <h3 className="text-base font-medium mt-2 mb-1" {...props} />,
+                              ul: ({node, ...props}) => <ul className="list-disc pl-5 my-2 space-y-1" {...props} />,
+                              ol: ({node, ...props}) => <ol className="list-decimal pl-5 my-2 space-y-1" {...props} />,
+                              li: ({node, ...props}) => <li className="text-sm leading-relaxed" {...props} />,
+                              p: ({node, ...props}) => <p className="text-sm leading-relaxed mb-2" {...props} />,
+                              a: ({node, ...props}) => <a className="text-primary hover:underline font-medium" target="_blank" rel="noopener noreferrer" {...props} />,
+                              code: ({node, ...props}) => <code className="bg-muted px-1.5 py-0.5 rounded text-xs font-mono" {...props} />,
+                              blockquote: ({node, ...props}) => <blockquote className="border-l-4 border-primary/20 pl-4 italic my-2" {...props} />,
+                            }}
+                          >
                             {extractSearchText(searchResult.result)}
                           </ReactMarkdown>
                         </div>
