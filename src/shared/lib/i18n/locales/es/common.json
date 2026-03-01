@@ -42,7 +42,13 @@
     "optional": "opcional",
     "stop": "Detener",
     "clear": "Limpiar",
-    "send": "Enviar"
+    "clearFilters": "Limpiar filtros",
+    "noResults": "No se encontraron resultados.",
+    "selected": "seleccionado(s)",
+    "send": "Enviar",
+    "backToHome": "Volver al inicio",
+    "retry": "Reintentar",
+    "unknownError": "Ha ocurrido un error inesperado."
   },
   "theme": {
     "light": "Claro",
@@ -55,10 +61,134 @@
     "es": "Español",
     "dk": "Danés"
   },
-  "themeToggle": {
-    "light": "Tema claro",
-    "dark": "Tema oscuro",
-    "system": "Tema del sistema"
+  "projects": {
+    "title": "Proyectos",
+    "description": "Gestiona tus proyectos y equipos.",
+    "create": "Crear Proyecto",
+    "edit": "Editar Proyecto",
+    "delete": "Eliminar Proyecto",
+    "deleteConfirm": "¿Estás seguro de que quieres eliminar este proyecto?",
+    "actions": {
+      "create": "Crear Proyecto",
+      "createAnother": "Crear otro proyecto"
+    },
+    "success": {
+      "created": "Proyecto creado",
+      "updated": "Proyecto actualizado",
+      "deleted": "Proyecto eliminado"
+    },
+    "form": {
+      "nameLabel": "Nombre del Proyecto",
+      "namePlaceholder": "Ej. Rediseño del sitio web",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Describe los objetivos del proyecto...",
+      "datesLabel": "Fechas",
+      "startDateLabel": "Fecha de Inicio",
+      "endDateLabel": "Fecha de Finalización",
+      "statusLabel": "Estado",
+      "typeLabel": "Tipo",
+      "priorityLabel": "Prioridad",
+      "budgetLabel": "Presupuesto",
+      "budgetPlaceholder": "0.00",
+      "editTitle": "Editar Proyecto",
+      "editDescription": "Actualiza la información del proyecto y gestiona el equipo.",
+      "createTitle": "Crear Proyecto",
+      "createDescription": "Define un nuevo proyecto y asigna los miembros iniciales del equipo.",
+      "confirmationDescription": "El proyecto ha sido creado exitosamente.",
+      "teamLabel": "Miembros del Equipo",
+      "teamPlaceholder": "Seleccionar miembros...",
+      "teamEmpty": "No se encontraron usuarios.",
+      "addNewUser": "Añadir nuevo usuario",
+      "technologiesLabel": "Tecnologías",
+      "technologiesPlaceholder": "Ej. React, Node.js"
+    },
+    "status": {
+      "active": "Activo",
+      "completed": "Completado",
+      "on_hold": "En espera",
+      "planning": "Planificación",
+      "cancelled": "Cancelado"
+    },
+    "types": {
+      "internal": "Interno",
+      "external": "Externo",
+      "research": "Investigación",
+      "maintenance": "Mantenimiento"
+    },
+    "priorities": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "tabs": {
+      "general": "General",
+      "team": "Equipo"
+    },
+    "roles": {
+      "owner": "Propietario",
+      "manager": "Gestor",
+      "contributor": "Colaborador",
+      "viewer": "Observador"
+    },
+    "toast": {
+      "created": "Proyecto creado correctamente",
+      "updated": "Proyecto actualizado correctamente",
+      "deleted": "Proyecto eliminado correctamente"
+    },
+    "error": {
+      "hasTasks": "No se puede eliminar el proyecto '{{name}}' porque tiene tareas asociadas.",
+      "delete": "Error al eliminar el proyecto.",
+      "update": "Error al actualizar el proyecto.",
+      "fetch": "No se pudieron cargar los proyectos."
+    },
+    "confirm": {
+      "delete": "¿Estás seguro de que quieres eliminar el proyecto '{{name}}'?"
+    },
+    "members": {
+      "title": "Miembros del Equipo",
+      "description": "Gestiona los miembros del equipo y sus roles.",
+      "add": "Añadir Miembro",
+      "register": "Registrar Usuario",
+      "searchUsers": "Buscar usuarios...",
+      "searchMembers": "Buscar miembros...",
+      "projectPlaceholder": "Seleccionar proyecto...",
+      "selectProjectFirst": "Selecciona un proyecto primero para ver los miembros.",
+      "noMembers": "No hay miembros en este proyecto.",
+      "noAvailableUsers": "No hay más usuarios disponibles.",
+      "empty": "No se encontraron miembros.",
+      "removeConfirm": "¿Estás seguro de que quieres eliminar a {{name}} del proyecto?",
+      "success": {
+        "added": "Miembro añadido correctamente",
+        "updated": "Rol actualizado correctamente",
+        "removed": "Miembro eliminado correctamente"
+      }
+    }
+  },
+  "users": {
+    "title": "Usuarios",
+    "description": "Gestiona los usuarios de la plataforma.",
+    "create": "Nuevo Usuario",
+    "edit": "Editar Usuario",
+    "delete": "Eliminar Usuario",
+    "form": {
+      "nameLabel": "Nombre",
+      "namePlaceholder": "Nombre completo",
+      "emailLabel": "Correo electrónico",
+      "emailPlaceholder": "correo@ejemplo.com",
+      "roleLabel": "Rol",
+      "avatarLabel": "Avatar URL",
+      "avatarPlaceholder": "https://...",
+      "generateAvatar": "Generar avatar"
+    },
+    "roles": {
+      "admin": "Administrador",
+      "user": "Usuario"
+    },
+    "toast": {
+      "created": "Usuario creado correctamente",
+      "updated": "Usuario actualizado correctamente",
+      "deleted": "Usuario eliminado correctamente"
+    }
   },
   "sidebar": {
     "main": {
@@ -94,584 +224,20 @@
       "suggestions": "Destinos sugeridos"
     },
     "chat": {
-      "title": "Ayuda IA",
-      "description": "Pregunta sobre el dashboard, los flujos o los datos.",
-      "placeholder": "Escribe tu pregunta...",
-      "send": "Enviar",
-      "typing": "La IA está escribiendo...",
-      "offline": "Estás sin conexión. Conéctate para enviar mensajes.",
-      "error": "No pudimos contactar el servicio de IA.",
-      "empty": "Inicia la conversación con una pregunta.",
-      "providers": "Estado de proveedores",
-      "thinking": "Proceso de pensamiento",
-      "dropFiles": "Suelta archivos aquí para subir",
-      "pressEnter": "Presiona Enter para enviar",
-      "emptyDescription": "¿En qué puedo ayudarte hoy? Puedes preguntarme sobre tus datos, configurar el dashboard o subir una imagen para analizar.",
-      "assistantName": "Asistente Inteligente",
-      "supportAssistant": "Asistente de Soporte",
-      "agentInactive": "El asistente no está disponible en este momento",
-      "retry": "Reintentar",
-      "connectionError": "Error de conexión con el servidor",
-      "emptyResponse": "La IA devolvió una respuesta vacía. Intenta preguntar de nuevo o reformula tu pregunta.",
-      "fileAutoInstruction": "Analiza el archivo adjunto. Si contiene una lista de tareas o elementos, crea una tarea para cada uno usando bloques de acción CREAR TAREA.",
-      "fileAnalyzeInstruction": "Analiza el archivo adjunto y proporciona un resumen o acciones relevantes.",
-      "conversations": "Conversaciones",
-      "newConversation": "Nueva conversación",
-      "deleteConversation": "Eliminar conversación",
-      "deleteAllConversations": "Eliminar todo",
-      "confirmDeleteConversation": "¿Estás seguro de que deseas eliminar esta conversación?",
-      "confirmDeleteAll": "¿Estás seguro de que deseas eliminar todas las conversaciones?",
-      "noConversations": "Aún no hay conversaciones",
-      "today": "Hoy",
-      "yesterday": "Ayer",
-      "previousDays": "Últimos 7 días",
-      "older": "Anteriores",
-      "untitledConversation": "Nueva conversación"
-    }
-  },
-  "settings": {
-    "title": "Configuración",
-    "description": "Administra tus preferencias del panel de control y la configuración de la aplicación.",
-    "sections": {
-      "interface": "Configuración de Interfaz",
-      "development": "Herramientas de Desarrollo"
-    },
-    "language": {
-      "title": "Idioma",
-      "description": "Selecciona tu idioma de visualización preferido. Los cambios se aplican inmediatamente."
-    },
-    "theme": {
-      "title": "Tema",
-      "description": "Elige tu esquema de colores preferido para la interfaz."
-    },
-    "devtools": {
-      "title": "Herramientas de Desarrollo",
-      "description": "Mostrar u ocultar las DevTools de TanStack en la interfaz.",
-      "show": "Mostrar DevTools",
-      "showDescription": "Mostrar el panel de DevTools de TanStack para depuración."
-    },
-    "actions": {
-      "save": "Guardar Cambios",
-      "reset": "Restablecer Valores",
-      "saving": "Guardando..."
-    },
-    "messages": {
-      "saved": "Configuración guardada exitosamente.",
-      "reset": "Configuración restablecida a los valores predeterminados.",
-      "error": "Error al guardar la configuración. Inténtalo de nuevo."
-    },
-    "ai": {
-      "sections": {
-        "status": "Estado del Sistema",
-        "configurations": "Configuraciones",
-        "logs": "Registros",
-        "statusDescription": "Verifica la disponibilidad de tus modelos locales y remotos.",
-        "fallback": "Prioridad de Respaldo del Sistema",
-        "connection": "Detalles de Conexión",
-        "parameters": "Parámetros del Modelo",
-        "endpoints": "Configuración de Endpoints"
-      },
-      "messages": {
-        "saved": "Configuración guardada correctamente",
-        "reset": "Configuración restaurada a valores por defecto",
-        "testSuccess": "Conexión exitosa con el proveedor",
-        "testError": "No se pudo conectar con el proveedor",
-        "checkingStatus": "Verificando estado de los servicios...",
-        "fallbackDescription": "El sistema intentará automáticamente usar el siguiente proveedor disponible si el activo falla.",
-        "active": "Activo",
-        "noModels": "No se encontraron modelos",
-        "modelsCount": "{{count}} modelos"
-      },
-      "fields": {
-        "provider": "Proveedor IA",
-        "baseUrl": "URL Base",
-        "token": "API Token",
-        "model": "Modelo",
-        "maxTokens": "Max Tokens",
-        "temperature": "Temperatura",
-        "topP": "Top P",
-        "frequencyPenalty": "Penalización de Frecuencia",
-        "presencePenalty": "Penalización de Presencia",
-        "additionalParams": "Parámetros Adicionales (JSON)"
-      },
-      "actions": {
-        "save": "Guardar Cambios",
-        "test": "Probar Conexión",
-        "reset": "Restaurar"
-      },
-      "description": "Configura los proveedores de Inteligencia Artificial para el chat y los agentes."
-    }
-  },
-  "dashboard": {
-    "error": {
-      "title": "Error",
-      "description": "Ocurrió un error al cargar los datos del dashboard."
-    },
-    "stats": {
-      "totalRevenue": "Ingresos Totales",
-      "subscriptions": "Suscripciones",
-      "sales": "Ventas",
-      "activeNow": "Activos Ahora",
-      "change": "{{value}} desde el mes pasado",
-      "activeNowContext": "{{value}} {{context}}"
-    },
-    "recentTransactions": "Transacciones recientes",
-    "recentSummary": "Has realizado {{count}} ventas este mes.",
-    "table": {
-      "customer": "Cliente",
-      "status": "Estado",
-      "date": "Fecha",
-      "amount": "Monto"
-    }
-  },
-  "analytics": {
-    "title": "Analíticas",
-    "pageViews": "Vistas de página",
-    "overview": "Resumen",
-    "placeholder": "Gráfico de analíticas próximamente..."
-  },
-  "sectionCards": {
-    "totalRevenue": {
-      "title": "Ingresos Totales",
-      "trend": "Tendencia al alza este mes",
-      "detail": "Visitantes de los últimos 6 meses"
-    },
-    "newCustomers": {
-      "title": "Nuevos Clientes",
-      "trend": "Baja del 20% en este periodo",
-      "detail": "La adquisición necesita atención"
-    },
-    "activeAccounts": {
-      "title": "Cuentas Activas",
-      "trend": "Fuerte retención de usuarios",
-      "detail": "El engagement supera objetivos"
-    },
-    "growthRate": {
-      "title": "Tasa de Crecimiento",
-      "trend": "Incremento de rendimiento estable",
-      "detail": "Cumple las proyecciones de crecimiento"
-    }
-  },
-  "chart": {
-    "timeRange": {
-      "placeholder": "Selecciona un rango",
-      "90d": "Últimos 3 meses",
-      "30d": "Últimos 30 días",
-      "7d": "Últimos 7 días"
-    }
-  },
-  "categories": {
-    "title": "Categorías",
-    "add": "Agregar Categoría",
-    "nameLabel": "Nombre",
-    "namePlaceholder": "Nombre de la categoría",
-    "colorLabel": "Color",
-    "save": "Guardar Categoría",
-    "summary": "Mostrando {{shown}} de {{total}} categorías",
-    "columns": {
-      "name": "Nombre",
-      "color": "Color"
-    },
-    "description": {
-      "create": "Agrega una nueva categoría para tus transacciones.",
-      "edit": "Actualiza los detalles de la categoría."
-    },
-    "confirm": {
-      "delete": "¿Estás seguro de eliminar esta categoría?"
-    },
-    "error": {
-      "title": "Error",
-      "description": "Ocurrió un error al cargar las categorías."
-    }
-  },
-  "projects": {
-    "title": "Proyectos"
-  },
-  "team": {
-    "title": "Equipo"
-  },
-  "todos": {
-    "title": "Tareas",
-    "subtitlePrefix": "Gestiona tu flujo de trabajo. Tienes ",
-    "subtitleSuffix": " tareas activas.",
-    "actions": {
-      "new": "Nueva Tarea",
-      "create": "Crear Tarea",
-      "update": "Actualizar Tarea",
-      "edit": "Editar Tarea",
-      "delete": "Eliminar"
-    },
-    "form": {
-      "headerTitle": "Detalles de la tarea",
-      "headerSubtitle": "Define objetivos y fechas de entrega.",
-      "titleLabel": "Título del Proyecto",
-      "titlePlaceholder": "Ej: Rediseño del dashboard",
-      "descriptionLabel": "Descripción Detallada",
-      "descriptionPlaceholder": "Describe los pasos a seguir...",
-      "statusLabel": "Estado actual",
-      "statusPlaceholder": "Selecciona estado",
-      "statusPending": "Pendiente",
-      "statusInProgress": "En progreso",
-      "statusCompleted": "Completada",
-      "priorityLabel": "Prioridad",
-      "priorityPlaceholder": "Selecciona prioridad",
-      "priorityLow": "Baja",
-      "priorityMedium": "Media",
-      "priorityHigh": "Alta",
-      "dueDateLabel": "Fecha límite",
-      "dueDatePlaceholder": "Selecciona fecha",
-      "assignedToLabel": "Asignado a",
-      "assignedToPlaceholder": "Seleccionar usuario",
-      "assignedToSelf": "Yo",
-      "projectLabel": "Proyecto",
-      "projectPlaceholder": "Selecciona proyecto"
-    },
-    "status": {
-      "pending": "Pendiente",
-      "inProgress": "En progreso",
-      "completed": "Completada"
-    },
-    "priority": {
-      "low": "Baja",
-      "medium": "Media",
-      "high": "Alta"
-    },
-    "table": {
-      "title": "Tarea",
-      "status": "Estado",
-      "priority": "Prioridad",
-      "assignedTo": "Asignado a",
-      "createdAt": "Creada"
-    },
-    "confirm": {
-      "delete": "¿Estás seguro de eliminar esta tarea?"
-    },
-    "loadingMore": "Cargando más tareas...",
-    "error": {
-      "title": "Error al cargar",
-      "description": "No pudimos obtener tus tareas. Revisa tu conexión e inténtalo nuevamente.",
-      "retry": "Reintentar"
-    },
-    "sheet": {
-      "createTitle": "Crear tarea",
-      "createDescription": "Añade una nueva tarea a tu lista. Completa los detalles abajo.",
-      "editTitle": "Editar tarea",
-      "editDescription": "Actualiza los detalles de la tarea. Los cambios se guardan al instante."
-    },
-    "toast": {
-      "created": "Tarea creada correctamente",
-      "updated": "Tarea actualizada correctamente",
-      "deleted": "Tarea eliminada correctamente"
-    }
-  },
-  "users": {
-    "title": "Usuarios",
-    "subtitlePrefix": "Gestiona los niveles de acceso para ",
-    "subtitleSuffix": " miembros del equipo.",
-    "actions": {
-      "new": "Nuevo Usuario",
-      "save": "Guardar Usuario",
-      "editProfile": "Editar Perfil",
-      "deleteAccount": "Eliminar Cuenta"
-    },
-    "form": {
-      "nameLabel": "Nombre",
-      "namePlaceholder": "Nombre de usuario",
-      "emailLabel": "Correo electrónico",
-      "emailPlaceholder": "Correo electrónico",
-      "roleLabel": "Rol",
-      "rolePlaceholder": "Selecciona rol",
-      "roleUser": "Usuario",
-      "roleAdmin": "Administrador",
-      "avatarLabel": "URL de avatar",
-      "avatarPlaceholder": "URL de avatar",
-      "avatarRandom": "Aleatorio",
-      "avatarHelp": "Pega una URL o genera un avatar aleatorio"
-    },
-    "table": {
-      "user": "Usuario",
-      "role": "Rol / Acceso"
-    },
-    "confirm": {
-      "delete": "¿Estás seguro de eliminar este usuario?"
-    },
-    "loadingMore": "Sincronizando...",
-    "loadMore": "Cargar más usuarios",
-    "error": {
-      "title": "Error de conexión",
-      "description": "No pudimos sincronizar la lista de usuarios. Intenta nuevamente en unos momentos.",
-      "retry": "Reintentar"
-    },
-    "sheet": {
-      "createTitle": "Registro de usuario",
-      "createDescription": "Crea un nuevo perfil de acceso para tu equipo.",
-      "editTitle": "Perfil de usuario",
-      "editDescription": "Actualiza la información de contacto y permisos."
-    },
-    "toast": {
-      "created": "Usuario creado correctamente",
-      "updated": "Usuario actualizado correctamente",
-      "deleted": "Usuario eliminado correctamente"
-    }
-  },
-  "transactions": {
-    "title": "Transacciones",
-    "summary": "Mostrando {{shown}} de {{total}} transacciones",
-    "actions": {
-      "add": "Agregar Transacción",
-      "save": "Guardar Transacción",
-      "edit": "Editar",
-      "delete": "Eliminar"
-    },
-    "form": {
-      "customerNameLabel": "Nombre del cliente",
-      "customerNamePlaceholder": "Nombre del cliente",
-      "customerEmailLabel": "Correo del cliente",
-      "customerEmailPlaceholder": "Correo del cliente",
-      "statusLabel": "Estado",
-      "statusPlaceholder": "Selecciona estado",
-      "statusApproved": "Aprobada",
-      "statusPending": "Pendiente",
-      "statusRejected": "Rechazada",
-      "amountLabel": "Monto",
-      "amountPlaceholder": "0.00",
-      "dateLabel": "Fecha",
-      "userLabel": "Usuario",
-      "userPlaceholder": "Selecciona Usuario",
-      "projectLabel": "Proyecto",
-      "projectPlaceholder": "Selecciona Proyecto",
-      "createDescription": "Crea un nuevo registro de transacción.",
-      "editDescription": "Edita los detalles de la transacción."
-    },
-    "table": {
-      "customer": "Cliente",
-      "status": "Estado",
-      "date": "Fecha",
-      "amount": "Monto"
-    },
-    "status": {
-      "approved": "Aprobado",
-      "pending": "Pendiente",
-      "rejected": "Rechazado"
-    },
-    "confirm": {
-      "delete": "¿Estás seguro de eliminar esta transacción?"
-    },
-    "error": {
-      "title": "Error",
-      "description": "Ocurrió un error al cargar las transacciones."
-    },
-    "toast": {
-      "created": "Transacción creada correctamente",
-      "updated": "Transacción actualizada correctamente",
-      "deleted": "Transacción eliminada correctamente"
+      "title": "Chat IA",
+      "description": "Pregunta cualquier cosa al asistente.",
+      "placeholder": "Escribe un mensaje...",
+      "welcome": "¡Hola! ¿En qué puedo ayudarte hoy?",
+      "clear": "Limpiar chat",
+      "error": "Ocurrió un error al procesar tu solicitud.",
+      "stop": "Detener generación"
     }
   },
   "validation": {
     "required": "Este campo es obligatorio",
-    "minLength": "Debe tener al menos {{min}} caracteres",
-    "maxLength": "Debe tener como máximo {{max}} caracteres",
-    "invalidEmail": "Dirección de email inválida",
+    "invalidEmail": "Correo electrónico inválido",
     "invalidUrl": "URL inválida",
-    "invalidColor": "Color inválido",
-    "invalidDate": "Fecha inválida",
-    "futureDate": "La fecha debe ser futura",
-    "minAmount": "Debe ser mayor que 0"
-  },
-  "home": {
-    "hero": {
-      "badge": "Propósito en cada pixel",
-      "title": "Donde la intuición humana",
-      "titleHighlight": "se encuentra con la IA",
-      "description": "No estamos aquí para reemplazar tu voz, sino para amplificarla. Creamos sistemas que aprenden de tu esencia para que tú puedas volver a lo que realmente importa: crear, imaginar y liderar.",
-      "ctaPrimary": "Empieza tu transformación",
-      "ctaSecondary": "Nuestra filosofía",
-      "pills": {
-        "alma": "Tecnología con Alma",
-        "impacto": "Impacto Real",
-        "friccion": "Cero Fricción"
-      },
-      "stats": {
-        "hours": {
-          "label": "Horas devueltas al talento",
-          "value": "2.5k+"
-        },
-        "precision": {
-          "label": "Precisión Humana",
-          "value": "99.9%"
-        },
-        "projects": {
-          "label": "Proyectos con propósito",
-          "value": "150+"
-        }
-      }
-    },
-    "newHero": {
-      "badge": "Entendemos el ruido, buscamos la claridad",
-      "title": "Tu negocio es único,",
-      "titleHighlight": "tu IA también debería serlo",
-      "description": "¿Sientes que la tecnología actual es una barrera en lugar de un puente? Hemos ayudado a cientos de equipos a recuperar 15 horas semanales de trabajo mecánico para que puedan enfocarse en la estrategia que solo los humanos pueden trazar.",
-      "ctaPrimary": "Agenda una charla honesta",
-      "ctaSecondary": "Mira cómo trabajamos",
-      "stats": {
-        "customers": {
-          "label": "Clientes felices",
-          "value": "10K+"
-        },
-        "projects": {
-          "label": "Proyectos completados",
-          "value": "500+"
-        },
-        "satisfaction": {
-          "label": "Tasa de satisfacción",
-          "value": "99%"
-        }
-      }
-    },
-    "features": {
-      "title": "Nuestros pilares no son negociables",
-      "description": "Creemos que la tecnología debe estar al servicio de las personas, no al revés. Estas son las promesas que mantenemos en cada línea de código.",
-      "items": {
-        "efficiency": {
-          "title": "Eficiencia Invisible",
-          "description": "Automatizamos lo que te agota, no lo que te define. Sistemas que trabajan en segundo plano para que tú seas el protagonista."
-        },
-        "ethics": {
-          "title": "Ética por Diseño",
-          "description": "Tus datos son tu legado. Construimos con una privacidad innegociable, protegiendo la confianza que has ganado con tus clientes."
-        },
-        "closeness": {
-          "title": "Cercanía Radical",
-          "description": "No entregamos código y nos vamos. Somos tus socios tecnológicos, entendiendo tus desafíos como si fueran nuestros."
-        }
-      }
-    },
-    "services": {
-      "badge": "Cómo te acompañamos",
-      "title": "Soluciones que resuelven, no que complican",
-      "description": "Entendemos que detrás de cada requerimiento técnico hay un objetivo humano. Aquí es cómo lo hacemos realidad.",
-      "cta": "Ver cómo",
-      "items": {
-        "software": {
-          "title": "Software con Sentido",
-          "description": "No lanzamos código al vacío. Desarrollamos herramientas que eliminan la fricción diaria de tu equipo, devolviéndoles el tiempo que merecen.",
-          "badge": "Impacto Directo"
-        },
-        "design": {
-          "title": "Diseño Empático",
-          "description": "Interfaces que no necesitan manual. Nos ponemos en la piel de quien usará tu producto para que cada clic sea natural y sin estrés."
-        },
-        "mobility": {
-          "title": "Cercanía Digital",
-          "description": "Estar donde tus usuarios están, pero de forma respetuosa. Creamos experiencias móviles que se sienten como una extensión de su día a día.",
-          "badge": "Esencial"
-        },
-        "clarity": {
-          "title": "Claridad en el Caos",
-          "description": "En un mundo saturado de información, te ayudamos a que tu mensaje real llegue a las personas que genuinamente lo necesitan."
-        },
-        "growth": {
-          "title": "Crecimiento Sostenible",
-          "description": "Escalar no tiene por qué ser traumático. Optimizamos tus procesos para que tu proyecto crezca al ritmo de tus ambiciones, no de tus preocupaciones."
-        },
-        "trust": {
-          "title": "Tranquilidad Total",
-          "description": "Protegemos lo que más valoras: la confianza de tus usuarios. Implementamos seguridad robusta para que tú solo te preocupes de innovar.",
-          "badge": "Compromiso"
-        }
-      }
-    },
-    "timeline": {
-      "badge": "Nuestra Evolución",
-      "title": "Un camino de personas, no solo de código",
-      "description": "Miramos atrás no para celebrar logros, sino para recordar por qué empezamos este viaje en primer lugar.",
-      "events": {
-        "seed": {
-          "title": "La Semilla de una Idea",
-          "description": "Nacimos en un pequeño estudio, cansados de ver cómo la tecnología se alejaba de las personas."
-        },
-        "listening": {
-          "title": "Escuchando Historias Reales",
-          "description": "Llegamos a nuestros primeros 1,000 usuarios, no como números, sino como conversaciones que dieron forma a nuestra plataforma."
-        },
-        "growth": {
-          "title": "Creciendo con Responsabilidad",
-          "description": "Recibimos apoyo para expandirnos, manteniendo siempre nuestra promesa de no perder el toque humano."
-        },
-        "impact": {
-          "title": "Impacto Sin Fronteras",
-          "description": "Abrimos oficinas en 5 países, aprendiendo que el deseo de trabajar mejor es un lenguaje universal."
-        },
-        "purpose": {
-          "title": "Inteligencia con Propósito",
-          "description": "Lanzamos nuestras funciones de IA, diseñadas para devolverte el tiempo que el trabajo administrativo te robó."
-        }
-      },
-      "footer": "Y la historia sigue contigo..."
-    },
-    "contact": {
-      "title": "Hablemos de lo que te quita el sueño",
-      "description": "¿Tienes un proyecto en mente o simplemente quieres entender cómo la tecnología puede devolverte tu tiempo? Estamos aquí para escucharte, sin tecnicismos innecesarios.",
-      "form": {
-        "name": {
-          "label": "¿Cómo te llamas?",
-          "placeholder": "Tu nombre"
-        },
-        "email": {
-          "label": "Tu correo personal",
-          "placeholder": "ejemplo@correo.com"
-        },
-        "subject": {
-          "label": "¿Qué tienes en mente?",
-          "placeholder": "Cuéntanos brevemente..."
-        },
-        "message": {
-          "label": "Cuéntanos tu historia",
-          "placeholder": "¿Cuál es el mayor desafío al que te enfrentas hoy?"
-        },
-        "submit": "Enviar mensaje y empezar la charla"
-      },
-      "info": {
-        "email": "Email",
-        "phone": "Teléfono",
-        "location": "Ubicación"
-      },
-      "workingHours": {
-        "title": "Horario de Atención",
-        "weekdays": "Lunes - Viernes",
-        "saturday": "Sábado",
-        "sunday": "Domingo",
-        "closed": "Cerrado"
-      }
-    },
-    "footer": {
-      "brand": "Brand",
-      "since": "Desde 2018",
-      "copyright": "© {{year}} Brand Inc. Todos los derechos reservados.",
-      "description": "Humanizando la tecnología para que tú puedas ser más humano. No somos solo una empresa de IA, somos tus socios en la búsqueda de tiempo y propósito.",
-      "subscribe": {
-        "title": "Únete a nuestra charla semanal",
-        "placeholder": "Tu mejor correo",
-        "button": "Suscribirme"
-      },
-      "links": {
-        "essence": {
-          "title": "Nuestra Esencia",
-          "items": ["Filosofía", "Historias de éxito", "Metodología", "Blog Humano"]
-        },
-        "company": {
-          "title": "Compañía",
-          "items": ["Quiénes somos", "Cultura", "Trabaja con nosotros", "Prensa"]
-        },
-        "community": {
-          "title": "Comunidad",
-          "items": ["Eventos", "Centro de ayuda", "Socios", "Estado de red"]
-        },
-        "legal": {
-          "title": "Legalidad",
-          "items": ["Privacidad Ética", "Términos de uso", "Cookies", "Licencias"]
-        }
-      }
-    }
+    "minLength": "Debe tener al menos {{count}} caracteres",
+    "maxLength": "Debe tener como máximo {{count}} caracteres"
   }
 }

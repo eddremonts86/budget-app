@@ -1,7 +1,16 @@
-import { IconActivity, IconCurrencyDollar, IconListCheck, IconFolder } from '@tabler/icons-react'
+import {
+  IconActivity,
+  IconCurrencyDollar,
+  IconFolder,
+  IconTrendingUp,
+  IconTrendingDown,
+  IconCreditCard,
+} from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from '@/components/ui'
+import { cn } from '@/shared/lib/utils'
 import { useDashboardStats } from '../api/dashboard.queries'
+import { ExpenseDistributionChart } from './ExpenseDistributionChart'
 import { UpcomingTodosList } from './UpcomingTodosList'
 import { WorkloadChart } from './WorkloadChart'
 
@@ -44,6 +53,43 @@ export function DashboardPage() {
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                 <CardTitle className="text-sm font-medium">
+                  {t('dashboard.stats.netBalance', { defaultValue: 'Net Balance' })}
+                </CardTitle>
+                <IconActivity className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div
+                  className={cn(
+                    'text-2xl font-bold',
+                    (stats?.netBalance?.value ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500',
+                  )}
+                >
+                  ${stats?.netBalance?.value?.toLocaleString() ?? '0'}
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p className="flex items-center gap-1">
+                    {(stats?.netBalance?.change ?? 0) >= 0 ? (
+                      <IconTrendingUp className="h-3 w-3 text-emerald-500" />
+                    ) : (
+                      <IconTrendingDown className="h-3 w-3 text-red-500" />
+                    )}
+                    <span
+                      className={
+                        (stats?.netBalance?.change ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500'
+                      }
+                    >
+                      {(stats?.netBalance?.change ?? 0) > 0 ? '+' : ''}
+                      {stats?.netBalance?.change ?? 0}%
+                    </span>
+                    <span>vs last month</span>
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
                   {t('dashboard.stats.totalRevenue')}
                 </CardTitle>
                 <IconCurrencyDollar className="h-4 w-4 text-muted-foreground" />
@@ -61,22 +107,41 @@ export function DashboardPage() {
                     })}
                   </p>
                   <p>
-                    {t('dashboard.stats.periodDays', {
-                      defaultValue: 'Last {{days}} days',
-                      days: stats?.revenue?.periodDays ?? 30,
-                    })}
-                    : ${stats?.revenue?.periodTotal?.toLocaleString() ?? '0'}
-                  </p>
-                  <p>
                     {t('dashboard.stats.pendingApproval', { defaultValue: 'Pending approval' })}: $
                     {stats?.revenue?.pendingApprovalTotal?.toLocaleString() ?? '0'}
                   </p>
                 </div>
               </CardContent>
             </Card>
+
             <Card>
               <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Projects</CardTitle>
+                <CardTitle className="text-sm font-medium">
+                  {t('dashboard.stats.totalExpenses', { defaultValue: 'Total Expenses' })}
+                </CardTitle>
+                <IconCreditCard className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                <div className="text-2xl font-bold text-red-500">
+                  -${stats?.expenses?.value?.toLocaleString() ?? '0'}
+                </div>
+                <div className="text-xs text-muted-foreground space-y-1">
+                  <p>
+                    {t('dashboard.stats.change', {
+                      value: `${(stats?.expenses?.change ?? 0) > 0 ? '+' : ''}${
+                        stats?.expenses?.change ?? 0
+                      }%`,
+                    })}
+                  </p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t('dashboard.stats.activeProjects', { defaultValue: 'Active Projects' })}
+                </CardTitle>
                 <IconFolder className="h-4 w-4 text-muted-foreground" />
               </CardHeader>
               <CardContent>
@@ -86,38 +151,19 @@ export function DashboardPage() {
                 <p className="text-xs text-muted-foreground">{stats?.activeProjects?.context}</p>
               </CardContent>
             </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Completed Tasks</CardTitle>
-                <IconListCheck className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats?.completedTasks?.value?.toLocaleString() ?? '0'}
-                </div>
-                <p className="text-xs text-muted-foreground">{stats?.completedTasks?.context}</p>
-              </CardContent>
-            </Card>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Pending Tasks</CardTitle>
-                <IconActivity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats?.pendingTasks?.value?.toLocaleString() ?? '0'}
-                </div>
-                <p className="text-xs text-muted-foreground">{stats?.pendingTasks?.context}</p>
-              </CardContent>
-            </Card>
           </>
         )}
       </div>
 
       {/* Main Content Grid */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 items-start">
-        <WorkloadChart />
-        <UpcomingTodosList />
+        <div className="lg:col-span-4 flex flex-col gap-4">
+          <WorkloadChart />
+          <ExpenseDistributionChart />
+        </div>
+        <div className="lg:col-span-3">
+          <UpcomingTodosList />
+        </div>
       </div>
     </div>
   )

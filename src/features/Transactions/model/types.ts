@@ -7,8 +7,11 @@ export interface Transaction {
   status: 'Approved' | 'Pending' | 'Rejected'
   date: string
   amount: number
+  paymentMethod?: string | null
+  description?: string | null
   userId: string | null
   projectId: string | null
+  categoryId?: string | null
   assignedAdminId?: string | null
   approvedBy?: string | null
   approvedAt?: string | null

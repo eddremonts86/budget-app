@@ -1,9 +1,9 @@
-import { useForm } from '@tanstack/react-form'
+import { useForm, useStore } from '@tanstack/react-form'
 import { format } from 'date-fns'
 import { da, enUS, es } from 'date-fns/locale'
 import { motion } from 'framer-motion'
 import {
-  Calendar as CalendarIcon,
+  Calendar,
   Flag,
   Folder,
   ListTodo,
@@ -18,7 +18,7 @@ import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
-import { Calendar } from '@/components/ui/calendar'
+import { Calendar as CalendarComponent } from '@/components/ui/calendar'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
-import { useProjects } from '@/features/Projects/api/projects.queries'
+import { useProjectMembers, useProjects } from '@/features/Projects/api/projects.queries'
 import { useUsers } from '@/features/Users/api/users.queries'
 import { cn } from '@/shared/lib/utils'
 import type { Todo } from '../model/types'
@@ -68,10 +68,6 @@ export function TodoForm({
   const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
   const { data: users } = useUsers()
   const { data: projects } = useProjects()
-  const selectableProjects = React.useMemo(() => {
-    if (!projects) return []
-    return projects.filter((p) => p.status === 'active' || p.id === defaultValues?.projectId)
-  }, [projects, defaultValues?.projectId])
 
   const locale = React.useMemo(() => {
     const language = i18n.language?.toLowerCase() ?? 'en'
@@ -80,6 +76,7 @@ export function TodoForm({
     if (normalized === 'dk' || normalized === 'da') return da
     return enUS
   }, [i18n.language])
+
   const form = useForm({
     defaultValues: {
       title: defaultValues?.title ?? '',
@@ -97,6 +94,23 @@ export function TodoForm({
       await onSubmit(value)
     },
   })
+
+  // Subscribe to projectId to filter members
+  const selectedProjectId = useStore(form.store, (state) => state.values.projectId)
+  const { data: projectMembers, isLoading: isLoadingMembers } = useProjectMembers(selectedProjectId)
+
+  const selectableProjects = React.useMemo(() => {
+    if (!projects) return []
+    return projects.filter((p) => p.status === 'active' || p.id === defaultValues?.projectId)
+  }, [projects, defaultValues?.projectId])
+
+  const filteredUsers = React.useMemo(() => {
+    if (!selectedProjectId) return users || []
+    if (!projectMembers || !users) return []
+
+    const memberUserIds = new Set(projectMembers.map((m) => m.userId))
+    return users.filter((user) => memberUserIds.has(user.id))
+  }, [selectedProjectId, projectMembers, users])
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -313,7 +327,7 @@ export function TodoForm({
                       htmlFor={field.name}
                       className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2"
                     >
-                      <CalendarIcon className="w-3.5 h-3.5" /> {t('todos.form.dueDateLabel')}
+                      <Calendar className="w-3.5 h-3.5" /> {t('todos.form.dueDateLabel')}
                     </FieldLabel>
                     <div className="flex gap-2">
                       <Popover>
@@ -325,7 +339,7 @@ export function TodoForm({
                               !field.state.value && 'text-muted-foreground',
                             )}
                           >
-                            <CalendarIcon className="mr-2 h-4 w-4 opacity-50" />
+                            <Calendar className="mr-2 h-4 w-4 opacity-50" />
                             {field.state.value ? (
                               format(
                                 new Date(
@@ -345,7 +359,7 @@ export function TodoForm({
                           className="w-auto p-0 rounded-2xl border-border/40 shadow-2xl"
                           align="start"
                         >
-                          <Calendar
+                          <CalendarComponent
                             mode="single"
                             selected={
                               field.state.value
@@ -464,23 +478,35 @@ export function TodoForm({
                       <SelectValue placeholder={t('todos.form.assignedToPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
-                      {users?.map((user) => (
-                        <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
-                          <div className="flex items-center gap-2">
-                            <Avatar className="h-5 w-5">
-                              <AvatarImage src={user.avatar} alt={user.name} />
-                              <AvatarFallback className="text-[10px]">
-                                {user.name.substring(0, 2).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <span>
-                              {user.id === currentUserId
-                                ? `${user.name} (${t('todos.form.assignedToSelf')})`
-                                : user.name}
-                            </span>
-                          </div>
-                        </SelectItem>
-                      ))}
+                      {isLoadingMembers ? (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          {t('common.loading')}
+                        </div>
+                      ) : filteredUsers.length === 0 ? (
+                        <div className="p-4 text-center text-sm text-muted-foreground">
+                          {selectedProjectId
+                            ? t('projects.members.empty')
+                            : t('todos.form.selectProjectFirst')}
+                        </div>
+                      ) : (
+                        filteredUsers.map((user) => (
+                          <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
+                            <div className="flex items-center gap-2">
+                              <Avatar className="h-5 w-5">
+                                <AvatarImage src={user.avatar || undefined} alt={user.name} />
+                                <AvatarFallback className="text-[10px]">
+                                  {user.name.substring(0, 2).toUpperCase()}
+                                </AvatarFallback>
+                              </Avatar>
+                              <span>
+                                {user.id === currentUserId
+                                  ? `${user.name} (${t('todos.form.assignedToSelf')})`
+                                  : user.name}
+                              </span>
+                            </div>
+                          </SelectItem>
+                        ))
+                      )}
                     </SelectContent>
                   </Select>
                   <FieldError

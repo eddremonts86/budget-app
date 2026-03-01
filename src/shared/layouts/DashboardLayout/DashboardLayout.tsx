@@ -1,6 +1,6 @@
 import { useAuth } from '@clerk/tanstack-react-start'
 import { Outlet, redirect, useLocation } from '@tanstack/react-router'
-import { LogOut } from 'lucide-react'
+import { Home } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { AppSidebar } from '@/components/app-sidebar'
 import {
@@ -14,9 +14,10 @@ import {
 import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { AiSearchProvider } from '@/features/Ai/context/AiSearchContext'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
-import { UserProvider } from '@/features/Users/context/UserContext'
+import { UserProvider } from '@/features/Users/context/UserProvider'
 import { cn } from '@/shared/utils'
 import { NotificationBell } from './NotificationBell'
 
@@ -30,7 +31,9 @@ export function DashboardLayout() {
   const segments = pathname.split('/').filter(Boolean)
   const lastSegment = segments[segments.length - 1] || 'dashboard'
   const pageTitle = t(`sidebar.main.${lastSegment}`, {
-    defaultValue: lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1),
+    defaultValue: lastSegment
+      ? lastSegment.charAt(0).toUpperCase() + lastSegment.slice(1)
+      : 'Dashboard',
   })
 
   if (!isE2E && isLoaded && !userId) {
@@ -83,6 +86,7 @@ export function DashboardLayout() {
 
 function DashboardContent({ children }: { children: React.ReactNode }) {
   const { isPinned, isOpen } = useAiSearch()
+  const { t } = useTranslation()
 
   return (
     <SidebarInset className="flex flex-col h-screen overflow-hidden">
@@ -94,12 +98,21 @@ function DashboardContent({ children }: { children: React.ReactNode }) {
         </div>
         <div className="flex items-center gap-2">
           <NotificationBell />
-          <Button variant="ghost" size="icon" asChild title="Go to Landing Page">
-            <a href="/">
-              <LogOut className="h-5 w-5" />
-              <span className="sr-only">Go to Landing</span>
-            </a>
-          </Button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="ghost" size="icon" asChild>
+                  <a href="/">
+                    <Home className="h-5 w-5" />
+                    <span className="sr-only">{t('common.backToHome')}</span>
+                  </a>
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{t('common.backToHome')}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
       </header>
       <div

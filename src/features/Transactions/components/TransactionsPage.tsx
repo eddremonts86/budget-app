@@ -24,6 +24,7 @@ import { useProjects } from '@/features/Projects/api/projects.queries'
 import { useUsers } from '@/features/Users/api/users.queries'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { toast } from '@/shared/lib/toast'
+import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
 import {
   useCreateTransaction,
@@ -53,7 +54,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
 
   const handleApprove = (transaction: Transaction) => {
     if (!currentUserId) return
-    if (confirm('Are you sure you want to approve this transaction?')) {
+    if (confirm(t('transactions.pending.approveConfirm'))) {
       updateMutation.mutate(
         {
           id: transaction.id,
@@ -64,7 +65,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
           },
         },
         {
-          onSuccess: () => toast.success('Transaction approved successfully'),
+          onSuccess: () => toast.success(t('transactions.pending.approveSuccess')),
         },
       )
     }
@@ -72,7 +73,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
 
   const handleReject = (transaction: Transaction) => {
     if (!currentUserId) return
-    const reason = prompt('Please provide a reason for rejection:')
+    const reason = prompt(t('transactions.pending.rejectPrompt'))
     if (reason) {
       updateMutation.mutate(
         {
@@ -85,7 +86,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
           },
         },
         {
-          onSuccess: () => toast.success('Transaction rejected successfully'),
+          onSuccess: () => toast.success(t('transactions.pending.rejectSuccess')),
         },
       )
     }
@@ -97,7 +98,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
       header: 'ID',
       cell: ({ row }) => (
         <span className="font-mono text-xs text-muted-foreground">
-          #{row.original.id.slice(0, 8)}
+          #{row.original.id?.slice(0, 8)}
         </span>
       ),
     },
@@ -117,11 +118,23 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
       header: t('transactions.table.amount'),
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue('amount'))
+        const isExpense = amount < 0
         const formatted = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',
-        }).format(amount)
-        return <div className="font-medium">{formatted}</div>
+        }).format(Math.abs(amount))
+
+        return (
+          <div
+            className={cn(
+              'font-semibold flex items-center gap-1',
+              isExpense ? 'text-red-500' : 'text-emerald-500',
+            )}
+          >
+            {isExpense ? '-' : '+'}
+            {formatted}
+          </div>
+        )
       },
     },
     {
@@ -157,7 +170,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
               onClick={() => handleApprove(transaction)}
             >
               <Check className="h-4 w-4" />
-              <span className="sr-only">Approve</span>
+              <span className="sr-only">{t('transactions.pending.approve')}</span>
             </Button>
             <Button
               size="sm"
@@ -166,7 +179,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
               onClick={() => handleReject(transaction)}
             >
               <X className="h-4 w-4" />
-              <span className="sr-only">Reject</span>
+              <span className="sr-only">{t('transactions.pending.reject')}</span>
             </Button>
           </div>
         )
@@ -182,7 +195,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
     <div className="space-y-4 border rounded-xl p-4 bg-muted/30">
       <div className="flex items-center justify-between">
         <h3 className="text-lg font-semibold flex items-center gap-2 text-orange-600">
-          Requires Your Approval
+          {t('transactions.pending.title')}
           <Badge variant="destructive" className="rounded-full px-2">
             {pendingTransactions.length}
           </Badge>
@@ -209,7 +222,7 @@ export function TransactionsPage() {
   const { data: users = [] } = useUsers()
   const { data: projects = [] } = useProjects()
 
-  const { syncedUserId: currentUserId, userRole } = useCurrentUser()
+  const { syncedUserId: currentUserId } = useCurrentUser()
 
   const displayedTransactions = React.useMemo(() => {
     // Show all transactions for demo purposes
@@ -284,11 +297,23 @@ export function TransactionsPage() {
       header: t('transactions.table.amount'),
       cell: ({ row }) => {
         const amount = parseFloat(row.getValue('amount'))
+        const isExpense = amount < 0
         const formatted = new Intl.NumberFormat('en-US', {
           style: 'currency',
           currency: 'USD',
-        }).format(amount)
-        return <div className="font-medium">{formatted}</div>
+        }).format(Math.abs(amount))
+
+        return (
+          <div
+            className={cn(
+              'font-semibold flex items-center gap-1',
+              isExpense ? 'text-red-500' : 'text-emerald-500',
+            )}
+          >
+            {isExpense ? '-' : '+'}
+            {formatted}
+          </div>
+        )
       },
     },
     {
@@ -339,7 +364,7 @@ export function TransactionsPage() {
   ]
 
   if (isError) {
-    return <div>Error loading transactions</div>
+    return <div>{t('transactions.error.description')}</div>
   }
 
   return (
@@ -360,7 +385,9 @@ export function TransactionsPage() {
       )}
 
       <div className="flex-1 min-h-0 flex flex-col space-y-4">
-        <h3 className="text-xl font-semibold tracking-tight shrink-0">Transaction History</h3>
+        <h3 className="text-xl font-semibold tracking-tight shrink-0">
+          {t('transactions.history')}
+        </h3>
         {isLoading ? (
           <div className="space-y-2">
             <Skeleton className="h-10 w-full" />

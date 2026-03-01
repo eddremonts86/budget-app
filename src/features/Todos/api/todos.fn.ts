@@ -1,9 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, count } from 'drizzle-orm'
 import { z } from 'zod'
-// import { requireAuth } from '@/shared/lib/auth/server'
 import { todos } from '@/shared/lib/db/schema'
 import type { Todo } from '../model/types'
+// import { requireAuth } from '@/shared/lib/auth/server'
 
 export const todoSchema = z.object({
   title: z.string().min(1),
@@ -133,7 +133,7 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' }).handler(
 )
 
 export const getTodosByProjectIdFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data: projectId }: { data: string | undefined }) => {
+  async ({ data: projectId }: { data?: string }) => {
     if (process.env.VITE_E2E === 'true') {
       return Array.from({ length: 5 }).map((_, i) => ({
         id: i.toString(),
@@ -173,12 +173,12 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' }).handler(
       return []
     }
   },
-)
+) as unknown as (opts: { data: string }) => Promise<Todo[]>
 
 export const createTodoFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
+  async ({ data: input }: { data?: CreateTodoInput }) => {
+    if (!input) throw new Error('Input is required')
     if (process.env.VITE_E2E === 'true') {
-      const input = data as any
       return {
         id: 'mock-id',
         ...input,
@@ -199,12 +199,6 @@ export const createTodoFn = createServerFn({ method: 'POST' }).handler(
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const { syncRagDocument } = await import('@/shared/lib/rag/sync')
-      // Manual validation
-      const parsed = todoSchema.safeParse(data)
-      if (!parsed.success) {
-        throw new Error(`Invalid input: ${parsed.error.message}`)
-      }
-      const input = parsed.data
 
       const userId = 'user_1' // await requireAuth()
 
@@ -241,9 +235,10 @@ export const createTodoFn = createServerFn({ method: 'POST' }).handler(
 )
 
 export const updateTodoFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
+  async ({ data }: { data?: { id: string; data: UpdateTodoInput } }) => {
+    if (!data) throw new Error('Data is required')
+    const { id, data: updateData } = data
     if (process.env.VITE_E2E === 'true') {
-      const { id, data: updateData } = data as any
       return {
         id,
         ...updateData,
@@ -264,10 +259,6 @@ export const updateTodoFn = createServerFn({ method: 'POST' }).handler(
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const { syncRagDocument } = await import('@/shared/lib/rag/sync')
-      const { id, data: updateData } = data as {
-        id: string
-        data: Partial<z.infer<typeof todoSchema>>
-      }
 
       const [updatedItem] = await db
         .update(todos)

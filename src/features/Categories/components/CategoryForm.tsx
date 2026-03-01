@@ -94,12 +94,27 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
         )}
       />
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+      <div className="flex justify-end gap-3 pt-6 border-t border-border/40 mt-4">
+        <Button
+          type="button"
+          variant="ghost"
+          onClick={onCancel}
+          disabled={isLoading}
+          className="hover:bg-accent/50"
+        >
           {t('common.cancel')}
         </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? t('common.loading') : t('categories.save')}
+        <Button type="submit" disabled={isLoading} className="px-8 shadow-lg shadow-primary/20">
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+              {t('common.loading')}
+            </div>
+          ) : defaultValues ? (
+            t('common.save')
+          ) : (
+            t('common.create')
+          )}
         </Button>
       </div>
     </form>

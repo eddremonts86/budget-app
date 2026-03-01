@@ -42,7 +42,13 @@
     "optional": "optional",
     "stop": "Stop",
     "clear": "Clear",
-    "send": "Send"
+    "clearFilters": "Clear filters",
+    "noResults": "No results found.",
+    "selected": "selected",
+    "send": "Send",
+    "backToHome": "Go to Homepage",
+    "retry": "Retry",
+    "unknownError": "An unexpected error occurred."
   },
   "theme": {
     "light": "Light",
@@ -216,19 +222,23 @@
         "checkingStatus": "Checking service status...",
         "fallbackDescription": "The system will automatically try the next available provider if the active one fails.",
         "active": "Active",
-         "noModels": "No models found",
-         "modelsCount": "{{count}} models"
-       }
+        "noModels": "No models found",
+        "modelsCount": "{{count}} models"
+      }
     }
   },
   "dashboard": {
     "title": "Dashboard",
     "description": "Welcome to your dashboard.",
     "stats": {
+      "netBalance": "Net Balance",
       "totalRevenue": "Total Revenue",
+      "totalExpenses": "Total Expenses",
+      "pendingApproval": "Pending approval",
       "subscriptions": "Subscriptions",
       "sales": "Sales",
       "activeNow": "Active Now",
+      "activeProjects": "Active Projects",
       "change": "{{value}} from last month"
     },
     "recentTasks": {
@@ -242,13 +252,75 @@
     "error": {
       "title": "Error loading dashboard",
       "description": "We couldn't load the dashboard data. Please try again later."
+    },
+    "upcomingTasks": {
+      "title": "Upcoming Tasks (Next 7 Days)",
+      "description": "Tasks due this week.",
+      "filterByResponsible": "Responsible",
+      "noTasks": "No upcoming tasks for this week.",
+      "noFilteredResults": "No tasks found for selected filters."
     }
   },
   "analytics": {
     "title": "Analytics",
     "pageViews": "Page Views",
     "overview": "Overview",
-    "placeholder": "Analytics chart coming soon..."
+    "placeholder": "Analytics chart coming soon...",
+    "netBalance": "Net Balance",
+    "netBalanceDesc": "Income minus expenses",
+    "totalRevenue": "Total Revenue",
+    "totalRevenueDesc": "Total approved income",
+    "totalExpenses": "Total Expenses",
+    "totalExpensesDesc": "Total approved expenses",
+    "activeProjects": "Active Projects",
+    "activeProjectsDesc": "Currently active projects",
+    "taskCompletion": "Task Completion",
+    "tasks": "tasks",
+    "activeUsers": "Active Users",
+    "activeUsersDesc": "Total registered users",
+    "error": "Error loading KPIs",
+    "searchPlaceholder": "Search...",
+    "export": "Export",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last90Days": "Last 90 days",
+    "financialTrend": {
+      "title": "Financial Trend",
+      "description": "Income and expenses over the last {{days}} days",
+      "error": "Error loading financial data",
+      "income": "Income",
+      "expenses": "Expenses"
+    },
+    "taskCompletionTrend": {
+      "title": "Task Completion Trend",
+      "description": "Tasks completed over the last {{days}} days",
+      "label": "Tasks Completed"
+    },
+    "taskDistribution": {
+      "byStatus": "Tasks by Status",
+      "byStatusDesc": "Current distribution of tasks",
+      "byPriority": "Tasks by Priority",
+      "byPriorityDesc": "Priority breakdown",
+      "label": "Tasks",
+      "error": "Error loading task data"
+    },
+    "projectPerformance": {
+      "title": "Project Performance",
+      "description": "Overview of project progress and budget usage",
+      "searchPlaceholder": "Search projects...",
+      "columns": {
+        "name": "Project Name",
+        "status": "Status",
+        "budget": "Budget Used",
+        "completion": "Task Completion",
+        "tasks": "Tasks"
+      },
+      "status": {
+        "active": "Active",
+        "completed": "Completed",
+        "on_hold": "On Hold"
+      }
+    }
   },
   "sectionCards": {
     "totalRevenue": {
@@ -305,7 +377,105 @@
     }
   },
   "projects": {
-    "title": "Projects"
+    "title": "Projects",
+    "actions": {
+      "create": "Create New Project",
+      "new": "New Project",
+      "edit": "Edit Project",
+      "delete": "Delete Project",
+      "createAnother": "Create Another Project"
+    },
+    "form": {
+      "nameLabel": "Project Name",
+      "namePlaceholder": "Enter project name",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Describe the project objectives...",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Select status",
+      "typeLabel": "Project Type",
+      "typePlaceholder": "Select type",
+      "startDateLabel": "Start Date",
+      "endDateLabel": "End Date",
+      "technologiesLabel": "Technologies",
+      "technologiesPlaceholder": "React, TypeScript, Tailwind...",
+      "budgetLabel": "Budget",
+      "budgetPlaceholder": "0",
+      "priorityLabel": "Priority",
+      "priorityPlaceholder": "Select priority",
+      "departmentLabel": "Department",
+      "departmentPlaceholder": "Select department",
+      "teamLabel": "Team Members",
+      "teamPlaceholder": "Search users...",
+      "teamEmpty": "No users found.",
+      "createTitle": "Create Project",
+      "createDescription": "Add a new project to your workspace. Fill in the details below.",
+      "editTitle": "Edit Project",
+      "editDescription": "Update project details and configuration.",
+      "confirmationDescription": "Your project has been successfully created. You can now start adding tasks and team members.",
+      "tabs": {
+        "general": "General",
+        "team": "Team"
+      }
+    },
+    "members": {
+      "title": "Team Members",
+      "description": "Manage who has access to this project and their roles.",
+      "add": "Add Member",
+      "register": "Register New Member",
+      "registerDescription": "Create a new user and add them to the project team.",
+      "searchUsers": "Search users...",
+      "searchMembers": "Search team members...",
+      "noAvailableUsers": "No more users available.",
+      "empty": "No members in this project.",
+      "success": {
+        "added": "Member added successfully",
+        "updated": "Role updated successfully",
+        "removed": "Member removed successfully"
+      }
+    },
+    "status": {
+      "active": "Active",
+      "completed": "Completed",
+      "on_hold": "On Hold",
+      "planning": "Planning",
+      "cancelled": "Cancelled"
+    },
+    "type": {
+      "internal": "Internal",
+      "external": "External",
+      "research": "Research",
+      "maintenance": "Maintenance"
+    },
+    "priority": {
+      "low": "Low",
+      "medium": "Medium",
+      "high": "High"
+    },
+    "success": {
+      "created": "Project created successfully",
+      "updated": "Project updated successfully",
+      "deleted": "Project deleted successfully"
+    },
+    "error": {
+      "create": "Failed to create project",
+      "update": "Failed to update project",
+      "delete": "Failed to delete project",
+      "hasTasks": "Cannot delete project '{{name}}' because it has associated tasks."
+    },
+    "confirm": {
+      "delete": "Are you sure you want to delete project '{{name}}'?"
+    },
+    "member": {
+      "role": "Role",
+      "owner": "Owner",
+      "manager": "Manager",
+      "contributor": "Contributor",
+      "viewer": "Viewer",
+      "add": "Add Member",
+      "remove": "Remove Member",
+      "updateRole": "Update Role",
+      "joinedAt": "Joined on"
+    }
   },
   "team": {
     "title": "Team"
@@ -361,7 +531,8 @@
       "status": "Status",
       "priority": "Priority",
       "assignedTo": "Assigned To",
-      "createdAt": "Created"
+      "createdAt": "Created",
+      "dueDate": "Due Date"
     },
     "confirm": {
       "delete": "Are you sure you want to delete this task?"
@@ -441,7 +612,8 @@
       "add": "Add Transaction",
       "save": "Save Transaction",
       "edit": "Edit",
-      "delete": "Delete"
+      "delete": "Delete",
+      "create": "Create Transaction"
     },
     "form": {
       "customerNameLabel": "Customer Name",
@@ -485,6 +657,16 @@
       "created": "Transaction created successfully",
       "updated": "Transaction updated successfully",
       "deleted": "Transaction deleted successfully"
+    },
+    "history": "Transaction History",
+    "pending": {
+      "title": "Requires Your Approval",
+      "approveConfirm": "Are you sure you want to approve this transaction?",
+      "approveSuccess": "Transaction approved successfully",
+      "rejectPrompt": "Please provide a reason for rejection:",
+      "rejectSuccess": "Transaction rejected successfully",
+      "approve": "Approve",
+      "reject": "Reject"
     }
   },
   "validation": {

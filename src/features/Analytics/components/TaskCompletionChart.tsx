@@ -1,29 +1,36 @@
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
 import { Skeleton } from '@/components/ui/skeleton'
 import { taskCompletionTrendQueryOptions } from '../api/analytics.queries'
 
-const chartConfig = {
-  count: {
-    label: "Tasks Completed",
-    color: "#16a34a",
-  },
-}
-
 interface TaskCompletionChartProps {
   days: number
 }
 
 export function TaskCompletionChart({ days }: TaskCompletionChartProps) {
+  const { t } = useTranslation()
   const { data, isLoading } = useQuery(taskCompletionTrendQueryOptions(days))
+
+  const chartConfig = {
+    count: {
+      label: t('analytics.taskCompletionTrend.label', { defaultValue: 'Tasks Completed' }),
+      color: "#16a34a",
+    },
+  }
 
   return (
     <Card className="col-span-4 lg:col-span-2">
       <CardHeader>
-        <CardTitle>Task Completion Trend</CardTitle>
-        <CardDescription>Tasks completed over the last {days} days</CardDescription>
+        <CardTitle>{t('analytics.taskCompletionTrend.title', { defaultValue: 'Task Completion Trend' })}</CardTitle>
+        <CardDescription>
+          {t('analytics.taskCompletionTrend.description', {
+            defaultValue: 'Tasks completed over the last {{days}} days',
+            days,
+          })}
+        </CardDescription>
       </CardHeader>
       <CardContent>
         {isLoading ? (

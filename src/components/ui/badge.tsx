@@ -5,8 +5,8 @@ import * as React from 'react'
 import { cn } from '@/shared/utils/index'
 import { badgeVariants, type BadgeVariantProps } from './badge-variants'
 
-export interface BadgeProps
-  extends React.HTMLAttributes<HTMLDivElement>, BadgeVariantProps {
+export interface BadgeProps extends React.HTMLAttributes<HTMLDivElement>, BadgeVariantProps {
+  variant?: 'default' | 'secondary' | 'destructive' | 'outline' | 'success' | 'warning' | 'info'
   asChild?: boolean
 }
 

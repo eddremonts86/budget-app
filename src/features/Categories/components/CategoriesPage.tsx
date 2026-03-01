@@ -57,9 +57,9 @@ export function CategoriesPage() {
       accessorKey: 'name',
       header: t('categories.columns.name'),
       cell: ({ row }) => (
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
           <div
-            className="w-4 h-4 rounded-full border"
+            className="size-4 rounded border border-border/40 shadow-sm shrink-0"
             style={{ backgroundColor: row.original.color }}
           />
           <span className="font-medium">{row.original.name}</span>
@@ -70,7 +70,15 @@ export function CategoriesPage() {
       accessorKey: 'color',
       header: t('categories.columns.color'),
       cell: ({ row }) => (
-        <code className="bg-muted px-1.5 py-0.5 rounded">{row.original.color}</code>
+        <div className="flex items-center gap-3">
+          <div
+            className="size-6 rounded-lg border border-border/50 shadow-sm shrink-0"
+            style={{ backgroundColor: row.original.color }}
+          />
+          <code className="bg-muted/50 px-2 py-1 rounded-md text-xs font-mono border border-border/20">
+            {row.original.color.toUpperCase()}
+          </code>
+        </div>
       ),
     },
     {
@@ -180,12 +188,16 @@ export function CategoriesPage() {
 
       {/* Create Sheet */}
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent className="sm:max-w-[540px]">
-          <SheetHeader>
-            <SheetTitle>{t('categories.add')}</SheetTitle>
-            <SheetDescription>{t('categories.description.create')}</SheetDescription>
+        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
+          <SheetHeader className="p-6 border-b border-border/40 shrink-0">
+            <SheetTitle className="text-2xl font-bold tracking-tight">
+              {t('categories.add')}
+            </SheetTitle>
+            <SheetDescription className="text-base">
+              {t('categories.description.create')}
+            </SheetDescription>
           </SheetHeader>
-          <div className="py-6">
+          <div className="flex-1 overflow-y-auto p-6">
             <CategoryForm
               onSubmit={async (values) => {
                 await createMutation.mutateAsync(values)
@@ -200,12 +212,16 @@ export function CategoriesPage() {
 
       {/* Edit Sheet */}
       <Sheet open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
-        <SheetContent className="sm:max-w-[540px]">
-          <SheetHeader>
-            <SheetTitle>{t('common.edit')}</SheetTitle>
-            <SheetDescription>{t('categories.description.edit')}</SheetDescription>
+        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
+          <SheetHeader className="p-6 border-b border-border/40 shrink-0">
+            <SheetTitle className="text-2xl font-bold tracking-tight">
+              {t('common.edit')}
+            </SheetTitle>
+            <SheetDescription className="text-base">
+              {t('categories.description.edit')}
+            </SheetDescription>
           </SheetHeader>
-          <div className="py-6">
+          <div className="flex-1 overflow-y-auto p-6">
             {editingCategory && (
               <CategoryForm
                 defaultValues={editingCategory}

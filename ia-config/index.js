@@ -1,18 +1,37 @@
+/* global console */
 /**
  * @fileoverview Master configuration index.
  * Aggregates all agent configurations and provides a unified interface.
  * Implements configuration validation and runtime updates.
  */
 
-import { exec } from 'node:child_process';
-import dns from 'node:dns/promises';
-import os from 'node:os';
-import util from 'node:util';
-import { ANTHROPIC_CONFIG } from './anthropic-config.js';
-import { LLAMA_CPP_CONFIG } from './llama-config.js';
-import { LM_STUDIO_CONFIG } from './lmstudio-config.js';
-import { OLLAMA_CONFIG } from './ollama-config.js';
-import { OPENAI_CONFIG } from './openai-config.js';
+// import { exec } from 'node:child_process';
+// import dns from 'node:dns/promises';
+// import os from 'node:os';
+// import util from 'node:util';
+import { ANTHROPIC_CONFIG } from './anthropic-config.js'
+import { LLAMA_CPP_CONFIG } from './llama-config.js'
+import { LM_STUDIO_CONFIG } from './lmstudio-config.js'
+import { OLLAMA_CONFIG } from './ollama-config.js'
+import { OPENAI_CONFIG } from './openai-config.js'
+
+/**
+ * Helper to dynamically import node modules safely
+ */
+async function getNodeModules() {
+  if (typeof window !== 'undefined') {
+    return null
+  }
+  try {
+    const childProcess = await import('node:child_process')
+    const dns = await import('node:dns/promises')
+    const os = await import('node:os')
+    const util = await import('node:util')
+    return { childProcess, dns, os, util }
+  } catch {
+    return null
+  }
+}
 
 /**
  * Validates the configuration for a given provider.
@@ -22,13 +41,13 @@ import { OPENAI_CONFIG } from './openai-config.js';
  */
 function validateConfig(provider, config) {
   if (!config) {
-    throw new Error(`Configuration for ${provider} is missing.`);
+    throw new Error(`Configuration for ${provider} is missing.`)
   }
   // Basic validation logic - extend as needed
   if (!config.models || Object.keys(config.models).length === 0) {
-    console.warn(`Warning: No models configured for ${provider}.`);
+    console.warn(`Warning: No models configured for ${provider}.`)
   }
-  return true;
+  return true
 }
 
 /**
@@ -47,12 +66,12 @@ export const AI_CONFIG = {
    * @returns {object} The configuration object.
    */
   get(providerId) {
-    const config = this[providerId];
+    const config = this[providerId]
     if (config) {
-      validateConfig(providerId, config);
-      return config;
+      validateConfig(providerId, config)
+      return config
     }
-    throw new Error(`Provider ${providerId} not found in AI_CONFIG.`);
+    throw new Error(`Provider ${providerId} not found in AI_CONFIG.`)
   },
 
   /**
@@ -63,13 +82,13 @@ export const AI_CONFIG = {
    */
   update(providerId, newConfig) {
     if (this[providerId]) {
-      this[providerId] = { ...this[providerId], ...newConfig };
-      console.log(`Configuration for ${providerId} updated.`);
+      this[providerId] = { ...this[providerId], ...newConfig }
+      console.log(`Configuration for ${providerId} updated.`)
     } else {
-      throw new Error(`Provider ${providerId} not found.`);
+      throw new Error(`Provider ${providerId} not found.`)
     }
-  }
-};
+  },
+}
 
 /**
  * Pre-flight checks for hardware and connectivity.
@@ -77,51 +96,65 @@ export const AI_CONFIG = {
  * @returns {Promise<{gpu: object, memory: object, network: object}>}
  */
 export async function runPreFlightChecks() {
-  console.log('Running pre-flight checks...');
+  console.log('Running pre-flight checks...')
 
-  const execAsync = typeof exec === 'function' ? util.promisify(exec) : async () => { throw new Error('exec not available'); };
+  const modules = await getNodeModules()
+  if (!modules) {
+    return {
+      gpu: { available: false, info: 'Not available in browser' },
+      memory: { total: '0 GB', free: '0 GB', status: 'UNKNOWN' },
+      network: { internet: false, local: false, latency: 0 },
+    }
+  }
+
+  const { childProcess, os, util, dns } = modules
+  const execAsync = util.promisify(childProcess.exec)
 
   const results = {
     gpu: { available: false, info: 'Unknown' },
     memory: { total: '0 GB', free: '0 GB', status: 'UNKNOWN' },
-    network: { internet: false, local: false, latency: 0 }
-  };
+    network: { internet: false, local: false, latency: 0 },
+  }
 
   // 1. Check GPU (NVIDIA or Apple Silicon)
   try {
-    const { stdout } = await execAsync('nvidia-smi --query-gpu=driver_version,memory.total --format=csv,noheader');
-    results.gpu = { available: true, info: `NVIDIA Driver: ${stdout.trim()}` };
-  } catch (e) {
+    const { stdout } = await execAsync(
+      'nvidia-smi --query-gpu=driver_version,memory.total --format=csv,noheader',
+    )
+    results.gpu = { available: true, info: `NVIDIA Driver: ${stdout.trim()}` }
+  } catch {
     if (os.platform() === 'darwin') {
-      results.gpu = { available: true, info: 'Apple Silicon / Metal (Assumed)' };
+      results.gpu = { available: true, info: 'Apple Silicon / Metal (Assumed)' }
     } else {
-      results.gpu = { available: false, info: 'No NVIDIA GPU detected.' };
+      results.gpu = { available: false, info: 'No NVIDIA GPU detected.' }
     }
   }
 
   // 2. Check Memory
-  const totalMem = os.totalmem();
-  const freeMem = os.freemem();
+  const totalMem = os.totalmem() / (1024 * 1024 * 1024)
+  const freeMem = os.freemem() / (1024 * 1024 * 1024)
   results.memory = {
-    total: `${(totalMem / 1024 ** 3).toFixed(2)} GB`,
-    free: `${(freeMem / 1024 ** 3).toFixed(2)} GB`,
-    status: (freeMem / totalMem) < 0.1 ? 'CRITICAL' : (freeMem / totalMem) < 0.2 ? 'WARNING' : 'OK'
-  };
+    total: `${totalMem.toFixed(1)} GB`,
+    free: `${freeMem.toFixed(1)} GB`,
+    status: totalMem > 16 ? 'OPTIMAL' : totalMem > 8 ? 'ADEQUATE' : 'LOW',
+  }
 
-  // 3. Check Network
-  const start = Date.now();
+  // 3. Check Network Connectivity
   try {
-    await dns.lookup('google.com');
-    results.network.internet = true;
-  } catch {}
+    await dns.lookup('google.com')
+    results.network.internet = true
+  } catch {
+    // Ignore error
+  }
 
   try {
-    await dns.lookup('localhost');
-    results.network.local = true;
-  } catch {}
-  results.network.latency = Date.now() - start;
+    await dns.lookup('localhost')
+    results.network.local = true
+  } catch {
+    // Ignore error
+  }
 
-  return results;
+  return results
 }
 
-export default AI_CONFIG;
+export default AI_CONFIG

@@ -1,67 +1,144 @@
-import { queryOptions, useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import { i18n } from '@/shared/lib/i18n'
+import { useTQuery, useTQMutation, useTQInfinite } from '@/shared/lib/query'
 import {
   type ProjectInput,
   createProjectFn,
   deleteProjectFn,
+  getDepartmentsFn,
   getProjectByIdFn,
   getProjectsFn,
   updateProjectFn,
+  getProjectMembersFn,
+  addProjectMemberFn,
+  updateProjectMemberFn,
+  removeProjectMemberFn,
+  type ProjectMemberInput,
+  type Project,
+  type ProjectMember,
+  type ProjectListResponse,
 } from './projects.fn'
 
 export const projectsKeys = {
   all: ['projects'] as const,
   lists: () => [...projectsKeys.all, 'list'] as const,
+  infinite: () => [...projectsKeys.lists(), 'infinite'] as const,
+  departments: () => [...projectsKeys.all, 'departments'] as const,
   detail: (id: string) => [...projectsKeys.all, 'detail', id] as const,
+  members: (projectId: string) => [...projectsKeys.all, 'members', projectId] as const,
 }
 
-export const projectsQueries = {
-  list: () =>
-    queryOptions({
-      queryKey: projectsKeys.lists(),
-      queryFn: () => getProjectsFn({ data: {} }),
-    }),
-  detail: (id: string) =>
-    queryOptions({
-      queryKey: projectsKeys.detail(id),
-      queryFn: () => getProjectByIdFn({ data: id }),
-    }),
+export function useInfiniteProjects(limit = 10) {
+  return useTQInfinite<ProjectListResponse, Error, InfiniteData<ProjectListResponse>, number>(
+    [...projectsKeys.infinite(), { limit }],
+    ({ pageParam }) => getProjectsFn({ data: { pageParam, limit } }),
+    {
+      initialPageParam: 1,
+      getNextPageParam: (lastPage: any) => lastPage.nextPage,
+      cache: 'realtime',
+    },
+  )
 }
 
 export function useProjects() {
-  return useQuery(projectsQueries.list())
+  return useTQuery<ProjectListResponse, Error, Project[]>(
+    projectsKeys.lists(),
+    () => getProjectsFn({ data: { limit: 1000 } }),
+    {
+      cache: 'realtime',
+      select: (res) => res.data || [],
+    },
+  )
+}
+
+export function useDepartments() {
+  return useTQuery<any[]>(projectsKeys.departments(), () => getDepartmentsFn())
 }
 
 export function useProject(id: string) {
-  return useQuery(projectsQueries.detail(id))
+  return useTQuery<Project | null>(projectsKeys.detail(id), () => getProjectByIdFn({ data: id }))
+}
+
+export function useProjectMembers(projectId: string) {
+  return useTQuery<ProjectMember[]>(projectsKeys.members(projectId), () =>
+    getProjectMembersFn({ data: projectId }),
+  )
 }
 
 export function useCreateProject() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (data: ProjectInput) => createProjectFn({ data }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectsKeys.lists() })
-    },
+  return useTQMutation(['projects', 'create'], (data: ProjectInput) => createProjectFn({ data }), {
+    invalidateKeys: [projectsKeys.lists()],
+    successMessage: i18n.t('projects.success.created'),
   })
 }
 
 export function useUpdateProject() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<ProjectInput> }) =>
+  return useTQMutation(
+    ['projects', 'update'],
+    ({ id, data }: { id: string; data: Partial<ProjectInput> }) =>
       updateProjectFn({ data: { id, data } }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectsKeys.lists() })
+    {
+      invalidateKeys: [projectsKeys.all],
+      successMessage: i18n.t('projects.success.updated'),
     },
-  })
+  )
 }
 
 export function useDeleteProject() {
-  const queryClient = useQueryClient()
-  return useMutation({
-    mutationFn: (id: string) => deleteProjectFn({ data: id }),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: projectsKeys.lists() })
-    },
+  return useTQMutation(['projects', 'delete'], (id: string) => deleteProjectFn({ data: id }), {
+    invalidateKeys: [projectsKeys.lists()],
+    successMessage: i18n.t('projects.success.deleted'),
   })
+}
+
+export function useAddProjectMember() {
+  const queryClient = useQueryClient()
+  return useTQMutation(
+    ['projects', 'members', 'add'],
+    (data: ProjectMemberInput) => addProjectMemberFn({ data }),
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: projectsKeys.members(variables.projectId) })
+        queryClient.invalidateQueries({ queryKey: projectsKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: projectsKeys.detail(variables.projectId) })
+      },
+      successMessage: i18n.t('projects.members.success.added'),
+    },
+  )
+}
+
+export function useUpdateProjectMember() {
+  const queryClient = useQueryClient()
+  return useTQMutation(
+    ['projects', 'members', 'update'],
+    (input: {
+      projectId: string
+      userId: string
+      data: { role: 'owner' | 'manager' | 'contributor' | 'viewer' }
+    }) => updateProjectMemberFn({ data: input }),
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: projectsKeys.members(variables.projectId) })
+        queryClient.invalidateQueries({ queryKey: projectsKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: projectsKeys.detail(variables.projectId) })
+      },
+      successMessage: i18n.t('projects.members.success.updated'),
+    },
+  )
+}
+
+export function useRemoveProjectMember() {
+  const queryClient = useQueryClient()
+  return useTQMutation(
+    ['projects', 'members', 'remove'],
+    (input: { projectId: string; userId: string }) => removeProjectMemberFn({ data: input }),
+    {
+      onSuccess: (_, variables) => {
+        queryClient.invalidateQueries({ queryKey: projectsKeys.members(variables.projectId) })
+        queryClient.invalidateQueries({ queryKey: projectsKeys.lists() })
+        queryClient.invalidateQueries({ queryKey: projectsKeys.detail(variables.projectId) })
+      },
+      successMessage: i18n.t('projects.members.success.removed'),
+    },
+  )
 }

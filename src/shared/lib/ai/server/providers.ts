@@ -1,7 +1,7 @@
-import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
 import type { AnyTextAdapter } from '@tanstack/ai'
 import { createAnthropicChat } from '@tanstack/ai-anthropic'
 import { createOpenaiChat } from '@tanstack/ai-openai'
+import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
 import { type AiProviderId, aiConfig } from '../ai-config'
 import { getAllAiConfigs } from './config-store'
 
@@ -27,7 +27,8 @@ export const registerProvider = (provider: ProviderRegistryItem) => {
   providerRegistry.set(provider.id, provider)
 }
 
-const normalizeOpenAiBaseUrl = (baseUrl: string) => {
+const normalizeOpenAiBaseUrl = (baseUrl?: string) => {
+  if (!baseUrl) return ''
   let url = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
   // Si termina en /api/v1, lo normalizamos a /v1 para compatibilidad con el adaptador de OpenAI
   if (url.endsWith('/api/v1')) {
@@ -95,7 +96,10 @@ registerProvider({
   label: 'Anthropic',
   buildAdapter: (config) => {
     const apiKey = config.apiKey || config.token || ''
-    const baseUrl = config.baseUrl.endsWith('/') ? config.baseUrl.slice(0, -1) : config.baseUrl
+    const baseUrl =
+      config.baseUrl && config.baseUrl.endsWith('/')
+        ? config.baseUrl.slice(0, -1)
+        : config.baseUrl || ''
     return (model) =>
       createAnthropicChat(model as Parameters<typeof createAnthropicChat>[0], apiKey, {
         baseURL: baseUrl,
@@ -129,7 +133,10 @@ export const getProviderHeaders = (config: AiConfigFormData) => {
 }
 
 const buildProbeUrl = (config: AiConfigFormData) => {
-  const baseUrl = config.baseUrl.endsWith('/') ? config.baseUrl.slice(0, -1) : config.baseUrl
+  const baseUrl =
+    config.baseUrl && config.baseUrl.endsWith('/')
+      ? config.baseUrl.slice(0, -1)
+      : config.baseUrl || ''
   const modelsEndpoint = config.endpoints.models.startsWith('/')
     ? config.endpoints.models
     : `/${config.endpoints.models}`

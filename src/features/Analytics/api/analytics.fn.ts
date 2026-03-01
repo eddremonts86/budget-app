@@ -1,11 +1,13 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, and, gte, count, sum } from 'drizzle-orm'
+import { eq, and, gte, count, sum, sql } from 'drizzle-orm'
 import { todos, users, transactions, projects } from '@/shared/lib/db/schema'
 
 export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' }).handler(async () => {
   if (process.env.VITE_E2E === 'true') {
     return {
       revenue: 125000,
+      expenses: 45000,
+      netBalance: 80000,
       activeProjects: 12,
       completedProjects: 8,
       totalTasks: 150,
@@ -20,7 +22,8 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' }).handler(asyn
     const db = getDb()
 
     const [
-      [totalRevenue],
+      [totalIncome],
+      [totalExpenses],
       [activeProjects],
       [completedProjects],
       [totalTasks],
@@ -30,7 +33,11 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' }).handler(asyn
       db
         .select({ value: sum(transactions.amount) })
         .from(transactions)
-        .where(eq(transactions.status, 'Approved')),
+        .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} > 0`)),
+      db
+        .select({ value: sum(transactions.amount) })
+        .from(transactions)
+        .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`)),
       db.select({ count: count() }).from(projects).where(eq(projects.status, 'active')),
       db.select({ count: count() }).from(projects).where(eq(projects.status, 'completed')),
       db.select({ count: count() }).from(todos),
@@ -38,12 +45,16 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' }).handler(asyn
       db.select({ count: count() }).from(users),
     ])
 
-    const revenueValue = Number(totalRevenue?.value ?? 0)
+    const incomeValue = Number(totalIncome?.value ?? 0)
+    const expenseValue = Math.abs(Number(totalExpenses?.value ?? 0))
+    const netBalance = incomeValue - expenseValue
     const taskCompletionRate =
       totalTasks.count > 0 ? Math.round((completedTasks.count / totalTasks.count) * 100) : 0
 
     return {
-      revenue: revenueValue,
+      revenue: incomeValue,
+      expenses: expenseValue,
+      netBalance,
       activeProjects: activeProjects.count,
       completedProjects: completedProjects.count,
       totalTasks: totalTasks.count,
@@ -55,6 +66,8 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' }).handler(asyn
     console.error('Database connection failed, using mock data for KPIs', error)
     return {
       revenue: 125000,
+      expenses: 45000,
+      netBalance: 80000,
       activeProjects: 12,
       completedProjects: 8,
       totalTasks: 150,
@@ -76,7 +89,8 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' }).handler(
         date.setDate(date.getDate() - i)
         mockData.push({
           date: date.toISOString().split('T')[0],
-          amount: Math.floor(Math.random() * 5000) + 1000,
+          income: Math.floor(Math.random() * 5000) + 1000,
+          expenses: Math.floor(Math.random() * 2000) + 500,
         })
       }
       return mockData
@@ -104,15 +118,33 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' }).handler(
       const grouped = results.reduce(
         (acc, curr) => {
           const dateStr = curr.date.toISOString().split('T')[0]
-          acc[dateStr] = (acc[dateStr] || 0) + curr.amount
+          if (!acc[dateStr]) {
+            acc[dateStr] = { income: 0, expenses: 0 }
+          }
+          if (curr.amount > 0) {
+            acc[dateStr].income += curr.amount
+          } else {
+            acc[dateStr].expenses += Math.abs(curr.amount)
+          }
           return acc
         },
-        {} as Record<string, number>,
+        {} as Record<string, { income: number; expenses: number }>,
       )
 
-      return Object.entries(grouped)
-        .map(([date, amount]) => ({ date, amount }))
-        .sort((a, b) => a.date.localeCompare(b.date))
+      // Ensure all days are represented
+      const fullData = []
+      for (let i = days; i >= 0; i--) {
+        const d = new Date(now)
+        d.setDate(d.getDate() - i)
+        const dateStr = d.toISOString().split('T')[0]
+        fullData.push({
+          date: dateStr,
+          income: grouped[dateStr]?.income || 0,
+          expenses: grouped[dateStr]?.expenses || 0,
+        })
+      }
+
+      return fullData
     } catch (error) {
       console.error('Database connection failed, using mock data for Revenue Trend', error)
       const days = (data as { days?: number })?.days || 30
@@ -123,7 +155,8 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' }).handler(
         date.setDate(date.getDate() - i)
         mockData.push({
           date: date.toISOString().split('T')[0],
-          amount: Math.floor(Math.random() * 5000) + 1000,
+          income: Math.floor(Math.random() * 5000) + 1000,
+          expenses: Math.floor(Math.random() * 2000) + 500,
         })
       }
       return mockData

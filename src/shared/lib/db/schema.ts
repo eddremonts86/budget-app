@@ -16,10 +16,23 @@ export const projectStatusEnum = pgEnum('project_status', [
   'on_hold',
   'cancelled',
 ])
+export const projectTypeEnum = pgEnum('project_type', [
+  'internal',
+  'external',
+  'research',
+  'maintenance',
+])
 export const transactionStatusEnum = pgEnum('transaction_status', [
   'Approved',
   'Pending',
   'Rejected',
+])
+
+export const projectMemberRoleEnum = pgEnum('project_member_role', [
+  'owner',
+  'manager',
+  'contributor',
+  'viewer',
 ])
 
 export const users = pgTable('users', {
@@ -55,10 +68,10 @@ export const projects = pgTable('projects', {
   endDate: timestamp('end_date'),
   technologies: text('technologies').array(),
   status: projectStatusEnum('status').default('active').notNull(),
+  type: projectTypeEnum('type').default('internal').notNull(),
   priority: text('priority').default('medium'),
   budget: integer('budget').default(0),
   departmentId: text('department_id').references(() => departments.id),
-  team: text('team').array(), // Array of Team IDs
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
@@ -90,9 +103,12 @@ export const transactions = pgTable('transactions', {
   customerEmail: text('customer_email').notNull(),
   status: transactionStatusEnum('status').default('Pending').notNull(),
   date: timestamp('date').notNull(),
-  amount: integer('amount').notNull(), // Storing as integer (cents) or keeping as number? JSON uses number. Let's use integer for safety or doublePrecision.
+  amount: integer('amount').notNull(), // Storing as integer (cents)
+  paymentMethod: text('payment_method'),
+  description: text('description'),
   userId: text('user_id').references(() => users.id),
   projectId: text('project_id').references(() => projects.id),
+  categoryId: text('category_id').references(() => categories.id),
   assignedAdminId: text('assigned_admin_id').references(() => users.id),
   approvedBy: text('approved_by').references(() => users.id),
   approvedAt: timestamp('approved_at'),
@@ -116,5 +132,18 @@ export const teams = pgTable('teams', {
   leadId: text('lead_id').references(() => users.id),
   members: text('members').array(), // Array of user IDs
   createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const projectMembers = pgTable('project_members', {
+  id: text('id').primaryKey(),
+  projectId: text('project_id')
+    .notNull()
+    .references(() => projects.id, { onDelete: 'cascade' }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade' }),
+  role: projectMemberRoleEnum('role').default('contributor').notNull(),
+  joinedAt: timestamp('joined_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

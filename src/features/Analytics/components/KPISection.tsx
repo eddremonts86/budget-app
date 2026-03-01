@@ -1,10 +1,20 @@
+import {
+  IconCurrencyDollar,
+  IconFolder,
+  IconChecklist,
+  IconUsers,
+  IconCreditCard,
+  IconActivity,
+} from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { IconCurrencyDollar, IconFolder, IconChecklist, IconUsers } from '@tabler/icons-react'
-import { kpisQueryOptions } from '../api/analytics.queries'
 import { Skeleton } from '@/components/ui/skeleton'
+import { cn } from '@/shared/lib/utils'
+import { kpisQueryOptions } from '../api/analytics.queries'
 
 export function KPISection() {
+  const { t } = useTranslation()
   const { data, isLoading, error } = useQuery(kpisQueryOptions)
 
   if (isLoading) {
@@ -12,51 +22,66 @@ export function KPISection() {
   }
 
   if (error) {
-    return <div className="text-red-500">Error loading KPIs</div>
+    return (
+      <div className="text-red-500">
+        {t('analytics.error', { defaultValue: 'Error loading KPIs' })}
+      </div>
+    )
   }
 
   const kpis = [
     {
-      title: 'Total Revenue',
+      title: t('analytics.netBalance', { defaultValue: 'Net Balance' }),
+      value: `$${data?.netBalance.toLocaleString() ?? '0'}`,
+      icon: IconActivity,
+      description: t('analytics.netBalanceDesc', { defaultValue: 'Income minus expenses' }),
+      color: (data?.netBalance ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500',
+    },
+    {
+      title: t('analytics.totalRevenue', { defaultValue: 'Total Revenue' }),
       value: `$${data?.revenue.toLocaleString() ?? '0'}`,
       icon: IconCurrencyDollar,
-      description: 'Total approved transactions'
+      description: t('analytics.totalRevenueDesc', { defaultValue: 'Total approved income' }),
+      color: 'text-emerald-500',
     },
     {
-      title: 'Active Projects',
+      title: t('analytics.totalExpenses', { defaultValue: 'Total Expenses' }),
+      value: `$${data?.expenses.toLocaleString() ?? '0'}`,
+      icon: IconCreditCard,
+      description: t('analytics.totalExpensesDesc', { defaultValue: 'Total approved expenses' }),
+      color: 'text-red-500',
+    },
+    {
+      title: t('analytics.activeProjects', { defaultValue: 'Active Projects' }),
       value: data?.activeProjects.toString() ?? '0',
       icon: IconFolder,
-      description: 'Currently active projects'
+      description: t('analytics.activeProjectsDesc', { defaultValue: 'Currently active projects' }),
     },
     {
-      title: 'Task Completion',
+      title: t('analytics.taskCompletion', { defaultValue: 'Task Completion' }),
       value: `${data?.taskCompletionRate ?? 0}%`,
       icon: IconChecklist,
-      description: `${data?.completedTasks} / ${data?.totalTasks} tasks`
+      description: `${data?.completedTasks} / ${data?.totalTasks} ${t('analytics.tasks', { defaultValue: 'tasks' })}`,
     },
     {
-      title: 'Active Users',
+      title: t('analytics.activeUsers', { defaultValue: 'Active Users' }),
       value: data?.activeUsers.toString() ?? '0',
       icon: IconUsers,
-      description: 'Total registered users'
-    }
+      description: t('analytics.activeUsersDesc', { defaultValue: 'Total registered users' }),
+    },
   ]
 
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       {kpis.map((kpi) => (
         <Card key={kpi.title}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">
-              {kpi.title}
-            </CardTitle>
+            <CardTitle className="text-sm font-medium">{kpi.title}</CardTitle>
             <kpi.icon className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">{kpi.value}</div>
-            <p className="text-xs text-muted-foreground">
-              {kpi.description}
-            </p>
+            <div className={cn('text-2xl font-bold', kpi.color)}>{kpi.value}</div>
+            <p className="text-xs text-muted-foreground">{kpi.description}</p>
           </CardContent>
         </Card>
       ))}
@@ -66,8 +91,8 @@ export function KPISection() {
 
 function KPISkeleton() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-      {[1, 2, 3, 4].map((i) => (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+      {[1, 2, 3, 4, 5, 6].map((i) => (
         <Card key={i}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <Skeleton className="h-4 w-[100px]" />

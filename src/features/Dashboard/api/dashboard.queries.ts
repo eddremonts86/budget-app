@@ -4,6 +4,7 @@ import {
   getRecentTransactionsFn,
   getUpcomingTodosFn,
   getUsersWorkloadFn,
+  getExpenseDistributionFn,
 } from './dashboard.fn'
 
 export const dashboardKeys = {
@@ -12,6 +13,11 @@ export const dashboardKeys = {
   transactions: () => [...dashboardKeys.all, 'transactions'] as const,
   upcomingTodos: () => [...dashboardKeys.all, 'upcomingTodos'] as const,
   usersWorkload: () => [...dashboardKeys.all, 'usersWorkload'] as const,
+  expenseDistribution: () => [...dashboardKeys.all, 'expenseDistribution'] as const,
+}
+
+export const useExpenseDistribution = () => {
+  return useTQuery(dashboardKeys.expenseDistribution(), () => getExpenseDistributionFn())
 }
 
 export const useDashboardStats = () => {

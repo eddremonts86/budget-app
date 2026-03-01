@@ -56,7 +56,10 @@ export const getUsersFn = createServerFn({ method: 'GET' }).handler(
       return {
         data: items.map((item) => ({
           ...item,
-          createdAt: item.createdAt.toISOString(),
+          createdAt:
+            item.createdAt instanceof Date
+              ? item.createdAt.toISOString()
+              : new Date().toISOString(),
         })),
         nextPage,
         totalCount: total,
@@ -91,7 +94,8 @@ export const getUserByIdFn = createServerFn({ method: 'GET' }).handler(
     const item = result[0]
     return {
       ...item,
-      createdAt: item.createdAt.toISOString(),
+      createdAt:
+        item.createdAt instanceof Date ? item.createdAt.toISOString() : new Date().toISOString(),
     }
   },
 ) as unknown as (opts: { data: string }) => Promise<User | null>
@@ -119,7 +123,8 @@ export const getUserByEmailFn = createServerFn({ method: 'GET' }).handler(
     const item = result[0]
     return {
       ...item,
-      createdAt: item.createdAt.toISOString(),
+      createdAt:
+        item.createdAt instanceof Date ? item.createdAt.toISOString() : new Date().toISOString(),
     }
   },
 ) as unknown as (opts: { data: string }) => Promise<User | null>
@@ -160,7 +165,10 @@ export const createUserFn = createServerFn({ method: 'POST' }).handler(
 
     return {
       ...newItem,
-      createdAt: newItem.createdAt.toISOString(),
+      createdAt:
+        newItem.createdAt instanceof Date
+          ? newItem.createdAt.toISOString()
+          : new Date().toISOString(),
     }
   },
 ) as unknown as (opts: { data: z.infer<typeof userSchema> }) => Promise<User>
@@ -197,9 +205,16 @@ export const updateUserFn = createServerFn({ method: 'POST' }).handler(
       .where(eq(users.id, id))
       .returning()
 
+    if (!updatedItem) {
+      throw new Error('User not found for update')
+    }
+
     return {
       ...updatedItem,
-      createdAt: updatedItem.createdAt.toISOString(),
+      createdAt:
+        updatedItem.createdAt instanceof Date
+          ? updatedItem.createdAt.toISOString()
+          : new Date().toISOString(),
     }
   },
 ) as unknown as (opts: {
@@ -237,29 +252,43 @@ export const upsertUserFn = createServerFn({ method: 'POST' }).handler(
     const db = getDb()
     const input = data as UserInput & { id: string }
 
-    const [upserted] = await db
-      .insert(users)
-      .values({
-        id: input.id,
-        name: input.name,
-        email: input.email,
-        role: input.role as 'admin' | 'user',
-        avatar: input.avatar,
-      })
-      .onConflictDoUpdate({
-        target: users.id,
-        set: {
+    try {
+      const [upserted] = await db
+        .insert(users)
+        .values({
+          id: input.id,
           name: input.name,
           email: input.email,
+          role: (input.role as 'admin' | 'user') || 'user',
           avatar: input.avatar,
-          // role is intentionally omitted to preserve existing role
-        },
-      })
-      .returning()
+        })
+        .onConflictDoUpdate({
+          target: users.id,
+          set: {
+            name: input.name,
+            email: input.email,
+            avatar: input.avatar,
+            // role is intentionally omitted to preserve existing role
+          },
+        })
+        .returning()
 
-    return {
-      ...upserted,
-      createdAt: upserted.createdAt.toISOString(),
+      if (!upserted) {
+        throw new Error('No user returned from upsert')
+      }
+
+      const createdAt =
+        upserted.createdAt instanceof Date
+          ? upserted.createdAt.toISOString()
+          : new Date().toISOString()
+
+      return {
+        ...upserted,
+        createdAt,
+      }
+    } catch (error) {
+      console.error('Error in upsertUserFn:', error)
+      throw error
     }
   },
 ) as unknown as (opts: { data: UserInput & { id: string } }) => Promise<User>

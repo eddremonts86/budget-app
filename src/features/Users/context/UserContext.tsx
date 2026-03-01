@@ -10,5 +10,3 @@ export interface UserContextValue {
 }
 
 export const UserContext = React.createContext<UserContextValue | undefined>(undefined)
-
-export * from './UserProvider'

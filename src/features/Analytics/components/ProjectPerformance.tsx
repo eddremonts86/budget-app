@@ -1,6 +1,7 @@
 import { IconSearch } from '@tabler/icons-react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group'
@@ -17,6 +18,7 @@ import {
 import { projectPerformanceQueryOptions } from '../api/analytics.queries'
 
 export function ProjectPerformance() {
+  const { t } = useTranslation()
   const { data, isLoading } = useQuery(projectPerformanceQueryOptions)
   const [search, setSearch] = useState('')
 
@@ -35,15 +37,15 @@ export function ProjectPerformance() {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <CardTitle>Project Performance</CardTitle>
-            <CardDescription>Overview of project progress and budget usage</CardDescription>
+            <CardTitle>{t('analytics.projectPerformance.title', { defaultValue: 'Project Performance' })}</CardTitle>
+            <CardDescription>{t('analytics.projectPerformance.description', { defaultValue: 'Overview of project progress and budget usage' })}</CardDescription>
           </div>
           <InputGroup className="max-w-[200px]">
             <InputGroupAddon>
               <IconSearch />
             </InputGroupAddon>
             <InputGroupInput
-              placeholder="Search projects..."
+              placeholder={t('analytics.projectPerformance.searchPlaceholder', { defaultValue: 'Search projects...' })}
               value={search}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
             />
@@ -54,11 +56,11 @@ export function ProjectPerformance() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[200px]">Project Name</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Budget Used</TableHead>
-              <TableHead className="w-[300px]">Task Completion</TableHead>
-              <TableHead className="text-right">Tasks</TableHead>
+              <TableHead className="w-[200px]">{t('analytics.projectPerformance.columns.name', { defaultValue: 'Project Name' })}</TableHead>
+              <TableHead>{t('analytics.projectPerformance.columns.status', { defaultValue: 'Status' })}</TableHead>
+              <TableHead>{t('analytics.projectPerformance.columns.budget', { defaultValue: 'Budget Used' })}</TableHead>
+              <TableHead className="w-[300px]">{t('analytics.projectPerformance.columns.completion', { defaultValue: 'Task Completion' })}</TableHead>
+              <TableHead className="text-right">{t('analytics.projectPerformance.columns.tasks', { defaultValue: 'Tasks' })}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -67,7 +69,7 @@ export function ProjectPerformance() {
                 <TableCell className="font-medium">{project.name}</TableCell>
                 <TableCell>
                   <Badge variant={project.status === 'active' ? 'default' : 'secondary'}>
-                    {project.status}
+                    {t(`analytics.projectPerformance.status.${project.status}`, project.status)}
                   </Badge>
                 </TableCell>
                 <TableCell>

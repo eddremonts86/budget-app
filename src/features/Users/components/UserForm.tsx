@@ -24,7 +24,7 @@ const createUserSchema = (t: (key: string) => string) =>
     avatar: z.string().min(1, t('validation.required')).url(t('validation.invalidUrl')),
   })
 
-type UserFormValues = z.infer<ReturnType<typeof createUserSchema>>
+export type UserFormValues = z.infer<ReturnType<typeof createUserSchema>>
 
 type UserFormProps = {
   defaultValues?: Partial<User>
@@ -71,13 +71,18 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               id={field.name}
               value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                field.handleChange(e.target.value)
+              }
               placeholder={t('users.form.namePlaceholder')}
             />
             <FieldError
-              errors={field.state.meta.errors.map((e) =>
-                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
-              )}
+              errors={field.state.meta.errors.map((e) => {
+                if (typeof e === 'string') return e
+                if (e && typeof e === 'object' && 'message' in e)
+                  return String((e as { message: string }).message)
+                return String(e)
+              })}
             />
           </Field>
         )}
@@ -93,13 +98,18 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               type="email"
               value={field.state.value}
               onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                field.handleChange(e.target.value)
+              }
               placeholder={t('users.form.emailPlaceholder')}
             />
             <FieldError
-              errors={field.state.meta.errors.map((e) =>
-                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
-              )}
+              errors={field.state.meta.errors.map((e) => {
+                if (typeof e === 'string') return e
+                if (e && typeof e === 'object' && 'message' in e)
+                  return String((e as { message: string }).message)
+                return String(e)
+              })}
             />
           </Field>
         )}
@@ -112,7 +122,7 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
             <FieldLabel htmlFor={field.name}>{t('users.form.roleLabel')}</FieldLabel>
             <Select
               value={field.state.value}
-              onValueChange={(value) => field.handleChange(value as UserFormValues['role'])}
+              onValueChange={(value: string) => field.handleChange(value as UserFormValues['role'])}
             >
               <SelectTrigger id={field.name}>
                 <SelectValue placeholder={t('users.form.rolePlaceholder')} />
@@ -123,9 +133,12 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               </SelectContent>
             </Select>
             <FieldError
-              errors={field.state.meta.errors.map((e) =>
-                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
-              )}
+              errors={field.state.meta.errors.map((e) => {
+                if (typeof e === 'string') return e
+                if (e && typeof e === 'object' && 'message' in e)
+                  return String((e as { message: string }).message)
+                return String(e)
+              })}
             />
           </Field>
         )}
@@ -143,14 +156,13 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                   alt="Avatar preview"
                   className="object-cover"
                 />
-                <form.Subscribe
-                  selector={(state) => state.values.name}
-                  children={(name) => (
+                <form.Subscribe selector={(state) => state.values.name}>
+                  {(name) => (
                     <AvatarFallback className="bg-primary/5 text-primary text-lg font-bold">
-                      {(name || '?').charAt(0).toUpperCase()}
+                      {((name as string) || '?').charAt(0).toUpperCase()}
                     </AvatarFallback>
                   )}
-                />
+                </form.Subscribe>
               </Avatar>
               <div className="flex-1 space-y-2">
                 <div className="flex gap-2">
@@ -158,7 +170,9 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                     id={field.name}
                     value={field.state.value}
                     onBlur={field.handleBlur}
-                    onChange={(e) => field.handleChange(e.target.value)}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      field.handleChange(e.target.value)
+                    }
                     placeholder={t('users.form.avatarPlaceholder')}
                     className="font-mono text-xs"
                   />
@@ -172,9 +186,10 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                         `https://api.dicebear.com/7.x/avataaars/svg?seed=${Math.random()}`,
                       )
                     }
+                    disabled={isLoading}
                     title={t('users.form.avatarRandom')}
                   >
-                    <RefreshCw className="h-4 w-4" />
+                    <RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
                   </Button>
                 </div>
                 <p className="text-[10px] text-muted-foreground">
@@ -183,9 +198,12 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               </div>
             </div>
             <FieldError
-              errors={field.state.meta.errors.map((e) =>
-                typeof e === 'string' ? e : e?.message ? String(e.message) : String(e),
-              )}
+              errors={field.state.meta.errors.map((e) => {
+                if (typeof e === 'string') return e
+                if (e && typeof e === 'object' && 'message' in e)
+                  return String((e as { message: string }).message)
+                return String(e)
+              })}
             />
           </Field>
         )}

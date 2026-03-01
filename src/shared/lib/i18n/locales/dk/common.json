@@ -42,7 +42,11 @@
     "optional": "valgfri",
     "stop": "Stop",
     "clear": "Ryd",
-    "send": "Send"
+    "clearFilters": "Ryd filtre",
+    "noResults": "Ingen resultater fundet.",
+    "selected": "valgt",
+    "send": "Send",
+    "backToHome": "Gå til startside"
   },
   "theme": {
     "light": "Lys",
@@ -212,11 +216,22 @@
       "title": "Fejl",
       "description": "Der opstod en fejl ved indlæsning af dashboard-data."
     },
+    "upcomingTasks": {
+      "title": "Kommende Opgaver (Næste 7 Dage)",
+      "description": "Opgaver der forfalder i denne uge.",
+      "filterByResponsible": "Ansvarlig",
+      "noTasks": "Ingen kommende opgaver i denne uge.",
+      "noFilteredResults": "Ingen opgaver fundet for de valgte filtre."
+    },
     "stats": {
+      "netBalance": "Netto balance",
       "totalRevenue": "Samlet omsætning",
+      "totalExpenses": "Samlede udgifter",
+      "pendingApproval": "Afventer godkendelse",
       "subscriptions": "Abonnementer",
       "sales": "Salg",
       "activeNow": "Aktive nu",
+      "activeProjects": "Aktive projekter",
       "change": "{{value}} siden sidste måned",
       "activeNowContext": "{{value}} {{context}}"
     },
@@ -233,7 +248,62 @@
     "title": "Analyse",
     "pageViews": "Sidevisninger",
     "overview": "Oversigt",
-    "placeholder": "Analyse-graf kommer snart..."
+    "placeholder": "Analyse-graf kommer snart...",
+    "netBalance": "Netto balance",
+    "netBalanceDesc": "Indtægter minus udgifter",
+    "totalRevenue": "Samlet omsætning",
+    "totalRevenueDesc": "Samlet godkendt indkomst",
+    "totalExpenses": "Samlede udgifter",
+    "totalExpensesDesc": "Samlede godkendte udgifter",
+    "activeProjects": "Aktive projekter",
+    "activeProjectsDesc": "Aktive projekter i øjeblikket",
+    "taskCompletion": "Opgavegennemførelse",
+    "tasks": "opgaver",
+    "activeUsers": "Aktive brugere",
+    "activeUsersDesc": "Samlet antal registrerede brugere",
+    "error": "Fejl ved indlæsning af KPI'er",
+    "searchPlaceholder": "Søg...",
+    "export": "Eksporter",
+    "last7Days": "Seneste 7 dage",
+    "last30Days": "Seneste 30 dage",
+    "last90Days": "Seneste 90 dage",
+    "financialTrend": {
+      "title": "Økonomisk tendens",
+      "description": "Indtægter og udgifter over de seneste {{days}} dage",
+      "error": "Fejl ved indlæsning af økonomiske data",
+      "income": "Indtægt",
+      "expenses": "Udgifter"
+    },
+    "taskCompletionTrend": {
+      "title": "Tendens for opgavegennemførelse",
+      "description": "Opgaver gennemført over de seneste {{days}} dage",
+      "label": "Opgaver gennemført"
+    },
+    "taskDistribution": {
+      "byStatus": "Opgaver efter status",
+      "byStatusDesc": "Nuværende fordeling af opgaver",
+      "byPriority": "Opgaver efter prioritet",
+      "byPriorityDesc": "Opdeling efter prioritet",
+      "label": "Opgaver",
+      "error": "Fejl ved indlæsning af opgavedata"
+    },
+    "projectPerformance": {
+      "title": "Projektets ydeevne",
+      "description": "Oversigt over projektets fremdrift og budgetforbrug",
+      "searchPlaceholder": "Søg efter projekter...",
+      "columns": {
+        "name": "Projektnavn",
+        "status": "Status",
+        "budget": "Brugt budget",
+        "completion": "Opgavegennemførelse",
+        "tasks": "Opgaver"
+      },
+      "status": {
+        "active": "Aktiv",
+        "completed": "Gennemført",
+        "on_hold": "På hold"
+      }
+    }
   },
   "sectionCards": {
     "totalRevenue": {
@@ -290,7 +360,73 @@
     }
   },
   "projects": {
-    "title": "Projekter"
+    "title": "Projekter",
+    "actions": {
+      "create": "Opret nyt projekt",
+      "new": "Nyt projekt",
+      "edit": "Rediger projekt",
+      "delete": "Slet projekt",
+      "createAnother": "Opret et andet projekt"
+    },
+    "form": {
+      "nameLabel": "Projektnavn",
+      "namePlaceholder": "Indtast projektnavn",
+      "descriptionLabel": "Beskrivelse",
+      "descriptionPlaceholder": "Beskriv projektets mål...",
+      "statusLabel": "Status",
+      "statusPlaceholder": "Vælg status",
+      "typeLabel": "Projekttype",
+      "typePlaceholder": "Vælg type",
+      "startDateLabel": "Startdato",
+      "endDateLabel": "Slutdato",
+      "technologiesLabel": "Teknologier",
+      "technologiesPlaceholder": "React, TypeScript, Tailwind...",
+      "budgetLabel": "Budget",
+      "budgetPlaceholder": "0",
+      "priorityLabel": "Prioritet",
+      "priorityPlaceholder": "Vælg prioritet",
+      "departmentLabel": "Afdeling",
+      "departmentPlaceholder": "Vælg afdeling",
+      "teamLabel": "Teammedlemmer",
+      "teamPlaceholder": "Vælg teammedlemmer",
+      "createTitle": "Opret projekt",
+      "createDescription": "Tilføj et nyt projekt til dit arbejdsområde. Udfyld detaljerne nedenfor.",
+      "editTitle": "Rediger projekt",
+      "editDescription": "Opdater projektdetaljer og konfiguration.",
+      "confirmationDescription": "Dit projekt er blevet oprettet. Du kan nu begynde at tilføje opgaver og teammedlemmer."
+    },
+    "status": {
+      "active": "Aktiv",
+      "completed": "Afsluttet",
+      "on_hold": "På vent",
+      "planning": "Planlægning",
+      "cancelled": "Annulleret"
+    },
+    "type": {
+      "internal": "Intern",
+      "external": "Ekstern",
+      "research": "Forskning",
+      "maintenance": "Vedligeholdelse"
+    },
+    "priority": {
+      "low": "Lav",
+      "medium": "Mellem",
+      "high": "Høj"
+    },
+    "success": {
+      "created": "Projektet blev oprettet korrekt",
+      "updated": "Projektet blev opdateret korrekt",
+      "deleted": "Projektet blev slettet korrekt"
+    },
+    "error": {
+      "create": "Kunne ikke oprette projektet",
+      "update": "Kunne ikke opdatere projektet",
+      "delete": "Kunne ikke slette projektet",
+      "hasTasks": "Kan ikke slette projektet '{{name}}', fordi det har tilknyttede opgaver."
+    },
+    "confirm": {
+      "delete": "Er du sikker på, at du vil slette projektet '{{name}}'?"
+    }
   },
   "team": {
     "title": "Team"
@@ -344,7 +480,8 @@
       "status": "Status",
       "priority": "Prioritet",
       "assignedTo": "Tildelt til",
-      "createdAt": "Oprettet"
+      "createdAt": "Oprettet",
+      "dueDate": "Forfaldsdato"
     },
     "confirm": {
       "delete": "Er du sikker på, at du vil slette denne opgave?"
@@ -424,7 +561,8 @@
       "add": "Tilføj transaktion",
       "save": "Gem transaktion",
       "edit": "Rediger",
-      "delete": "Slet"
+      "delete": "Slet",
+      "create": "Opret transaktion"
     },
     "form": {
       "customerNameLabel": "Kundenavn",
@@ -468,6 +606,16 @@
       "created": "Transaktion oprettet",
       "updated": "Transaktion opdateret",
       "deleted": "Transaktion slettet"
+    },
+    "history": "Transaktionshistorik",
+    "pending": {
+      "title": "Kræver din godkendelse",
+      "approveConfirm": "Er du sikker på, at du vil godkende denne transaktion?",
+      "approveSuccess": "Transaktion godkendt korrekt",
+      "rejectPrompt": "Angiv venligst en årsag til afvisning:",
+      "rejectSuccess": "Transaktion afvist korrekt",
+      "approve": "Godkend",
+      "reject": "Afvis"
     }
   },
   "validation": {

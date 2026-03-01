@@ -43,15 +43,15 @@ export function WorkloadChart() {
 
   const chartConfig = {
     completed: {
-      label: t('status.completed', 'Completed'),
+      label: t('todos.status.completed', 'Completed'),
       color: '#10b981', // Emerald-500
     },
     inProgress: {
-      label: t('status.inProgress', 'In Progress'),
+      label: t('todos.status.inProgress', 'In Progress'),
       color: '#f59e0b', // Amber-500
     },
     pending: {
-      label: t('status.pending', 'Pending'),
+      label: t('todos.status.pending', 'Pending'),
       color: '#ef4444', // Red-500
     },
   } satisfies ChartConfig

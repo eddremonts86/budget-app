@@ -31,7 +31,7 @@ import { useUsers } from '../../Users/api/users.queries'
 import { useUpcomingTodos } from '../api/dashboard.queries'
 
 interface UserFilterProps {
-  users: Array<{ id: string; name: string; avatar?: string }>
+  users: Array<{ id: string; name: string; avatar?: string | null }>
   selectedUsers: Set<string>
   onSelectionChange: (selected: Set<string>) => void
 }
@@ -79,7 +79,7 @@ function UserFilter({ users, selectedUsers, onSelectionChange }: UserFilterProps
               <div className="hidden space-x-1 lg:flex">
                 {selectedUsers.size > 2 ? (
                   <Badge variant="secondary" className="rounded-sm px-1 font-normal">
-                    {selectedUsers.size} selected
+                    {selectedUsers.size} {t('common.selected', 'selected')}
                   </Badge>
                 ) : (
                   users
@@ -166,7 +166,7 @@ export function UpcomingTodosList() {
   const todoList = useMemo(() => {
     const list = Array.isArray(todos) ? todos : []
     if (selectedUserIds.size === 0) return list
-    return list.filter((todo) => selectedUserIds.has(todo.assignedTo))
+    return list.filter((todo) => todo.assignedTo && selectedUserIds.has(todo.assignedTo))
   }, [todos, selectedUserIds])
 
   const userMap = useMemo(() => {
@@ -175,15 +175,16 @@ export function UpcomingTodosList() {
   }, [users])
 
   const statusLabels: Record<string, string> = {
-    pending: t('status.pending', 'Pending'),
-    in_progress: t('status.in_progress', 'In Progress'),
-    completed: t('status.completed', 'Completed'),
+    pending: t('todos.status.pending', 'Pending'),
+    in_progress: t('todos.status.inProgress', 'In Progress'),
+    completed: t('todos.status.completed', 'Completed'),
   }
 
   const getInitials = (name: string) => {
+    if (!name) return '?'
     return name
       .split(' ')
-      .map((n) => n[0])
+      .map((n) => n[0] || '')
       .join('')
       .toUpperCase()
       .slice(0, 2)
@@ -231,11 +232,11 @@ export function UpcomingTodosList() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Task</TableHead>
-              <TableHead>Assigned To</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead className="text-right">Due Date</TableHead>
+              <TableHead>{t('todos.table.title', 'Task')}</TableHead>
+              <TableHead>{t('todos.table.assignedTo', 'Assigned To')}</TableHead>
+              <TableHead>{t('todos.table.status', 'Status')}</TableHead>
+              <TableHead>{t('todos.table.priority', 'Priority')}</TableHead>
+              <TableHead className="text-right">{t('todos.table.dueDate', 'Due Date')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -259,7 +260,10 @@ export function UpcomingTodosList() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Avatar className="h-6 w-6">
-                          <AvatarImage src={assignedUser?.avatar} alt={assignedUser?.name} />
+                          <AvatarImage
+                            src={assignedUser?.avatar || undefined}
+                            alt={assignedUser?.name}
+                          />
                           <AvatarFallback className="text-[10px]">
                             {assignedUser ? getInitials(assignedUser.name) : '?'}
                           </AvatarFallback>
@@ -283,7 +287,7 @@ export function UpcomingTodosList() {
                           todo.priority === 'low' && 'text-green-500 border-green-200',
                         )}
                       >
-                        {todo.priority}
+                        {t(`todos.priority.${todo.priority}`, todo.priority)}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">

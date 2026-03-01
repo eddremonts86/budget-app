@@ -56,11 +56,12 @@ async function seed() {
       const name = gen.fullName()
       const isManager = i < 5 // First 5 are managers
       const jobTitle = isManager ? 'Engineering Manager' : gen.randomItem(jobTitles)
+      const email = `${name.toLowerCase().replace(' ', '.')}.${i}@example.com`
 
       usersData.push({
         id: `user_${randomUUID()}`,
         name,
-        email: gen.email(name),
+        email,
         role: i < 3 ? 'admin' : 'user', // First 3 admins
         jobTitle,
         department: gen.randomItem(departments),

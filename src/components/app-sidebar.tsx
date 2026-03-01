@@ -156,7 +156,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         const lines = chunk.split('\n')
 
         for (const line of lines) {
-          if (line.startsWith('data: ')) {
+          if (line && line.startsWith('data: ')) {
             const data = line.slice(6)
             if (data === '[DONE]') continue
 

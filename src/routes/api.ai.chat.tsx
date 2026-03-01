@@ -1,7 +1,7 @@
-import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
-import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { chat, toServerSentEventsResponse } from '@tanstack/ai'
 import { createFileRoute } from '@tanstack/react-router'
+import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
+import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 
 type ChatRequestBody = {
   messages: Array<{
@@ -23,7 +23,8 @@ type ChatRequestBody = {
   }
 }
 
-const normalizeBaseUrl = (baseUrl: string) => {
+const normalizeBaseUrl = (baseUrl?: string) => {
+  if (!baseUrl) return ''
   let url = baseUrl.endsWith('/') ? baseUrl.slice(0, -1) : baseUrl
   if (url.endsWith('/api/v1')) {
     url = url.replace('/api/v1', '/v1')
@@ -574,7 +575,7 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
     })
 
     const config = await getActiveAiConfig()
-    const validation = validateAiConfig(config)
+    validateAiConfig(config)
 
     // Fallback logic
     let providerId: AiProviderId | undefined = body.providerId ?? config.provider

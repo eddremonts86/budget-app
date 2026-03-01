@@ -13,6 +13,20 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' }).handler(asy
         pendingApprovalTotal: 5000,
         periodDays: 30,
       },
+      expenses: {
+        value: 45000,
+        change: 5.2,
+        trend: 'up',
+        periodTotal: 15000,
+        periodDays: 30,
+      },
+      netBalance: {
+        value: 80000,
+        change: 15.8,
+        trend: 'up',
+        periodTotal: 30000,
+        periodDays: 30,
+      },
       activeProjects: {
         value: 12,
         change: 0,
@@ -48,19 +62,47 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' }).handler(asy
     const periodStart = new Date(now)
     periodStart.setDate(periodStart.getDate() - 30)
 
-    const [historicalSumRow] = await db
-      .select({
-        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
-      })
-      .from(transactions)
-      .where(eq(transactions.status, 'Approved'))
+    const [historicalIncomeRow, historicalExpenseRow] = await Promise.all([
+      db
+        .select({
+          total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+        })
+        .from(transactions)
+        .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} > 0`)),
+      db
+        .select({
+          total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+        })
+        .from(transactions)
+        .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`)),
+    ])
 
-    const [periodSumRow] = await db
-      .select({
-        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
-      })
-      .from(transactions)
-      .where(and(eq(transactions.status, 'Approved'), gte(transactions.date, periodStart)))
+    const [periodIncomeRow, periodExpenseRow] = await Promise.all([
+      db
+        .select({
+          total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+        })
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.status, 'Approved'),
+            gte(transactions.date, periodStart),
+            sql`${transactions.amount} > 0`,
+          ),
+        ),
+      db
+        .select({
+          total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+        })
+        .from(transactions)
+        .where(
+          and(
+            eq(transactions.status, 'Approved'),
+            gte(transactions.date, periodStart),
+            sql`${transactions.amount} < 0`,
+          ),
+        ),
+    ])
 
     const [pendingSumRow] = await db
       .select({
@@ -69,24 +111,55 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' }).handler(asy
       .from(transactions)
       .where(eq(transactions.status, 'Pending'))
 
-    const totalRevenue = Number(historicalSumRow?.total ?? 0)
-    const totalRevenuePeriod = Number(periodSumRow?.total ?? 0)
+    const totalIncome = Number(historicalIncomeRow[0]?.total ?? 0)
+    const totalExpenses = Math.abs(Number(historicalExpenseRow[0]?.total ?? 0))
+    const netBalance = totalIncome - totalExpenses
+
+    const periodIncome = Number(periodIncomeRow[0]?.total ?? 0)
+    const periodExpenses = Math.abs(Number(periodExpenseRow[0]?.total ?? 0))
+    const periodNetBalance = periodIncome - periodExpenses
+
     const totalRevenuePending = Number(pendingSumRow?.total ?? 0)
 
     const revenueChange =
-      totalRevenue > 0
+      totalIncome > 0
+        ? Math.round(((periodIncome / Math.max(1, totalIncome)) * 100 + Number.EPSILON) * 10) / 10
+        : 0
+
+    const expenseChange =
+      totalExpenses > 0
+        ? Math.round(((periodExpenses / Math.max(1, totalExpenses)) * 100 + Number.EPSILON) * 10) /
+          10
+        : 0
+
+    const balanceChange =
+      Math.abs(netBalance) > 0
         ? Math.round(
-            ((totalRevenuePeriod / Math.max(1, totalRevenue)) * 100 + Number.EPSILON) * 10,
+            ((periodNetBalance / Math.max(1, Math.abs(netBalance))) * 100 + Number.EPSILON) * 10,
           ) / 10
         : 0
 
     return {
       revenue: {
-        value: totalRevenue,
+        value: totalIncome,
         change: revenueChange,
         trend: revenueChange >= 0 ? 'up' : 'down',
-        periodTotal: totalRevenuePeriod,
+        periodTotal: periodIncome,
         pendingApprovalTotal: totalRevenuePending,
+        periodDays: 30,
+      },
+      expenses: {
+        value: totalExpenses,
+        change: expenseChange,
+        trend: expenseChange >= 0 ? 'up' : 'down',
+        periodTotal: periodExpenses,
+        periodDays: 30,
+      },
+      netBalance: {
+        value: netBalance,
+        change: balanceChange,
+        trend: balanceChange >= 0 ? 'up' : 'down',
+        periodTotal: periodNetBalance,
         periodDays: 30,
       },
       activeProjects: {
@@ -119,6 +192,20 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' }).handler(asy
         pendingApprovalTotal: 0,
         periodDays: 30,
       },
+      expenses: {
+        value: 0,
+        change: 0,
+        trend: 'down',
+        periodTotal: 0,
+        periodDays: 30,
+      },
+      netBalance: {
+        value: 0,
+        change: 0,
+        trend: 'down',
+        periodTotal: 0,
+        periodDays: 30,
+      },
       activeProjects: {
         value: 0,
         change: 0,
@@ -138,6 +225,43 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' }).handler(asy
         context: 'Pending Tasks',
       },
     }
+  }
+})
+
+export const getExpenseDistributionFn = createServerFn({ method: 'GET' }).handler(async () => {
+  if (process.env.VITE_E2E === 'true') {
+    return [
+      { category: 'Development', amount: 5000, color: '#3b82f6' },
+      { category: 'Design', amount: 3000, color: '#ec4899' },
+      { category: 'Marketing', amount: 2000, color: '#f59e0b' },
+      { category: 'Research', amount: 1500, color: '#10b981' },
+    ]
+  }
+
+  try {
+    const { getDb } = await import('@/shared/lib/db')
+    const { categories } = await import('@/shared/lib/db/schema')
+    const db = getDb()
+
+    const results = await db
+      .select({
+        categoryName: categories.name,
+        categoryColor: categories.color,
+        totalAmount: sql<number>`ABS(SUM(${transactions.amount}))`,
+      })
+      .from(transactions)
+      .innerJoin(categories, eq(transactions.categoryId, categories.id))
+      .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`))
+      .groupBy(categories.name, categories.color)
+
+    return results.map((r) => ({
+      category: r.categoryName,
+      amount: Number(r.totalAmount),
+      color: r.categoryColor,
+    }))
+  } catch (error) {
+    console.error('Error in getExpenseDistributionFn:', error)
+    return []
   }
 })
 
@@ -176,6 +300,7 @@ export const getUpcomingTodosFn = createServerFn({ method: 'GET' }).handler(asyn
       description: `Description ${i}`,
       status: 'pending' as const,
       priority: 'medium' as const,
+      assignedTo: '1',
       dueDate: new Date().toISOString(),
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),

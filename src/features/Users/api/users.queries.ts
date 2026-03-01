@@ -31,7 +31,7 @@ export const useInfiniteUsers = (limit = 10) => {
 
 export const useUsers = () => {
   return useTQuery(userKeys.lists(), () =>
-    getUsersFn({ data: { limit: 1000 } }).then((res: { data: User[] }) => res.data),
+    getUsersFn({ data: { limit: 1000 } }).then((res) => res?.data || []),
   )
 }
 

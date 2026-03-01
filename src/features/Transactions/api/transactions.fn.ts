@@ -11,8 +11,11 @@ export const transactionSchema = z.object({
   status: z.enum(['Approved', 'Pending', 'Rejected']).default('Pending'),
   date: z.string(), // ISO string
   amount: z.number(),
+  paymentMethod: z.string().optional(),
+  description: z.string().optional(),
   userId: z.string().optional(),
   projectId: z.string().optional(),
+  categoryId: z.string().optional(),
   assignedAdminId: z.string().optional(),
   approvedBy: z.string().optional(),
   approvedAt: z.string().optional(),

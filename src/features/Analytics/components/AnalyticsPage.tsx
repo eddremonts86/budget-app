@@ -31,10 +31,10 @@ export function AnalyticsPage() {
 
       // Create CSV content
       const csvContent = [
-        ['Date', 'Revenue', 'Tasks Completed'],
+        ['Date', 'Income', 'Expenses', 'Tasks Completed'],
         ...revenueData.map((r) => {
           const task = taskData.find((t) => t.date === r.date)
-          return [r.date, r.amount, task?.count || 0]
+          return [r.date, r.income, r.expenses, task?.count || 0]
         }),
       ]
         .map((e) => e.join(','))
@@ -64,21 +64,29 @@ export function AnalyticsPage() {
             <InputGroupAddon>
               <IconSearch />
             </InputGroupAddon>
-            <InputGroupInput placeholder="Search..." />
+            <InputGroupInput
+              placeholder={t('analytics.searchPlaceholder', { defaultValue: 'Search...' })}
+            />
           </InputGroup>
           <Select value={days.toString()} onValueChange={(val) => setDays(Number(val))}>
             <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Select days" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="7">Last 7 days</SelectItem>
-              <SelectItem value="30">Last 30 days</SelectItem>
-              <SelectItem value="90">Last 90 days</SelectItem>
+              <SelectItem value="7">
+                {t('analytics.last7Days', { defaultValue: 'Last 7 days' })}
+              </SelectItem>
+              <SelectItem value="30">
+                {t('analytics.last30Days', { defaultValue: 'Last 30 days' })}
+              </SelectItem>
+              <SelectItem value="90">
+                {t('analytics.last90Days', { defaultValue: 'Last 90 days' })}
+              </SelectItem>
             </SelectContent>
           </Select>
           <Button onClick={handleExport}>
             <IconDownload className="mr-2 h-4 w-4" />
-            Export
+            {t('analytics.export', { defaultValue: 'Export' })}
           </Button>
         </div>
       </div>
