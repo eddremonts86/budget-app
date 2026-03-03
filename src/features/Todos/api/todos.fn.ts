@@ -8,7 +8,15 @@ import { todos } from '@/shared/lib/db/schema'
 export const todoSchema = z.object({
   title: z.string().min(1),
   description: z.string().optional(),
-  status: z.enum(['pending', 'in_progress', 'completed']),
+  status: z.enum([
+    'pending',
+    'in_progress',
+    'completed',
+    'on_hold',
+    'testing',
+    'blocked',
+    'cancelled',
+  ]),
   priority: z.enum(['low', 'medium', 'high']),
   dueDate: z.string().optional(), // ISO string
   projectId: z.string(),
@@ -23,6 +31,9 @@ export const getTodosFn = createServerFn({ method: 'GET' })
     z.object({
       pageParam: z.number().optional().default(1),
       limit: z.number().optional().default(10),
+      status: z
+        .enum(['pending', 'in_progress', 'completed', 'on_hold', 'testing', 'blocked', 'cancelled'])
+        .optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -30,13 +41,21 @@ export const getTodosFn = createServerFn({ method: 'GET' })
 
     try {
       const db = getDb()
-      const { pageParam, limit } = data
+      const { pageParam, limit, status } = data
       const page = pageParam
       const offset = (page - 1) * limit
 
+      const whereClause = status ? eq(todos.status, status) : undefined
+
       const [items, totalResult] = await Promise.all([
-        db.select().from(todos).limit(limit).offset(offset).orderBy(desc(todos.createdAt)),
-        db.select({ count: count() }).from(todos),
+        db
+          .select()
+          .from(todos)
+          .where(whereClause)
+          .limit(limit)
+          .offset(offset)
+          .orderBy(desc(todos.createdAt)),
+        db.select({ count: count() }).from(todos).where(whereClause),
       ])
 
       const total = totalResult[0]?.count ?? 0
@@ -63,6 +82,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
             dependencies: [],
             acceptanceCriteria: '',
             createdBy: 'user-1',
+            categoryId: null,
           })),
           nextPage: undefined,
           totalCount: 10,
@@ -80,7 +100,6 @@ export const getTodosFn = createServerFn({ method: 'GET' })
         totalCount: total,
       }
     } catch (error) {
-      console.error('Error in getTodosFn:', error)
       if (isE2E) {
         return {
           data: Array.from({ length: 10 }).map((_, i) => ({
@@ -101,6 +120,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
             dependencies: [],
             acceptanceCriteria: '',
             createdBy: 'user-1',
+            categoryId: null,
           })),
           nextPage: undefined,
           totalCount: 10,
@@ -139,6 +159,7 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
             dependencies: [],
             acceptanceCriteria: '',
             createdBy: 'user-1',
+            categoryId: null,
           }
         }
         return null
@@ -151,7 +172,6 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
         updatedAt: item.updatedAt.toISOString(),
       }
     } catch (error) {
-      console.error('Error in getTodoByIdFn:', error)
       if (isE2E && id) {
         return {
           id,
@@ -171,6 +191,7 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
           dependencies: [],
           acceptanceCriteria: '',
           createdBy: 'user-1',
+          categoryId: null,
         }
       }
       throw error
@@ -216,7 +237,6 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
         updatedAt: item.updatedAt.toISOString(),
       }))
     } catch (error) {
-      console.error('Error in getTodosByProjectIdFn:', error)
       if (isE2E && projectId) {
         return Array.from({ length: 5 }).map((_, i) => ({
           id: i.toString(),
@@ -279,7 +299,6 @@ export const createTodoFn = createServerFn({ method: 'POST' })
         updatedAt: newItem.updatedAt.toISOString(),
       }
     } catch (error) {
-      console.error('Error in createTodoFn:', error)
       if (isE2E) {
         return {
           id: 'mock-id',
@@ -333,7 +352,6 @@ export const updateTodoFn = createServerFn({ method: 'POST' })
         updatedAt: updatedItem.updatedAt.toISOString(),
       }
     } catch (error) {
-      console.error('Error in updateTodoFn:', error)
       if (isE2E) {
         return {
           id,
@@ -366,7 +384,6 @@ export const deleteTodoFn = createServerFn({ method: 'POST' })
       await deleteRagDocument('todo', id)
       return { success: true }
     } catch (error) {
-      console.error('Error in deleteTodoFn:', error)
       if (isE2E) {
         return { success: true }
       }

@@ -4,12 +4,16 @@ import { da, enUS, es } from 'date-fns/locale'
 import { motion } from 'framer-motion'
 import {
   Calendar,
+  ChevronDown,
+  Clock,
   Flag,
   Folder,
-  ListTodo,
+  Layers,
+  LayoutList,
   Loader2,
   MoreHorizontal,
   Save,
+  Target,
   UserCircle,
   X,
 } from 'lucide-react'
@@ -19,6 +23,17 @@ import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import { Checkbox } from '@/components/ui/checkbox'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxList,
+  ComboboxItem,
+  ComboboxEmpty,
+  ComboboxChips,
+  ComboboxChip,
+  ComboboxChipsInput,
+} from '@/components/ui/combobox'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -29,7 +44,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Separator } from '@/components/ui/separator'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjectMembers, useProjects } from '@/features/Projects/api/projects.queries'
 import { useUsers } from '@/features/Users/api/users.queries'
@@ -40,11 +54,24 @@ const createTodoSchema = (t: (key: string) => string) =>
   z.object({
     title: z.string().min(1, t('validation.required')),
     description: z.string().min(1, t('validation.required')),
-    status: z.enum(['pending', 'in_progress', 'completed']),
+    status: z.enum([
+      'pending',
+      'in_progress',
+      'testing',
+      'on_hold',
+      'completed',
+      'blocked',
+      'cancelled',
+    ]),
     priority: z.enum(['low', 'medium', 'high']),
     dueDate: z.string().min(1, t('validation.required')),
     assignedTo: z.string().min(1, t('validation.required')),
     projectId: z.string().min(1, t('validation.required')),
+    complexity: z.number().min(1).max(10).nullish(),
+    estimatedTime: z.number().min(0).nullish(),
+    actualTime: z.number().min(0).nullish(),
+    acceptanceCriteria: z.string().nullish(),
+    dependencies: z.array(z.string()).default([]),
   })
 
 type TodoFormValues = z.infer<ReturnType<typeof createTodoSchema>>
@@ -55,6 +82,7 @@ type TodoFormProps = {
   onSubmit: (values: TodoFormValues) => void | Promise<void>
   onCancel: () => void
   isLoading?: boolean
+  availableTodos?: Todo[]
 }
 
 export function TodoForm({
@@ -63,6 +91,7 @@ export function TodoForm({
   onSubmit,
   onCancel,
   isLoading,
+  availableTodos = [],
 }: TodoFormProps) {
   const { t, i18n } = useTranslation()
   const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
@@ -86,9 +115,11 @@ export function TodoForm({
       dueDate: defaultValues?.dueDate ?? new Date().toISOString().split('T')[0],
       assignedTo: defaultValues?.assignedTo ?? currentUserId ?? '',
       projectId: defaultValues?.projectId ?? '',
-    },
-    validators: {
-      onChange: todoSchema,
+      complexity: defaultValues?.complexity ?? null,
+      estimatedTime: defaultValues?.estimatedTime ?? null,
+      actualTime: defaultValues?.actualTime ?? null,
+      acceptanceCriteria: defaultValues?.acceptanceCriteria ?? '',
+      dependencies: defaultValues?.dependencies ?? [],
     },
     onSubmit: async ({ value }) => {
       await onSubmit(value)
@@ -141,26 +172,14 @@ export function TodoForm({
       }}
       className="flex flex-col gap-8 min-h-full"
     >
-      <div className="flex-1 space-y-8">
-        {/* Header Visual Enhancement */}
-        <Field className="space-y-4">
-          <div className="flex items-center gap-3">
-            <div className="p-2 rounded-xl bg-primary/10 text-primary">
-              <ListTodo className="w-5 h-5" />
-            </div>
-            <div>
-              <h3 className="text-lg font-semibold tracking-tight">
-                {t('todos.form.headerTitle')}
-              </h3>
-              <p className="text-sm text-muted-foreground">{t('todos.form.headerSubtitle')}</p>
-            </div>
-          </div>
-          <Separator className="bg-border/50" />
-        </Field>
-
+      <div className="flex-1 space-y-8 pb-32">
         <FieldGroup>
+          {/* 1. Title */}
           <form.Field
             name="title"
+            validators={{
+              onChange: todoSchema.shape.title,
+            }}
             children={(field) => (
               <motion.div variants={itemVariants}>
                 <Field className="space-y-2">
@@ -179,14 +198,18 @@ export function TodoForm({
                         field.handleChange(e.target.value)
                       }
                       placeholder={t('todos.form.titlePlaceholder')}
-                      className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 focus:border-primary transition-all duration-300 rounded-xl px-4 text-base"
+                      className="h-10 bg-secondary/30 border-transparent hover:border-primary/30 focus:border-primary transition-all duration-300 rounded-lg px-4 text-sm"
+                      aria-label={t('todos.form.titleLabel')}
                     />
-                    <div className="absolute inset-0 rounded-xl bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
+                    <div className="absolute inset-0 rounded-lg bg-primary/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none" />
                   </div>
                   <FieldError
-                    errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
-                    )}
+                    errors={field.state.meta.errors.map((e) => {
+                      if (typeof e === 'string') return e
+                      if (e && typeof e === 'object' && 'message' in e)
+                        return String((e as { message: string }).message)
+                      return String(e)
+                    })}
                     className="text-xs font-medium"
                   />
                 </Field>
@@ -194,6 +217,7 @@ export function TodoForm({
             )}
           />
 
+          {/* 2. Description */}
           <form.Field
             name="description"
             children={(field) => (
@@ -213,18 +237,268 @@ export function TodoForm({
                       field.handleChange(e.target.value)
                     }
                     placeholder={t('todos.form.descriptionPlaceholder')}
-                    className="min-h-[120px] bg-secondary/30 border-transparent hover:border-primary/30 focus:border-primary transition-all duration-300 rounded-xl p-4 resize-none text-base"
+                    className="min-h-[120px] bg-secondary/30 border-transparent hover:border-primary/30 focus:border-primary transition-all duration-300 rounded-lg p-4 resize-none text-sm"
                   />
                   <FieldError
-                    errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
-                    )}
+                    errors={field.state.meta.errors.map((e) => {
+                      if (typeof e === 'string') return e
+                      if (e && typeof e === 'object' && 'message' in e)
+                        return String((e as { message: string }).message)
+                      return String(e)
+                    })}
                   />
                 </Field>
               </motion.div>
             )}
           />
 
+          {/* 3. Acceptance Criteria */}
+          <form.Field
+            name="acceptanceCriteria"
+            children={(field) => (
+              <motion.div variants={itemVariants}>
+                <Field className="space-y-2">
+                  <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                    <Target className="w-3.5 h-3.5" /> {t('todos.form.acceptanceCriteriaLabel')}
+                  </FieldLabel>
+                  <Textarea
+                    value={field.state.value ?? ''}
+                    onChange={(e) => field.handleChange(e.target.value)}
+                    placeholder={t('todos.form.acceptanceCriteriaPlaceholder')}
+                    className="min-h-[80px] bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg p-4 resize-none text-sm"
+                  />
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => {
+                      if (typeof e === 'string') return e
+                      if (e && typeof e === 'object' && 'message' in e)
+                        return String((e as { message: string }).message)
+                      return String(e)
+                    })}
+                  />
+                </Field>
+              </motion.div>
+            )}
+          />
+
+          {/* 4. Due Date */}
+          <form.Field
+            name="dueDate"
+            children={(field) => (
+              <motion.div variants={itemVariants}>
+                <Field className="space-y-2">
+                  <FieldLabel
+                    htmlFor={field.name}
+                    className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2"
+                  >
+                    <Calendar className="w-3.5 h-3.5" /> {t('todos.form.dueDateLabel')}
+                  </FieldLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          'h-10 w-full justify-start text-left font-normal bg-secondary/30 border-transparent hover:border-primary/30 rounded-lg px-4 text-sm transition-all duration-300',
+                          !field.state.value && 'text-muted-foreground',
+                        )}
+                      >
+                        <Calendar className="h-4 w-4 opacity-50" />
+                        {field.state.value ? (
+                          format(
+                            new Date(
+                              field.state.value.includes('T')
+                                ? field.state.value
+                                : `${field.state.value}T00:00:00`,
+                            ),
+                            'PPP HH:mm',
+                            { locale },
+                          )
+                        ) : (
+                          <span>{t('todos.form.dueDatePlaceholder')}</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent
+                      className="w-auto p-0 rounded-lg border-border/40 shadow-2xl flex"
+                      align="start"
+                    >
+                      <div className="flex divide-x divide-border/40">
+                        <CalendarComponent
+                          mode="single"
+                          selected={
+                            field.state.value
+                              ? new Date(
+                                  field.state.value.includes('T')
+                                    ? field.state.value
+                                    : `${field.state.value}T00:00:00`,
+                                )
+                              : undefined
+                          }
+                          onSelect={(date) => {
+                            if (!date) return
+                            const year = date.getFullYear()
+                            const month = String(date.getMonth() + 1).padStart(2, '0')
+                            const day = String(date.getDate()).padStart(2, '0')
+                            const currentTime = field.state.value?.includes('T')
+                              ? field.state.value.split('T')[1]
+                              : '00:00:00'
+                            field.handleChange(`${year}-${month}-${day}T${currentTime}`)
+                          }}
+                          initialFocus
+                          locale={locale}
+                          className="rounded-l-lg"
+                        />
+                        <div className="flex flex-col max-h-[350px] overflow-y-auto p-1 scrollbar-hide w-[120px]">
+                          <div className="p-2 text-xs font-bold uppercase tracking-widest text-muted-foreground/50 text-center border-b border-border/40 mb-1">
+                            {t('common.time', 'Time')}
+                          </div>
+                          {Array.from({ length: 24 * 4 }).map((_, i) => {
+                            const hour = Math.floor(i / 4)
+                            const minute = (i % 4) * 15
+                            const timeStr = `${String(hour).padStart(2, '0')}:${String(minute).padStart(2, '0')}`
+                            const isSelected = field.state.value?.includes(`T${timeStr}`)
+
+                            return (
+                              <Button
+                                key={timeStr}
+                                variant="ghost"
+                                className={cn(
+                                  'justify-center font-medium h-9 px-3 rounded-lg text-sm transition-all',
+                                  isSelected
+                                    ? 'bg-primary text-primary-foreground hover:bg-primary/90'
+                                    : 'hover:bg-primary/10 hover:text-primary',
+                                )}
+                                onClick={() => {
+                                  const datePart =
+                                    field.state.value?.split('T')[0] ||
+                                    new Date().toISOString().split('T')[0]
+                                  field.handleChange(`${datePart}T${timeStr}:00`)
+                                }}
+                              >
+                                {timeStr}
+                              </Button>
+                            )
+                          })}
+                        </div>
+                      </div>
+                    </PopoverContent>
+                  </Popover>
+                  <FieldError
+                    errors={field.state.meta.errors.map((e) => {
+                      if (typeof e === 'string') return e
+                      if (e && typeof e === 'object' && 'message' in e)
+                        return String((e as { message: string }).message)
+                      return String(e)
+                    })}
+                  />
+                </Field>
+              </motion.div>
+            )}
+          />
+
+          {/* 5. Assigned To, Project */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <form.Field
+              name="assignedTo"
+              children={(field) => (
+                <motion.div variants={itemVariants}>
+                  <Field className="space-y-2">
+                    <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                      <UserCircle className="w-3.5 h-3.5" /> {t('todos.form.assignedToLabel')}
+                    </FieldLabel>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => field.handleChange(value)}
+                    >
+                      <SelectTrigger className="h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4">
+                        <SelectValue placeholder={t('todos.form.assignedToPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl">
+                        {isLoadingMembers ? (
+                          <div className="p-4 text-center text-sm text-muted-foreground">
+                            {t('common.loading')}
+                          </div>
+                        ) : filteredUsers.length === 0 ? (
+                          <div className="p-4 text-center text-sm text-muted-foreground">
+                            {selectedProjectId
+                              ? t('projects.members.empty')
+                              : t('todos.form.selectProjectFirst', 'Select a project first')}
+                          </div>
+                        ) : (
+                          filteredUsers.map((user) => (
+                            <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
+                              <div className="flex items-center gap-2">
+                                <Avatar className="h-5 w-5">
+                                  <AvatarImage src={user.avatar || undefined} alt={user.name} />
+                                  <AvatarFallback className="text-[10px]">
+                                    {user.name.substring(0, 2).toUpperCase()}
+                                  </AvatarFallback>
+                                </Avatar>
+                                <span>
+                                  {user.id === currentUserId
+                                    ? `${user.name} (${t('todos.form.assignedToSelf')})`
+                                    : user.name}
+                                </span>
+                              </div>
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <FieldError
+                      errors={field.state.meta.errors.map((e) => {
+                        if (typeof e === 'string') return e
+                        if (e && typeof e === 'object' && 'message' in e)
+                          return String((e as { message: string }).message)
+                        return String(e)
+                      })}
+                    />
+                  </Field>
+                </motion.div>
+              )}
+            />
+
+            <form.Field
+              name="projectId"
+              children={(field) => (
+                <motion.div variants={itemVariants}>
+                  <Field className="space-y-2">
+                    <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                      <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
+                    </FieldLabel>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(value) => field.handleChange(value)}
+                    >
+                      <SelectTrigger className="h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4">
+                        <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
+                      </SelectTrigger>
+                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl">
+                        {selectableProjects?.map((project) => (
+                          <SelectItem
+                            key={project.id}
+                            value={project.id}
+                            className="rounded-lg m-1"
+                          >
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldError
+                      errors={field.state.meta.errors.map((e) => {
+                        if (typeof e === 'string') return e
+                        if (e && typeof e === 'object' && 'message' in e)
+                          return String((e as { message: string }).message)
+                        return String(e)
+                      })}
+                    />
+                  </Field>
+                </motion.div>
+              )}
+            />
+          </div>
+
+          {/* 6. Status, Priority */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <form.Field
               name="status"
@@ -240,15 +514,27 @@ export function TodoForm({
                         field.handleChange(value as TodoFormValues['status'])
                       }
                     >
-                      <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
+                      <SelectTrigger className="h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4">
                         <SelectValue placeholder={t('todos.form.statusPlaceholder')} />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
+                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl">
                         <SelectItem value="pending" className="rounded-lg m-1">
                           {t('todos.form.statusPending')}
                         </SelectItem>
                         <SelectItem value="in_progress" className="rounded-lg m-1">
                           {t('todos.form.statusInProgress')}
+                        </SelectItem>
+                        <SelectItem value="testing" className="rounded-lg m-1">
+                          {t('todos.form.statusTesting', 'Testing')}
+                        </SelectItem>
+                        <SelectItem value="on_hold" className="rounded-lg m-1">
+                          {t('todos.form.statusOnHold', 'On Hold')}
+                        </SelectItem>
+                        <SelectItem value="blocked" className="rounded-lg m-1">
+                          {t('todos.form.statusBlocked', 'Blocked')}
+                        </SelectItem>
+                        <SelectItem value="cancelled" className="rounded-lg m-1">
+                          {t('todos.form.statusCancelled', 'Cancelled')}
                         </SelectItem>
                         <SelectItem value="completed" className="rounded-lg m-1">
                           {t('todos.form.statusCompleted')}
@@ -256,11 +542,12 @@ export function TodoForm({
                       </SelectContent>
                     </Select>
                     <FieldError
-                      errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string'
-                          ? e
-                          : (e as { message?: string })?.message || String(e),
-                      )}
+                      errors={field.state.meta.errors.map((e) => {
+                        if (typeof e === 'string') return e
+                        if (e && typeof e === 'object' && 'message' in e)
+                          return String((e as { message: string }).message)
+                        return String(e)
+                      })}
                     />
                   </Field>
                 </motion.div>
@@ -283,13 +570,13 @@ export function TodoForm({
                     >
                       <SelectTrigger
                         className={cn(
-                          'h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl',
+                          'h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4',
                           field.state.value === 'high' && 'text-destructive',
                         )}
                       >
                         <SelectValue placeholder={t('todos.form.priorityPlaceholder')} />
                       </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
+                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl">
                         <SelectItem value="low" className="rounded-lg m-1">
                           {t('todos.form.priorityLow')}
                         </SelectItem>
@@ -305,11 +592,12 @@ export function TodoForm({
                       </SelectContent>
                     </Select>
                     <FieldError
-                      errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string'
-                          ? e
-                          : (e as { message?: string })?.message || String(e),
-                      )}
+                      errors={field.state.meta.errors.map((e) => {
+                        if (typeof e === 'string') return e
+                        if (e && typeof e === 'object' && 'message' in e)
+                          return String((e as { message: string }).message)
+                        return String(e)
+                      })}
                     />
                   </Field>
                 </motion.div>
@@ -317,144 +605,90 @@ export function TodoForm({
             />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* 7. Complexity, Estimated Time, Actual Time */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <form.Field
-              name="dueDate"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
-                  <Field className="space-y-2">
-                    <FieldLabel
-                      htmlFor={field.name}
-                      className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2"
-                    >
-                      <Calendar className="w-3.5 h-3.5" /> {t('todos.form.dueDateLabel')}
-                    </FieldLabel>
-                    <div className="flex gap-2">
-                      <Popover>
-                        <PopoverTrigger asChild>
-                          <Button
-                            variant="outline"
-                            className={cn(
-                              'h-12 w-full justify-start text-left font-normal bg-secondary/30 border-transparent hover:border-primary/30 rounded-xl px-4',
-                              !field.state.value && 'text-muted-foreground',
-                            )}
-                          >
-                            <Calendar className="mr-2 h-4 w-4 opacity-50" />
-                            {field.state.value ? (
-                              format(
-                                new Date(
-                                  field.state.value.includes('T')
-                                    ? field.state.value
-                                    : `${field.state.value}T00:00:00`,
-                                ),
-                                'PPP',
-                                { locale },
-                              )
-                            ) : (
-                              <span>{t('todos.form.dueDatePlaceholder')}</span>
-                            )}
-                          </Button>
-                        </PopoverTrigger>
-                        <PopoverContent
-                          className="w-auto p-0 rounded-2xl border-border/40 shadow-2xl"
-                          align="start"
-                        >
-                          <CalendarComponent
-                            mode="single"
-                            selected={
-                              field.state.value
-                                ? new Date(
-                                    field.state.value.includes('T')
-                                      ? field.state.value
-                                      : `${field.state.value}T00:00:00`,
-                                  )
-                                : undefined
-                            }
-                            onSelect={(date) => {
-                              if (!date) return
-                              const year = date.getFullYear()
-                              const month = String(date.getMonth() + 1).padStart(2, '0')
-                              const day = String(date.getDate()).padStart(2, '0')
-                              // Preserve time if exists
-                              const currentTime = field.state.value?.includes('T')
-                                ? field.state.value.split('T')[1]
-                                : ''
-                              field.handleChange(
-                                `${year}-${month}-${day}${currentTime ? `T${currentTime}` : ''}`,
-                              )
-                            }}
-                            initialFocus
-                            locale={locale}
-                            className="rounded-2xl"
-                          />
-                        </PopoverContent>
-                      </Popover>
-                      <Input
-                        type="time"
-                        className="h-12 w-32 bg-secondary/30 border-transparent hover:border-primary/30 rounded-xl"
-                        value={
-                          field.state.value?.includes('T')
-                            ? field.state.value.split('T')[1].substring(0, 5)
-                            : ''
-                        }
-                        onChange={(e) => {
-                          const time = e.target.value
-                          const datePart =
-                            field.state.value?.split('T')[0] ||
-                            new Date().toISOString().split('T')[0]
-                          if (time) {
-                            field.handleChange(`${datePart}T${time}:00`)
-                          } else {
-                            field.handleChange(datePart)
-                          }
-                        }}
-                      />
-                    </div>
-                    <FieldError
-                      errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string'
-                          ? e
-                          : (e as { message?: string })?.message || String(e),
-                      )}
-                    />
-                  </Field>
-                </motion.div>
-              )}
-            />
-
-            <form.Field
-              name="projectId"
+              name="complexity"
               children={(field) => (
                 <motion.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
-                      <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
+                      <Layers className="w-3.5 h-3.5" /> {t('todos.form.complexityLabel')}
                     </FieldLabel>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(value) => field.handleChange(value)}
-                    >
-                      <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
-                        <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
-                        {selectableProjects?.map((project) => (
-                          <SelectItem
-                            key={project.id}
-                            value={project.id}
-                            className="rounded-lg m-1"
-                          >
-                            {project.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                    <Input
+                      type="number"
+                      min={1}
+                      max={10}
+                      value={field.state.value ?? ''}
+                      onChange={(e) => field.handleChange(e.target.valueAsNumber)}
+                      placeholder={t('todos.form.complexityPlaceholder')}
+                      className="h-10 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg px-4 text-sm"
+                    />
                     <FieldError
-                      errors={field.state.meta.errors.map((e) =>
-                        typeof e === 'string'
-                          ? e
-                          : (e as { message?: string })?.message || String(e),
-                      )}
+                      errors={field.state.meta.errors.map((e) => {
+                        if (typeof e === 'string') return e
+                        if (e && typeof e === 'object' && 'message' in e)
+                          return String((e as { message: string }).message)
+                        return String(e)
+                      })}
+                    />
+                  </Field>
+                </motion.div>
+              )}
+            />
+
+            <form.Field
+              name="estimatedTime"
+              children={(field) => (
+                <motion.div variants={itemVariants}>
+                  <Field className="space-y-2">
+                    <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5" /> {t('todos.form.estimatedTimeLabel')}
+                    </FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={field.state.value ?? ''}
+                      onChange={(e) => field.handleChange(e.target.valueAsNumber)}
+                      placeholder={t('todos.form.estimatedTimePlaceholder')}
+                      className="h-10 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg px-4 text-sm"
+                    />
+                    <FieldError
+                      errors={field.state.meta.errors.map((e) => {
+                        if (typeof e === 'string') return e
+                        if (e && typeof e === 'object' && 'message' in e)
+                          return String((e as { message: string }).message)
+                        return String(e)
+                      })}
+                    />
+                  </Field>
+                </motion.div>
+              )}
+            />
+
+            <form.Field
+              name="actualTime"
+              children={(field) => (
+                <motion.div variants={itemVariants}>
+                  <Field className="space-y-2">
+                    <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
+                      <Clock className="w-3.5 h-3.5" /> {t('todos.form.actualTimeLabel')}
+                    </FieldLabel>
+                    <Input
+                      type="number"
+                      min={0}
+                      value={field.state.value ?? ''}
+                      onChange={(e) => field.handleChange(e.target.valueAsNumber)}
+                      placeholder={t('todos.form.actualTimePlaceholder')}
+                      className="h-10 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg px-4 text-sm"
+                    />
+                    <FieldError
+                      errors={field.state.meta.errors.map((e) => {
+                        if (typeof e === 'string') return e
+                        if (e && typeof e === 'object' && 'message' in e)
+                          return String((e as { message: string }).message)
+                        return String(e)
+                      })}
                     />
                   </Field>
                 </motion.div>
@@ -462,57 +696,87 @@ export function TodoForm({
             />
           </div>
 
+          {/* 8. Dependencies */}
           <form.Field
-            name="assignedTo"
+            name="dependencies"
             children={(field) => (
               <motion.div variants={itemVariants}>
                 <Field className="space-y-2">
                   <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
-                    <UserCircle className="w-3.5 h-3.5" /> {t('todos.form.assignedToLabel')}
+                    <LayoutList className="w-3.5 h-3.5" /> {t('todos.form.dependenciesLabel')}
                   </FieldLabel>
-                  <Select
-                    value={field.state.value}
+                  <Combobox
+                    multiple
+                    value={field.state.value || []}
                     onValueChange={(value) => field.handleChange(value)}
                   >
-                    <SelectTrigger className="h-12 bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-xl">
-                      <SelectValue placeholder={t('todos.form.assignedToPlaceholder')} />
-                    </SelectTrigger>
-                    <SelectContent className="rounded-xl border-border/50 shadow-2xl backdrop-blur-xl">
-                      {isLoadingMembers ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
-                          {t('common.loading')}
-                        </div>
-                      ) : filteredUsers.length === 0 ? (
-                        <div className="p-4 text-center text-sm text-muted-foreground">
-                          {selectedProjectId
-                            ? t('projects.members.empty')
-                            : t('todos.form.selectProjectFirst')}
-                        </div>
-                      ) : (
-                        filteredUsers.map((user) => (
-                          <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
-                            <div className="flex items-center gap-2">
-                              <Avatar className="h-5 w-5">
-                                <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                                <AvatarFallback className="text-[10px]">
-                                  {user.name.substring(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                              </Avatar>
-                              <span>
-                                {user.id === currentUserId
-                                  ? `${user.name} (${t('todos.form.assignedToSelf')})`
-                                  : user.name}
-                              </span>
-                            </div>
-                          </SelectItem>
-                        ))
-                      )}
-                    </SelectContent>
-                  </Select>
+                    <ComboboxChips className="h-auto min-h-10 bg-secondary/30 border-transparent hover:border-primary/30 rounded-lg px-4 py-2 text-sm">
+                      {field.state.value?.map((id: string) => {
+                        const todo = availableTodos.find((t) => t.id === id)
+                        return (
+                          <ComboboxChip
+                            key={id}
+                            onRemove={() => {
+                              field.handleChange(
+                                field.state.value?.filter((v: string) => v !== id) || [],
+                              )
+                            }}
+                            className="bg-primary/10 text-primary border-primary/20"
+                          >
+                            {todo?.title || id}
+                          </ComboboxChip>
+                        )
+                      })}
+                      <ComboboxChipsInput
+                        placeholder={
+                          field.state.value?.length ? '' : t('todos.form.dependenciesPlaceholder')
+                        }
+                        className="bg-transparent text-sm"
+                      />
+                      <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
+                    </ComboboxChips>
+                    <ComboboxContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl max-h-60 overflow-y-auto">
+                      <ComboboxList>
+                        {availableTodos
+                          .filter((todo) => todo.id !== defaultValues?.id)
+                          .map((todo) => (
+                            <ComboboxItem
+                              key={todo.id}
+                              value={todo.id}
+                              onClick={() => {
+                                const current = field.state.value || []
+                                if (current.includes(todo.id)) {
+                                  field.handleChange(current.filter((id: string) => id !== todo.id))
+                                } else {
+                                  field.handleChange([...current, todo.id])
+                                }
+                              }}
+                              className="rounded-lg m-1 flex items-center gap-2"
+                            >
+                              <Checkbox checked={field.state.value?.includes(todo.id)} />
+                              <div className="flex flex-col">
+                                <span className="font-medium">{todo.title}</span>
+                                <span className="text-[10px] text-muted-foreground">
+                                  {todo.status} • {todo.priority}
+                                </span>
+                              </div>
+                            </ComboboxItem>
+                          ))}
+                        {availableTodos.length === 0 && (
+                          <ComboboxEmpty className="p-4 text-center text-sm text-muted-foreground">
+                            {t('todos.form.noDependenciesAvailable', 'No tasks available')}
+                          </ComboboxEmpty>
+                        )}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
                   <FieldError
-                    errors={field.state.meta.errors.map((e) =>
-                      typeof e === 'string' ? e : (e as { message?: string })?.message || String(e),
-                    )}
+                    errors={field.state.meta.errors.map((e) => {
+                      if (typeof e === 'string') return e
+                      if (e && typeof e === 'object' && 'message' in e)
+                        return String((e as { message: string }).message)
+                      return String(e)
+                    })}
                   />
                 </Field>
               </motion.div>
@@ -530,7 +794,7 @@ export function TodoForm({
             type="button"
             variant="ghost"
             onClick={onCancel}
-            className="rounded-xl px-6 hover:bg-secondary/50 transition-colors"
+            className="rounded-lg px-6 hover:bg-secondary/50 transition-colors"
           >
             <X className="w-4 h-4 mr-2" />
             {t('common.cancel')}
@@ -538,7 +802,7 @@ export function TodoForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="rounded-xl px-8 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
+            className="rounded-lg px-8 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">

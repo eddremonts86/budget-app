@@ -27,7 +27,9 @@ function randomDate(start: Date, end: Date) {
 }
 
 function randomAmount(min = 25, max = 5000) {
-  return Math.floor(min + Math.random() * (max - min))
+  const amount = Math.floor(min + Math.random() * (max - min))
+  // 30% chance of being a negative amount (expense)
+  return Math.random() < 0.3 ? -amount : amount
 }
 
 function randomStatus() {

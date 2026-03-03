@@ -98,11 +98,19 @@ export function ListView({ onEdit }: ListViewProps) {
           completed: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
           in_progress: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
           pending: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
+          on_hold: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
+          testing: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
+          blocked: 'bg-destructive/10 text-destructive border-destructive/20',
+          cancelled: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
         }
         const labels: Record<string, string> = {
           completed: t('todos.status.completed'),
           in_progress: t('todos.status.inProgress'),
           pending: t('todos.status.pending'),
+          on_hold: t('todos.status.onHold', 'On Hold'),
+          testing: t('todos.status.testing', 'Testing'),
+          blocked: t('todos.status.blocked', 'Blocked'),
+          cancelled: t('todos.status.cancelled', 'Cancelled'),
         }
         return (
           <Badge
@@ -293,7 +301,7 @@ export function ListView({ onEdit }: ListViewProps) {
     )
   }
 
-  const allTodos = data?.pages.flatMap((page) => page.data) ?? []
+  const allTodos = (data?.pages.flatMap((page) => page.data) ?? []) as Todo[]
 
   if (isLoading) {
     return (

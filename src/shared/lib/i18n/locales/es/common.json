@@ -40,6 +40,9 @@
     "loadMore": "Cargar más",
     "openMenu": "Abrir menú",
     "optional": "opcional",
+    "pin": "Anclar",
+    "unpin": "Desanclar",
+    "pinVisible": "Mantener visible",
     "stop": "Detener",
     "clear": "Limpiar",
     "clearFilters": "Limpiar filtros",
@@ -251,5 +254,98 @@
     "invalidUrl": "URL inválida",
     "minLength": "Debe tener al menos {{count}} caracteres",
     "maxLength": "Debe tener como máximo {{count}} caracteres"
+  },
+  "todos": {
+    "title": "Tareas",
+    "subtitlePrefix": "Gestiona tu flujo de trabajo. Tienes ",
+    "subtitleSuffix": " tareas activas.",
+    "actions": {
+      "new": "Nueva Tarea",
+      "create": "Crear Tarea",
+      "update": "Actualizar Tarea",
+      "edit": "Editar Tarea",
+      "delete": "Eliminar"
+    },
+    "form": {
+      "headerTitle": "Detalles de la Tarea",
+      "headerSubtitle": "Define objetivos y fechas de entrega.",
+      "titleLabel": "Título del Proyecto",
+      "titlePlaceholder": "Ej: Rediseño del dashboard",
+      "descriptionLabel": "Descripción Detallada",
+      "descriptionPlaceholder": "Describe los pasos a seguir...",
+      "statusLabel": "Estado Actual",
+      "statusPlaceholder": "Seleccionar estado",
+      "statusPending": "Pendiente",
+      "statusInProgress": "En Progreso",
+      "statusTesting": "En Pruebas",
+      "statusOnHold": "En Espera",
+      "statusBlocked": "Bloqueado",
+      "statusCancelled": "Cancelado",
+      "statusCompleted": "Completado",
+      "priorityLabel": "Prioridad",
+      "priorityPlaceholder": "Seleccionar prioridad",
+      "priorityLow": "Baja",
+      "priorityMedium": "Media",
+      "priorityHigh": "Alta",
+      "dueDateLabel": "Fecha de Entrega",
+      "dueDatePlaceholder": "Seleccionar fecha",
+      "assignedToLabel": "Asignado a",
+      "assignedToPlaceholder": "Seleccionar usuario",
+      "assignedToSelf": "Yo",
+      "projectLabel": "Proyecto",
+      "projectPlaceholder": "Seleccionar proyecto",
+      "complexityLabel": "Complejidad",
+      "complexityPlaceholder": "1-10 (ej: 5)",
+      "estimatedTimeLabel": "Tiempo Estimado",
+      "estimatedTimePlaceholder": "Horas (ej: 4)",
+      "actualTimeLabel": "Tiempo Real",
+      "actualTimePlaceholder": "Horas (ej: 2)",
+      "acceptanceCriteriaLabel": "Criterios de Aceptación",
+      "acceptanceCriteriaPlaceholder": "Ej: La funcionalidad debe ser accesible...",
+      "dependenciesLabel": "Dependencias",
+      "dependenciesPlaceholder": "Seleccionar tareas..."
+    },
+    "status": {
+      "pending": "Pendiente",
+      "in_progress": "En Progreso",
+      "completed": "Completado",
+      "on_hold": "En espera",
+      "testing": "Pruebas",
+      "blocked": "Bloqueado",
+      "cancelled": "Cancelado"
+    },
+    "priority": {
+      "low": "Baja",
+      "medium": "Media",
+      "high": "Alta"
+    },
+    "table": {
+      "title": "Tarea",
+      "status": "Estado",
+      "priority": "Prioridad",
+      "assignedTo": "Asignado a",
+      "createdAt": "Creado",
+      "dueDate": "Fecha de Entrega"
+    },
+    "confirm": {
+      "delete": "¿Estás seguro de que quieres eliminar esta tarea?"
+    },
+    "loadingMore": "Cargando más tareas...",
+    "error": {
+      "title": "Error de Carga",
+      "description": "No pudimos obtener tus tareas. Revisa tu conexión e intenta de nuevo.",
+      "retry": "Reintentar"
+    },
+    "sheet": {
+      "createTitle": "Crear Tarea",
+      "createDescription": "Añade una nueva tarea a tu lista. Completa los detalles abajo.",
+      "editTitle": "Editar Tarea",
+      "editDescription": "Actualiza los detalles de tu tarea. Los cambios se guardan inmediatamente."
+    },
+    "toast": {
+      "created": "Tarea creada correctamente",
+      "updated": "Tarea actualizada correctamente",
+      "deleted": "Tarea eliminada correctamente"
+    }
   }
 }

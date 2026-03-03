@@ -40,6 +40,9 @@
     "loadMore": "Load More",
     "openMenu": "Open menu",
     "optional": "optional",
+    "pin": "Pin",
+    "unpin": "Unpin",
+    "pinVisible": "Pin visible",
     "stop": "Stop",
     "clear": "Clear",
     "clearFilters": "Clear filters",
@@ -514,7 +517,17 @@
       "assignedToPlaceholder": "Select user",
       "assignedToSelf": "Me",
       "projectLabel": "Project",
-      "projectPlaceholder": "Select project"
+      "projectPlaceholder": "Select project",
+      "complexityLabel": "Complexity",
+      "complexityPlaceholder": "1-10 (e.g. 5)",
+      "estimatedTimeLabel": "Estimated Time",
+      "estimatedTimePlaceholder": "Hours (e.g. 4)",
+      "actualTimeLabel": "Actual Time",
+      "actualTimePlaceholder": "Hours (e.g. 2)",
+      "acceptanceCriteriaLabel": "Acceptance Criteria",
+      "acceptanceCriteriaPlaceholder": "Ex: Feature must be accessible...",
+      "dependenciesLabel": "Dependencies",
+      "dependenciesPlaceholder": "Select tasks..."
     },
     "status": {
       "pending": "Pending",

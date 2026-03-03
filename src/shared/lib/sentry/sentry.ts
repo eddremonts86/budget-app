@@ -36,6 +36,7 @@ export function initSentry() {
       'Network Error',
       'Failed to fetch',
       'Load failed',
+      'net::ERR_ABORTED',
       // Clerk telemetry and noise
       'clerk-telemetry',
     ],

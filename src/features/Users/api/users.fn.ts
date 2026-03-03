@@ -288,6 +288,8 @@ export const upsertUserFn = createServerFn({ method: 'POST' })
     const db = getDb()
 
     try {
+      const { syncRagDocument } = await import('@/shared/lib/rag/sync')
+
       const [upserted] = await db
         .insert(users)
         .values({
@@ -317,6 +319,10 @@ export const upsertUserFn = createServerFn({ method: 'POST' })
       if (!upserted) {
         throw new Error('No user returned from upsert')
       }
+
+      // Sync to RAG
+      const doc = `User: ${upserted.name}. Email: ${upserted.email}. Role: ${upserted.role}. Job: ${upserted.jobTitle || 'N/A'}. Dept: ${upserted.departmentId || 'N/A'}`
+      await syncRagDocument('user', upserted.id, doc)
 
       const createdAt =
         upserted.createdAt instanceof Date

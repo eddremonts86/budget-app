@@ -3,7 +3,13 @@ import { type InfiniteData, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
 import { useUsers } from '@/features/Users/api/users.queries'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
-import { todoKeys, useDeleteTodo, useInfiniteTodos, useUpdateTodo } from '../../api/todos.queries'
+import {
+  todoKeys,
+  useDeleteTodo,
+  useInfiniteTodos,
+  useUpdateTodo,
+  type TodoStatus,
+} from '../../api/todos.queries'
 import { canModifyTodo } from '../../model/permissions'
 import type { Todo } from '../../model/types'
 import { KanbanBoard } from './KanbanBoard'
@@ -18,7 +24,13 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
   const { syncedUserId, userRole } = useCurrentUser()
   const updateMutation = useUpdateTodo({ invalidateKeys: [todoKeys.all] })
   const deleteMutation = useDeleteTodo()
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage } = useInfiniteTodos(10)
+
+  const pendingQuery = useInfiniteTodos(10, 'pending')
+  const inProgressQuery = useInfiniteTodos(10, 'in_progress')
+  const testingQuery = useInfiniteTodos(10, 'testing')
+  const onHoldQuery = useInfiniteTodos(10, 'on_hold')
+  const completedQuery = useInfiniteTodos(10, 'completed')
+
   const [activeTodo, setActiveTodo] = React.useState<Todo | null>(null)
 
   const userMap = React.useMemo(() => {
@@ -31,24 +43,40 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
     return map
   }, [users])
 
-  const allTodos = React.useMemo(() => data?.pages.flatMap((p) => p.data) ?? [], [data])
-
   const columns = React.useMemo(() => {
-    const cols = {
-      pending: [] as Todo[],
-      in_progress: [] as Todo[],
-      completed: [] as Todo[],
+    return {
+      pending: (pendingQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
+      in_progress: (inProgressQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
+      testing: (testingQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
+      on_hold: (onHoldQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
+      completed: (completedQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
     }
-    allTodos.forEach((todo) => {
-      const status = todo.status as keyof typeof cols
-      if (cols[status]) {
-        cols[status].push(todo)
-      }
-    })
-    return cols
-  }, [allTodos])
+  }, [
+    pendingQuery.data,
+    inProgressQuery.data,
+    testingQuery.data,
+    onHoldQuery.data,
+    completedQuery.data,
+  ])
+
+  const totalCounts = React.useMemo(() => {
+    return {
+      pending: pendingQuery.data?.pages[0]?.totalCount ?? 0,
+      in_progress: inProgressQuery.data?.pages[0]?.totalCount ?? 0,
+      testing: testingQuery.data?.pages[0]?.totalCount ?? 0,
+      on_hold: onHoldQuery.data?.pages[0]?.totalCount ?? 0,
+      completed: completedQuery.data?.pages[0]?.totalCount ?? 0,
+    }
+  }, [
+    pendingQuery.data,
+    inProgressQuery.data,
+    testingQuery.data,
+    onHoldQuery.data,
+    completedQuery.data,
+  ])
 
   const handleDragStart = (event: DragStartEvent) => {
+    console.log('[Kanban] Drag Start:', event.active.id)
     setActiveTodo(event.active.data.current as Todo)
   }
 
@@ -56,30 +84,85 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
     const { active, over } = event
     setActiveTodo(null)
 
-    if (!over) return
+    console.log('[Kanban] Drag End - Active:', active.id, 'Over:', over?.id)
+
+    if (!over) {
+      console.warn('[Kanban] Drag End: No over target detected')
+      return
+    }
 
     const todoId = active.id as string
     const newStatus = over.id as string
+    const allTodos = [
+      ...columns.pending,
+      ...columns.in_progress,
+      ...columns.testing,
+      ...columns.on_hold,
+      ...columns.completed,
+    ]
     const todo = allTodos.find((t) => t.id === todoId)
 
     if (
       todo &&
       todo.status !== newStatus &&
-      ['pending', 'in_progress', 'completed'].includes(newStatus)
+      [
+        'pending',
+        'in_progress',
+        'testing',
+        'on_hold',
+        'completed',
+        'blocked',
+        'cancelled',
+      ].includes(newStatus)
     ) {
+      console.log(`[Kanban] Updating todo ${todoId} from ${todo.status} to ${newStatus}`)
       const previousStatus = todo.status
-      const queryKey = [...todoKeys.infinite(), { limit: 10 }]
+      const sourceQueryKey = [
+        ...todoKeys.infinite(),
+        { limit: 10, status: previousStatus as TodoStatus },
+      ]
+      const targetQueryKey = [
+        ...todoKeys.infinite(),
+        { limit: 10, status: newStatus as TodoStatus },
+      ]
 
+      // Optimistic update: remove from source, add to target
       queryClient.setQueryData(
-        queryKey,
-        (oldData: InfiniteData<{ nextPage: number; data: Todo[] }> | undefined) => {
+        sourceQueryKey,
+        (
+          oldData: InfiniteData<{ nextPage: number; data: Todo[]; totalCount: number }> | undefined,
+        ) => {
           if (!oldData) return oldData
           return {
             ...oldData,
             pages: oldData.pages.map((page) => ({
               ...page,
-              data: page.data.map((t) => (t.id === todoId ? { ...t, status: newStatus } : t)),
+              data: page.data.filter((t) => t.id !== todoId),
+              totalCount: page.totalCount - 1,
             })),
+          }
+        },
+      )
+
+      queryClient.setQueryData(
+        targetQueryKey,
+        (
+          oldData: InfiniteData<{ nextPage: number; data: Todo[]; totalCount: number }> | undefined,
+        ) => {
+          if (!oldData) return oldData
+          const updatedTodo = { ...todo, status: newStatus as Todo['status'] }
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page, index) => {
+              if (index === 0) {
+                return {
+                  ...page,
+                  data: [updatedTodo, ...page.data],
+                  totalCount: page.totalCount + 1,
+                }
+              }
+              return page
+            }),
           }
         },
       )
@@ -91,26 +174,19 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
         },
         {
           onError: () => {
-            queryClient.setQueryData(
-              queryKey,
-              (oldData: InfiniteData<{ nextPage: number; data: Todo[] }> | undefined) => {
-                if (!oldData) return oldData
-                return {
-                  ...oldData,
-                  pages: oldData.pages.map((page) => ({
-                    ...page,
-                    data: page.data.map((t) =>
-                      t.id === todoId ? { ...t, status: previousStatus } : t,
-                    ),
-                  })),
-                }
-              },
-            )
             queryClient.invalidateQueries({ queryKey: todoKeys.all })
           },
         },
       )
     }
+  }
+
+  const handleFetchNextPage = (status: TodoStatus) => {
+    if (status === 'pending') pendingQuery.fetchNextPage()
+    if (status === 'in_progress') inProgressQuery.fetchNextPage()
+    if (status === 'testing') testingQuery.fetchNextPage()
+    if (status === 'on_hold') onHoldQuery.fetchNextPage()
+    if (status === 'completed') completedQuery.fetchNextPage()
   }
 
   const handleDelete = (id: string) => {
@@ -122,14 +198,27 @@ export function KanbanView({ onEdit }: KanbanViewProps) {
   return (
     <KanbanBoard
       columns={columns}
+      totalCounts={totalCounts}
       userMap={userMap}
       onEdit={onEdit}
       onDelete={handleDelete}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
-      onFetchNextPage={fetchNextPage}
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
+      onFetchNextPage={handleFetchNextPage}
+      hasNextPage={{
+        pending: !!pendingQuery.hasNextPage,
+        in_progress: !!inProgressQuery.hasNextPage,
+        testing: !!testingQuery.hasNextPage,
+        on_hold: !!onHoldQuery.hasNextPage,
+        completed: !!completedQuery.hasNextPage,
+      }}
+      isFetchingNextPage={{
+        pending: pendingQuery.isFetchingNextPage,
+        in_progress: inProgressQuery.isFetchingNextPage,
+        testing: testingQuery.isFetchingNextPage,
+        on_hold: onHoldQuery.isFetchingNextPage,
+        completed: completedQuery.isFetchingNextPage,
+      }}
       canModifyTodo={canModify}
       activeTodo={activeTodo}
     />

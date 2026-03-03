@@ -8,6 +8,8 @@ export const todoStatusEnum = pgEnum('todo_status', [
   'completed',
   'blocked',
   'cancelled',
+  'on_hold',
+  'testing',
 ])
 
 export const todoPriorityEnum = pgEnum('todo_priority', ['low', 'medium', 'high'])

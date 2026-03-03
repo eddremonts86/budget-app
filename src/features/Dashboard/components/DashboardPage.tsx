@@ -6,6 +6,7 @@ import {
   IconTrendingDown,
   IconCreditCard,
 } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from '@/components/ui'
 import { cn } from '@/shared/lib/utils'
@@ -50,107 +51,127 @@ export function DashboardPage() {
           ))
         ) : (
           <>
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('dashboard.stats.netBalance', { defaultValue: 'Net Balance' })}
-                </CardTitle>
-                <IconActivity className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div
-                  className={cn(
-                    'text-2xl font-bold',
-                    (stats?.netBalance?.value ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500',
-                  )}
-                >
-                  ${stats?.netBalance?.value?.toLocaleString() ?? '0'}
-                </div>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p className="flex items-center gap-1">
-                    {(stats?.netBalance?.change ?? 0) >= 0 ? (
-                      <IconTrendingUp className="h-3 w-3 text-emerald-500" />
-                    ) : (
-                      <IconTrendingDown className="h-3 w-3 text-red-500" />
+            <Link
+              to="/dashboard/analytics"
+              className="block transition-transform hover:scale-[1.02]"
+            >
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {t('dashboard.stats.netBalance', { defaultValue: 'Net Balance' })}
+                  </CardTitle>
+                  <IconActivity className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div
+                    className={cn(
+                      'text-2xl font-bold',
+                      (stats?.netBalance?.value ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500',
                     )}
-                    <span
-                      className={
-                        (stats?.netBalance?.change ?? 0) >= 0 ? 'text-emerald-500' : 'text-red-500'
-                      }
-                    >
-                      {(stats?.netBalance?.change ?? 0) > 0 ? '+' : ''}
-                      {stats?.netBalance?.change ?? 0}%
-                    </span>
-                    <span>vs last month</span>
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+                  >
+                    ${stats?.netBalance?.value?.toLocaleString() ?? '0'}
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p className="flex items-center gap-1">
+                      {(stats?.netBalance?.change ?? 0) >= 0 ? (
+                        <IconTrendingUp className="h-3 w-3 text-emerald-500" />
+                      ) : (
+                        <IconTrendingDown className="h-3 w-3 text-red-500" />
+                      )}
+                      <span
+                        className={
+                          (stats?.netBalance?.change ?? 0) >= 0
+                            ? 'text-emerald-500'
+                            : 'text-red-500'
+                        }
+                      >
+                        {(stats?.netBalance?.change ?? 0) > 0 ? '+' : ''}
+                        {stats?.netBalance?.change ?? 0}%
+                      </span>
+                      <span>vs last month</span>
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('dashboard.stats.totalRevenue')}
-                </CardTitle>
-                <IconCurrencyDollar className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  ${stats?.revenue?.value?.toLocaleString() ?? '0'}
-                </div>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>
-                    {t('dashboard.stats.change', {
-                      value: `${(stats?.revenue?.change ?? 0) > 0 ? '+' : ''}${
-                        stats?.revenue?.change ?? 0
-                      }%`,
-                    })}
-                  </p>
-                  <p>
-                    {t('dashboard.stats.pendingApproval', { defaultValue: 'Pending approval' })}: $
-                    {stats?.revenue?.pendingApprovalTotal?.toLocaleString() ?? '0'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <Link
+              to="/dashboard/analytics"
+              className="block transition-transform hover:scale-[1.02]"
+            >
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {t('dashboard.stats.totalRevenue')}
+                  </CardTitle>
+                  <IconCurrencyDollar className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    ${stats?.revenue?.value?.toLocaleString() ?? '0'}
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p>
+                      {t('dashboard.stats.change', {
+                        value: `${(stats?.revenue?.change ?? 0) > 0 ? '+' : ''}${
+                          stats?.revenue?.change ?? 0
+                        }%`,
+                      })}
+                    </p>
+                    <p>
+                      {t('dashboard.stats.pendingApproval', { defaultValue: 'Pending approval' })}:
+                      ${stats?.revenue?.pendingApprovalTotal?.toLocaleString() ?? '0'}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('dashboard.stats.totalExpenses', { defaultValue: 'Total Expenses' })}
-                </CardTitle>
-                <IconCreditCard className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-500">
-                  -${stats?.expenses?.value?.toLocaleString() ?? '0'}
-                </div>
-                <div className="text-xs text-muted-foreground space-y-1">
-                  <p>
-                    {t('dashboard.stats.change', {
-                      value: `${(stats?.expenses?.change ?? 0) > 0 ? '+' : ''}${
-                        stats?.expenses?.change ?? 0
-                      }%`,
-                    })}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+            <Link
+              to="/dashboard/analytics"
+              className="block transition-transform hover:scale-[1.02]"
+            >
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {t('dashboard.stats.totalExpenses', { defaultValue: 'Total Expenses' })}
+                  </CardTitle>
+                  <IconCreditCard className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold text-red-500">
+                    {(stats?.expenses?.value ?? 0) > 0 ? '-' : ''}$
+                    {stats?.expenses?.value?.toLocaleString() ?? '0'}
+                  </div>
+                  <div className="text-xs text-muted-foreground space-y-1">
+                    <p>
+                      {t('dashboard.stats.change', {
+                        value: `${(stats?.expenses?.change ?? 0) > 0 ? '+' : ''}${
+                          stats?.expenses?.change ?? 0
+                        }%`,
+                      })}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            </Link>
 
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {t('dashboard.stats.activeProjects', { defaultValue: 'Active Projects' })}
-                </CardTitle>
-                <IconFolder className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {stats?.activeProjects?.value?.toLocaleString() ?? '0'}
-                </div>
-                <p className="text-xs text-muted-foreground">{stats?.activeProjects?.context}</p>
-              </CardContent>
-            </Card>
+            <Link to="/dashboard/projects" className="block transition-transform hover:scale-[1.02]">
+              <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {t('dashboard.stats.activeProjects', { defaultValue: 'Active Projects' })}
+                  </CardTitle>
+                  <IconFolder className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <div className="text-2xl font-bold">
+                    {stats?.activeProjects?.value?.toLocaleString() ?? '0'}
+                  </div>
+                  <p className="text-xs text-muted-foreground">{stats?.activeProjects?.context}</p>
+                </CardContent>
+              </Card>
+            </Link>
           </>
         )}
       </div>

@@ -9,6 +9,7 @@ import {
   useDroppable,
   useSensor,
   useSensors,
+  rectIntersection,
 } from '@dnd-kit/core'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Calendar, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
@@ -28,6 +29,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { cn } from '@/shared/lib/utils'
+import { type TodoStatus } from '../../api/todos.queries'
 import type { Todo } from '../../model/types'
 
 interface KanbanCardProps {
@@ -118,9 +120,7 @@ export const KanbanCard = React.memo(function KanbanCard({
                 {user?.name?.substring(0, 2).toUpperCase() || '?'}
               </AvatarFallback>
             </Avatar>
-            <span className="text-xs text-muted-foreground truncate max-w-[80px]">
-              {user?.name || 'Unassigned'}
-            </span>
+            <span className="text-xs text-muted-foreground">{user?.name || 'Unassigned'}</span>
           </div>
         </div>
       </CardContent>
@@ -161,21 +161,11 @@ const DraggableCard = React.memo(function DraggableCard(props: {
   )
 })
 
-const KanbanColumn = React.memo(function KanbanColumn({
-  id,
-  title,
-  todos,
-  userMap,
-  onEdit,
-  onDelete,
-  onFetchNextPage,
-  hasNextPage,
-  isFetchingNextPage,
-  canModifyTodo,
-}: {
+interface KanbanColumnProps {
   id: string
   title: string
   todos: Todo[]
+  totalCount: number
   userMap: Map<string, { name: string; avatar: string }>
   onEdit: (todo: Todo) => void
   onDelete: (id: string) => void
@@ -183,8 +173,22 @@ const KanbanColumn = React.memo(function KanbanColumn({
   hasNextPage: boolean
   isFetchingNextPage: boolean
   canModifyTodo: (todo: Todo) => boolean
-}) {
-  const { setNodeRef } = useDroppable({ id })
+}
+
+const KanbanColumn = React.memo(function KanbanColumn({
+  id,
+  title,
+  todos,
+  totalCount,
+  userMap,
+  onEdit,
+  onDelete,
+  onFetchNextPage,
+  hasNextPage,
+  isFetchingNextPage,
+  canModifyTodo,
+}: KanbanColumnProps) {
+  const { setNodeRef, isOver } = useDroppable({ id })
   const parentRef = React.useRef<HTMLDivElement>(null)
 
   const rowVirtualizer = useVirtualizer({
@@ -208,8 +212,14 @@ const KanbanColumn = React.memo(function KanbanColumn({
   return (
     <div
       ref={setNodeRef}
-      className="flex flex-col h-full min-w-[300px] max-w-[350px] bg-secondary/20 rounded-2xl border border-border/40 p-1"
+      className={cn(
+        'flex flex-col h-full min-w-[300px] max-w-[350px] bg-secondary/20 rounded-2xl border border-border/40 p-1 transition-colors duration-200 relative',
+        isOver && 'bg-primary/10 border-primary/40 shadow-inner ring-2 ring-primary/20',
+      )}
     >
+      {isOver && (
+        <div className="absolute inset-0 bg-primary/5 pointer-events-none rounded-2xl z-0" />
+      )}
       <div className="p-3 flex items-center justify-between sticky top-0 bg-background/50 backdrop-blur-md rounded-t-xl z-10">
         <h3 className="font-semibold text-sm uppercase tracking-wider text-muted-foreground flex items-center gap-2">
           {title}
@@ -217,7 +227,7 @@ const KanbanColumn = React.memo(function KanbanColumn({
             variant="secondary"
             className="rounded-full px-2 h-5 min-w-5 flex items-center justify-center text-xs"
           >
-            {todos.length}
+            {totalCount}
           </Badge>
         </h3>
       </div>
@@ -275,22 +285,44 @@ interface KanbanBoardProps {
   columns: {
     pending: Todo[]
     in_progress: Todo[]
+    testing: Todo[]
+    on_hold: Todo[]
     completed: Todo[]
+  }
+  totalCounts: {
+    pending: number
+    in_progress: number
+    testing: number
+    on_hold: number
+    completed: number
   }
   userMap: Map<string, { name: string; avatar: string }>
   onEdit: (todo: Todo) => void
   onDelete: (id: string) => void
   onDragStart: (event: DragStartEvent) => void
   onDragEnd: (event: DragEndEvent) => void
-  onFetchNextPage: () => void
-  hasNextPage: boolean
-  isFetchingNextPage: boolean
+  onFetchNextPage: (status: TodoStatus) => void
+  hasNextPage: {
+    pending: boolean
+    in_progress: boolean
+    testing: boolean
+    on_hold: boolean
+    completed: boolean
+  }
+  isFetchingNextPage: {
+    pending: boolean
+    in_progress: boolean
+    testing: boolean
+    on_hold: boolean
+    completed: boolean
+  }
   canModifyTodo: (todo: Todo) => boolean
   activeTodo: Todo | null
 }
 
 export function KanbanBoard({
   columns,
+  totalCounts,
   userMap,
   onEdit,
   onDelete,
@@ -307,54 +339,88 @@ export function KanbanBoard({
   const sensors = useSensors(
     useSensor(MouseSensor, {
       activationConstraint: {
-        distance: 10,
+        distance: 5,
       },
     }),
     useSensor(TouchSensor, {
       activationConstraint: {
-        delay: 250,
-        tolerance: 5,
+        delay: 150,
+        tolerance: 10,
       },
     }),
   )
 
   return (
     <div className="h-full flex gap-4 overflow-x-auto pb-4 snap-x">
-      <DndContext sensors={sensors} onDragStart={onDragStart} onDragEnd={onDragEnd}>
+      <DndContext
+        sensors={sensors}
+        collisionDetection={rectIntersection}
+        onDragStart={onDragStart}
+        onDragEnd={onDragEnd}
+      >
         <KanbanColumn
           id="pending"
           title={t('todos.status.pending')}
           todos={columns.pending}
+          totalCount={totalCounts.pending}
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={onFetchNextPage}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
+          onFetchNextPage={() => onFetchNextPage('pending')}
+          hasNextPage={hasNextPage.pending}
+          isFetchingNextPage={isFetchingNextPage.pending}
           canModifyTodo={canModifyTodo}
         />
         <KanbanColumn
           id="in_progress"
           title={t('todos.status.inProgress')}
           todos={columns.in_progress}
+          totalCount={totalCounts.in_progress}
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={onFetchNextPage}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
+          onFetchNextPage={() => onFetchNextPage('in_progress')}
+          hasNextPage={hasNextPage.in_progress}
+          isFetchingNextPage={isFetchingNextPage.in_progress}
+          canModifyTodo={canModifyTodo}
+        />
+        <KanbanColumn
+          id="testing"
+          title={t('todos.status.testing', 'Testing')}
+          todos={columns.testing}
+          totalCount={totalCounts.testing}
+          userMap={userMap}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onFetchNextPage={() => onFetchNextPage('testing')}
+          hasNextPage={hasNextPage.testing}
+          isFetchingNextPage={isFetchingNextPage.testing}
+          canModifyTodo={canModifyTodo}
+        />
+        <KanbanColumn
+          id="on_hold"
+          title={t('todos.status.onHold', 'On Hold')}
+          todos={columns.on_hold}
+          totalCount={totalCounts.on_hold}
+          userMap={userMap}
+          onEdit={onEdit}
+          onDelete={onDelete}
+          onFetchNextPage={() => onFetchNextPage('on_hold')}
+          hasNextPage={hasNextPage.on_hold}
+          isFetchingNextPage={isFetchingNextPage.on_hold}
           canModifyTodo={canModifyTodo}
         />
         <KanbanColumn
           id="completed"
           title={t('todos.status.completed')}
           todos={columns.completed}
+          totalCount={totalCounts.completed}
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={onFetchNextPage}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
+          onFetchNextPage={() => onFetchNextPage('completed')}
+          hasNextPage={hasNextPage.completed}
+          isFetchingNextPage={isFetchingNextPage.completed}
           canModifyTodo={canModifyTodo}
         />
 
