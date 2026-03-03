@@ -8,6 +8,12 @@ import {
   getUsersFn,
   updateUserFn,
 } from './users.fn'
+import {
+  getRolesFn,
+  getSkillsFn,
+  getJobTitlesFn,
+  getExperienceLevelsFn,
+} from './master-data.fn'
 
 export const userKeys = {
   all: ['users'] as const,
@@ -15,6 +21,27 @@ export const userKeys = {
   infinite: () => [...userKeys.lists(), 'infinite'] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
+  master: () => [...userKeys.all, 'master'] as const,
+  roles: () => [...userKeys.master(), 'roles'] as const,
+  skills: () => [...userKeys.master(), 'skills'] as const,
+  jobTitles: () => [...userKeys.master(), 'jobTitles'] as const,
+  experienceLevels: () => [...userKeys.master(), 'experienceLevels'] as const,
+}
+
+export const useRoles = () => {
+  return useTQuery(userKeys.roles(), () => getRolesFn())
+}
+
+export const useSkills = () => {
+  return useTQuery(userKeys.skills(), () => getSkillsFn())
+}
+
+export const useJobTitles = () => {
+  return useTQuery(userKeys.jobTitles(), () => getJobTitlesFn())
+}
+
+export const useExperienceLevels = () => {
+  return useTQuery(userKeys.experienceLevels(), () => getExperienceLevelsFn())
 }
 
 export const useInfiniteUsers = (limit = 10, search?: string) => {

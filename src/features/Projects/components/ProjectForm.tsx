@@ -31,7 +31,7 @@ import {
 } from '@/components/ui/select'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
-import { useDepartments } from '@/features/Projects/api/projects.queries'
+import { useDepartments, useSkills } from '@/features/Projects/api/projects.queries'
 import { useCreateUser, useUsers } from '@/features/Users/api/users.queries'
 import { UserForm } from '@/features/Users/components/UserForm'
 import { cn } from '@/shared/lib/utils'
@@ -50,7 +50,7 @@ const projectFormSchema = z.object({
   type: z.enum(['internal', 'external', 'research', 'maintenance']),
   startDate: z.string().min(1),
   endDate: z.string().min(1),
-  technologies: z.string().min(1),
+  skills: z.array(z.string()).min(1),
   budget: z.number().min(0),
   priority: z.enum(['low', 'medium', 'high']),
   departmentId: z.string().optional(),
@@ -77,6 +77,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
   const { t, i18n } = useTranslation()
   const { data: departments = [] } = useDepartments()
   const { data: users = [] } = useUsers()
+  const { data: availableSkills = [] } = useSkills()
   const createUser = useCreateUser()
   const [isUserSheetOpen, setIsUserSheetOpen] = React.useState(false)
 
@@ -99,7 +100,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
       type: (defaultValues?.type as ProjectFormValues['type']) ?? 'internal',
       startDate: defaultValues?.startDate ?? now.toISOString().split('T')[0],
       endDate: defaultValues?.endDate ?? thirtyDaysLater.toISOString().split('T')[0],
-      technologies: defaultValues?.technologies?.join(', ') ?? '',
+      skills: defaultValues?.skills ?? [],
       budget: defaultValues?.budget ?? 0,
       priority: (defaultValues?.priority as ProjectFormValues['priority']) ?? 'medium',
       departmentId: defaultValues?.departmentId ?? undefined,
@@ -110,7 +111,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
   }, [defaultValues])
 
   const form = useForm({
-    defaultValues: initialValues,
+    defaultValues: initialValues as ProjectFormValues,
     onSubmit: async ({ value }) => {
       const result = projectFormSchema.safeParse(value)
       if (!result.success) {
@@ -563,21 +564,35 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
         </form.Field>
       </div>
 
-      <form.Field name="technologies">
+      <form.Field name="skills">
         {(field) => (
           <FieldGroup>
             <FieldLabel htmlFor={field.name} className="flex items-center gap-2">
               <Code className="h-4 w-4" />
-              {t('projects.form.technologiesLabel')}
+              {t('projects.form.skillsLabel')}
             </FieldLabel>
-            <Input
-              id={field.name}
-              name={field.name}
+            <Combobox
+              multiple
               value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e) => field.handleChange(e.target.value)}
-              placeholder={t('projects.form.technologiesPlaceholder')}
-            />
+              onValueChange={(value) => field.handleChange(value)}
+            >
+              <ComboboxChips>
+                {field.state.value.map((skill) => (
+                  <ComboboxChip key={skill}>{skill}</ComboboxChip>
+                ))}
+                <ComboboxChipsInput placeholder={t('projects.form.skillsPlaceholder')} />
+              </ComboboxChips>
+              <ComboboxContent>
+                <ComboboxEmpty>{t('projects.form.skillsEmpty')}</ComboboxEmpty>
+                <ComboboxList>
+                  {availableSkills.map((skill) => (
+                    <ComboboxItem key={skill.id} value={skill.name}>
+                      {skill.name}
+                    </ComboboxItem>
+                  ))}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
             <FieldError
               errors={field.state.meta.errors.map((e) => {
                 if (typeof e === 'string') return e

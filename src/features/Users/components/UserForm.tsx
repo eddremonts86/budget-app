@@ -5,6 +5,16 @@ import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
+import {
+  Combobox,
+  ComboboxChip,
+  ComboboxChips,
+  ComboboxChipsInput,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxItem,
+  ComboboxList,
+} from '@/components/ui/combobox'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
@@ -17,18 +27,26 @@ import {
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useDepartments } from '@/features/Departments/api/departments.queries'
-import { useUsers } from '../api/users.queries'
+import {
+  useRoles,
+  useJobTitles,
+  useExperienceLevels,
+  useSkills,
+  useUsers,
+} from '../api/users.queries'
 import type { User } from '../model/types'
 
 const createUserSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t('validation.required')),
     email: z.string().email(t('validation.invalidEmail')).min(1, t('validation.required')),
-    role: z.enum(['admin', 'user']),
+    roleId: z.string().min(1, t('validation.required')),
     avatar: z.string().url(t('validation.invalidUrl')).min(1, t('validation.required')),
-    jobTitle: z.string().nullable(),
+    jobTitleId: z.string().nullable(),
+    experienceLevelId: z.string().nullable(),
     departmentId: z.string().nullable(),
     reportsTo: z.string().nullable(),
+    skills: z.array(z.string()).optional(),
   })
 
 export type UserFormValues = z.infer<ReturnType<typeof createUserSchema>>
@@ -47,17 +65,23 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
 
   const { data: departments } = useDepartments()
   const { data: users } = useUsers()
+  const { data: roles } = useRoles()
+  const { data: jobTitles } = useJobTitles()
+  const { data: experienceLevels } = useExperienceLevels()
+  const { data: availableSkills } = useSkills()
 
   const form = useForm({
     defaultValues: {
       name: defaultValues?.name ?? '',
       email: defaultValues?.email ?? '',
-      role: (defaultValues?.role as UserFormValues['role']) ?? 'user',
+      roleId: defaultValues?.roleId ?? '',
       avatar: defaultValues?.avatar ?? initialAvatar,
-      jobTitle: defaultValues?.jobTitle ?? null,
+      jobTitleId: defaultValues?.jobTitleId ?? null,
+      experienceLevelId: defaultValues?.experienceLevelId ?? null,
       departmentId: defaultValues?.departmentId ?? null,
       reportsTo: defaultValues?.reportsTo ?? null,
-    },
+      skills: defaultValues?.skills ?? [],
+    } as UserFormValues,
     validators: {
       onChange: userSchema,
     },
@@ -240,7 +264,7 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <form.Field
-              name="role"
+              name="roleId"
               children={(field) => (
                 <Field>
                   <div className="flex items-center gap-2">
@@ -253,17 +277,18 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                     </Tooltip>
                   </div>
                   <Select
-                    value={field.state.value}
-                    onValueChange={(value: string) =>
-                      field.handleChange(value as UserFormValues['role'])
-                    }
+                    value={field.state.value || ''}
+                    onValueChange={(value: string) => field.handleChange(value)}
                   >
                     <SelectTrigger id={field.name}>
                       <SelectValue placeholder={t('users.form.rolePlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="user">{t('users.form.roleUser')}</SelectItem>
-                      <SelectItem value="admin">{t('users.form.roleAdmin')}</SelectItem>
+                      {roles?.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                   <FieldError
@@ -279,19 +304,57 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
             />
 
             <form.Field
-              name="jobTitle"
+              name="jobTitleId"
               children={(field) => (
                 <Field>
                   <FieldLabel htmlFor={field.name}>{t('users.form.jobTitleLabel')}</FieldLabel>
-                  <Input
-                    id={field.name}
+                  <Select
                     value={field.state.value || ''}
-                    onBlur={field.handleBlur}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                      field.handleChange(e.target.value === '' ? null : e.target.value)
+                    onValueChange={(value: string) =>
+                      field.handleChange(value === '' ? null : value)
                     }
-                    placeholder={t('users.form.jobTitlePlaceholder')}
-                  />
+                  >
+                    <SelectTrigger id={field.name}>
+                      <SelectValue placeholder={t('users.form.jobTitlePlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">-</SelectItem>
+                      {jobTitles?.map((jt) => (
+                        <SelectItem key={jt.id} value={jt.id}>
+                          {jt.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </Field>
+              )}
+            />
+
+            <form.Field
+              name="experienceLevelId"
+              children={(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>
+                    {t('users.form.experienceLevelLabel')}
+                  </FieldLabel>
+                  <Select
+                    value={field.state.value || ''}
+                    onValueChange={(value: string) =>
+                      field.handleChange(value === '' ? null : value)
+                    }
+                  >
+                    <SelectTrigger id={field.name}>
+                      <SelectValue placeholder={t('users.form.experienceLevelPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="">-</SelectItem>
+                      {experienceLevels?.map((el) => (
+                        <SelectItem key={el.id} value={el.id}>
+                          {el.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </Field>
               )}
             />
@@ -314,6 +377,39 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                 {t('users.form.sections.organization.description')}
               </p>
             </div>
+          </div>
+
+          <div className="space-y-4">
+            <form.Field
+              name="skills"
+              children={(field) => (
+                <Field>
+                  <FieldLabel htmlFor={field.name}>{t('users.form.skillsLabel')}</FieldLabel>
+                  <Combobox
+                    multiple
+                    value={field.state.value || []}
+                    onValueChange={(value) => field.handleChange(value)}
+                  >
+                    <ComboboxChips>
+                      {(field.state.value || []).map((skill) => (
+                        <ComboboxChip key={skill}>{skill}</ComboboxChip>
+                      ))}
+                      <ComboboxChipsInput placeholder={t('users.form.skillsPlaceholder')} />
+                    </ComboboxChips>
+                    <ComboboxContent>
+                      <ComboboxEmpty>{t('users.form.skillsEmpty')}</ComboboxEmpty>
+                      <ComboboxList>
+                        {availableSkills?.map((skill) => (
+                          <ComboboxItem key={skill.id} value={skill.name}>
+                            {skill.name}
+                          </ComboboxItem>
+                        ))}
+                      </ComboboxList>
+                    </ComboboxContent>
+                  </Combobox>
+                </Field>
+              )}
+            />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">

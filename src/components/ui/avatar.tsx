@@ -26,12 +26,26 @@ function Avatar({
 
 function AvatarImage({
   className,
+  src,
   ...props
 }: React.ComponentProps<typeof AvatarPrimitive.Image>) {
+  // Use a proxy or different format if DiceBear is blocked
+  const safeSrc = React.useMemo(() => {
+    if (typeof src === 'string' && src.includes('api.dicebear.com')) {
+      // DiceBear SVGs are often blocked by ORB/CORS in some environments.
+      // Replacing .svg with .png or adding the format parameter helps.
+      if (src.includes('/svg')) {
+        return src.replace('/svg', '/png')
+      }
+    }
+    return src
+  }, [src])
+
   return (
     <AvatarPrimitive.Image
       data-slot="avatar-image"
       className={cn("aspect-square size-full", className)}
+      src={safeSrc}
       {...props}
     />
   )

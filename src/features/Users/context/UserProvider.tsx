@@ -20,7 +20,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
           name: 'Local Test User',
           email: 'local-test@example.com',
           avatar: null,
-          role: 'admin',
+          roleId: 'role_admin',
+          roleName: 'admin',
           createdAt: new Date().toISOString(),
         })
       }
@@ -61,7 +62,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
 
         const synced = await upsertUserFn({
-          data: userData,
+          data: {
+            ...userData,
+            roleId: 'role_user', // Provide a default roleId for new synced users
+          },
         })
 
         if (!synced) {
@@ -83,7 +87,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     const isReady = (isE2E && !!syncedUser) || (clerkIsLoaded && !!syncedUser)
     return {
       syncedUserId: syncedUser?.id ?? null,
-      userRole: syncedUser?.role ?? 'user',
+      userRole: (syncedUser?.roleName === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
       user: syncedUser,
       isLoading: !isReady || isLoading,
       isReady,

@@ -1,14 +1,21 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq, and, inArray, count, like } from 'drizzle-orm'
 import { z } from 'zod'
-import { projects, departments, projectMembers, users } from '@/shared/lib/db/schema'
+import {
+  projects,
+  departments,
+  projectMembers,
+  users,
+  projectSkills,
+  skills,
+} from '@/shared/lib/db/schema'
 
 export const projectSchema = z.object({
   name: z.string().min(1),
   description: z.string().nullable(),
   startDate: z.string(),
   endDate: z.string(),
-  technologies: z.array(z.string()),
+  skills: z.array(z.string()),
   status: z.enum(['active', 'completed', 'on_hold', 'planning', 'cancelled']),
   type: z.enum(['internal', 'external', 'research', 'maintenance']),
   priority: z.string().nullable(),
@@ -30,7 +37,7 @@ export interface Project {
   description: string | null
   startDate: string
   endDate: string
-  technologies: string[]
+  skills: string[]
   status: 'active' | 'completed' | 'on_hold' | 'planning' | 'cancelled'
   type: 'internal' | 'external' | 'research' | 'maintenance'
   priority: string
@@ -91,7 +98,20 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
 
       const [items, totalResult] = await Promise.all([
         db
-          .select()
+          .select({
+            id: projects.id,
+            name: projects.name,
+            description: projects.description,
+            startDate: projects.startDate,
+            endDate: projects.endDate,
+            status: projects.status,
+            type: projects.type,
+            priority: projects.priority,
+            budget: projects.budget,
+            departmentId: projects.departmentId,
+            createdAt: projects.createdAt,
+            updatedAt: projects.updatedAt,
+          })
           .from(projects)
           .where(whereClause)
           .limit(limit)
@@ -107,53 +127,60 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
       }
 
       const projectIds = items.map((i) => i.id)
-      const allMembers =
-        projectIds.length > 0
-          ? await db
-              .select()
-              .from(projectMembers)
-              .where(inArray(projectMembers.projectId, projectIds))
-          : []
 
-      const projectsData: Project[] = (items || [])
-        .map((item) => {
-          if (!item) return null
-          try {
-            const team = (allMembers || [])
-              .filter((m) => m && m.projectId === item.id)
-              .map((m) => ({
-                userId: m.userId?.toString() || '',
-                role: (m.role as ProjectInput['team'][number]['role']) || 'viewer',
-              }))
+      // Fetch skills and members for these projects
+      const [allSkills, allMembers] = await Promise.all([
+        db
+          .select({
+            projectId: projectSkills.projectId,
+            skillName: skills.name,
+          })
+          .from(projectSkills)
+          .innerJoin(skills, eq(projectSkills.skillId, skills.id))
+          .where(inArray(projectSkills.projectId, projectIds)),
+        db.select().from(projectMembers).where(inArray(projectMembers.projectId, projectIds)),
+      ])
 
-            return {
-              id: item.id?.toString() || '',
-              name: item.name || 'Untitled Project',
-              description: item.description,
-              startDate: item.startDate ? item.startDate.toISOString() : new Date().toISOString(),
-              endDate: item.endDate ? item.endDate.toISOString() : new Date().toISOString(),
-              technologies: Array.isArray(item.technologies) ? (item.technologies as string[]) : [],
-              status: (item.status as ProjectInput['status']) || 'active',
-              type: (item.type as ProjectInput['type']) || 'internal',
-              priority: (item.priority as ProjectInput['priority']) || 'medium',
-              budget: item.budget ? Number(item.budget) : 0,
-              departmentId: item.departmentId,
-              team,
-              createdAt:
-                item.createdAt instanceof Date
-                  ? item.createdAt.toISOString()
-                  : new Date().toISOString(),
-              updatedAt:
-                item.updatedAt instanceof Date
-                  ? item.updatedAt.toISOString()
-                  : new Date().toISOString(),
-            }
-          } catch (err) {
-            console.error('Error mapping project item:', item.id, err)
-            throw err
-          }
-        })
-        .filter((p): p is Project => p !== null)
+      const skillsMap = allSkills.reduce(
+        (acc, curr) => {
+          if (!acc[curr.projectId]) acc[curr.projectId] = []
+          acc[curr.projectId].push(curr.skillName)
+          return acc
+        },
+        {} as Record<string, string[]>,
+      )
+
+      const projectsData: Project[] = items.map((item) => {
+        const team = (allMembers || [])
+          .filter((m) => m && m.projectId === item.id)
+          .map((m) => ({
+            userId: m.userId?.toString() || '',
+            role: (m.role as ProjectInput['team'][number]['role']) || 'viewer',
+          }))
+
+        return {
+          id: item.id?.toString() || '',
+          name: item.name || 'Untitled Project',
+          description: item.description,
+          startDate: item.startDate ? item.startDate.toISOString() : new Date().toISOString(),
+          endDate: item.endDate ? item.endDate.toISOString() : new Date().toISOString(),
+          skills: skillsMap[item.id] || [],
+          status: (item.status as ProjectInput['status']) || 'active',
+          type: (item.type as ProjectInput['type']) || 'internal',
+          priority: (item.priority as string) || 'medium',
+          budget: item.budget ? Number(item.budget) : 0,
+          departmentId: item.departmentId,
+          team,
+          createdAt:
+            item.createdAt instanceof Date
+              ? item.createdAt.toISOString()
+              : new Date().toISOString(),
+          updatedAt:
+            item.updatedAt instanceof Date
+              ? item.updatedAt.toISOString()
+              : new Date().toISOString(),
+        }
+      })
 
       const totalPages = Math.ceil(total / limit)
       const nextPage = page < totalPages ? page + 1 : undefined
@@ -175,17 +202,34 @@ export const getProjectByIdFn = createServerFn({ method: 'GET' }).handler(
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const [item] = await db
-        .select()
+        .select({
+          id: projects.id,
+          name: projects.name,
+          description: projects.description,
+          startDate: projects.startDate,
+          endDate: projects.endDate,
+          status: projects.status,
+          type: projects.type,
+          priority: projects.priority,
+          budget: projects.budget,
+          departmentId: projects.departmentId,
+          createdAt: projects.createdAt,
+          updatedAt: projects.updatedAt,
+        })
         .from(projects)
         .where(eq(projects.id, id as string))
         .limit(1)
 
       if (!item) return null
 
-      const members = await db
-        .select()
-        .from(projectMembers)
-        .where(eq(projectMembers.projectId, item.id))
+      const [members, projectSkillsData] = await Promise.all([
+        db.select().from(projectMembers).where(eq(projectMembers.projectId, item.id)),
+        db
+          .select({ skillName: skills.name })
+          .from(projectSkills)
+          .innerJoin(skills, eq(projectSkills.skillId, skills.id))
+          .where(eq(projectSkills.projectId, item.id)),
+      ])
 
       const team = members.map((m) => ({
         userId: m.userId,
@@ -198,7 +242,7 @@ export const getProjectByIdFn = createServerFn({ method: 'GET' }).handler(
         description: item.description,
         startDate: item.startDate ? item.startDate.toISOString() : '',
         endDate: item.endDate ? item.endDate.toISOString() : '',
-        technologies: item.technologies || [],
+        skills: projectSkillsData.map((s) => s.skillName),
         status: item.status as Project['status'],
         type: item.type as Project['type'],
         priority: (item.priority as string) || 'medium',
@@ -254,7 +298,6 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
           description: input.description,
           startDate: input.startDate ? new Date(input.startDate) : undefined,
           endDate: input.endDate ? new Date(input.endDate) : undefined,
-          technologies: input.technologies,
           status: input.status,
           type: input.type,
           priority: input.priority,
@@ -262,6 +305,19 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
           departmentId: input.departmentId,
         })
         .returning()
+
+      if (input.skills && input.skills.length > 0) {
+        for (const skillName of input.skills) {
+          let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
+          if (!skill) {
+            ;[skill] = await db
+              .insert(skills)
+              .values({ id: crypto.randomUUID(), name: skillName })
+              .returning()
+          }
+          await db.insert(projectSkills).values({ projectId: newItem.id, skillId: skill.id })
+        }
+      }
 
       if (input.team && input.team.length > 0) {
         await db.insert(projectMembers).values(
@@ -280,7 +336,7 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
         description: newItem.description,
         startDate: newItem.startDate ? newItem.startDate.toISOString() : '',
         endDate: newItem.endDate ? newItem.endDate.toISOString() : '',
-        technologies: newItem.technologies || [],
+        skills: input.skills,
         status: newItem.status as Project['status'],
         type: newItem.type as Project['type'],
         priority: (newItem.priority as string) || 'medium',
@@ -310,7 +366,6 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
           description: updateData.description,
           startDate: updateData.startDate ? new Date(updateData.startDate) : undefined,
           endDate: updateData.endDate ? new Date(updateData.endDate) : undefined,
-          technologies: updateData.technologies,
           status: updateData.status,
           type: updateData.type,
           priority: updateData.priority,
@@ -320,6 +375,25 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
         })
         .where(eq(projects.id, id))
         .returning()
+
+      if (!updatedItem) {
+        throw new Error('Project not found for update')
+      }
+
+      if (updateData.skills) {
+        // Sync skills
+        await db.delete(projectSkills).where(eq(projectSkills.projectId, id))
+        for (const skillName of updateData.skills) {
+          let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
+          if (!skill) {
+            ;[skill] = await db
+              .insert(skills)
+              .values({ id: crypto.randomUUID(), name: skillName })
+              .returning()
+          }
+          await db.insert(projectSkills).values({ projectId: id, skillId: skill.id })
+        }
+      }
 
       if (updateData.team) {
         await db.delete(projectMembers).where(eq(projectMembers.projectId, id))
@@ -341,7 +415,7 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
         description: updatedItem.description,
         startDate: updatedItem.startDate ? updatedItem.startDate.toISOString() : '',
         endDate: updatedItem.endDate ? updatedItem.endDate.toISOString() : '',
-        technologies: updatedItem.technologies || [],
+        skills: updateData.skills || [],
         status: updatedItem.status as Project['status'],
         type: updatedItem.type as Project['type'],
         priority: (updatedItem.priority as string) || 'medium',

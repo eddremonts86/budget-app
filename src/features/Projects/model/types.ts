@@ -17,7 +17,7 @@ export interface Project {
   description?: string | null
   startDate: string
   endDate: string
-  technologies: string[] | null
+  skills?: string[] | null
   status: 'active' | 'completed' | 'on_hold' | 'planning' | 'cancelled'
   type: 'internal' | 'external' | 'research' | 'maintenance'
   priority: 'low' | 'medium' | 'high' | string | null

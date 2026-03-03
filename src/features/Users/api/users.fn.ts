@@ -1,37 +1,35 @@
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq, count, like, or } from 'drizzle-orm'
+import { desc, eq, count, like, or, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
-// import { db } from '@/shared/lib/db'
-import { users, departments } from '@/shared/lib/db/schema'
+import {
+  users,
+  departments,
+  roles,
+  jobTitles,
+  experienceLevels,
+  userSkills,
+  skills,
+} from '@/shared/lib/db/schema'
+import type { User as UserType } from '../model/types'
 
 export const userSchema = z.object({
   id: z.string().optional(),
   name: z.string().min(1),
   email: z.string().email(),
-  role: z.enum(['admin', 'user']).default('user'),
+  roleId: z.string(),
   avatar: z.string().nullable().optional(),
-  jobTitle: z.string().nullable().optional(),
+  jobTitleId: z.string().nullable().optional(),
+  experienceLevelId: z.string().nullable().optional(),
   departmentId: z.string().nullable().optional(),
   reportsTo: z.string().nullable().optional(),
+  salary: z.number().nullable().optional(),
+  skills: z.array(z.string()).optional(), // Skill names
 })
 
 export type UserInput = z.infer<typeof userSchema>
 
-export interface User {
-  id: string
-  name: string
-  email: string
-  role: 'admin' | 'user'
-  avatar: string | null
-  jobTitle: string | null
-  departmentId: string | null
-  departmentName: string | null
-  reportsTo: string | null
-  createdAt: string
-}
-
 export interface UserListResponse {
-  data: User[]
+  data: UserType[]
   nextPage?: number
   totalCount: number
 }
@@ -53,9 +51,11 @@ export const getUsersFn = createServerFn({ method: 'GET' })
           id: i.toString(),
           name: `User ${i}`,
           email: `user${i}@example.com`,
-          role: 'user' as const,
+          roleId: 'role_1',
+          roleName: 'Admin',
           avatar: null,
-          jobTitle: 'Developer',
+          jobTitleId: 'job_1',
+          jobTitleName: 'Developer',
           departmentId: '1',
           departmentName: 'Engineering',
           reportsTo: null,
@@ -67,7 +67,6 @@ export const getUsersFn = createServerFn({ method: 'GET' })
     }
 
     try {
-      console.log('getUsersFn: Starting...')
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const { pageParam, limit: limitParam, search } = data || {}
@@ -85,15 +84,25 @@ export const getUsersFn = createServerFn({ method: 'GET' })
             id: users.id,
             name: users.name,
             email: users.email,
-            role: users.role,
+            roleId: users.roleId,
+            roleName: roles.name,
             avatar: users.avatar,
-            jobTitle: users.jobTitle,
+            jobTitleId: users.jobTitleId,
+            jobTitleName: jobTitles.name,
+            experienceLevelId: users.experienceLevelId,
+            experienceLevelName: experienceLevels.name,
             departmentId: users.departmentId,
             departmentName: departments.name,
             reportsTo: users.reportsTo,
+            reportsToName: sql<string>`(SELECT name FROM ${users} as u2 WHERE u2.id = ${users.reportsTo})`,
+            salary: users.salary,
             createdAt: users.createdAt,
+            updatedAt: users.updatedAt,
           })
           .from(users)
+          .leftJoin(roles, eq(users.roleId, roles.id))
+          .leftJoin(jobTitles, eq(users.jobTitleId, jobTitles.id))
+          .leftJoin(experienceLevels, eq(users.experienceLevelId, experienceLevels.id))
           .leftJoin(departments, eq(users.departmentId, departments.id))
           .where(whereClause)
           .limit(limit)
@@ -104,7 +113,28 @@ export const getUsersFn = createServerFn({ method: 'GET' })
 
       const total = totalResult[0]?.count ?? 0
 
-      console.log(`getUsersFn: Found ${items.length} users, total ${total}`)
+      // Fetch skills for these users
+      const userIds = items.map((u) => u.id)
+      const allSkills =
+        userIds.length > 0
+          ? await db
+              .select({
+                userId: userSkills.userId,
+                skillName: skills.name,
+              })
+              .from(userSkills)
+              .innerJoin(skills, eq(userSkills.skillId, skills.id))
+              .where(inArray(userSkills.userId, userIds))
+          : []
+
+      const skillsMap = allSkills.reduce(
+        (acc, curr) => {
+          if (!acc[curr.userId]) acc[curr.userId] = []
+          acc[curr.userId].push(curr.skillName)
+          return acc
+        },
+        {} as Record<string, string[]>,
+      )
 
       const totalPages = Math.ceil(total / limit)
       const nextPage = page < totalPages ? page + 1 : undefined
@@ -112,10 +142,9 @@ export const getUsersFn = createServerFn({ method: 'GET' })
       return {
         data: items.map((item) => ({
           ...item,
-          createdAt:
-            item.createdAt instanceof Date
-              ? item.createdAt.toISOString()
-              : new Date().toISOString(),
+          skills: skillsMap[item.id] || [],
+          createdAt: item.createdAt.toISOString(),
+          updatedAt: item.updatedAt.toISOString(),
         })),
         nextPage,
         totalCount: total,
@@ -129,101 +158,110 @@ export const getUsersFn = createServerFn({ method: 'GET' })
 export const getUserByIdFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string().optional())
   .handler(async ({ data: id }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        id: (id as string) || '1',
-        name: 'User 1',
-        email: 'user1@example.com',
-        role: 'user' as const,
-        avatar: null,
-        createdAt: new Date().toISOString(),
-      }
-    }
+    if (!id) return null
 
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
+
     const result = await db
-      .select()
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        roleId: users.roleId,
+        roleName: roles.name,
+        avatar: users.avatar,
+        jobTitleId: users.jobTitleId,
+        jobTitleName: jobTitles.name,
+        experienceLevelId: users.experienceLevelId,
+        experienceLevelName: experienceLevels.name,
+        departmentId: users.departmentId,
+        departmentName: departments.name,
+        reportsTo: users.reportsTo,
+        salary: users.salary,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
       .from(users)
-      .where(eq(users.id, id as string))
+      .leftJoin(roles, eq(users.roleId, roles.id))
+      .leftJoin(jobTitles, eq(users.jobTitleId, jobTitles.id))
+      .leftJoin(experienceLevels, eq(users.experienceLevelId, experienceLevels.id))
+      .leftJoin(departments, eq(users.departmentId, departments.id))
+      .where(eq(users.id, id))
+
     if (!result.length) return null
     const item = result[0]
+
+    const userSkillsData = await db
+      .select({ skillName: skills.name })
+      .from(userSkills)
+      .innerJoin(skills, eq(userSkills.skillId, skills.id))
+      .where(eq(userSkills.userId, id))
+
     return {
       ...item,
-      createdAt:
-        item.createdAt instanceof Date ? item.createdAt.toISOString() : new Date().toISOString(),
+      skills: userSkillsData.map((s) => s.skillName),
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
     }
   })
 
 export const getUserByEmailFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
   .handler(async ({ data: email }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        id: '1',
-        name: 'User 1',
-        email: (email as string) || 'user1@example.com',
-        role: 'user' as const,
-        avatar: null,
-        createdAt: new Date().toISOString(),
-      }
-    }
-
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
-    const result = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, email as string))
+    const result = await db.select().from(users).where(eq(users.email, email))
     if (!result.length) return null
     const item = result[0]
     return {
       ...item,
-      createdAt:
-        item.createdAt instanceof Date ? item.createdAt.toISOString() : new Date().toISOString(),
+      createdAt: item.createdAt.toISOString(),
+      updatedAt: item.updatedAt.toISOString(),
     }
   })
 
 export const createUserFn = createServerFn({ method: 'POST' })
   .inputValidator(userSchema)
   .handler(async ({ data: input }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        id: crypto.randomUUID(),
-        name: input.name,
-        email: input.email,
-        role: input.role || 'user',
-        avatar: input.avatar || null,
-        jobTitle: input.jobTitle || null,
-        departmentId: input.departmentId || null,
-        reportsTo: input.reportsTo || null,
-        createdAt: new Date().toISOString(),
-      }
-    }
-
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
+
+    const userId = input.id || crypto.randomUUID()
 
     const [newItem] = await db
       .insert(users)
       .values({
-        id: input.id || crypto.randomUUID(),
+        id: userId,
         name: input.name,
         email: input.email,
-        role: input.role,
+        roleId: input.roleId,
         avatar: input.avatar,
-        jobTitle: input.jobTitle,
+        jobTitleId: input.jobTitleId,
+        experienceLevelId: input.experienceLevelId,
         departmentId: input.departmentId,
         reportsTo: input.reportsTo,
       })
       .returning()
 
+    if (input.skills && input.skills.length > 0) {
+      // Find or create skills
+      for (const skillName of input.skills) {
+        let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
+        if (!skill) {
+          ;[skill] = await db
+            .insert(skills)
+            .values({ id: crypto.randomUUID(), name: skillName })
+            .returning()
+        }
+        await db.insert(userSkills).values({ userId: newItem.id, skillId: skill.id })
+      }
+    }
+
     return {
       ...newItem,
-      createdAt:
-        newItem.createdAt instanceof Date
-          ? newItem.createdAt.toISOString()
-          : new Date().toISOString(),
+      createdAt: newItem.createdAt.toISOString(),
+      updatedAt: newItem.updatedAt.toISOString(),
     }
   })
 
@@ -236,20 +274,6 @@ export const updateUserFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const { id, data: updateData } = data
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        id,
-        name: updateData.name || 'User 1',
-        email: updateData.email || 'user1@example.com',
-        role: updateData.role || 'user',
-        avatar: updateData.avatar || null,
-        jobTitle: updateData.jobTitle || null,
-        departmentId: updateData.departmentId || null,
-        reportsTo: updateData.reportsTo || null,
-        createdAt: new Date().toISOString(),
-      }
-    }
-
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
 
@@ -258,11 +282,13 @@ export const updateUserFn = createServerFn({ method: 'POST' })
       .set({
         name: updateData.name,
         email: updateData.email,
-        role: updateData.role,
+        roleId: updateData.roleId,
         avatar: updateData.avatar,
-        jobTitle: updateData.jobTitle,
+        jobTitleId: updateData.jobTitleId,
+        experienceLevelId: updateData.experienceLevelId,
         departmentId: updateData.departmentId,
         reportsTo: updateData.reportsTo,
+        updatedAt: new Date(),
       })
       .where(eq(users.id, id))
       .returning()
@@ -271,60 +297,54 @@ export const updateUserFn = createServerFn({ method: 'POST' })
       throw new Error('User not found for update')
     }
 
+    if (updateData.skills) {
+      // Sync skills
+      await db.delete(userSkills).where(eq(userSkills.userId, id))
+      for (const skillName of updateData.skills) {
+        let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
+        if (!skill) {
+          ;[skill] = await db
+            .insert(skills)
+            .values({ id: crypto.randomUUID(), name: skillName })
+            .returning()
+        }
+        await db.insert(userSkills).values({ userId: id, skillId: skill.id })
+      }
+    }
+
     return {
       ...updatedItem,
-      createdAt:
-        updatedItem.createdAt instanceof Date
-          ? updatedItem.createdAt.toISOString()
-          : new Date().toISOString(),
+      createdAt: updatedItem.createdAt.toISOString(),
+      updatedAt: updatedItem.updatedAt.toISOString(),
     }
   })
 
 export const deleteUserFn = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
   .handler(async ({ data: id }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return { success: true }
-    }
-
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
-    await db.delete(users).where(eq(users.id, id as string))
+    await db.delete(users).where(eq(users.id, id))
     return { success: true }
   })
 
 export const upsertUserFn = createServerFn({ method: 'POST' })
   .inputValidator(userSchema.extend({ id: z.string() }))
   .handler(async ({ data: input }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        id: input.id,
-        name: input.name,
-        email: input.email,
-        role: (input.role as 'admin' | 'user') || 'user',
-        avatar: input.avatar || null,
-        jobTitle: input.jobTitle || null,
-        departmentId: input.departmentId || null,
-        reportsTo: input.reportsTo || null,
-        createdAt: new Date().toISOString(),
-      }
-    }
-
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
 
     try {
-      const { syncRagDocument } = await import('@/shared/lib/rag/sync')
-
       const [upserted] = await db
         .insert(users)
         .values({
           id: input.id,
           name: input.name,
           email: input.email,
-          role: (input.role as 'admin' | 'user') || 'user',
+          roleId: input.roleId,
           avatar: input.avatar,
-          jobTitle: input.jobTitle,
+          jobTitleId: input.jobTitleId,
+          experienceLevelId: input.experienceLevelId,
           departmentId: input.departmentId,
           reportsTo: input.reportsTo,
         })
@@ -334,10 +354,13 @@ export const upsertUserFn = createServerFn({ method: 'POST' })
             name: input.name,
             email: input.email,
             avatar: input.avatar,
-            jobTitle: input.jobTitle,
+            roleId: input.roleId,
+            jobTitleId: input.jobTitleId,
+            experienceLevelId: input.experienceLevelId,
             departmentId: input.departmentId,
             reportsTo: input.reportsTo,
-            // role is intentionally omitted to preserve existing role
+            salary: input.salary,
+            updatedAt: new Date(),
           },
         })
         .returning()
@@ -346,18 +369,25 @@ export const upsertUserFn = createServerFn({ method: 'POST' })
         throw new Error('No user returned from upsert')
       }
 
-      // Sync to RAG
-      const doc = `User: ${upserted.name}. Email: ${upserted.email}. Role: ${upserted.role}. Job: ${upserted.jobTitle || 'N/A'}. Dept: ${upserted.departmentId || 'N/A'}`
-      await syncRagDocument('user', upserted.id, doc)
-
-      const createdAt =
-        upserted.createdAt instanceof Date
-          ? upserted.createdAt.toISOString()
-          : new Date().toISOString()
+      if (input.skills) {
+        // Sync skills
+        await db.delete(userSkills).where(eq(userSkills.userId, upserted.id))
+        for (const skillName of input.skills) {
+          let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
+          if (!skill) {
+            ;[skill] = await db
+              .insert(skills)
+              .values({ id: crypto.randomUUID(), name: skillName })
+              .returning()
+          }
+          await db.insert(userSkills).values({ userId: upserted.id, skillId: skill.id })
+        }
+      }
 
       return {
         ...upserted,
-        createdAt,
+        createdAt: upserted.createdAt.toISOString(),
+        updatedAt: upserted.updatedAt.toISOString(),
       }
     } catch (error) {
       console.error('Error in upsertUserFn:', error)

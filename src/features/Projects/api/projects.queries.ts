@@ -18,6 +18,7 @@ import {
   type ProjectMember,
   type ProjectListResponse,
 } from './projects.fn'
+import { getSkillsFn } from '@/features/Users/api/master-data.fn'
 
 export const projectsKeys = {
   all: ['projects'] as const,
@@ -26,6 +27,11 @@ export const projectsKeys = {
   departments: () => [...projectsKeys.all, 'departments'] as const,
   detail: (id: string) => [...projectsKeys.all, 'detail', id] as const,
   members: (projectId: string) => [...projectsKeys.all, 'members', projectId] as const,
+  skills: () => [...projectsKeys.all, 'skills'] as const,
+}
+
+export function useSkills() {
+  return useTQuery(projectsKeys.skills(), () => getSkillsFn())
 }
 
 export function useInfiniteProjects(limit = 10, search?: string) {
