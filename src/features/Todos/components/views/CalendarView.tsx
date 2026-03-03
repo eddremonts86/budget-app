@@ -8,12 +8,14 @@ import { CalendarContent, type CalendarMode } from './CalendarContent'
 interface CalendarViewProps {
   onEdit: (todo: Todo) => void
   onCreateWithDate?: (date: Date) => void
+  assignedTo?: string
 }
 
-export function CalendarView({ onEdit, onCreateWithDate }: CalendarViewProps) {
+export function CalendarView({ onEdit, onCreateWithDate, assignedTo }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = React.useState(new Date())
   const [mode, setMode] = React.useState<CalendarMode>('month')
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteTodos(100)
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
+    useInfiniteTodos(100, undefined, assignedTo)
 
   // Load more automatically to fill calendar
   React.useEffect(() => {

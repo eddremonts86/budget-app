@@ -3,6 +3,7 @@ import { Plus, Pin, PinOff, X } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { Label } from '@/components/ui/label'
 import {
   Sheet,
   SheetContent,
@@ -11,6 +12,7 @@ import {
   SheetTitle,
   SheetClose,
 } from '@/components/ui/sheet'
+import { Switch } from '@/components/ui/switch'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { cn } from '@/shared/utils/index'
 import { useCreateTodo, useUpdateTodo, useInfiniteTodos } from '../api/todos.queries'
@@ -24,7 +26,8 @@ import { ViewSwitcher, type TodoViewType } from './ViewSwitcher'
 export function TodosPage() {
   const { t } = useTranslation()
   const { syncedUserId } = useCurrentUser()
-  const { data } = useInfiniteTodos(1)
+  const [onlyMyTasks, setOnlyMyTasks] = React.useState(false)
+  const { data } = useInfiniteTodos(1, undefined, onlyMyTasks ? syncedUserId || '' : undefined)
   const totalCount = data?.pages[0]?.totalCount ?? 0
 
   const [view, setView] = React.useState<TodoViewType>(() => {
@@ -83,6 +86,17 @@ export function TodosPage() {
             </p>
           </div>
           <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 mr-2">
+              <Switch
+                id="my-tasks"
+                checked={onlyMyTasks}
+                onCheckedChange={setOnlyMyTasks}
+                className="data-[state=checked]:bg-primary"
+              />
+              <Label htmlFor="my-tasks" className="text-sm font-medium cursor-pointer">
+                {t('todos.filters.onlyMyTasks', 'Only my tasks')}
+              </Label>
+            </div>
             <ViewSwitcher view={view} onViewChange={handleViewChange} />
             <Button onClick={() => handleCreate()} className="gap-2">
               <Plus className="h-4 w-4" />
@@ -101,11 +115,22 @@ export function TodosPage() {
               transition={{ duration: 0.2 }}
               className="h-full"
             >
-              {view === 'list' && <ListView onEdit={setEditingTodo} />}
-              {view === 'kanban' && <KanbanView onEdit={setEditingTodo} />}
+              {view === 'list' && (
+                <ListView
+                  onEdit={setEditingTodo}
+                  assignedTo={onlyMyTasks ? syncedUserId || '' : undefined}
+                />
+              )}
+              {view === 'kanban' && (
+                <KanbanView
+                  onEdit={setEditingTodo}
+                  assignedTo={onlyMyTasks ? syncedUserId || '' : undefined}
+                />
+              )}
               {view === 'calendar' && (
                 <CalendarView
                   onEdit={setEditingTodo}
+                  assignedTo={onlyMyTasks ? syncedUserId || '' : undefined}
                   onCreateWithDate={(date) =>
                     handleCreate({ dueDate: date.toISOString().split('T')[0] })
                   }

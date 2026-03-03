@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, desc, count } from 'drizzle-orm'
+import { eq, desc, count, and } from 'drizzle-orm'
 import { z } from 'zod'
 import { getDb } from '@/shared/lib/db'
 import { todos } from '@/shared/lib/db/schema'
@@ -34,6 +34,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
       status: z
         .enum(['pending', 'in_progress', 'completed', 'on_hold', 'testing', 'blocked', 'cancelled'])
         .optional(),
+      assignedTo: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -41,11 +42,18 @@ export const getTodosFn = createServerFn({ method: 'GET' })
 
     try {
       const db = getDb()
-      const { pageParam, limit, status } = data
+      const { pageParam, limit, status, assignedTo } = data
       const page = pageParam
       const offset = (page - 1) * limit
 
-      const whereClause = status ? eq(todos.status, status) : undefined
+      let whereClause = undefined
+      if (status && assignedTo) {
+        whereClause = and(eq(todos.status, status), eq(todos.assignedTo, assignedTo))
+      } else if (status) {
+        whereClause = eq(todos.status, status)
+      } else if (assignedTo) {
+        whereClause = eq(todos.assignedTo, assignedTo)
+      }
 
       const [items, totalResult] = await Promise.all([
         db
@@ -95,6 +103,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
           dueDate: item.dueDate ? item.dueDate.toISOString() : '',
           createdAt: item.createdAt.toISOString(),
           updatedAt: item.updatedAt.toISOString(),
+          completedAt: item.completedAt ? item.completedAt.toISOString() : null,
         })),
         nextPage,
         totalCount: total,

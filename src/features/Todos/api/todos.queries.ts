@@ -27,10 +27,10 @@ export type TodoStatus =
   | 'blocked'
   | 'cancelled'
 
-export const useInfiniteTodos = (limit = 10, status?: TodoStatus) => {
+export const useInfiniteTodos = (limit = 10, status?: TodoStatus, assignedTo?: string) => {
   return useTQInfinite(
-    [...todoKeys.infinite(), { limit, status }],
-    ({ pageParam }) => getTodosFn({ data: { pageParam, limit, status } }),
+    [...todoKeys.infinite(), { limit, status, assignedTo }],
+    ({ pageParam }) => getTodosFn({ data: { pageParam, limit, status, assignedTo } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage?.nextPage,
@@ -38,10 +38,20 @@ export const useInfiniteTodos = (limit = 10, status?: TodoStatus) => {
   )
 }
 
-export const useTodos = (params?: { page?: number; limit?: number; status?: TodoStatus }) => {
+export const useTodos = (params?: {
+  page?: number
+  limit?: number
+  status?: TodoStatus
+  assignedTo?: string
+}) => {
   return useTQuery([...todoKeys.lists(), params], () =>
     getTodosFn({
-      data: { pageParam: params?.page, limit: params?.limit, status: params?.status },
+      data: {
+        pageParam: params?.page,
+        limit: params?.limit,
+        status: params?.status,
+        assignedTo: params?.assignedTo,
+      },
     }),
   )
 }

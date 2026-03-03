@@ -16,20 +16,21 @@ import { KanbanBoard } from './KanbanBoard'
 
 interface KanbanViewProps {
   onEdit: (todo: Todo) => void
+  assignedTo?: string
 }
 
-export function KanbanView({ onEdit }: KanbanViewProps) {
+export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
   const queryClient = useQueryClient()
   const { data: users } = useUsers()
   const { syncedUserId, userRole } = useCurrentUser()
   const updateMutation = useUpdateTodo({ invalidateKeys: [todoKeys.all] })
   const deleteMutation = useDeleteTodo()
 
-  const pendingQuery = useInfiniteTodos(10, 'pending')
-  const inProgressQuery = useInfiniteTodos(10, 'in_progress')
-  const testingQuery = useInfiniteTodos(10, 'testing')
-  const onHoldQuery = useInfiniteTodos(10, 'on_hold')
-  const completedQuery = useInfiniteTodos(10, 'completed')
+  const pendingQuery = useInfiniteTodos(10, 'pending', assignedTo)
+  const inProgressQuery = useInfiniteTodos(10, 'in_progress', assignedTo)
+  const testingQuery = useInfiniteTodos(10, 'testing', assignedTo)
+  const onHoldQuery = useInfiniteTodos(10, 'on_hold', assignedTo)
+  const completedQuery = useInfiniteTodos(10, 'completed', assignedTo)
 
   const [activeTodo, setActiveTodo] = React.useState<Todo | null>(null)
 

@@ -39,9 +39,10 @@ import type { Todo } from '../../model/types'
 
 interface ListViewProps {
   onEdit: (todo: Todo) => void
+  assignedTo?: string
 }
 
-export function ListView({ onEdit }: ListViewProps) {
+export function ListView({ onEdit, assignedTo }: ListViewProps) {
   const { t } = useTranslation()
   const { syncedUserId, userRole } = useCurrentUser()
   const { data: users } = useUsers()
@@ -58,7 +59,7 @@ export function ListView({ onEdit }: ListViewProps) {
   }, [users])
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteTodos(10)
+    useInfiniteTodos(10, undefined, assignedTo)
 
   const { ref, inView } = useInView()
 
