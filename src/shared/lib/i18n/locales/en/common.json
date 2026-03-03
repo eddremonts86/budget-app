@@ -527,7 +527,25 @@
       "acceptanceCriteriaLabel": "Acceptance Criteria",
       "acceptanceCriteriaPlaceholder": "Ex: Feature must be accessible...",
       "dependenciesLabel": "Dependencies",
-      "dependenciesPlaceholder": "Select tasks..."
+      "dependenciesPlaceholder": "Select tasks...",
+      "sections": {
+        "general": {
+          "title": "General Information",
+          "description": "Define the basic aspects of the task so everyone understands what it's about."
+        },
+        "planning": {
+          "title": "Planning & Timing",
+          "description": "Set deadlines and estimate the effort required to complete the work."
+        },
+        "assignment": {
+          "title": "Assignment & Context",
+          "description": "Place the task within a project and assign it to the responsible person."
+        },
+        "tracking": {
+          "title": "Tracking & Relations",
+          "description": "Manage the current status and link this task with other dependencies."
+        }
+      }
     },
     "status": {
       "pending": "Pending",
@@ -585,6 +603,7 @@
       "emailPlaceholder": "User email",
       "roleLabel": "Role",
       "rolePlaceholder": "Select role",
+      "roleHelp": "The role defines the user's permissions.",
       "roleUser": "User",
       "roleAdmin": "Admin",
       "avatarLabel": "Avatar URL",
@@ -596,7 +615,22 @@
       "departmentLabel": "Department",
       "departmentPlaceholder": "Select department",
       "reportsToLabel": "Reports To",
-      "reportsToPlaceholder": "Select manager"
+      "reportsToPlaceholder": "Select manager",
+      "reportsToHelp": "The person this user reports to directly.",
+      "sections": {
+        "account": {
+          "title": "Account Information",
+          "description": "Manage basic user data and identity on the platform."
+        },
+        "professional": {
+          "title": "Professional Details",
+          "description": "Define the user's role and job title within the organization."
+        },
+        "organization": {
+          "title": "Organizational Structure",
+          "description": "Place the user in a department and define their reporting line."
+        }
+      }
     },
     "table": {
       "user": "User",

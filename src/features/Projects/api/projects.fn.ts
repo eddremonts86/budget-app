@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq, and, inArray, count } from 'drizzle-orm'
+import { desc, eq, and, inArray, count, like } from 'drizzle-orm'
 import { z } from 'zod'
 import { projects, departments, projectMembers, users } from '@/shared/lib/db/schema'
 
@@ -67,14 +67,19 @@ export interface ProjectListResponse {
   totalCount: number
 }
 
-export const getProjectsFn = createServerFn({ method: 'GET' }).handler(
-  async ({
-    data,
-  }: {
-    data?: { pageParam?: number; limit?: number }
-  }): Promise<ProjectListResponse> => {
+export const getProjectsFn = createServerFn({ method: 'GET' })
+  .inputValidator(
+    z
+      .object({
+        pageParam: z.number().optional(),
+        limit: z.number().optional(),
+        search: z.string().optional(),
+      })
+      .optional(),
+  )
+  .handler(async ({ data }): Promise<ProjectListResponse> => {
     try {
-      const { pageParam, limit: limitParam } = data || {}
+      const { pageParam, limit: limitParam, search } = data || {}
       const page = pageParam || 1
       const limit = limitParam || 100
       const offset = (page - 1) * limit
@@ -82,9 +87,17 @@ export const getProjectsFn = createServerFn({ method: 'GET' }).handler(
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
 
+      const whereClause = search ? like(projects.name, `%${search}%`) : undefined
+
       const [items, totalResult] = await Promise.all([
-        db.select().from(projects).limit(limit).offset(offset).orderBy(desc(projects.createdAt)),
-        db.select({ count: count() }).from(projects),
+        db
+          .select()
+          .from(projects)
+          .where(whereClause)
+          .limit(limit)
+          .offset(offset)
+          .orderBy(desc(projects.createdAt)),
+        db.select({ count: count() }).from(projects).where(whereClause),
       ])
 
       const total = totalResult[0]?.count ?? 0
@@ -154,8 +167,7 @@ export const getProjectsFn = createServerFn({ method: 'GET' }).handler(
       console.error('getProjectsFn ERROR:', error)
       throw error
     }
-  },
-)
+  })
 
 export const getProjectByIdFn = createServerFn({ method: 'GET' }).handler(
   async ({ data: id }: { data: unknown }): Promise<Project | null> => {

@@ -9,6 +9,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from '@tanstack/react-table'
+import { useDebounce } from '@uidotdev/usehooks'
 import { motion, AnimatePresence } from 'framer-motion'
 import { ChevronDown, Search, SlidersHorizontal } from 'lucide-react'
 import * as React from 'react'
@@ -52,7 +53,6 @@ export function DataTable<TData, TValue>({
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
-
   const table = useReactTable({
     data,
     columns,
@@ -72,6 +72,17 @@ export function DataTable<TData, TValue>({
     },
   })
 
+  const [searchValue, setSearchValue] = React.useState(
+    (filterColumn ? (table.getColumn(filterColumn)?.getFilterValue() as string) : '') ?? '',
+  )
+  const debouncedSearchValue = useDebounce(searchValue, 300)
+
+  React.useEffect(() => {
+    if (filterColumn) {
+      table.getColumn(filterColumn)?.setFilterValue(debouncedSearchValue)
+    }
+  }, [debouncedSearchValue, filterColumn, table])
+
   return (
     <FieldGroup className={cn('w-full space-y-6', fullHeight && 'h-full flex flex-col')}>
       <Field className="flex flex-col md:flex-row items-center justify-between gap-4 shrink-0">
@@ -80,10 +91,8 @@ export function DataTable<TData, TValue>({
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
             <Input
               placeholder={`Buscar por ${filterColumn}...`}
-              value={(table.getColumn(filterColumn)?.getFilterValue() as string) ?? ''}
-              onChange={(event) =>
-                table.getColumn(filterColumn)?.setFilterValue(event.target.value)
-              }
+              value={searchValue}
+              onChange={(event) => setSearchValue(event.target.value)}
               className="pl-10 h-11 bg-secondary/20 border-transparent focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all"
             />
           </div>

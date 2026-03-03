@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq, count } from 'drizzle-orm'
+import { desc, eq, count, like, or } from 'drizzle-orm'
 import { z } from 'zod'
 // import { db } from '@/shared/lib/db'
 import { users, departments } from '@/shared/lib/db/schema'
@@ -17,16 +17,36 @@ export const userSchema = z.object({
 
 export type UserInput = z.infer<typeof userSchema>
 
+export interface User {
+  id: string
+  name: string
+  email: string
+  role: 'admin' | 'user'
+  avatar: string | null
+  jobTitle: string | null
+  departmentId: string | null
+  departmentName: string | null
+  reportsTo: string | null
+  createdAt: string
+}
+
+export interface UserListResponse {
+  data: User[]
+  nextPage?: number
+  totalCount: number
+}
+
 export const getUsersFn = createServerFn({ method: 'GET' })
   .inputValidator(
     z
       .object({
         pageParam: z.number().optional(),
         limit: z.number().optional(),
+        search: z.string().optional(),
       })
       .optional(),
   )
-  .handler(async ({ data }) => {
+  .handler(async ({ data }): Promise<UserListResponse> => {
     if (process.env.VITE_E2E === 'true') {
       return {
         data: Array.from({ length: 5 }).map((_, i) => ({
@@ -38,6 +58,7 @@ export const getUsersFn = createServerFn({ method: 'GET' })
           jobTitle: 'Developer',
           departmentId: '1',
           departmentName: 'Engineering',
+          reportsTo: null,
           createdAt: new Date().toISOString(),
         })),
         nextPage: undefined,
@@ -49,10 +70,14 @@ export const getUsersFn = createServerFn({ method: 'GET' })
       console.log('getUsersFn: Starting...')
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const { pageParam, limit: limitParam } = data || {}
+      const { pageParam, limit: limitParam, search } = data || {}
       const page = pageParam || 1
       const limit = limitParam || 10
       const offset = (page - 1) * limit
+
+      const whereClause = search
+        ? or(like(users.name, `%${search}%`), like(users.email, `%${search}%`))
+        : undefined
 
       const [items, totalResult] = await Promise.all([
         db
@@ -70,10 +95,11 @@ export const getUsersFn = createServerFn({ method: 'GET' })
           })
           .from(users)
           .leftJoin(departments, eq(users.departmentId, departments.id))
+          .where(whereClause)
           .limit(limit)
           .offset(offset)
           .orderBy(desc(users.createdAt)),
-        db.select({ count: count() }).from(users),
+        db.select({ count: count() }).from(users).where(whereClause),
       ])
 
       const total = totalResult[0]?.count ?? 0

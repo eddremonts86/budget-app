@@ -17,10 +17,10 @@ export const userKeys = {
   detail: (id: string) => [...userKeys.details(), id] as const,
 }
 
-export const useInfiniteUsers = (limit = 10) => {
+export const useInfiniteUsers = (limit = 10, search?: string) => {
   return useTQInfinite(
-    [...userKeys.infinite(), { limit }],
-    ({ pageParam }) => getUsersFn({ data: { pageParam, limit } }),
+    [...userKeys.infinite(), { limit, search }],
+    ({ pageParam }) => getUsersFn({ data: { pageParam, limit, search } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,

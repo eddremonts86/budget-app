@@ -28,10 +28,10 @@ export const projectsKeys = {
   members: (projectId: string) => [...projectsKeys.all, 'members', projectId] as const,
 }
 
-export function useInfiniteProjects(limit = 10) {
+export function useInfiniteProjects(limit = 10, search?: string) {
   return useTQInfinite<ProjectListResponse, Error, InfiniteData<ProjectListResponse>, number>(
-    [...projectsKeys.infinite(), { limit }],
-    ({ pageParam }) => getProjectsFn({ data: { pageParam, limit } }),
+    [...projectsKeys.infinite(), { limit, search }],
+    ({ pageParam }) => getProjectsFn({ data: { pageParam, limit, search } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage: ProjectListResponse) => lastPage.nextPage,

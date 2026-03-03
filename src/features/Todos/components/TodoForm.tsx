@@ -45,8 +45,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { useProjectMembers, useProjects } from '@/features/Projects/api/projects.queries'
-import { useUsers } from '@/features/Users/api/users.queries'
+import type { Project } from '@/features/Projects/api/projects.fn'
+import { useProjectMembers, useInfiniteProjects } from '@/features/Projects/api/projects.queries'
+import type { User } from '@/features/Users/api/users.fn'
+import { useInfiniteUsers } from '@/features/Users/api/users.queries'
 import { cn } from '@/shared/lib/utils'
 import type { Todo } from '../model/types'
 
@@ -95,8 +97,28 @@ export function TodoForm({
 }: TodoFormProps) {
   const { t, i18n } = useTranslation()
   const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
-  const { data: users } = useUsers()
-  const { data: projects } = useProjects()
+  const {
+    data: infiniteProjects,
+    fetchNextPage: fetchNextProjects,
+    hasNextPage: hasNextProjects,
+    isFetchingNextPage: isFetchingNextProjects,
+  } = useInfiniteProjects(50)
+
+  const {
+    data: infiniteUsers,
+    fetchNextPage: fetchNextUsers,
+    hasNextPage: hasNextUsers,
+    isFetchingNextPage: isFetchingNextUsers,
+  } = useInfiniteUsers(50)
+
+  const projects = React.useMemo(
+    () => (infiniteProjects?.pages.flatMap((page) => page.data) as Project[]) ?? [],
+    [infiniteProjects],
+  )
+  const users = React.useMemo(
+    () => (infiniteUsers?.pages.flatMap((page) => page.data) as User[]) ?? [],
+    [infiniteUsers],
+  )
 
   const locale = React.useMemo(() => {
     const language = i18n.language?.toLowerCase() ?? 'en'
@@ -173,7 +195,7 @@ export function TodoForm({
       className="flex flex-col gap-8 min-h-full"
     >
       <div className="flex-1 space-y-8 pb-32">
-        <FieldGroup>
+        <FieldGroup className="bg-secondary/30 rounded-xl p-6">
           {/* 1. Title */}
           <form.Field
             name="title"
@@ -395,52 +417,52 @@ export function TodoForm({
             )}
           />
 
-          {/* 5. Assigned To, Project */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <form.Field
-              name="assignedTo"
+              name="projectId"
               children={(field) => (
                 <motion.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
-                      <UserCircle className="w-3.5 h-3.5" /> {t('todos.form.assignedToLabel')}
+                      <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
                     </FieldLabel>
                     <Select
                       value={field.state.value}
-                      onValueChange={(value) => field.handleChange(value)}
+                      onValueChange={(value) => {
+                        field.handleChange(value)
+                        form.setFieldValue('assignedTo', '')
+                      }}
                     >
                       <SelectTrigger className="h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4">
-                        <SelectValue placeholder={t('todos.form.assignedToPlaceholder')} />
+                        <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
                       </SelectTrigger>
-                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl">
-                        {isLoadingMembers ? (
-                          <div className="p-4 text-center text-sm text-muted-foreground">
-                            {t('common.loading')}
-                          </div>
-                        ) : filteredUsers.length === 0 ? (
-                          <div className="p-4 text-center text-sm text-muted-foreground">
-                            {selectedProjectId
-                              ? t('projects.members.empty')
-                              : t('todos.form.selectProjectFirst', 'Select a project first')}
-                          </div>
-                        ) : (
-                          filteredUsers.map((user) => (
-                            <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
-                              <div className="flex items-center gap-2">
-                                <Avatar className="h-5 w-5">
-                                  <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                                  <AvatarFallback className="text-[10px]">
-                                    {user.name.substring(0, 2).toUpperCase()}
-                                  </AvatarFallback>
-                                </Avatar>
-                                <span>
-                                  {user.id === currentUserId
-                                    ? `${user.name} (${t('todos.form.assignedToSelf')})`
-                                    : user.name}
-                                </span>
-                              </div>
-                            </SelectItem>
-                          ))
+                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl max-h-[300px] overflow-y-auto">
+                        {selectableProjects?.map((project) => (
+                          <SelectItem
+                            key={project.id}
+                            value={project.id}
+                            className="rounded-lg m-1"
+                          >
+                            {project.name}
+                          </SelectItem>
+                        ))}
+                        {hasNextProjects && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="w-full text-xs"
+                            onClick={(e) => {
+                              e.preventDefault()
+                              e.stopPropagation()
+                              fetchNextProjects()
+                            }}
+                            disabled={isFetchingNextProjects}
+                          >
+                            {isFetchingNextProjects ? (
+                              <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                            ) : null}
+                            {t('common.loadMore', 'Load More')}
+                          </Button>
                         )}
                       </SelectContent>
                     </Select>
@@ -458,30 +480,70 @@ export function TodoForm({
             />
 
             <form.Field
-              name="projectId"
+              name="assignedTo"
               children={(field) => (
                 <motion.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
-                      <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
+                      <UserCircle className="w-3.5 h-3.5" /> {t('todos.form.assignedToLabel')}
                     </FieldLabel>
                     <Select
                       value={field.state.value}
                       onValueChange={(value) => field.handleChange(value)}
                     >
                       <SelectTrigger className="h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4">
-                        <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
+                        <SelectValue placeholder={t('todos.form.assignedToPlaceholder')} />
                       </SelectTrigger>
-                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl">
-                        {selectableProjects?.map((project) => (
-                          <SelectItem
-                            key={project.id}
-                            value={project.id}
-                            className="rounded-lg m-1"
-                          >
-                            {project.name}
-                          </SelectItem>
-                        ))}
+                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl max-h-[300px] overflow-y-auto">
+                        {isLoadingMembers ? (
+                          <div className="p-4 text-center text-sm text-muted-foreground">
+                            {t('common.loading')}
+                          </div>
+                        ) : filteredUsers.length === 0 ? (
+                          <div className="p-4 text-center text-sm text-muted-foreground">
+                            {selectedProjectId
+                              ? t('projects.members.empty')
+                              : t('todos.form.selectProjectFirst', 'Select a project first')}
+                          </div>
+                        ) : (
+                          <>
+                            {filteredUsers.map((user) => (
+                              <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
+                                <div className="flex items-center gap-2">
+                                  <Avatar className="h-5 w-5">
+                                    <AvatarImage src={user.avatar || undefined} alt={user.name} />
+                                    <AvatarFallback className="text-[10px]">
+                                      {user.name.substring(0, 2).toUpperCase()}
+                                    </AvatarFallback>
+                                  </Avatar>
+                                  <span>
+                                    {user.id === currentUserId
+                                      ? `${user.name} (${t('todos.form.assignedToSelf')})`
+                                      : user.name}
+                                  </span>
+                                </div>
+                              </SelectItem>
+                            ))}
+                            {hasNextUsers && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="w-full text-xs"
+                                onClick={(e) => {
+                                  e.preventDefault()
+                                  e.stopPropagation()
+                                  fetchNextUsers()
+                                }}
+                                disabled={isFetchingNextUsers}
+                              >
+                                {isFetchingNextUsers ? (
+                                  <Loader2 className="h-3 w-3 animate-spin mr-2" />
+                                ) : null}
+                                {t('common.loadMore', 'Load More')}
+                              </Button>
+                            )}
+                          </>
+                        )}
                       </SelectContent>
                     </Select>
                     <FieldError
@@ -787,7 +849,7 @@ export function TodoForm({
 
       <motion.div
         variants={itemVariants}
-        className="pt-6 border-t border-border/50 mt-auto sticky bottom-0 bg-background pb-4 z-10"
+        className="pt-6 border-t border-border/50 mt-auto sticky bottom-0 bg-secondary/30 backdrop-blur-md pb-4 z-10"
       >
         <Field className="flex items-center justify-end gap-3">
           <Button

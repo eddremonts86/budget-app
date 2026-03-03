@@ -179,15 +179,32 @@
       "emailLabel": "Correo electrónico",
       "emailPlaceholder": "correo@ejemplo.com",
       "roleLabel": "Rol",
+      "roleHelp": "El rol define los permisos del usuario.",
       "avatarLabel": "Avatar URL",
       "avatarPlaceholder": "https://...",
+      "avatarHelp": "Pega una URL o genera un avatar aleatorio.",
       "generateAvatar": "Generar avatar",
       "jobTitleLabel": "Cargo",
       "jobTitlePlaceholder": "ej. Desarrollador Senior",
       "departmentLabel": "Departamento",
       "departmentPlaceholder": "Seleccionar departamento",
       "reportsToLabel": "Reporta a",
-      "reportsToPlaceholder": "Seleccionar responsable"
+      "reportsToPlaceholder": "Seleccionar responsable",
+      "reportsToHelp": "Persona a la que este usuario reporta directamente.",
+      "sections": {
+        "account": {
+          "title": "Información de la Cuenta",
+          "description": "Gestiona los datos básicos y la identidad del usuario en la plataforma."
+        },
+        "professional": {
+          "title": "Detalles Profesionales",
+          "description": "Define el rol y cargo del usuario dentro de la organización."
+        },
+        "organization": {
+          "title": "Estructura Organizativa",
+          "description": "Ubica al usuario en un departamento y define su línea de reporte."
+        }
+      }
     },
     "table": {
       "user": "Usuario",
@@ -303,7 +320,25 @@
       "acceptanceCriteriaLabel": "Criterios de Aceptación",
       "acceptanceCriteriaPlaceholder": "Ej: La funcionalidad debe ser accesible...",
       "dependenciesLabel": "Dependencias",
-      "dependenciesPlaceholder": "Seleccionar tareas..."
+      "dependenciesPlaceholder": "Seleccionar tareas...",
+      "sections": {
+        "general": {
+          "title": "Información General",
+          "description": "Define los aspectos básicos de la tarea para que todos entiendan de qué se trata."
+        },
+        "planning": {
+          "title": "Planificación y Tiempos",
+          "description": "Establece plazos y estima el esfuerzo necesario para completar el trabajo."
+        },
+        "assignment": {
+          "title": "Asignación y Contexto",
+          "description": "Ubica la tarea dentro de un proyecto y asígnala a la persona responsable."
+        },
+        "tracking": {
+          "title": "Seguimiento y Relaciones",
+          "description": "Gestiona el estado actual y vincula esta tarea con otras dependencias."
+        }
+      }
     },
     "status": {
       "pending": "Pendiente",
