@@ -1,6 +1,7 @@
-import { pgTable, text, timestamp, integer, pgEnum } from 'drizzle-orm/pg-core'
+import { pgTable, text, timestamp, integer, pgEnum, type AnyPgColumn } from 'drizzle-orm/pg-core'
 
 export const userRoleEnum = pgEnum('user_role', ['admin', 'user'])
+
 export const todoStatusEnum = pgEnum('todo_status', [
   'pending',
   'in_progress',
@@ -8,7 +9,9 @@ export const todoStatusEnum = pgEnum('todo_status', [
   'blocked',
   'cancelled',
 ])
+
 export const todoPriorityEnum = pgEnum('todo_priority', ['low', 'medium', 'high'])
+
 export const projectStatusEnum = pgEnum('project_status', [
   'planning',
   'active',
@@ -16,12 +19,14 @@ export const projectStatusEnum = pgEnum('project_status', [
   'on_hold',
   'cancelled',
 ])
+
 export const projectTypeEnum = pgEnum('project_type', [
   'internal',
   'external',
   'research',
   'maintenance',
 ])
+
 export const transactionStatusEnum = pgEnum('transaction_status', [
   'Approved',
   'Pending',
@@ -41,11 +46,17 @@ export const users = pgTable('users', {
   email: text('email').notNull().unique(),
   role: userRoleEnum('role').default('user').notNull(),
   jobTitle: text('job_title'),
-  department: text('department'),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  departmentId: text('department_id').references((): AnyPgColumn => (departments as any).id, {
+    onDelete: 'set null',
+  }),
   hireDate: timestamp('hire_date'),
   experienceLevel: text('experience_level'),
   skills: text('skills').array(),
-  reportsTo: text('reports_to'), // Self-reference ID
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  reportsTo: text('reports_to').references((): AnyPgColumn => (users as any).id, {
+    onDelete: 'set null',
+  }), // Self-reference ID
   avatar: text('avatar'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 })
@@ -53,7 +64,8 @@ export const users = pgTable('users', {
 export const departments = pgTable('departments', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
-  managerId: text('manager_id').references(() => users.id),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  managerId: text('manager_id').references(() => (users as any).id, { onDelete: 'set null' }),
   budget: integer('budget').default(0),
   location: text('location'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
@@ -119,7 +131,7 @@ export const categories = pgTable('categories', {
   id: text('id').primaryKey(),
   name: text('name').notNull(),
   description: text('description'),
-  parentId: text('parent_id'), // Self-reference ID
+  parentId: text('parent_id').references((): AnyPgColumn => categories.id), // Self-reference ID
   sla: integer('sla'), // in hours
   color: text('color').notNull(),
 })

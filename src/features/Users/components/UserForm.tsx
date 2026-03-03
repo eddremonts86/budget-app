@@ -14,14 +14,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { useDepartments } from '@/features/Departments/api/departments.queries'
+import { useUsers } from '../api/users.queries'
 import type { User } from '../model/types'
 
 const createUserSchema = (t: (key: string) => string) =>
   z.object({
     name: z.string().min(1, t('validation.required')),
-    email: z.string().min(1, t('validation.required')).email(t('validation.invalidEmail')),
+    email: z.string().email(t('validation.invalidEmail')).min(1, t('validation.required')),
     role: z.enum(['admin', 'user']),
-    avatar: z.string().min(1, t('validation.required')).url(t('validation.invalidUrl')),
+    avatar: z.string().url(t('validation.invalidUrl')).min(1, t('validation.required')),
+    jobTitle: z.string().nullable(),
+    departmentId: z.string().nullable(),
+    reportsTo: z.string().nullable(),
   })
 
 export type UserFormValues = z.infer<ReturnType<typeof createUserSchema>>
@@ -38,12 +43,18 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
   const initialAvatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default'
   const userSchema = React.useMemo(() => createUserSchema(t), [t])
 
+  const { data: departments } = useDepartments()
+  const { data: users } = useUsers()
+
   const form = useForm({
     defaultValues: {
       name: defaultValues?.name ?? '',
       email: defaultValues?.email ?? '',
       role: (defaultValues?.role as UserFormValues['role']) ?? 'user',
       avatar: defaultValues?.avatar ?? initialAvatar,
+      jobTitle: defaultValues?.jobTitle ?? null,
+      departmentId: defaultValues?.departmentId ?? null,
+      reportsTo: defaultValues?.reportsTo ?? null,
     },
     validators: {
       onChange: userSchema,
@@ -62,87 +73,165 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
       }}
       className="space-y-4"
     >
-      <form.Field
-        name="name"
-        children={(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('users.form.nameLabel')}</FieldLabel>
-            <Input
-              id={field.name}
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                field.handleChange(e.target.value)
-              }
-              placeholder={t('users.form.namePlaceholder')}
-            />
-            <FieldError
-              errors={field.state.meta.errors.map((e) => {
-                if (typeof e === 'string') return e
-                if (e && typeof e === 'object' && 'message' in e)
-                  return String((e as { message: string }).message)
-                return String(e)
-              })}
-            />
-          </Field>
-        )}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form.Field
+          name="name"
+          children={(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('users.form.nameLabel')}</FieldLabel>
+              <Input
+                id={field.name}
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  field.handleChange(e.target.value)
+                }
+                placeholder={t('users.form.namePlaceholder')}
+              />
+              <FieldError
+                errors={field.state.meta.errors.map((e) => {
+                  if (typeof e === 'string') return e
+                  if (e && typeof e === 'object' && 'message' in e)
+                    return String((e as { message: string }).message)
+                  return String(e)
+                })}
+              />
+            </Field>
+          )}
+        />
 
-      <form.Field
-        name="email"
-        children={(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('users.form.emailLabel')}</FieldLabel>
-            <Input
-              id={field.name}
-              type="email"
-              value={field.state.value}
-              onBlur={field.handleBlur}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                field.handleChange(e.target.value)
-              }
-              placeholder={t('users.form.emailPlaceholder')}
-            />
-            <FieldError
-              errors={field.state.meta.errors.map((e) => {
-                if (typeof e === 'string') return e
-                if (e && typeof e === 'object' && 'message' in e)
-                  return String((e as { message: string }).message)
-                return String(e)
-              })}
-            />
-          </Field>
-        )}
-      />
+        <form.Field
+          name="email"
+          children={(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('users.form.emailLabel')}</FieldLabel>
+              <Input
+                id={field.name}
+                type="email"
+                value={field.state.value}
+                onBlur={field.handleBlur}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  field.handleChange(e.target.value)
+                }
+                placeholder={t('users.form.emailPlaceholder')}
+              />
+              <FieldError
+                errors={field.state.meta.errors.map((e) => {
+                  if (typeof e === 'string') return e
+                  if (e && typeof e === 'object' && 'message' in e)
+                    return String((e as { message: string }).message)
+                  return String(e)
+                })}
+              />
+            </Field>
+          )}
+        />
+      </div>
 
-      <form.Field
-        name="role"
-        children={(field) => (
-          <Field>
-            <FieldLabel htmlFor={field.name}>{t('users.form.roleLabel')}</FieldLabel>
-            <Select
-              value={field.state.value}
-              onValueChange={(value: string) => field.handleChange(value as UserFormValues['role'])}
-            >
-              <SelectTrigger id={field.name}>
-                <SelectValue placeholder={t('users.form.rolePlaceholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="user">{t('users.form.roleUser')}</SelectItem>
-                <SelectItem value="admin">{t('users.form.roleAdmin')}</SelectItem>
-              </SelectContent>
-            </Select>
-            <FieldError
-              errors={field.state.meta.errors.map((e) => {
-                if (typeof e === 'string') return e
-                if (e && typeof e === 'object' && 'message' in e)
-                  return String((e as { message: string }).message)
-                return String(e)
-              })}
-            />
-          </Field>
-        )}
-      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form.Field
+          name="role"
+          children={(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('users.form.roleLabel')}</FieldLabel>
+              <Select
+                value={field.state.value}
+                onValueChange={(value: string) =>
+                  field.handleChange(value as UserFormValues['role'])
+                }
+              >
+                <SelectTrigger id={field.name}>
+                  <SelectValue placeholder={t('users.form.rolePlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="user">{t('users.form.roleUser')}</SelectItem>
+                  <SelectItem value="admin">{t('users.form.roleAdmin')}</SelectItem>
+                </SelectContent>
+              </Select>
+              <FieldError
+                errors={field.state.meta.errors.map((e) => {
+                  if (typeof e === 'string') return e
+                  if (e && typeof e === 'object' && 'message' in e)
+                    return String((e as { message: string }).message)
+                  return String(e)
+                })}
+              />
+            </Field>
+          )}
+        />
+
+        <form.Field
+          name="jobTitle"
+          children={(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('users.form.jobTitleLabel')}</FieldLabel>
+              <Input
+                id={field.name}
+                value={field.state.value || ''}
+                onBlur={field.handleBlur}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                  field.handleChange(e.target.value === '' ? null : e.target.value)
+                }
+                placeholder={t('users.form.jobTitlePlaceholder')}
+              />
+            </Field>
+          )}
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <form.Field
+          name="departmentId"
+          children={(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('users.form.departmentLabel')}</FieldLabel>
+              <Select
+                value={field.state.value || ''}
+                onValueChange={(value: string) => field.handleChange(value === '' ? null : value)}
+              >
+                <SelectTrigger id={field.name}>
+                  <SelectValue placeholder={t('users.form.departmentPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">-</SelectItem>
+                  {departments?.map((dept) => (
+                    <SelectItem key={dept.id} value={dept.id}>
+                      {dept.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
+        />
+
+        <form.Field
+          name="reportsTo"
+          children={(field) => (
+            <Field>
+              <FieldLabel htmlFor={field.name}>{t('users.form.reportsToLabel')}</FieldLabel>
+              <Select
+                value={field.state.value || ''}
+                onValueChange={(value: string) => field.handleChange(value === '' ? null : value)}
+              >
+                <SelectTrigger id={field.name}>
+                  <SelectValue placeholder={t('users.form.reportsToPlaceholder')} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="">-</SelectItem>
+                  {users
+                    ?.filter((u: User) => u.id !== defaultValues?.id)
+                    ?.map((user: User) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </Field>
+          )}
+        />
+      </div>
 
       <form.Field
         name="avatar"
@@ -209,12 +298,25 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
         )}
       />
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
+      <div className="flex justify-end gap-3 pt-4 border-t border-border/40">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={onCancel}
+          disabled={isLoading}
+          className="rounded-xl px-6"
+        >
           {t('common.cancel')}
         </Button>
-        <Button type="submit" disabled={isLoading}>
-          {isLoading ? t('common.loading') : t('users.actions.save')}
+        <Button type="submit" disabled={isLoading} className="rounded-xl px-8 min-w-[120px]">
+          {isLoading ? (
+            <div className="flex items-center gap-2">
+              <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+              {t('common.saving')}
+            </div>
+          ) : (
+            t('common.save')
+          )}
         </Button>
       </div>
     </form>

@@ -1,6 +1,5 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
-import type { User } from '../model/types'
 import {
   type UserInput,
   createUserFn,

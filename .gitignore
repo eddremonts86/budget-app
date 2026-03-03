@@ -59,6 +59,9 @@ pnpm-debug.log*
 /mocks/db.json.backup
 todos.json
 count.txt
+/.docker_data/
+/chroma_data/
+/models/
 
 # Tools / Frameworks
 .tanstack

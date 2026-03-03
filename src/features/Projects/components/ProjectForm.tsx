@@ -367,9 +367,9 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                         </ComboboxChip>
                       )
                     })}
+                    <ComboboxChipsInput placeholder={t('projects.form.teamPlaceholder')} />
                   </ComboboxChips>
                   <ComboboxContent>
-                    <ComboboxChipsInput placeholder={t('projects.form.teamPlaceholder')} />
                     <ComboboxEmpty className="p-4 text-center">
                       <p className="text-sm text-muted-foreground mb-4">
                         {t('projects.form.teamEmpty')}

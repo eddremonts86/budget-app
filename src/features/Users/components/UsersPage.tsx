@@ -1,28 +1,13 @@
-import { type ColumnDef } from '@tanstack/react-table'
 import { motion } from 'framer-motion'
 import {
-  ChevronDown,
-  Mail,
-  MoreHorizontal,
   Pencil,
-  ShieldCheck,
   Trash2,
   UserPlus,
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Sheet,
   SheetContent,
@@ -31,13 +16,11 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { TableCell, TableRow } from '@/components/ui/table'
 import { toast } from '@/shared/lib/toast'
-import { cn } from '@/shared/lib/utils'
-import { DataTable } from '@/shared/ui/DataTable'
 import { useCreateUser, useDeleteUser, useInfiniteUsers, useUpdateUser } from '../api/users.queries'
 import type { User } from '../model/types'
 import { UserForm } from './UserForm'
+import { UserTable } from './UserTable'
 
 export function UsersPage() {
   const { t } = useTranslation()
@@ -59,104 +42,16 @@ export function UsersPage() {
   const updateMutation = useUpdateUser()
   const deleteMutation = useDeleteUser()
 
-  const columns: ColumnDef<User>[] = [
-    {
-      accessorKey: 'name',
-      header: t('users.table.user'),
-      cell: ({ row }) => {
-        const avatar = row.original.avatar
-        const name = row.original.name
-        const email = row.original.email
-        return (
-          <div className="flex items-center gap-4">
-            <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
-              <AvatarImage src={avatar} alt={name} />
-              <AvatarFallback className="bg-primary/5 text-primary font-bold">
-                {name.charAt(0)}
-              </AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col">
-              <span className="font-semibold text-foreground leading-none">{name}</span>
-              <span className="text-xs text-muted-foreground flex items-center gap-1 mt-1">
-                <Mail className="w-3 h-3" /> {email}
-              </span>
-            </div>
-          </div>
-        )
+  const handleDelete = (user: User) => {
+    toast.error(t('users.confirm.delete'), {
+      description: t('common.confirm'),
+      action: {
+        label: t('common.delete'),
+        onClick: () => deleteMutation.mutate(user.id),
       },
-    },
-    {
-      accessorKey: 'role',
-      header: t('users.table.role'),
-      cell: ({ row }) => {
-        const role = row.getValue('role') as string
-        const isAdmin = role === 'admin'
-        return (
-          <Badge
-            variant="outline"
-            className={cn(
-              'capitalize px-3 py-1 rounded-full border-none font-medium',
-              isAdmin ? 'bg-primary/10 text-primary' : 'bg-secondary text-secondary-foreground',
-            )}
-          >
-            <div className="flex items-center gap-1.5">
-              {isAdmin && <ShieldCheck className="w-3.5 h-3.5" />}
-              {role}
-            </div>
-          </Badge>
-        )
-      },
-    },
-    {
-      id: 'actions',
-      cell: ({ row }) => {
-        const user = row.original
-
-        return (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" className="h-9 w-9 p-0 rounded-full hover:bg-secondary/80">
-                <span className="sr-only">{t('common.openMenu')}</span>
-                <MoreHorizontal className="h-4 w-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-48 p-2 rounded-2xl shadow-2xl backdrop-blur-xl border-border/40"
-            >
-              <DropdownMenuLabel className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
-                {t('common.actions')}
-              </DropdownMenuLabel>
-              <DropdownMenuItem
-                onClick={() => setEditingUser(user)}
-                className="rounded-lg m-1 gap-2 cursor-pointer focus:bg-primary/5 focus:text-primary"
-              >
-                <Pencil className="h-4 w-4" />
-                {t('users.actions.editProfile')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator className="bg-border/40" />
-              <DropdownMenuItem
-                className="text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive"
-                onClick={() => {
-                  toast.error(t('users.confirm.delete'), {
-                    description: t('common.confirm'),
-                    action: {
-                      label: t('common.delete'),
-                      onClick: () => deleteMutation.mutate(user.id),
-                    },
-                    duration: 10000,
-                  })
-                }}
-              >
-                <Trash2 className="h-4 w-4" />
-                {t('users.actions.deleteAccount')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )
-      },
-    },
-  ]
+      duration: 10000,
+    })
+  }
 
   if (isError) {
     return (
@@ -214,34 +109,15 @@ export function UsersPage() {
         </div>
       ) : (
         <div className="relative group flex-1 min-h-0 flex flex-col">
-          <DataTable columns={columns} data={allUsers} filterColumn="name" fullHeight>
-            {hasNextPage && (
-              <TableRow className="hover:bg-transparent border-none">
-                <TableCell colSpan={columns.length} className="py-8">
-                  <div ref={ref} className="flex justify-center">
-                    <Button
-                      onClick={() => fetchNextPage()}
-                      disabled={isFetchingNextPage}
-                      variant="outline"
-                      className="h-12 px-10 rounded-2xl border-dashed border-border/60 hover:border-primary/30 hover:bg-primary/5 transition-all group"
-                    >
-                      {isFetchingNextPage ? (
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                          {t('users.loadingMore')}
-                        </div>
-                      ) : (
-                        <div className="flex items-center gap-2 font-semibold">
-                          {t('users.loadMore')}
-                          <ChevronDown className="w-4 h-4 group-hover:translate-y-0.5 transition-transform" />
-                        </div>
-                      )}
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            )}
-          </DataTable>
+          <UserTable
+            users={allUsers}
+            onEdit={setEditingUser}
+            onDelete={handleDelete}
+            hasNextPage={hasNextPage}
+            isFetchingNextPage={isFetchingNextPage}
+            onFetchNextPage={fetchNextPage}
+            scrollRef={ref}
+          />
         </div>
       )}
 
@@ -266,10 +142,7 @@ export function UsersPage() {
           <div className="p-6">
             <UserForm
               onSubmit={async (values) => {
-                await createMutation.mutateAsync({
-                  ...values,
-                  createdAt: new Date().toISOString(),
-                })
+                await createMutation.mutateAsync(values)
                 setIsCreateOpen(false)
               }}
               onCancel={() => setIsCreateOpen(false)}

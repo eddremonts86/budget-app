@@ -12,7 +12,7 @@ export const analyticsKeys = {
 
 export const kpisQueryOptions = queryOptions({
   queryKey: analyticsKeys.kpis(),
-  queryFn: () => getAnalyticsKPIsFn(),
+  queryFn: () => getAnalyticsKPIsFn({ data: undefined }),
 })
 
 export const revenueTrendQueryOptions = (days: number) => queryOptions({
@@ -27,10 +27,10 @@ export const taskCompletionTrendQueryOptions = (days: number) => queryOptions({
 
 export const projectPerformanceQueryOptions = queryOptions({
   queryKey: analyticsKeys.projectPerformance(),
-  queryFn: () => getProjectPerformanceFn(),
+  queryFn: () => getProjectPerformanceFn({ data: undefined }),
 })
 
 export const taskDistributionQueryOptions = queryOptions({
   queryKey: analyticsKeys.taskDistribution(),
-  queryFn: () => getTaskDistributionFn(),
+  queryFn: () => getTaskDistributionFn({ data: undefined }),
 })

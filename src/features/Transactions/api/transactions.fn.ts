@@ -1,9 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-// import { db } from '@/shared/lib/db'
+import { getDb } from '@/shared/lib/db'
 import { transactions } from '@/shared/lib/db/schema'
-// import type { Transaction } from '../model/types'
 
 export const transactionSchema = z.object({
   customerName: z.string().min(1),
@@ -24,39 +23,15 @@ export const transactionSchema = z.object({
 
 export type TransactionInput = z.infer<typeof transactionSchema>
 
-export const getTransactionsFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data }: { data?: { pageParam?: number; limit?: number } }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        data: Array.from({ length: 10 }).map((_, i) => ({
-          id: i.toString(),
-          customerName: `Customer ${i}`,
-          customerEmail: `customer${i}@example.com`,
-          status: 'Pending' as const,
-          date: new Date().toISOString(),
-          amount: 100 * (i + 1),
-          userId: null,
-          projectId: null,
-          assignedAdminId: null,
-          approvedBy: null,
-          approvedAt: undefined,
-          rejectionReason: null,
-          customer: {
-            name: `Customer ${i}`,
-            email: `customer${i}@example.com`,
-          },
-        })),
-        nextPage: undefined,
-        totalCount: 10,
-      }
-    }
+export const getTransactionsFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.object({ pageParam: z.number().optional().default(1), limit: z.number().optional().default(10) }))
+  .handler(async ({ data }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const { pageParam, limit: limitParam } = data || {}
-      const page = pageParam || 1
-      const limit = limitParam || 10
+      const { pageParam, limit } = data
+      const page = pageParam
       const offset = (page - 1) * limit
 
       const [items, total] = await Promise.all([
@@ -66,6 +41,31 @@ export const getTransactionsFn = createServerFn({ method: 'GET' }).handler(
 
       const totalPages = Math.ceil(total / limit)
       const nextPage = page < totalPages ? page + 1 : undefined
+
+      if (isE2E && items.length === 0) {
+        return {
+          data: Array.from({ length: 10 }).map((_, i) => ({
+            id: i.toString(),
+            customerName: `Customer ${i}`,
+            customerEmail: `customer${i}@example.com`,
+            status: 'Pending' as const,
+            date: new Date().toISOString(),
+            amount: 100 * (i + 1),
+            userId: null,
+            projectId: null,
+            assignedAdminId: null,
+            approvedBy: null,
+            approvedAt: undefined,
+            rejectionReason: null,
+            customer: {
+              name: `Customer ${i}`,
+              email: `customer${i}@example.com`,
+            },
+          })),
+          nextPage: undefined,
+          totalCount: 10,
+        }
+      }
 
       return {
         data: items.map((item) => ({
@@ -82,46 +82,70 @@ export const getTransactionsFn = createServerFn({ method: 'GET' }).handler(
       }
     } catch (error) {
       console.error('Error in getTransactionsFn:', error)
-      // Return empty data instead of throwing to prevent app crash when DB is down
+      if (isE2E) {
+        return {
+          data: Array.from({ length: 10 }).map((_, i) => ({
+            id: i.toString(),
+            customerName: `Customer ${i}`,
+            customerEmail: `customer${i}@example.com`,
+            status: 'Pending' as const,
+            date: new Date().toISOString(),
+            amount: 100 * (i + 1),
+            userId: null,
+            projectId: null,
+            assignedAdminId: null,
+            approvedBy: null,
+            approvedAt: undefined,
+            rejectionReason: null,
+            customer: {
+              name: `Customer ${i}`,
+              email: `customer${i}@example.com`,
+            },
+          })),
+          nextPage: undefined,
+          totalCount: 10,
+        }
+      }
       return {
         data: [],
         nextPage: undefined,
         totalCount: 0,
       }
     }
-  },
-)
+  })
 
-export const getTransactionByIdFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
-    if (process.env.VITE_E2E === 'true') {
-      if (!id) return null
-      return {
-        id,
-        customerName: 'Mock Customer',
-        customerEmail: 'mock@example.com',
-        status: 'Pending' as const,
-        date: new Date().toISOString(),
-        amount: 1000,
-        userId: null,
-        projectId: null,
-        assignedAdminId: null,
-        approvedBy: null,
-        approvedAt: undefined,
-        rejectionReason: null,
-        customer: {
-          name: 'Mock Customer',
-          email: 'mock@example.com',
-        },
-      }
-    }
+export const getTransactionByIdFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.string().optional())
+  .handler(async ({ data: id }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
 
     try {
       if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const result = await db.select().from(transactions).where(eq(transactions.id, id))
-      if (!result.length) return null
+      if (!result.length) {
+        if (isE2E) {
+          return {
+            id,
+            customerName: 'Mock Customer',
+            customerEmail: 'mock@example.com',
+            status: 'Pending' as const,
+            date: new Date().toISOString(),
+            amount: 1000,
+            userId: null,
+            projectId: null,
+            assignedAdminId: null,
+            approvedBy: null,
+            approvedAt: undefined,
+            rejectionReason: null,
+            customer: {
+              name: 'Mock Customer',
+              email: 'mock@example.com',
+            },
+          }
+        }
+        return null
+      }
       const item = result[0]
       return {
         ...item,
@@ -134,35 +158,37 @@ export const getTransactionByIdFn = createServerFn({ method: 'GET' }).handler(
       }
     } catch (error) {
       console.error('Error in getTransactionByIdFn:', error)
+      if (isE2E && id) {
+        return {
+          id,
+          customerName: 'Mock Customer',
+          customerEmail: 'mock@example.com',
+          status: 'Pending' as const,
+          date: new Date().toISOString(),
+          amount: 1000,
+          userId: null,
+          projectId: null,
+          assignedAdminId: null,
+          approvedBy: null,
+          approvedAt: undefined,
+          rejectionReason: null,
+          customer: {
+            name: 'Mock Customer',
+            email: 'mock@example.com',
+          },
+        }
+      }
       return null
     }
-  },
-)
+  })
 
-export const createTransactionFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
-    if (process.env.VITE_E2E === 'true') {
-      const input = data as any
-      return {
-        id: 'mock-id',
-        ...input,
-        date: new Date().toISOString(),
-        customer: {
-          name: input.customerName,
-          email: input.customerEmail,
-        },
-      }
-    }
+export const createTransactionFn = createServerFn({ method: 'POST' })
+  .inputValidator(transactionSchema)
+  .handler(async ({ data: input }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      // Manual validation
-      const parsed = transactionSchema.safeParse(data)
-      if (!parsed.success) {
-        throw new Error(`Invalid input: ${parsed.error.message}`)
-      }
-      const input = parsed.data
 
       const [newItem] = await db
         .insert(transactions)
@@ -193,44 +219,34 @@ export const createTransactionFn = createServerFn({ method: 'POST' }).handler(
       }
     } catch (error) {
       console.error('Error in createTransactionFn:', error)
+      if (isE2E) {
+        return {
+          id: 'mock-id',
+          ...input,
+          date: new Date().toISOString(),
+          customer: {
+            name: input.customerName,
+            email: input.customerEmail,
+          },
+        }
+      }
       throw error
     }
-  },
-)
+  })
 
-export const updateTransactionFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
-    if (process.env.VITE_E2E === 'true') {
-      const { id, data: updateData } = data as any
-      return {
-        id,
-        ...updateData,
-        customer: {
-          name: 'Updated Mock',
-          email: 'updated@mock.com',
-        },
-        date: new Date().toISOString(),
-      }
-    }
+export const updateTransactionFn = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.string(), data: transactionSchema.partial() }))
+  .handler(async ({ data }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
+    const { id, data: updateData } = data
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const { id, data: updateData } = data as {
-        id: string
-        data: unknown
-      }
-
-      const parsed = transactionSchema.partial().safeParse(updateData)
-      if (!parsed.success) {
-        throw new Error(`Invalid input: ${parsed.error.message}`)
-      }
-      const input = parsed.data
 
       // Handle specific fields if needed
-      const updatePayload: Record<string, unknown> = { ...input }
-      if (input.date) updatePayload.date = new Date(input.date)
-      if (input.approvedAt) updatePayload.approvedAt = new Date(input.approvedAt)
+      const updatePayload: Record<string, unknown> = { ...updateData }
+      if (updateData.date) updatePayload.date = new Date(updateData.date)
+      if (updateData.approvedAt) updatePayload.approvedAt = new Date(updateData.approvedAt)
 
       const [updatedItem] = await db
         .update(transactions)
@@ -249,26 +265,35 @@ export const updateTransactionFn = createServerFn({ method: 'POST' }).handler(
       }
     } catch (error) {
       console.error('Error in updateTransactionFn:', error)
+      if (isE2E) {
+        return {
+          id,
+          ...updateData,
+          customer: {
+            name: 'Updated Mock',
+            email: 'updated@mock.com',
+          },
+          date: new Date().toISOString(),
+        }
+      }
       throw error
     }
-  },
-)
+  })
 
-export const deleteTransactionFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return { success: true }
-    }
+export const deleteTransactionFn = createServerFn({ method: 'POST' })
+  .inputValidator(z.string())
+  .handler(async ({ data: id }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       await db.delete(transactions).where(eq(transactions.id, id))
       return { success: true }
     } catch (error) {
       console.error('Error in deleteTransactionFn:', error)
+      if (isE2E) {
+        return { success: true }
+      }
       throw error
     }
-  },
-)
+  })

@@ -1,8 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, count } from 'drizzle-orm'
 import { z } from 'zod'
+import { getDb } from '@/shared/lib/db'
 import { todos } from '@/shared/lib/db/schema'
-import type { Todo } from '../model/types'
 // import { requireAuth } from '@/shared/lib/auth/server'
 
 export const todoSchema = z.object({
@@ -18,14 +18,145 @@ export const todoSchema = z.object({
 export type CreateTodoInput = z.infer<typeof todoSchema>
 export type UpdateTodoInput = Partial<CreateTodoInput>
 
-export const getTodosFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data }: { data?: { pageParam?: number; limit?: number } }) => {
-    if (process.env.VITE_E2E === 'true') {
+export const getTodosFn = createServerFn({ method: 'GET' })
+  .inputValidator(
+    z.object({
+      pageParam: z.number().optional().default(1),
+      limit: z.number().optional().default(10),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
+
+    try {
+      const db = getDb()
+      const { pageParam, limit } = data
+      const page = pageParam
+      const offset = (page - 1) * limit
+
+      const [items, totalResult] = await Promise.all([
+        db.select().from(todos).limit(limit).offset(offset).orderBy(desc(todos.createdAt)),
+        db.select({ count: count() }).from(todos),
+      ])
+
+      const total = totalResult[0]?.count ?? 0
+      const totalPages = Math.ceil(total / limit)
+      const nextPage = page < totalPages ? page + 1 : undefined
+
+      if (isE2E && items.length === 0) {
+        return {
+          data: Array.from({ length: 10 }).map((_, i) => ({
+            id: i.toString(),
+            title: `Task ${i}`,
+            description: `Description ${i}`,
+            status: 'pending' as const,
+            priority: 'medium' as const,
+            dueDate: new Date().toISOString(),
+            projectId: 'project-1',
+            assignedTo: 'user-1',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedAt: null,
+            complexity: 1,
+            estimatedTime: 0,
+            actualTime: 0,
+            dependencies: [],
+            acceptanceCriteria: '',
+            createdBy: 'user-1',
+          })),
+          nextPage: undefined,
+          totalCount: 10,
+        }
+      }
+
       return {
-        data: Array.from({ length: 10 }).map((_, i) => ({
-          id: i.toString(),
-          title: `Task ${i}`,
-          description: `Description ${i}`,
+        data: items.map((item) => ({
+          ...item,
+          dueDate: item.dueDate ? item.dueDate.toISOString() : '',
+          createdAt: item.createdAt.toISOString(),
+          updatedAt: item.updatedAt.toISOString(),
+        })),
+        nextPage,
+        totalCount: total,
+      }
+    } catch (error) {
+      console.error('Error in getTodosFn:', error)
+      if (isE2E) {
+        return {
+          data: Array.from({ length: 10 }).map((_, i) => ({
+            id: i.toString(),
+            title: `Task ${i}`,
+            description: `Description ${i}`,
+            status: 'pending' as const,
+            priority: 'medium' as const,
+            dueDate: new Date().toISOString(),
+            projectId: 'project-1',
+            assignedTo: 'user-1',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedAt: null,
+            complexity: 1,
+            estimatedTime: 0,
+            actualTime: 0,
+            dependencies: [],
+            acceptanceCriteria: '',
+            createdBy: 'user-1',
+          })),
+          nextPage: undefined,
+          totalCount: 10,
+        }
+      }
+      throw error
+    }
+  })
+
+export const getTodoByIdFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.string().optional())
+  .handler(async ({ data: id }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
+
+    try {
+      if (!id) throw new Error('ID is required')
+      const db = getDb()
+      const result = await db.select().from(todos).where(eq(todos.id, id))
+      if (!result.length) {
+        if (isE2E) {
+          return {
+            id,
+            title: 'Mock Task',
+            description: 'Mock Description',
+            status: 'pending' as const,
+            priority: 'medium' as const,
+            dueDate: new Date().toISOString(),
+            projectId: 'project-1',
+            assignedTo: 'user-1',
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedAt: null,
+            complexity: 1,
+            estimatedTime: 0,
+            actualTime: 0,
+            dependencies: [],
+            acceptanceCriteria: '',
+            createdBy: 'user-1',
+          }
+        }
+        return null
+      }
+      const item = result[0]
+      return {
+        ...item,
+        dueDate: item.dueDate ? item.dueDate.toISOString() : '',
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+      }
+    } catch (error) {
+      console.error('Error in getTodoByIdFn:', error)
+      if (isE2E && id) {
+        return {
+          id,
+          title: 'Mock Task',
+          description: 'Mock Description',
           status: 'pending' as const,
           priority: 'medium' as const,
           dueDate: new Date().toISOString(),
@@ -40,128 +171,44 @@ export const getTodosFn = createServerFn({ method: 'GET' }).handler(
           dependencies: [],
           acceptanceCriteria: '',
           createdBy: 'user-1',
-        })),
-        nextPage: undefined,
-        totalCount: 10,
+        }
       }
+      throw error
     }
+  })
 
-    try {
-      const { getDb } = await import('@/shared/lib/db')
-      const db = getDb()
-      // await requireAuth() // Uncomment when auth is ready
-      const { pageParam, limit: limitParam } = data || {}
-      const page = pageParam || 1
-      const limit = limitParam || 10
-      const offset = (page - 1) * limit
-
-      const [items, totalResult] = await Promise.all([
-        db.select().from(todos).limit(limit).offset(offset).orderBy(desc(todos.createdAt)),
-        db.select({ count: count() }).from(todos),
-      ])
-
-      const total = totalResult[0]?.count ?? 0
-
-      const totalPages = Math.ceil(total / limit)
-      const nextPage = page < totalPages ? page + 1 : undefined
-
-      return {
-        data: items.map((item) => ({
-          ...item,
-          dueDate: item.dueDate ? item.dueDate.toISOString() : '',
-          createdAt: item.createdAt.toISOString(),
-          updatedAt: item.updatedAt.toISOString(),
-        })),
-        nextPage,
-        totalCount: total,
-      }
-    } catch (error) {
-      console.error('Error in getTodosFn:', error)
-      return {
-        data: [],
-        nextPage: undefined,
-        totalCount: 0,
-      }
-    }
-  },
-)
-
-export const getTodoByIdFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
-    if (process.env.VITE_E2E === 'true') {
-      if (!id) return null
-      return {
-        id,
-        title: 'Mock Task',
-        description: 'Mock Description',
-        status: 'pending' as const,
-        priority: 'medium' as const,
-        dueDate: new Date().toISOString(),
-        projectId: 'project-1',
-        assignedTo: 'user-1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        completedAt: null,
-        complexity: 1,
-        estimatedTime: 0,
-        actualTime: 0,
-        dependencies: [],
-        acceptanceCriteria: '',
-        createdBy: 'user-1',
-      }
-    }
-
-    try {
-      if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
-      const db = getDb()
-      // await requireAuth()
-      const result = await db.select().from(todos).where(eq(todos.id, id))
-      if (!result.length) return null
-      const item = result[0]
-      return {
-        ...item,
-        dueDate: item.dueDate ? item.dueDate.toISOString() : '',
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-      }
-    } catch (error) {
-      console.error('Error in getTodoByIdFn:', error)
-      return null
-    }
-  },
-)
-
-export const getTodosByProjectIdFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data: projectId }: { data?: string }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return Array.from({ length: 5 }).map((_, i) => ({
-        id: i.toString(),
-        title: `Project Task ${i}`,
-        description: `Description ${i}`,
-        status: 'pending' as const,
-        priority: 'medium' as const,
-        dueDate: new Date().toISOString(),
-        projectId: projectId || 'project-1',
-        assignedTo: 'user-1',
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        completedAt: null,
-        complexity: 1,
-        estimatedTime: 0,
-        actualTime: 0,
-        dependencies: [],
-        acceptanceCriteria: '',
-        createdBy: 'user-1',
-      }))
-    }
+export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.string())
+  .handler(async ({ data: projectId }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
 
     try {
       if (!projectId) throw new Error('Project ID is required')
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      // await requireAuth()
       const result = await db.select().from(todos).where(eq(todos.projectId, projectId))
+
+      if (isE2E && result.length === 0) {
+        return Array.from({ length: 5 }).map((_, i) => ({
+          id: i.toString(),
+          title: `Project Task ${i}`,
+          description: `Description ${i}`,
+          status: 'pending' as const,
+          priority: 'medium' as const,
+          dueDate: new Date().toISOString(),
+          projectId: projectId,
+          assignedTo: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          completedAt: null,
+          complexity: 1,
+          estimatedTime: 0,
+          actualTime: 0,
+          dependencies: [],
+          acceptanceCriteria: '',
+          createdBy: 'user-1',
+        }))
+      }
+
       return result.map((item) => ({
         ...item,
         dueDate: item.dueDate ? item.dueDate.toISOString() : '',
@@ -170,33 +217,37 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' }).handler(
       }))
     } catch (error) {
       console.error('Error in getTodosByProjectIdFn:', error)
-      return []
-    }
-  },
-) as unknown as (opts: { data: string }) => Promise<Todo[]>
-
-export const createTodoFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: input }: { data?: CreateTodoInput }) => {
-    if (!input) throw new Error('Input is required')
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        id: 'mock-id',
-        ...input,
-        dueDate: input.dueDate || new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        completedAt: null,
-        complexity: 1,
-        estimatedTime: 0,
-        actualTime: 0,
-        dependencies: [],
-        acceptanceCriteria: '',
-        createdBy: 'user-1',
+      if (isE2E && projectId) {
+        return Array.from({ length: 5 }).map((_, i) => ({
+          id: i.toString(),
+          title: `Project Task ${i}`,
+          description: `Description ${i}`,
+          status: 'pending' as const,
+          priority: 'medium' as const,
+          dueDate: new Date().toISOString(),
+          projectId: projectId,
+          assignedTo: 'user-1',
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          completedAt: null,
+          complexity: 1,
+          estimatedTime: 0,
+          actualTime: 0,
+          dependencies: [],
+          acceptanceCriteria: '',
+          createdBy: 'user-1',
+        }))
       }
+      throw error
     }
+  })
+
+export const createTodoFn = createServerFn({ method: 'POST' })
+  .inputValidator(todoSchema)
+  .handler(async ({ data: input }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const { syncRagDocument } = await import('@/shared/lib/rag/sync')
 
@@ -229,34 +280,33 @@ export const createTodoFn = createServerFn({ method: 'POST' }).handler(
       }
     } catch (error) {
       console.error('Error in createTodoFn:', error)
+      if (isE2E) {
+        return {
+          id: 'mock-id',
+          ...input,
+          dueDate: input.dueDate || new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          completedAt: null,
+          complexity: 1,
+          estimatedTime: 0,
+          actualTime: 0,
+          dependencies: [],
+          acceptanceCriteria: '',
+          createdBy: 'user-1',
+        }
+      }
       throw error
     }
-  },
-)
+  })
 
-export const updateTodoFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data?: { id: string; data: UpdateTodoInput } }) => {
-    if (!data) throw new Error('Data is required')
+export const updateTodoFn = createServerFn({ method: 'POST' })
+  .inputValidator(z.object({ id: z.string(), data: todoSchema.partial() }))
+  .handler(async ({ data }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
     const { id, data: updateData } = data
-    if (process.env.VITE_E2E === 'true') {
-      return {
-        id,
-        ...updateData,
-        dueDate: updateData.dueDate || new Date().toISOString(),
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        completedAt: null,
-        complexity: 1,
-        estimatedTime: 0,
-        actualTime: 0,
-        dependencies: [],
-        acceptanceCriteria: '',
-        createdBy: 'user-1',
-      }
-    }
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const { syncRagDocument } = await import('@/shared/lib/rag/sync')
 
@@ -284,20 +334,32 @@ export const updateTodoFn = createServerFn({ method: 'POST' }).handler(
       }
     } catch (error) {
       console.error('Error in updateTodoFn:', error)
+      if (isE2E) {
+        return {
+          id,
+          ...updateData,
+          dueDate: updateData.dueDate || new Date().toISOString(),
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+          completedAt: null,
+          complexity: 1,
+          estimatedTime: 0,
+          actualTime: 0,
+          dependencies: [],
+          acceptanceCriteria: '',
+          createdBy: 'user-1',
+        }
+      }
       throw error
     }
-  },
-)
+  })
 
-export const deleteTodoFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
-    if (process.env.VITE_E2E === 'true') {
-      return { success: true }
-    }
+export const deleteTodoFn = createServerFn({ method: 'POST' })
+  .inputValidator(z.string())
+  .handler(async ({ data: id }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const { deleteRagDocument } = await import('@/shared/lib/rag/sync')
       await db.delete(todos).where(eq(todos.id, id))
@@ -305,7 +367,9 @@ export const deleteTodoFn = createServerFn({ method: 'POST' }).handler(
       return { success: true }
     } catch (error) {
       console.error('Error in deleteTodoFn:', error)
+      if (isE2E) {
+        return { success: true }
+      }
       throw error
     }
-  },
-)
+  })

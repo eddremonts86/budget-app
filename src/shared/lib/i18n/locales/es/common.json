@@ -178,7 +178,19 @@
       "roleLabel": "Rol",
       "avatarLabel": "Avatar URL",
       "avatarPlaceholder": "https://...",
-      "generateAvatar": "Generar avatar"
+      "generateAvatar": "Generar avatar",
+      "jobTitleLabel": "Cargo",
+      "jobTitlePlaceholder": "ej. Desarrollador Senior",
+      "departmentLabel": "Departamento",
+      "departmentPlaceholder": "Seleccionar departamento",
+      "reportsToLabel": "Reporta a",
+      "reportsToPlaceholder": "Seleccionar responsable"
+    },
+    "table": {
+      "user": "Usuario",
+      "role": "Rol / Acceso",
+      "jobTitle": "Cargo",
+      "department": "Departamento"
     },
     "roles": {
       "admin": "Administrador",

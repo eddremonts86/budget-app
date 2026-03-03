@@ -1,6 +1,28 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq, and, inArray, count } from 'drizzle-orm'
+import { z } from 'zod'
 import { projects, departments, projectMembers, users } from '@/shared/lib/db/schema'
+
+export const projectSchema = z.object({
+  name: z.string().min(1),
+  description: z.string().nullable(),
+  startDate: z.string(),
+  endDate: z.string(),
+  technologies: z.array(z.string()),
+  status: z.enum(['active', 'completed', 'on_hold', 'planning', 'cancelled']),
+  type: z.enum(['internal', 'external', 'research', 'maintenance']),
+  priority: z.string().nullable(),
+  budget: z.number().min(0),
+  departmentId: z.string().nullable(),
+  team: z.array(
+    z.object({
+      userId: z.string(),
+      role: z.enum(['owner', 'manager', 'contributor', 'viewer']),
+    }),
+  ),
+})
+
+export type ProjectInput = z.infer<typeof projectSchema>
 
 export interface Project {
   id: string
@@ -11,26 +33,12 @@ export interface Project {
   technologies: string[]
   status: 'active' | 'completed' | 'on_hold' | 'planning' | 'cancelled'
   type: 'internal' | 'external' | 'research' | 'maintenance'
-  priority: 'low' | 'medium' | 'high' | string | null
+  priority: string
   budget: number
   departmentId: string | null
   team: { userId: string; role: ProjectMemberRole }[]
   createdAt: string
   updatedAt: string
-}
-
-export interface ProjectInput {
-  name: string
-  description: string | null
-  startDate: string
-  endDate: string
-  technologies: string[]
-  status: Project['status']
-  type: Project['type']
-  priority: Project['priority']
-  budget: number
-  departmentId: string | null
-  team: { userId: string; role: ProjectMemberRole }[]
 }
 
 export type ProjectMemberRole = 'owner' | 'manager' | 'contributor' | 'viewer'
@@ -45,11 +53,13 @@ export interface ProjectMember {
   joinedAt: string
 }
 
-export interface ProjectMemberInput {
-  projectId: string
-  userId: string
-  role: ProjectMemberRole
-}
+export const projectMemberSchema = z.object({
+  projectId: z.string(),
+  userId: z.string(),
+  role: z.enum(['owner', 'manager', 'contributor', 'viewer']),
+})
+
+export type ProjectMemberInput = z.infer<typeof projectMemberSchema>
 
 export interface ProjectListResponse {
   data: Project[]
@@ -64,7 +74,6 @@ export const getProjectsFn = createServerFn({ method: 'GET' }).handler(
     data?: { pageParam?: number; limit?: number }
   }): Promise<ProjectListResponse> => {
     try {
-      console.log('getProjectsFn: Starting fetch', data)
       const { pageParam, limit: limitParam } = data || {}
       const page = pageParam || 1
       const limit = limitParam || 100
@@ -72,24 +81,19 @@ export const getProjectsFn = createServerFn({ method: 'GET' }).handler(
 
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      console.log('getProjectsFn: DB initialized')
 
-      console.log('getProjectsFn: Querying DB', { limit, offset })
       const [items, totalResult] = await Promise.all([
         db.select().from(projects).limit(limit).offset(offset).orderBy(desc(projects.createdAt)),
         db.select({ count: count() }).from(projects),
       ])
 
       const total = totalResult[0]?.count ?? 0
-      console.log(`getProjectsFn: Found ${items.length} items from projects table, total ${total}`)
 
       if (!items || items.length === 0) {
-        console.log('getProjectsFn: No items found, returning empty array')
         return { data: [], totalCount: total }
       }
 
       const projectIds = items.map((i) => i.id)
-      console.log('getProjectsFn: Fetching members for IDs:', projectIds)
       const allMembers =
         projectIds.length > 0
           ? await db
@@ -98,49 +102,49 @@ export const getProjectsFn = createServerFn({ method: 'GET' }).handler(
               .where(inArray(projectMembers.projectId, projectIds))
           : []
 
-      console.log(`getProjectsFn: Found ${allMembers.length} members total`)
+      const projectsData: Project[] = (items || [])
+        .map((item) => {
+          if (!item) return null
+          try {
+            const team = (allMembers || [])
+              .filter((m) => m && m.projectId === item.id)
+              .map((m) => ({
+                userId: m.userId?.toString() || '',
+                role: (m.role as ProjectInput['team'][number]['role']) || 'viewer',
+              }))
 
-      const projectsData: Project[] = items.map((item) => {
-        try {
-          const team = (allMembers || [])
-            .filter((m) => m.projectId === item.id)
-            .map((m) => ({
-              userId: m.userId,
-              role: m.role as ProjectMemberRole,
-            }))
-
-          return {
-            id: item.id,
-            name: item.name,
-            description: item.description,
-            startDate: item.startDate ? item.startDate.toISOString() : '',
-            endDate: item.endDate ? item.endDate.toISOString() : '',
-            technologies: Array.isArray(item.technologies) ? (item.technologies as string[]) : [],
-            status: (item.status as Project['status']) || 'active',
-            type: (item.type as Project['type']) || 'internal',
-            priority: (item.priority as Project['priority']) || 'medium',
-            budget: item.budget ? Number(item.budget) : 0,
-            departmentId: item.departmentId,
-            team,
-            createdAt:
-              item.createdAt instanceof Date
-                ? item.createdAt.toISOString()
-                : new Date().toISOString(),
-            updatedAt:
-              item.updatedAt instanceof Date
-                ? item.updatedAt.toISOString()
-                : new Date().toISOString(),
+            return {
+              id: item.id?.toString() || '',
+              name: item.name || 'Untitled Project',
+              description: item.description,
+              startDate: item.startDate ? item.startDate.toISOString() : new Date().toISOString(),
+              endDate: item.endDate ? item.endDate.toISOString() : new Date().toISOString(),
+              technologies: Array.isArray(item.technologies) ? (item.technologies as string[]) : [],
+              status: (item.status as ProjectInput['status']) || 'active',
+              type: (item.type as ProjectInput['type']) || 'internal',
+              priority: (item.priority as ProjectInput['priority']) || 'medium',
+              budget: item.budget ? Number(item.budget) : 0,
+              departmentId: item.departmentId,
+              team,
+              createdAt:
+                item.createdAt instanceof Date
+                  ? item.createdAt.toISOString()
+                  : new Date().toISOString(),
+              updatedAt:
+                item.updatedAt instanceof Date
+                  ? item.updatedAt.toISOString()
+                  : new Date().toISOString(),
+            }
+          } catch (err) {
+            console.error('Error mapping project item:', item.id, err)
+            throw err
           }
-        } catch (err) {
-          console.error('Error mapping project item:', item.id, err)
-          throw err
-        }
-      })
+        })
+        .filter((p): p is Project => p !== null)
 
       const totalPages = Math.ceil(total / limit)
       const nextPage = page < totalPages ? page + 1 : undefined
 
-      console.log('getProjectsFn: Success, returning', projectsData.length, 'projects')
       return {
         data: projectsData,
         nextPage,
@@ -185,7 +189,7 @@ export const getProjectByIdFn = createServerFn({ method: 'GET' }).handler(
         technologies: item.technologies || [],
         status: item.status as Project['status'],
         type: item.type as Project['type'],
-        priority: (item.priority as Project['priority']) || 'medium',
+        priority: (item.priority as string) || 'medium',
         budget: item.budget ? Number(item.budget) : 0,
         departmentId: item.departmentId,
         team,
@@ -220,9 +224,14 @@ export const getDepartmentsFn = createServerFn({ method: 'GET' }).handler(async 
 })
 
 export const createProjectFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: untypedInput }: { data: unknown }): Promise<Project> => {
+  async ({ data }: { data: unknown }): Promise<Project> => {
+    const parsed = projectSchema.safeParse(data)
+    if (!parsed.success) {
+      throw new Error(`Invalid project data: ${parsed.error.message}`)
+    }
+    const input = parsed.data
+
     try {
-      const input = untypedInput as ProjectInput
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
       const [newItem] = await db
@@ -234,8 +243,8 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
           startDate: input.startDate ? new Date(input.startDate) : undefined,
           endDate: input.endDate ? new Date(input.endDate) : undefined,
           technologies: input.technologies,
-          status: input.status as 'active' | 'completed' | 'on_hold' | 'planning' | 'cancelled',
-          type: input.type as 'internal' | 'external' | 'research' | 'maintenance',
+          status: input.status,
+          type: input.type,
           priority: input.priority,
           budget: Math.round(input.budget),
           departmentId: input.departmentId,
@@ -248,7 +257,7 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
             id: crypto.randomUUID(),
             projectId: newItem.id,
             userId: m.userId,
-            role: m.role as 'owner' | 'manager' | 'contributor' | 'viewer',
+            role: m.role,
           })),
         )
       }
@@ -262,10 +271,10 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
         technologies: newItem.technologies || [],
         status: newItem.status as Project['status'],
         type: newItem.type as Project['type'],
-        priority: (newItem.priority as Project['priority']) || 'medium',
+        priority: (newItem.priority as string) || 'medium',
         budget: newItem.budget ? Number(newItem.budget) : 0,
         departmentId: newItem.departmentId,
-        team: input.team || [],
+        team: input.team as { userId: string; role: ProjectMemberRole }[],
         createdAt: newItem.createdAt.toISOString(),
         updatedAt: newItem.updatedAt.toISOString(),
       }
@@ -277,11 +286,8 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
 ) as unknown as (opts: { data: ProjectInput }) => Promise<Project>
 
 export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: untypedData }: { data: unknown }): Promise<Project> => {
-    const { id, data: updateData } = untypedData as {
-      id: string
-      data: Partial<ProjectInput>
-    }
+  async ({ data }: { data: unknown }): Promise<Project> => {
+    const { id, data: updateData } = data as { id: string; data: Partial<ProjectInput> }
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
@@ -293,13 +299,8 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
           startDate: updateData.startDate ? new Date(updateData.startDate) : undefined,
           endDate: updateData.endDate ? new Date(updateData.endDate) : undefined,
           technologies: updateData.technologies,
-          status: updateData.status as
-            | 'active'
-            | 'completed'
-            | 'on_hold'
-            | 'planning'
-            | 'cancelled',
-          type: updateData.type as 'internal' | 'external' | 'research' | 'maintenance',
+          status: updateData.status,
+          type: updateData.type,
           priority: updateData.priority,
           budget: updateData.budget ? Math.round(updateData.budget) : undefined,
           departmentId: updateData.departmentId,
@@ -316,7 +317,7 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
               id: crypto.randomUUID(),
               projectId: id,
               userId: m.userId,
-              role: m.role as 'owner' | 'manager' | 'contributor' | 'viewer',
+              role: m.role,
             })),
           )
         }
@@ -331,7 +332,7 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
         technologies: updatedItem.technologies || [],
         status: updatedItem.status as Project['status'],
         type: updatedItem.type as Project['type'],
-        priority: (updatedItem.priority as Project['priority']) || 'medium',
+        priority: (updatedItem.priority as string) || 'medium',
         budget: updatedItem.budget ? Number(updatedItem.budget) : 0,
         departmentId: updatedItem.departmentId,
         team: (updateData.team || []) as { userId: string; role: ProjectMemberRole }[],
@@ -346,7 +347,7 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
 ) as unknown as (opts: { data: { id: string; data: Partial<ProjectInput> } }) => Promise<Project>
 
 export const deleteProjectFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: id }: { data: unknown }) => {
+  async ({ data: id }: { data: unknown }): Promise<{ success: boolean }> => {
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
@@ -362,11 +363,12 @@ export const deleteProjectFn = createServerFn({ method: 'POST' }).handler(
 
 export const getProjectMembersFn = createServerFn({ method: 'GET' }).handler(
   async ({ data: projectId }: { data: unknown }): Promise<ProjectMember[]> => {
+    const id = projectId as string
     if (process.env.VITE_E2E === 'true') {
       return [
         {
           id: '1',
-          projectId: projectId as string,
+          projectId: id,
           userId: 'user_e2e_local',
           userName: 'Local User',
           userEmail: 'local@example.com',
@@ -391,7 +393,7 @@ export const getProjectMembersFn = createServerFn({ method: 'GET' }).handler(
       })
       .from(projectMembers)
       .innerJoin(users, eq(projectMembers.userId, users.id))
-      .where(eq(projectMembers.projectId, projectId as string))
+      .where(eq(projectMembers.projectId, id))
 
     return members.map((m) => ({
       ...m,
@@ -404,12 +406,17 @@ export const getProjectMembersFn = createServerFn({ method: 'GET' }).handler(
 ) as unknown as (opts: { data: string }) => Promise<ProjectMember[]>
 
 export const addProjectMemberFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: untypedInput }: { data: unknown }): Promise<ProjectMember> => {
-    const typedInput = untypedInput as ProjectMemberInput
+  async ({ data }: { data: unknown }): Promise<ProjectMember> => {
+    const parsed = projectMemberSchema.safeParse(data)
+    if (!parsed.success) {
+      throw new Error(`Invalid member data: ${parsed.error.message}`)
+    }
+    const input = parsed.data
+
     if (process.env.VITE_E2E === 'true') {
       return {
         id: crypto.randomUUID(),
-        ...typedInput,
+        ...input,
         joinedAt: new Date().toISOString(),
         userName: 'E2E User',
         userEmail: 'e2e@example.com',
@@ -423,9 +430,9 @@ export const addProjectMemberFn = createServerFn({ method: 'POST' }).handler(
       .insert(projectMembers)
       .values({
         id: crypto.randomUUID(),
-        projectId: typedInput.projectId,
-        userId: typedInput.userId,
-        role: typedInput.role,
+        projectId: input.projectId,
+        userId: input.userId,
+        role: input.role,
       })
       .returning()
 
@@ -442,11 +449,11 @@ export const addProjectMemberFn = createServerFn({ method: 'POST' }).handler(
 ) as unknown as (opts: { data: ProjectMemberInput }) => Promise<ProjectMember>
 
 export const updateProjectMemberFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: untypedInput }: { data: unknown }) => {
-    const typedInput = untypedInput as {
+  async ({ data: typedInput }: { data: unknown }) => {
+    const input = typedInput as {
       projectId: string
       userId: string
-      data: { role: 'owner' | 'manager' | 'contributor' | 'viewer' }
+      data: { role: ProjectMemberRole }
     }
     if (process.env.VITE_E2E === 'true') {
       return { success: true }
@@ -458,13 +465,10 @@ export const updateProjectMemberFn = createServerFn({ method: 'POST' }).handler(
     await db
       .update(projectMembers)
       .set({
-        role: typedInput.data.role,
+        role: input.data.role,
       })
       .where(
-        and(
-          eq(projectMembers.projectId, typedInput.projectId),
-          eq(projectMembers.userId, typedInput.userId),
-        ),
+        and(eq(projectMembers.projectId, input.projectId), eq(projectMembers.userId, input.userId)),
       )
 
     return { success: true }
@@ -473,13 +477,13 @@ export const updateProjectMemberFn = createServerFn({ method: 'POST' }).handler(
   data: {
     projectId: string
     userId: string
-    data: { role: 'owner' | 'manager' | 'contributor' | 'viewer' }
+    data: { role: ProjectMemberRole }
   }
 }) => Promise<{ success: boolean }>
 
 export const removeProjectMemberFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: untypedInput }: { data: unknown }) => {
-    const typedInput = untypedInput as { projectId: string; userId: string }
+  async ({ data: typedInput }: { data: unknown }) => {
+    const input = typedInput as { projectId: string; userId: string }
     if (process.env.VITE_E2E === 'true') {
       return { success: true }
     }
@@ -490,10 +494,7 @@ export const removeProjectMemberFn = createServerFn({ method: 'POST' }).handler(
     await db
       .delete(projectMembers)
       .where(
-        and(
-          eq(projectMembers.projectId, typedInput.projectId),
-          eq(projectMembers.userId, typedInput.userId),
-        ),
+        and(eq(projectMembers.projectId, input.projectId), eq(projectMembers.userId, input.userId)),
       )
 
     return { success: true }

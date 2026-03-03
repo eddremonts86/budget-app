@@ -34,7 +34,7 @@ export function useInfiniteProjects(limit = 10) {
     ({ pageParam }) => getProjectsFn({ data: { pageParam, limit } }),
     {
       initialPageParam: 1,
-      getNextPageParam: (lastPage: any) => lastPage.nextPage,
+      getNextPageParam: (lastPage: ProjectListResponse) => lastPage.nextPage,
       cache: 'realtime',
     },
   )
@@ -46,13 +46,15 @@ export function useProjects() {
     () => getProjectsFn({ data: { limit: 1000 } }),
     {
       cache: 'realtime',
-      select: (res) => res.data || [],
+      select: (res) => (res && res.data) || [],
     },
   )
 }
 
 export function useDepartments() {
-  return useTQuery<any[]>(projectsKeys.departments(), () => getDepartmentsFn())
+  return useTQuery<{ id: string; name: string }[]>(projectsKeys.departments(), () =>
+    getDepartmentsFn(),
+  )
 }
 
 export function useProject(id: string) {

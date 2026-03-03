@@ -577,11 +577,19 @@
       "avatarLabel": "Avatar URL",
       "avatarPlaceholder": "Avatar URL",
       "avatarRandom": "Random",
-      "avatarHelp": "Paste a URL or generate a random avatar"
+      "avatarHelp": "Paste a URL or generate a random avatar",
+      "jobTitleLabel": "Job Title",
+      "jobTitlePlaceholder": "e.g. Senior Developer",
+      "departmentLabel": "Department",
+      "departmentPlaceholder": "Select department",
+      "reportsToLabel": "Reports To",
+      "reportsToPlaceholder": "Select manager"
     },
     "table": {
       "user": "User",
-      "role": "Role / Access"
+      "role": "Role / Access",
+      "jobTitle": "Job Title",
+      "department": "Department"
     },
     "confirm": {
       "delete": "Are you sure you want to delete this user?"

@@ -17,14 +17,14 @@ export const dashboardKeys = {
 }
 
 export const useExpenseDistribution = () => {
-  return useTQuery(dashboardKeys.expenseDistribution(), () => getExpenseDistributionFn())
+  return useTQuery(dashboardKeys.expenseDistribution(), () => getExpenseDistributionFn({ data: undefined }))
 }
 
 export const useDashboardStats = () => {
   return useTQuery(dashboardKeys.stats(), async () => {
     console.log('useDashboardStats: calling getDashboardStatsFn')
     try {
-      const result = await getDashboardStatsFn()
+      const result = await getDashboardStatsFn({ data: undefined })
       console.log('useDashboardStats: result', result)
       return result
     } catch (error) {
@@ -35,11 +35,11 @@ export const useDashboardStats = () => {
 }
 
 export const useRecentTransactions = () => {
-  return useTQuery(dashboardKeys.transactions(), () => getRecentTransactionsFn())
+  return useTQuery(dashboardKeys.transactions(), () => getRecentTransactionsFn({ data: undefined }))
 }
 
 export const useUpcomingTodos = () => {
-  return useTQuery(dashboardKeys.upcomingTodos(), () => getUpcomingTodosFn(), {
+  return useTQuery(dashboardKeys.upcomingTodos(), () => getUpcomingTodosFn({ data: undefined }), {
     select: (data) => {
       return data.sort((a, b) => {
         // Sort by priority first (high > medium > low)
@@ -56,5 +56,5 @@ export const useUpcomingTodos = () => {
 }
 
 export const useUsersWorkload = () => {
-  return useTQuery(dashboardKeys.usersWorkload(), () => getUsersWorkloadFn())
+  return useTQuery(dashboardKeys.usersWorkload(), () => getUsersWorkloadFn({ data: undefined }))
 }

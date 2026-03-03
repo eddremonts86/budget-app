@@ -44,7 +44,7 @@ services:
     ports:
       - '1234:1234'
     volumes:
-      - lmstudio_data:/root/.cache/lm-studio/models
+      - ./.docker_data/lmstudio:/root/.cache/lm-studio/models
     healthcheck:
       test: ['CMD-SHELL', 'lms status || exit 1']
       interval: 10s
@@ -58,7 +58,7 @@ services:
     ports:
       - '8000:8000'
     volumes:
-      - ./chroma_data:/chroma/chroma
+      - ./.docker_data/chroma:/chroma/chroma
     environment:
       IS_PERSISTENT: 'TRUE'
       ANONYMIZED_TELEMETRY: 'FALSE'
@@ -73,7 +73,7 @@ services:
       POSTGRES_PASSWORD: postgres
       POSTGRES_DB: tanstack_template
     volumes:
-      - postgres_data:/var/lib/postgresql/data
+      - ./.docker_data/postgres:/var/lib/postgresql/data
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U postgres']
       interval: 5s
@@ -86,7 +86,7 @@ services:
     ports:
       - '11434:11434'
     volumes:
-      - ollama_data:/root/.ollama
+      - ./.docker_data/ollama:/root/.ollama
       - ./ia-config:/etc/ia-config:ro
     environment:
       - OLLAMA_HOST=0.0.0.0
@@ -105,11 +105,11 @@ services:
     ports:
       - '8080:8080'
     volumes:
-      - ./models:/models
+      - ./.docker_data/models:/models
       - ./ia-config:/etc/ia-config:ro
     command: -m /models/llama-3.2-1b-instruct-q4_k_m.gguf -c 2048 --host 0.0.0.0 --port 8080
     healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health || exit 1"]
+      test: ['CMD-SHELL', 'curl -f http://localhost:8080/health || exit 1']
       interval: 30s
       timeout: 10s
       retries: 5
@@ -117,6 +117,3 @@ services:
 
 volumes:
   app_node_modules:
-  lmstudio_data:
-  ollama_data:
-  postgres_data:

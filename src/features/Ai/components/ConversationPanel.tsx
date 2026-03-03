@@ -272,7 +272,7 @@ export function ConversationPanel({
                                 {userRole === 'admin' && activeTab === 'all-chats' ? (
                                   <Avatar className="h-8 w-8 shrink-0 border border-black/5">
                                     <AvatarFallback className="text-[10px] bg-indigo-100 text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
-                                      {conv.userId?.slice(0, 2)?.toUpperCase() || '??'}
+                                      {conv.userId?.toString()?.slice(0, 2)?.toUpperCase() || '??'}
                                     </AvatarFallback>
                                   </Avatar>
                                 ) : (
@@ -304,7 +304,7 @@ export function ConversationPanel({
                                     })}
                                     {userRole === 'admin' && activeTab === 'all-chats' && (
                                       <span className="ml-1 opacity-70">
-                                        • User: {conv.userId?.slice(0, 6)}...
+                                        • User: {conv.userId?.toString()?.slice(0, 6)}...
                                       </span>
                                     )}
                                   </p>
