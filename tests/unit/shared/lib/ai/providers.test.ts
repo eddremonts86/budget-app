@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getActiveAiConfig } from '@/shared/lib/ai/server/config-store'
+import { getAllAiConfigs } from '@/shared/lib/ai/server/config-store'
 import { detectBestProvider, probeProvider } from '@/shared/lib/ai/server/providers'
 
 vi.mock('@/shared/lib/ai/server/config-store', () => ({
-  getActiveAiConfig: vi.fn(),
+  getAllAiConfigs: vi.fn(),
 }))
 
 describe('ai providers', () => {
@@ -21,7 +21,9 @@ describe('ai providers', () => {
 
   it('marks provider as available when probe returns ok', async () => {
     const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 200 }))
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ data: [{ id: 'model-1' }] }), { status: 200 }),
+    )
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const status = await probeProvider({ ...mockConfig, provider: 'lm-studio' } as any)
@@ -43,10 +45,20 @@ describe('ai providers', () => {
 
   it('detects best provider using active config', async () => {
     const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>
-    fetchMock.mockResolvedValueOnce(new Response(null, { status: 200 }))
+    fetchMock.mockResolvedValueOnce(
+      new Response(JSON.stringify({ data: [{ id: 'model-1' }] }), { status: 200 }),
+    )
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    vi.mocked(getActiveAiConfig).mockResolvedValue({ ...mockConfig, provider: 'openai' } as any)
+    vi.mocked(getAllAiConfigs).mockResolvedValue({
+      activeProvider: 'openai',
+      providers: {
+        openai: {
+          ...mockConfig,
+          provider: 'openai',
+          endpoints: { models: '/v1/models', chat: '/chat/completions' },
+        },
+      },
+    } as any)
 
     const result = await detectBestProvider()
 

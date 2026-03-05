@@ -1,10 +1,10 @@
 import { apiClient } from '@/shared/lib/api'
 import axios from 'axios'
 import type {
-    AiConfigAuditLog,
-    AiConfigFormData,
-    AiConfigStore,
-    AiProvider,
+  AiConfigAuditLog,
+  AiConfigFormData,
+  AiConfigStore,
+  AiProvider,
 } from '../model/ai-config.schema'
 
 const AI_CONFIG_STORE_ENDPOINT = '/api/ai/config-store'
@@ -24,16 +24,13 @@ const getEnv = (key: string, defaultValue: string) => {
 
 const LLAMA_CPP_BASE_URL = getEnv('VITE_AI_LLAMA_CPP_BASE_URL', 'http://localhost:8080/v1')
 const OLLAMA_BASE_URL = getEnv('VITE_AI_OLLAMA_BASE_URL', 'http://localhost:11434/v1')
-const LLAMA_CPP_MODEL = getEnv('VITE_AI_LLAMA_CPP_MODEL', 'llama-3.2-1b-instruct-q4_k_m.gguf')
-const OLLAMA_MODEL = getEnv('VITE_AI_OLLAMA_MODEL', 'llama3.2')
+const LLAMA_CPP_MODEL = getEnv(
+  'VITE_AI_LLAMA_CPP_MODEL',
+  '.docker_data/llm-models/llama-cpp/qwen3.5-9b-instruct-q4_k_m.gguf',
+)
+const OLLAMA_MODEL = getEnv('VITE_AI_OLLAMA_MODEL', 'qwen3.5:9b')
 
-const PROVIDERS = new Set<AiProvider>([
-  'llama-cpp',
-  'ollama',
-  'lm-studio',
-  'openai',
-  'anthropic',
-])
+const PROVIDERS = new Set<AiProvider>(['llama-cpp', 'ollama', 'lm-studio', 'openai', 'anthropic'])
 
 const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
   'llama-cpp': {
@@ -139,7 +136,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'local-model',
+      model: 'qwen3.5:9b',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,

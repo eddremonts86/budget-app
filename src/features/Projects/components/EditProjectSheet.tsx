@@ -37,10 +37,7 @@ export function EditProjectSheet({
         id: project.id,
         data: {
           ...values,
-          technologies: values.technologies
-            .split(',')
-            .map((tech: string) => tech.trim())
-            .filter(Boolean),
+          skills: values.skills,
         },
       })
       toast.success(t('projects.success.updated'))

@@ -1,0 +1,52 @@
+name: playwright-route-automation
+version: 1
+description: MCP-ready workflow for local route discovery, test generation and test-state handling.
+
+workflows:
+  - id: discover-routes
+    purpose: Build route inventory from TanStack route tree
+    command: pnpm routes:inventory
+    inputs:
+      - src/routeTree.gen.ts
+      - src/routes/**/*
+    outputs:
+      - docs/testing/routes-inventory.json
+      - docs/testing/routes-inventory.yaml
+    suggestedMcpTools:
+      - search_subagent
+      - read_file
+
+  - id: generate-playwright-tests
+    purpose: Generate or update route-centric E2E specs by module
+    inputs:
+      - tests/e2e/route-inventory.ts
+      - docs/testing/routes-inventory.json
+    outputs:
+      - tests/e2e/routes.navigation.spec.ts
+      - tests/e2e/routes.api.spec.ts
+      - tests/e2e/ui.interactions.spec.ts
+      - tests/e2e/ui.responsive.spec.ts
+      - tests/e2e/ui.accessibility.spec.ts
+    suggestedMcpTools:
+      - search_subagent
+      - apply_patch
+      - runTests
+
+  - id: manage-test-state
+    purpose: Enforce deterministic local auth state for tests
+    inputs:
+      - SKIP_AUTH
+      - VITE_SKIP_AUTH
+      - TEST_USER_ID
+      - VITE_TEST_USER_ID
+    outputs:
+      - Playwright webServer command with bypass vars
+      - Consistent mock user identity in client and server
+    suggestedMcpTools:
+      - runTests
+      - read_file
+
+constraints:
+  - Auth bypass must never be enabled in production.
+  - Auth bypass must run only on localhost hosts.
+  - Route inventory must stay in sync with src/routes and generated route tree.

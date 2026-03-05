@@ -14,7 +14,9 @@ vi.mock('@tanstack/react-query', async () => {
 
 // Mock translations
 vi.mock('react-i18next', () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({
+    t: (key: string, options?: { defaultValue?: string }) => options?.defaultValue ?? key,
+  }),
 }))
 
 describe('KPISection', () => {
@@ -31,7 +33,9 @@ describe('KPISection', () => {
     ;(useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: {
+        netBalance: 10000,
         revenue: 15000,
+        expenses: 5000,
         activeProjects: 5,
         taskCompletionRate: 75,
         totalTasks: 100,

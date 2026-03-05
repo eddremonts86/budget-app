@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useProjects } from '@/features/Projects/api/projects.queries'
 import { TodoForm } from '@/features/Todos/components/TodoForm'
-import { useUsers } from '@/features/Users/api/users.queries'
+import { useInfiniteProjects, useProjectMembers } from '@/features/Projects/api/projects.queries'
+import { useInfiniteUsers } from '@/features/Users/api/users.queries'
 
 // Mock dependencies
 vi.mock('react-i18next', () => ({
@@ -14,11 +14,12 @@ vi.mock('react-i18next', () => ({
 }))
 
 vi.mock('@/features/Projects/api/projects.queries', () => ({
-  useProjects: vi.fn(),
+  useInfiniteProjects: vi.fn(),
+  useProjectMembers: vi.fn(),
 }))
 
 vi.mock('@/features/Users/api/users.queries', () => ({
-  useUsers: vi.fn(),
+  useInfiniteUsers: vi.fn(),
 }))
 
 vi.mock('framer-motion', () => ({
@@ -40,13 +41,27 @@ describe('TodoForm', () => {
   const mockUsers = [{ id: 'u1', name: 'User 1', avatar: '' }]
 
   beforeEach(() => {
-    ;(useProjects as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ data: mockProjects })
-    ;(useUsers as unknown as ReturnType<typeof vi.fn>).mockReturnValue({ data: mockUsers })
+    ;(useInfiniteProjects as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: { pages: [{ data: mockProjects }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+    })
+    ;(useInfiniteUsers as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: { pages: [{ data: mockUsers }] },
+      fetchNextPage: vi.fn(),
+      hasNextPage: false,
+      isFetchingNextPage: false,
+    })
+    ;(useProjectMembers as unknown as ReturnType<typeof vi.fn>).mockReturnValue({
+      data: [{ projectId: '1', userId: 'u1', role: 'owner' }],
+      isLoading: false,
+    })
   })
 
   it('should render project selector', () => {
     render(<TodoForm onSubmit={vi.fn()} onCancel={vi.fn()} />)
-    expect(screen.getByText('todos.form.projectPlaceholder')).toBeDefined()
+    expect(screen.getByText('todos.form.projectLabel')).toBeDefined()
   })
 
   it('should require project selection', async () => {

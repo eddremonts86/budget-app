@@ -1,19 +1,19 @@
 'use client'
 
 import {
-    Button,
-    InputGroup,
-    InputGroupAddon,
-    InputGroupButton,
-    InputGroupTextarea,
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
 } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
 } from '@/components/ui/select'
 import { aiConfigApi } from '@/features/Settings/api/ai-config.api'
 import { useAiConfigStore } from '@/features/Settings/api/ai-config.queries'
@@ -21,19 +21,19 @@ import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { useTQuery } from '@/shared/lib/query'
 import type {
-    Conversation,
-    PersistedActionState,
-    StoredMessage,
+  Conversation,
+  PersistedActionState,
+  StoredMessage,
 } from '@/shared/lib/storage/chat-storage'
 import {
-    createConversationObject,
-    deleteAllConversations,
-    deleteConversation,
-    generateTitle,
-    getConversation,
-    getConversations,
-    migrateFromLocalStorage,
-    saveConversation,
+  createConversationObject,
+  deleteAllConversations,
+  deleteConversation,
+  generateTitle,
+  getConversation,
+  getConversations,
+  migrateFromLocalStorage,
+  saveConversation,
 } from '@/shared/lib/storage/chat-storage'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/utils/index'
@@ -43,26 +43,26 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import {
-    ArrowUp,
-    Bot,
-    Check,
-    ChevronDown,
-    ChevronUp,
-    Copy,
-    FileText,
-    Paperclip,
-    Settings,
-    Sparkles,
-    StopCircle,
-    Trash2,
-    User,
-    X,
+  ArrowUp,
+  Bot,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  FileText,
+  Paperclip,
+  Settings,
+  Sparkles,
+  StopCircle,
+  Trash2,
+  User,
+  X,
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism'
+import vscDarkPlus from 'react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus.js'
 import remarkGfm from 'remark-gfm'
 import { ActionConfirmationCard } from './ActionConfirmationCard'
 import { ActionStatesProvider } from './ActionStatesContext'
@@ -419,141 +419,141 @@ function MessageBubble({
                 if (part.type === 'thinking') {
                   return <ThinkingProcess key={partKey} content={part.content} />
                 }
-            if (part.type === 'text') {
-              // Show error placeholder for empty AI responses
-              if (!part.content?.trim()) {
-                if (!isUser) {
+                if (part.type === 'text') {
+                  // Show error placeholder for empty AI responses
+                  if (!part.content?.trim()) {
+                    if (!isUser) {
+                      return (
+                        <div
+                          key={partKey}
+                          className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-700 dark:text-amber-400"
+                        >
+                          <span className="text-base">⚠️</span>
+                          <span>{t('ai.chat.emptyResponse')}</span>
+                        </div>
+                      )
+                    }
+                    return null
+                  }
                   return (
                     <div
                       key={partKey}
-                      className="flex items-center gap-2 rounded-lg bg-amber-500/10 border border-amber-500/20 px-3 py-2 text-xs text-amber-700 dark:text-amber-400"
+                      className={cn(
+                        'markdown-content leading-7',
+                        isUser ? 'text-white/90' : 'text-foreground/90',
+                      )}
                     >
-                      <span className="text-base">⚠️</span>
-                      <span>{t('ai.chat.emptyResponse')}</span>
+                      <ReactMarkdown
+                        remarkPlugins={[remarkGfm]}
+                        components={{
+                          code({ className, children, ref: _ref, ...props }) {
+                            const match = /language-(\w+)/.exec(className || '')
+                            // Render action confirmation card for action code blocks
+                            if (match?.[1] === 'action') {
+                              return (
+                                <ActionConfirmationCard
+                                  actionJson={String(children).replace(/\n$/, '')}
+                                />
+                              )
+                            }
+                            return !String(className).includes('inline') && match ? (
+                              <div className="my-4 overflow-hidden rounded-lg border border-border/50 bg-zinc-950 shadow-sm">
+                                <div className="flex items-center justify-between bg-zinc-900/50 px-3 py-1.5 border-b border-border/10">
+                                  <span className="text-[10px] font-mono text-zinc-400">
+                                    {match[1]}
+                                  </span>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-6 w-6 rounded hover:bg-white/10 text-zinc-400"
+                                    onClick={() => navigator.clipboard.writeText(String(children))}
+                                  >
+                                    <Copy size={12} />
+                                  </Button>
+                                </div>
+                                <SyntaxHighlighter
+                                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                                  style={vscDarkPlus as any}
+                                  language={match[1]}
+                                  PreTag="div"
+                                  customStyle={{
+                                    margin: 0,
+                                    padding: '1rem',
+                                    background: 'transparent',
+                                  }}
+                                  {...props}
+                                >
+                                  {String(children).replace(/\n$/, '')}
+                                </SyntaxHighlighter>
+                              </div>
+                            ) : (
+                              <code
+                                className={cn(
+                                  'rounded px-1.5 py-0.5 font-mono text-xs font-medium',
+                                  isUser ? 'bg-white/20 text-white' : 'bg-muted text-foreground',
+                                )}
+                                {...props}
+                              >
+                                {children}
+                              </code>
+                            )
+                          },
+                          p: MarkdownP,
+                          ul: MarkdownUl,
+                          ol: MarkdownOl,
+                          li: MarkdownLi,
+                          a: MarkdownA,
+                          blockquote: MarkdownBlockquote,
+                          table: MarkdownTable,
+                          th: MarkdownTh,
+                          td: MarkdownTd,
+                        }}
+                      >
+                        {part.content}
+                      </ReactMarkdown>
+                    </div>
+                  )
+                }
+                if (part.type === 'image') {
+                  const imgUrl = (part as unknown as { image: string }).image
+                  return (
+                    <div
+                      key={partKey}
+                      className="mt-3 overflow-hidden rounded-xl border border-border/20 bg-black/5 shadow-sm"
+                    >
+                      <button
+                        type="button"
+                        onClick={() => onImageClick(imgUrl)}
+                        className="block w-full"
+                        title="Click to preview image"
+                      >
+                        <img
+                          src={imgUrl}
+                          alt="Uploaded content"
+                          className="max-h-75 w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-105"
+                        />
+                      </button>
+                    </div>
+                  )
+                }
+                // @ts-expect-error - tool calls
+                if (part.type === 'tool-invocation') {
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  const toolName = (part as any).toolCall?.toolName
+                  return (
+                    <div
+                      key={partKey}
+                      className="rounded-lg border border-border/50 bg-background/50 p-3 text-sm"
+                    >
+                      <div className="flex items-center gap-2 text-muted-foreground">
+                        <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
+                        Using tool: <span className="font-mono text-xs">{toolName}</span>
+                      </div>
                     </div>
                   )
                 }
                 return null
-              }
-              return (
-                <div
-                  key={partKey}
-                  className={cn(
-                    'markdown-content leading-7',
-                    isUser ? 'text-white/90' : 'text-foreground/90',
-                  )}
-                >
-                  <ReactMarkdown
-                    remarkPlugins={[remarkGfm]}
-                    components={{
-                      code({ className, children, ref: _ref, ...props }) {
-                        const match = /language-(\w+)/.exec(className || '')
-                        // Render action confirmation card for action code blocks
-                        if (match?.[1] === 'action') {
-                          return (
-                            <ActionConfirmationCard
-                              actionJson={String(children).replace(/\n$/, '')}
-                            />
-                          )
-                        }
-                        return !String(className).includes('inline') && match ? (
-                          <div className="my-4 overflow-hidden rounded-lg border border-border/50 bg-zinc-950 shadow-sm">
-                            <div className="flex items-center justify-between bg-zinc-900/50 px-3 py-1.5 border-b border-border/10">
-                              <span className="text-[10px] font-mono text-zinc-400">
-                                {match[1]}
-                              </span>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-6 w-6 rounded hover:bg-white/10 text-zinc-400"
-                                onClick={() => navigator.clipboard.writeText(String(children))}
-                              >
-                                <Copy size={12} />
-                              </Button>
-                            </div>
-                            <SyntaxHighlighter
-                              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                              style={vscDarkPlus as any}
-                              language={match[1]}
-                              PreTag="div"
-                              customStyle={{
-                                margin: 0,
-                                padding: '1rem',
-                                background: 'transparent',
-                              }}
-                              {...props}
-                            >
-                              {String(children).replace(/\n$/, '')}
-                            </SyntaxHighlighter>
-                          </div>
-                        ) : (
-                          <code
-                            className={cn(
-                              'rounded px-1.5 py-0.5 font-mono text-xs font-medium',
-                              isUser ? 'bg-white/20 text-white' : 'bg-muted text-foreground',
-                            )}
-                            {...props}
-                          >
-                            {children}
-                          </code>
-                        )
-                      },
-                      p: MarkdownP,
-                      ul: MarkdownUl,
-                      ol: MarkdownOl,
-                      li: MarkdownLi,
-                      a: MarkdownA,
-                      blockquote: MarkdownBlockquote,
-                      table: MarkdownTable,
-                      th: MarkdownTh,
-                      td: MarkdownTd,
-                    }}
-                  >
-                    {part.content}
-                  </ReactMarkdown>
-                </div>
-              )
-            }
-            if (part.type === 'image') {
-              const imgUrl = (part as unknown as { image: string }).image
-              return (
-                <div
-                  key={partKey}
-                  className="mt-3 overflow-hidden rounded-xl border border-border/20 bg-black/5 shadow-sm"
-                >
-                  <button
-                    type="button"
-                    onClick={() => onImageClick(imgUrl)}
-                    className="block w-full"
-                    title="Click to preview image"
-                  >
-                    <img
-                      src={imgUrl}
-                      alt="Uploaded content"
-                      className="max-h-75 w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-105"
-                    />
-                  </button>
-                </div>
-              )
-            }
-            // @ts-expect-error - tool calls
-            if (part.type === 'tool-invocation') {
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              const toolName = (part as any).toolCall?.toolName
-              return (
-                <div
-                  key={partKey}
-                  className="rounded-lg border border-border/50 bg-background/50 p-3 text-sm"
-                >
-                  <div className="flex items-center gap-2 text-muted-foreground">
-                    <div className="h-2 w-2 rounded-full bg-blue-500 animate-pulse" />
-                    Using tool: <span className="font-mono text-xs">{toolName}</span>
-                  </div>
-                </div>
-              )
-            }
-            return null
-          })
+              })
             : null}
           {isTyping && (
             <div className="mt-2 flex items-center gap-1.5">

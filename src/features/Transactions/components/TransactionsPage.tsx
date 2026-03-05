@@ -201,7 +201,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
           </Badge>
         </h3>
       </div>
-      <DataTable columns={columns} data={pendingTransactions} />
+      <DataTable columns={columns} data={pendingTransactions} className="max-h-[300px]" />
     </div>
   )
 }

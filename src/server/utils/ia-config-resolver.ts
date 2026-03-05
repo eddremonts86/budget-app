@@ -12,7 +12,19 @@ interface IaConfigProvider {
   models?: Record<string, IaConfigModel>
   connection?: {
     baseUrl?: string
+    base_url?: string
     apiKey?: string
+    timeout?: number
+    [key: string]: any
+  }
+  server?: {
+    base_url?: string
+    baseUrl?: string
+    timeout?: number
+    [key: string]: any
+  }
+  integration?: {
+    timeout?: number
     [key: string]: any
   }
   defaults?: Record<string, any>
@@ -27,11 +39,33 @@ interface IaConfigProvider {
  */
 export const resolveAiConfig = (
   providerId: string,
-  userConfig?: Partial<AiConfigFormData>
+  userConfig?: Partial<AiConfigFormData>,
 ): AiConfigFormData => {
   // 1. Get base config from ia-config
   const configKey = providerId as keyof typeof AI_CONFIG
   const baseConfig = AI_CONFIG[configKey] as IaConfigProvider | undefined
+  const baseUrlFromConfig =
+    baseConfig?.connection?.baseUrl ||
+    baseConfig?.connection?.base_url ||
+    baseConfig?.server?.baseUrl ||
+    baseConfig?.server?.base_url ||
+    ''
+  const envBaseUrlByProvider: Record<string, string | undefined> = {
+    'llama-cpp': process.env.AI_LLAMA_CPP_BASE_URL || process.env.VITE_AI_LLAMA_CPP_BASE_URL,
+    ollama: process.env.AI_OLLAMA_BASE_URL || process.env.VITE_AI_OLLAMA_BASE_URL,
+    'lm-studio':
+      process.env.AI_BASE_URL_INTERNAL ||
+      process.env.VITE_AI_LMSTUDIO_BASE_URL ||
+      process.env.VITE_AI_BASE_URL,
+    openai: process.env.OPENAI_BASE_URL || process.env.VITE_AI_OPENAI_BASE_URL,
+    anthropic: process.env.ANTHROPIC_BASE_URL || process.env.VITE_AI_ANTHROPIC_BASE_URL,
+  }
+  const resolvedBaseUrl = envBaseUrlByProvider[providerId] || baseUrlFromConfig
+  const resolvedTimeout =
+    baseConfig?.connection?.timeout ||
+    baseConfig?.server?.timeout ||
+    baseConfig?.integration?.timeout ||
+    60000
 
   if (!baseConfig) {
     console.warn(`[ConfigResolver] No base configuration found for provider: ${providerId}`)
@@ -41,7 +75,7 @@ export const resolveAiConfig = (
       baseUrl: '',
       parameters: {},
       endpoints: { chat: '/chat/completions', models: '/models' },
-      ...userConfig
+      ...userConfig,
     } as AiConfigFormData
   }
 
@@ -51,7 +85,7 @@ export const resolveAiConfig = (
 
   const mappedBaseConfig: Partial<AiConfigFormData> = {
     provider: providerId as any,
-    baseUrl: baseConfig.connection?.baseUrl || '',
+    baseUrl: resolvedBaseUrl,
     apiKey: baseConfig.connection?.apiKey || '',
     parameters: {
       temperature: 0.7,
@@ -68,8 +102,8 @@ export const resolveAiConfig = (
       chat: '/chat/completions',
       models: '/models',
     },
-    timeout: baseConfig.connection?.timeout || 60000,
-    port: baseConfig.connection?.baseUrl ? parseInt(new URL(baseConfig.connection.baseUrl).port) : 80,
+    timeout: resolvedTimeout,
+    port: resolvedBaseUrl ? parseInt(new URL(resolvedBaseUrl).port) : 80,
   }
 
   // 3. Merge with user config
@@ -84,7 +118,7 @@ export const resolveAiConfig = (
     endpoints: {
       ...mappedBaseConfig.endpoints,
       ...userConfig?.endpoints,
-    }
+    },
   } as AiConfigFormData
 
   // 4. Recalculate port if baseUrl is present in merged config

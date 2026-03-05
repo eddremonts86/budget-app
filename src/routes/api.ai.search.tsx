@@ -39,6 +39,8 @@ const buildSystemPrompt = (ragContext: string = '') => {
 
 export const handleSearchPost = async ({ request }: { request: Request }) => {
   try {
+    const isE2E = process.env.VITE_E2E === 'true'
+
     const [
       { getActiveAiConfig, getAllAiConfigs, validateAiConfig },
       { detectBestProvider, getProvider, probeProvider },
@@ -55,6 +57,19 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
         status: 400,
         headers: { 'Content-Type': 'application/json' },
       })
+    }
+
+    if (isE2E) {
+      return new Response(
+        JSON.stringify({
+          id: 'e2e-search-mock',
+          role: 'assistant',
+          content: `E2E mock search result for: ${query}`,
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      )
     }
 
     const config = await getActiveAiConfig()
@@ -132,12 +147,14 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
       // Some providers use max_output_tokens
       ...(providerId === 'openai' ? { max_output_tokens: maxTokens } : {}),
       // Anthropic thinking
-      ...(providerId === 'anthropic' ? {
-         thinking: {
-           type: 'enabled',
-           budget_tokens: Math.floor((maxTokens ?? 2048) / 2),
-         }
-      } : {})
+      ...(providerId === 'anthropic'
+        ? {
+            thinking: {
+              type: 'enabled',
+              budget_tokens: Math.floor((maxTokens ?? 2048) / 2),
+            },
+          }
+        : {}),
     }
 
     const stream = chat({

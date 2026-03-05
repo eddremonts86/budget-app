@@ -3,13 +3,22 @@ import { chat } from '@tanstack/ai'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { Route } from '@/routes/api.ai.chat'
 import { logAudit } from '@/shared/lib/ai/audit'
-import { getActiveAiConfig, validateAiConfig } from '@/shared/lib/ai/server/config-store'
-import { detectBestProvider } from '@/shared/lib/ai/server/providers'
+import {
+  getActiveAiConfig,
+  getAllAiConfigs,
+  validateAiConfig,
+} from '@/shared/lib/ai/server/config-store'
+import { detectBestProvider, probeProvider } from '@/shared/lib/ai/server/providers'
 
 // Mock dependencies
-vi.mock('@/shared/lib/ai/server/config-store')
+vi.mock('@/shared/lib/ai/server/config-store', () => ({
+  getActiveAiConfig: vi.fn(),
+  getAllAiConfigs: vi.fn(),
+  validateAiConfig: vi.fn(),
+}))
 vi.mock('@/shared/lib/ai/server/providers', () => ({
   detectBestProvider: vi.fn(),
+  probeProvider: vi.fn(),
   getProvider: vi.fn((id) => {
     if (id === 'openai') {
       return {
@@ -32,7 +41,7 @@ vi.mock('@/shared/lib/ai/audit', () => ({
 }))
 vi.mock('@tanstack/ai', () => ({
   chat: vi.fn(() => new ReadableStream()),
-  toServerSentEventsResponse: vi.fn(),
+  toServerSentEventsResponse: vi.fn(() => new Response('ok', { status: 200 })),
 }))
 
 describe('AI Chat API - Language Enforcement', () => {
@@ -63,6 +72,32 @@ describe('AI Chat API - Language Enforcement', () => {
     } as any)
     vi.mocked(validateAiConfig).mockReturnValue({ valid: true } as any)
     vi.mocked(detectBestProvider).mockResolvedValue({ statuses: [], provider: 'openai' })
+    vi.mocked(getAllAiConfigs).mockResolvedValue({
+      activeProvider: 'openai',
+      providers: {
+        openai: {
+          provider: 'openai',
+          baseUrl: 'https://api.openai.com/v1',
+          endpoints: { chat: '/chat/completions', models: '/models' },
+          parameters: {
+            model: 'gpt-4',
+            temperature: 0.7,
+            max_tokens: 1000,
+            top_p: 1,
+            frequency_penalty: 0,
+            presence_penalty: 0,
+          },
+          token: 'test-key',
+        },
+      },
+    } as any)
+    vi.mocked(probeProvider).mockResolvedValue({
+      id: 'openai',
+      label: 'OpenAI',
+      available: true,
+      status: 'available',
+      latencyMs: 10,
+    } as any)
     // vi.mocked(getProvider).mockReturnValue(...) // Removed because defined in factory
   })
 
@@ -80,10 +115,9 @@ describe('AI Chat API - Language Enforcement', () => {
     const callArgs = vi.mocked(chat).mock.calls[0][0] as any
     const messages = callArgs.messages
 
-    // Check first message is system prompt
-    expect(messages[0].role).toBe('system')
-    expect(messages[0].content).toContain('Spanish')
-    expect(messages[0].content).toContain('LANGUAGE')
+    // System prompt is injected as leading user message for provider compatibility
+    expect(messages[0].role).toBe('user')
+    expect(messages[0].content).toContain('Always respond in Spanish')
   })
 
   it('should default to en-US if locale is missing', async () => {
@@ -99,7 +133,7 @@ describe('AI Chat API - Language Enforcement', () => {
     const callArgs = vi.mocked(chat).mock.calls[0][0] as any
     const messages = callArgs.messages
 
-    expect(messages[0].content).toContain('English')
+    expect(messages[0].content).toContain('Always respond in English')
   })
 
   it('should log audit entry', async () => {

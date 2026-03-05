@@ -2,10 +2,93 @@
 
 set -eu
 
-MODEL="${1:-${LMSTUDIO_MODEL:-google/gemma-3-1b}}"
-IDENTIFIER="${2:-${LMSTUDIO_IDENTIFIER:-local-model}}"
+MODEL="${1:-${LMSTUDIO_MODEL:-qwen3.5-9b}}"
+IDENTIFIER="${2:-${LMSTUDIO_IDENTIFIER:-qwen3.5:9b}}"
+DRAFT_MODEL="${3:-${LMSTUDIO_DRAFT_MODEL:-qwen3.5-0.8b}}"
+DRAFT_IDENTIFIER="${4:-${LMSTUDIO_DRAFT_IDENTIFIER:-qwen3.5:0.8b-draft}}"
+MAIN_CANDIDATES="${LMSTUDIO_MAIN_CANDIDATES:-$MODEL,qwen3.5-9b,qwen3.5-4b}"
+DRAFT_CANDIDATES="${LMSTUDIO_DRAFT_CANDIDATES:-$DRAFT_MODEL,qwen3.5-0.8b}"
 MAX_RETRIES="${LMSTUDIO_HEALTH_RETRIES:-60}"
 SLEEP_SECONDS="${LMSTUDIO_HEALTH_SLEEP_SECONDS:-2}"
+
+is_supported_main() {
+  value="$1"
+  lower_value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+
+  case "$lower_value" in
+    *qwen3.5*9b*|*qwen3.5*4b*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+is_supported_draft() {
+  value="$1"
+  lower_value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+
+  case "$lower_value" in
+    *qwen3.5*0.8b*)
+      return 0
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
+download_first_available() {
+  candidates_csv="$1"
+  mode="$2"
+  downloaded_model=""
+
+  OLD_IFS="$IFS"
+  IFS=','
+  for candidate in $candidates_csv; do
+    IFS="$OLD_IFS"
+    candidate_trimmed="$(printf '%s' "$candidate" | sed 's/^ *//; s/ *$//')"
+    [ -n "$candidate_trimmed" ] || continue
+
+    if [ "$mode" = "main" ] && ! is_supported_main "$candidate_trimmed"; then
+      echo "[lmstudio] skipping unsupported main candidate: $candidate_trimmed"
+      continue
+    fi
+
+    if [ "$mode" = "draft" ] && ! is_supported_draft "$candidate_trimmed"; then
+      echo "[lmstudio] skipping unsupported draft candidate: $candidate_trimmed"
+      continue
+    fi
+
+    if docker compose exec -T lmstudio lms ls | grep -Fq "$candidate_trimmed"; then
+      echo "[lmstudio] $mode model already downloaded: $candidate_trimmed"
+      downloaded_model="$candidate_trimmed"
+      break
+    fi
+
+    echo "[lmstudio] trying to download $mode model: $candidate_trimmed"
+    if printf '%s' "$candidate_trimmed" | grep -q '/'; then
+      if docker compose exec -T lmstudio lms get "$candidate_trimmed" --yes; then
+        downloaded_model="$candidate_trimmed"
+        break
+      fi
+    elif docker compose exec -T lmstudio lms get "$candidate_trimmed" --gguf --yes; then
+      downloaded_model="$candidate_trimmed"
+      break
+    fi
+
+    echo "[lmstudio] candidate failed: $candidate_trimmed"
+    IFS=','
+  done
+  IFS="$OLD_IFS"
+
+  if [ -z "$downloaded_model" ]; then
+    return 1
+  fi
+
+  printf '%s\n' "$downloaded_model"
+}
 
 echo "[lmstudio] ensuring container is running..."
 docker compose up -d lmstudio
@@ -30,23 +113,45 @@ echo "[lmstudio] enforcing server-side CORS"
 docker compose exec -T lmstudio lms server stop || true
 docker compose exec -T lmstudio lms server start --port 1234 --cors
 
-if docker compose exec -T lmstudio lms ls | grep -Fq "$MODEL"; then
-  echo "[lmstudio] model already downloaded: $MODEL"
-else
-  echo "[lmstudio] downloading model: $MODEL"
-  if ! docker compose exec -T lmstudio lms get "$MODEL" --yes; then
-    echo "[lmstudio] exact model not found, trying fallback search for: $MODEL"
-    docker compose exec -T lmstudio lms get "$MODEL" --gguf --yes
-  fi
+if ! is_supported_main "$MODEL"; then
+  echo "[lmstudio] unsupported LMSTUDIO_MODEL: $MODEL (only Qwen3.5 4B/9B are allowed)"
+  exit 1
 fi
 
+MAIN_MODEL_RESOLVED="$(download_first_available "$MAIN_CANDIDATES" "main")" || {
+  echo "[lmstudio] failed to download/find a supported main model (4B/9B)."
+  exit 1
+}
+MODEL="$MAIN_MODEL_RESOLVED"
+
 if docker compose exec -T lmstudio lms ps | grep -Fq "$IDENTIFIER"; then
-  echo "[lmstudio] model already loaded with identifier: $IDENTIFIER"
+  echo "[lmstudio] main model already loaded with identifier: $IDENTIFIER"
 else
-  echo "[lmstudio] loading model with identifier: $IDENTIFIER"
+  echo "[lmstudio] loading main model with identifier: $IDENTIFIER"
   if ! docker compose exec -T lmstudio lms load "$MODEL" --identifier "$IDENTIFIER"; then
     echo "[lmstudio] load with identifier failed, retrying without identifier"
     docker compose exec -T lmstudio lms load "$MODEL"
+  fi
+fi
+
+if ! is_supported_draft "$DRAFT_MODEL"; then
+  echo "[lmstudio] unsupported LMSTUDIO_DRAFT_MODEL: $DRAFT_MODEL (only Qwen3.5 0.8B is allowed)"
+  exit 1
+fi
+
+if DRAFT_MODEL_RESOLVED="$(download_first_available "$DRAFT_CANDIDATES" "draft")"; then
+  DRAFT_MODEL="$DRAFT_MODEL_RESOLVED"
+else
+  echo "[lmstudio] draft model unavailable; continuing without draft loaded"
+  DRAFT_MODEL=""
+fi
+
+if [ -n "$DRAFT_MODEL" ]; then
+  if docker compose exec -T lmstudio lms ps | grep -Fq "$DRAFT_IDENTIFIER"; then
+    echo "[lmstudio] draft model already loaded with identifier: $DRAFT_IDENTIFIER"
+  else
+    echo "[lmstudio] loading draft model with identifier: $DRAFT_IDENTIFIER"
+    docker compose exec -T lmstudio lms load "$DRAFT_MODEL" --identifier "$DRAFT_IDENTIFIER" || true
   fi
 fi
 

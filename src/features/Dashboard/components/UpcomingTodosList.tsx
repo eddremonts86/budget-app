@@ -229,76 +229,78 @@ export function UpcomingTodosList() {
         )}
       </CardHeader>
       <CardContent>
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('todos.table.title', 'Task')}</TableHead>
-              <TableHead>{t('todos.table.assignedTo', 'Assigned To')}</TableHead>
-              <TableHead>{t('todos.table.status', 'Status')}</TableHead>
-              <TableHead>{t('todos.table.priority', 'Priority')}</TableHead>
-              <TableHead className="text-right">{t('todos.table.dueDate', 'Due Date')}</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {todoList.length === 0 ? (
+        <div className="max-h-[400px] overflow-y-auto relative">
+          <Table>
+            <TableHeader className="sticky top-0 bg-background z-10">
               <TableRow>
-                <TableCell colSpan={5} className="text-center text-muted-foreground h-24">
-                  {selectedUserIds.size > 0
-                    ? t(
-                        'dashboard.upcomingTasks.noFilteredResults',
-                        'No tasks found for selected filters.',
-                      )
-                    : t('dashboard.upcomingTasks.noTasks', 'No upcoming tasks for this week.')}
-                </TableCell>
+                <TableHead>{t('todos.table.title', 'Task')}</TableHead>
+                <TableHead>{t('todos.table.assignedTo', 'Assigned To')}</TableHead>
+                <TableHead>{t('todos.table.status', 'Status')}</TableHead>
+                <TableHead>{t('todos.table.priority', 'Priority')}</TableHead>
+                <TableHead className="text-right">{t('todos.table.dueDate', 'Due Date')}</TableHead>
               </TableRow>
-            ) : (
-              todoList.map((todo) => {
-                const assignedUser = userMap.get(todo.assignedTo)
-                return (
-                  <TableRow key={todo.id}>
-                    <TableCell className="font-medium">{todo.title}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Avatar className="h-6 w-6">
-                          <AvatarImage
-                            src={assignedUser?.avatar || undefined}
-                            alt={assignedUser?.name}
-                          />
-                          <AvatarFallback className="text-[10px]">
-                            {assignedUser ? getInitials(assignedUser.name) : '?'}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="text-sm text-muted-foreground">
-                          {assignedUser?.name || 'Unassigned'}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={todo.status === 'completed' ? 'default' : 'secondary'}>
-                        {statusLabels[todo.status] || todo.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={cn(
-                          todo.priority === 'high' && 'text-red-500 border-red-200',
-                          todo.priority === 'medium' && 'text-yellow-500 border-yellow-200',
-                          todo.priority === 'low' && 'text-green-500 border-green-200',
-                        )}
-                      >
-                        {t(`todos.priority.${todo.priority}`, todo.priority)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      {todo.dueDate ? format(new Date(todo.dueDate), 'MMM d') : '-'}
-                    </TableCell>
-                  </TableRow>
-                )
-              })
-            )}
-          </TableBody>
-        </Table>
+            </TableHeader>
+            <TableBody>
+              {todoList.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center text-muted-foreground h-24">
+                    {selectedUserIds.size > 0
+                      ? t(
+                          'dashboard.upcomingTasks.noFilteredResults',
+                          'No tasks found for selected filters.',
+                        )
+                      : t('dashboard.upcomingTasks.noTasks', 'No upcoming tasks for this week.')}
+                  </TableCell>
+                </TableRow>
+              ) : (
+                todoList.map((todo) => {
+                  const assignedUser = userMap.get(todo.assignedTo)
+                  return (
+                    <TableRow key={todo.id}>
+                      <TableCell className="font-medium">{todo.title}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Avatar className="h-6 w-6">
+                            <AvatarImage
+                              src={assignedUser?.avatar || undefined}
+                              alt={assignedUser?.name}
+                            />
+                            <AvatarFallback className="text-[10px]">
+                              {assignedUser ? getInitials(assignedUser.name) : '?'}
+                            </AvatarFallback>
+                          </Avatar>
+                          <span className="text-sm text-muted-foreground">
+                            {assignedUser?.name || 'Unassigned'}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={todo.status === 'completed' ? 'default' : 'secondary'}>
+                          {statusLabels[todo.status] || todo.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={cn(
+                            todo.priority === 'high' && 'text-red-500 border-red-200',
+                            todo.priority === 'medium' && 'text-yellow-500 border-yellow-200',
+                            todo.priority === 'low' && 'text-green-500 border-green-200',
+                          )}
+                        >
+                          {t(`todos.priority.${todo.priority}`, todo.priority)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        {todo.dueDate ? format(new Date(todo.dueDate), 'MMM d') : '-'}
+                      </TableCell>
+                    </TableRow>
+                  )
+                })
+              )}
+            </TableBody>
+          </Table>
+        </div>
       </CardContent>
     </Card>
   )

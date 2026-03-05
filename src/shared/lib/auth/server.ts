@@ -1,9 +1,11 @@
 import { auth } from '@clerk/tanstack-react-start/server'
+import { getServerTestUserId, isServerAuthBypassEnabled } from './bypass.server'
 
 export const getAuthUser = async () => {
-  if (process.env.VITE_E2E === 'true') {
+  if (isServerAuthBypassEnabled()) {
+    const userId = getServerTestUserId()
     return {
-      userId: 'user_e2e_local',
+      userId,
       sessionClaims: {
         publicMetadata: {
           role: 'admin',

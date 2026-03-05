@@ -1,11 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { renderHook, waitFor } from '@testing-library/react'
 import React from 'react'
-import { toast } from 'sonner'
+import { toast } from '@/shared/lib/toast'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useTQMutation } from '@/shared/lib/query/useTQMutation'
 
-vi.mock('sonner', () => ({
+vi.mock('@/shared/lib/toast', () => ({
   toast: {
     success: vi.fn(),
   },

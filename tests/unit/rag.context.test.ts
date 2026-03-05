@@ -24,6 +24,7 @@ vi.mock('@/shared/lib/db', () => {
 
   return {
     db: mockDb,
+    getDb: vi.fn(() => mockDb),
   }
 })
 

@@ -61,9 +61,10 @@ export default defineConfig({
   ),
 
   webServer: {
-    command: 'VITE_E2E=true npm run dev:server',
+    command:
+      'SKIP_AUTH=true VITE_SKIP_AUTH=true TEST_USER_ID=user_e2e_local VITE_TEST_USER_ID=user_e2e_local VITE_E2E=true npm run dev:server',
     url: 'http://localhost:3000',
-    reuseExistingServer: !process.env.CI,
+    reuseExistingServer: false,
     timeout: 120 * 1000,
   },
 })

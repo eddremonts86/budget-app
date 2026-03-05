@@ -49,7 +49,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       status: '',
     },
     parameters: {
-      model: 'llama-3.2-1b-instruct-q4_k_m.gguf',
+      model: '.docker_data/llm-models/llama-cpp/qwen3.5-9b-instruct-q4_k_m.gguf',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -68,7 +68,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       status: '',
     },
     parameters: {
-      model: 'llama3.2',
+      model: 'qwen3.5:9b',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -119,7 +119,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       status: '/models/download/status/:job_id',
     },
     parameters: {
-      model: 'llama3.2:latest',
+      model: 'qwen3.5:9b',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -323,7 +323,7 @@ export function AiConfigForm() {
               </p>
             </div>
             <div className="p-6 pt-0">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
+              <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6">
                 {[
                   {
                     id: 'llama-cpp',

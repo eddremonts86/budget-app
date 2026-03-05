@@ -103,7 +103,10 @@
       "teamEmpty": "No se encontraron usuarios.",
       "addNewUser": "Añadir nuevo usuario",
       "technologiesLabel": "Tecnologías",
-      "technologiesPlaceholder": "Ej. React, Node.js"
+      "technologiesPlaceholder": "Ej. React, Node.js",
+      "skillsLabel": "Habilidades",
+      "skillsPlaceholder": "Buscar habilidades...",
+      "skillsEmpty": "No se encontraron habilidades."
     },
     "status": {
       "active": "Activo",
@@ -169,10 +172,18 @@
   },
   "users": {
     "title": "Usuarios",
+    "subtitlePrefix": "Gestiona los niveles de acceso para ",
+    "subtitleSuffix": " miembros del equipo.",
     "description": "Gestiona los usuarios de la plataforma.",
     "create": "Nuevo Usuario",
     "edit": "Editar Usuario",
     "delete": "Eliminar Usuario",
+    "actions": {
+      "new": "Nuevo Usuario",
+      "save": "Guardar Usuario",
+      "editProfile": "Editar Perfil",
+      "deleteAccount": "Eliminar Cuenta"
+    },
     "form": {
       "nameLabel": "Nombre",
       "namePlaceholder": "Nombre completo",
@@ -215,6 +226,12 @@
     "roles": {
       "admin": "Administrador",
       "user": "Usuario"
+    },
+    "sheet": {
+      "createTitle": "Registro de Usuario",
+      "createDescription": "Crea un nuevo perfil de acceso para tu equipo.",
+      "editTitle": "Perfil de Usuario",
+      "editDescription": "Actualiza la información de contacto y permisos."
     },
     "toast": {
       "created": "Usuario creado correctamente",

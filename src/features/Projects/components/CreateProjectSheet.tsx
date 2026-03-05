@@ -30,10 +30,8 @@ export function CreateProjectSheet({ open, onOpenChange, onSuccess }: CreateProj
     try {
       const result = await createMutation.mutateAsync({
         ...values,
-        technologies: values.technologies
-          .split(',')
-          .map((tech: string) => tech.trim())
-          .filter(Boolean),
+        departmentId: values.departmentId ?? null,
+        skills: values.skills,
       })
       toast.success(t('projects.success.created'))
       setCreatedProject(result as Project)
@@ -129,16 +127,16 @@ export function CreateProjectSheet({ open, onOpenChange, onSuccess }: CreateProj
                 </div>
               </div>
 
-              {createdProject.technologies && createdProject.technologies.length > 0 && (
+              {createdProject.skills && createdProject.skills.length > 0 && (
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-xs font-medium text-muted-foreground uppercase tracking-wider">
                     <Code className="h-3 w-3" />
                     {t('projects.form.technologiesLabel')}
                   </div>
                   <div className="flex flex-wrap gap-2">
-                    {createdProject.technologies.map((tech) => (
-                      <Badge key={tech} variant="secondary">
-                        {tech}
+                    {createdProject.skills.map((skill) => (
+                      <Badge key={skill} variant="secondary">
+                        {skill}
                       </Badge>
                     ))}
                   </div>

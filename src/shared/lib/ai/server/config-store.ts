@@ -25,20 +25,11 @@ const OLLAMA_BASE_URL =
 const LLAMA_CPP_MODEL =
   process.env.AI_LLAMA_CPP_MODEL ||
   process.env.VITE_AI_LLAMA_CPP_MODEL ||
-  'llama-3.2-1b-instruct-q4_k_m.gguf'
+  '.docker_data/llm-models/llama-cpp/qwen3.5-9b-instruct-q4_k_m.gguf'
 
-const OLLAMA_MODEL =
-  process.env.AI_OLLAMA_MODEL ||
-  process.env.VITE_AI_OLLAMA_MODEL ||
-  'llama3.2'
+const OLLAMA_MODEL = process.env.AI_OLLAMA_MODEL || process.env.VITE_AI_OLLAMA_MODEL || 'qwen3.5:9b'
 
-const PROVIDERS = new Set<AiProvider>([
-  'llama-cpp',
-  'ollama',
-  'lm-studio',
-  'openai',
-  'anthropic',
-])
+const PROVIDERS = new Set<AiProvider>(['llama-cpp', 'ollama', 'lm-studio', 'openai', 'anthropic'])
 
 const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
   'llama-cpp': {
@@ -144,7 +135,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'llama3.2:latest',
+      model: 'qwen3.5:9b',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -183,7 +174,7 @@ const normalizeConfig = (
 
   // Fix for LM Studio requiring a valid model name (not local-model)
   if (provider === 'lm-studio' && mergedParameters.model === 'local-model') {
-    mergedParameters.model = 'llama3.2:latest'
+    mergedParameters.model = 'qwen3.5:9b'
   }
 
   return {

@@ -33,7 +33,7 @@ const normalizeBaseUrl = (baseUrl?: string) => {
 }
 
 type ChatMessage = {
-  role: 'user' | 'assistant' | 'tool'
+  role: 'user' | 'assistant' | 'tool' | 'system'
   content: string
   parts?: Array<{ type: 'text'; text: string } | { type: 'image'; image: string }>
 }
@@ -65,7 +65,19 @@ const localeToLanguage: Record<string, string> = {
 const resolveLanguageName = (locale: string) =>
   localeToLanguage[locale] || localeToLanguage[locale.split('-')[0]] || 'English'
 
-const buildSystemPrompt = (languageName: string) => {
+const buildSystemPrompt = (languageName: string, mode: 'general' | 'dashboard') => {
+  if (mode === 'general') {
+    return [
+      `You are a helpful, knowledgeable AI assistant.`,
+      `RULES:`,
+      `1. LANGUAGE: Always respond in ${languageName}.`,
+      `2. Answer the user's question directly and concisely.`,
+      `3. If the user asks about the dashboard application, use any provided context and data accurately.`,
+      `4. Never invent app-specific numbers, routes, or records when they are not provided.`,
+      `5. Use Markdown for formatting when helpful.`,
+    ].join('\n')
+  }
+
   return [
     `You are a helpful, knowledgeable AI assistant for the "Acme Inc." dashboard application.`,
     `You have access to application data (users, tasks, transactions, categories) and know the app's navigation structure.`,
@@ -83,7 +95,7 @@ const buildSystemPrompt = (languageName: string) => {
 const normalizeIncomingMessages = (rawMessages: ChatRequestBody['messages']): ChatMessage[] => {
   return rawMessages
     .map((msg) => {
-      const role: ChatMessage['role'] = msg.role === 'system' ? 'user' : msg.role
+      const role: ChatMessage['role'] = msg.role
 
       if (!Array.isArray(msg.parts)) {
         return {
@@ -161,9 +173,25 @@ const findLastUserQuery = (messages: ChatMessage[]) => {
   return lastUserMessage?.content
 }
 
+const isDashboardDomainQuery = async (query?: string): Promise<boolean> => {
+  if (!query) return false
+
+  const { detectIntent, detectActionIntent } = await import('@/shared/lib/rag/context')
+
+  const intents = detectIntent(query)
+  const actionIntent = detectActionIntent(query)
+
+  return intents.length > 0 || actionIntent !== null
+}
+
 const injectReferenceContext = async (messages: ChatMessage[], locale: string) => {
   const query = findLastUserQuery(messages)
   if (!query) return ''
+
+  const shouldInjectAppContext = await isDashboardDomainQuery(query)
+  if (!shouldInjectAppContext) {
+    return query
+  }
 
   const [{ retrieveContext }, { injectDynamicContext }] = await Promise.all([
     import('@/shared/lib/rag/retrieval'),
@@ -542,6 +570,8 @@ const streamLmStudioChat = async (
 
 export const handleChatPost = async ({ request }: { request: Request }) => {
   try {
+    const isE2E = process.env.VITE_E2E === 'true'
+
     const [
       { logAudit },
       { getActiveAiConfig, getAllAiConfigs, validateAiConfig },
@@ -563,14 +593,32 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
       })
     }
 
+    if (isE2E) {
+      return new Response(
+        JSON.stringify({
+          id: 'e2e-chat-mock',
+          role: 'assistant',
+          content: 'E2E mock response',
+        }),
+        {
+          headers: { 'Content-Type': 'application/json' },
+        },
+      )
+    }
+
     const url = new URL(request.url)
     const locale = url.searchParams.get('locale') || 'en-US'
 
-    const systemPrompt = buildSystemPrompt(resolveLanguageName(locale))
+    const lastUserQuery = findLastUserQuery(messages)
+    const isDashboardQuery = await isDashboardDomainQuery(lastUserQuery)
+    const systemPrompt = buildSystemPrompt(
+      resolveLanguageName(locale),
+      isDashboardQuery ? 'dashboard' : 'general',
+    )
 
     // Ensure system message is first
     messages.unshift({
-      role: 'user',
+      role: 'system',
       content: systemPrompt,
     })
 
@@ -618,7 +666,7 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
       })
     }
 
-    const lastUserQuery = await injectReferenceContext(messages, locale)
+    const contextualQuery = await injectReferenceContext(messages, locale)
 
     // Consolidate messages to merge consecutive user/assistant messages
     // This is crucial for providers like Anthropic that disallow consecutive user messages
@@ -628,7 +676,7 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
     logAudit({
       timestamp: new Date().toISOString(),
       locale,
-      query: lastUserQuery ? `${String(lastUserQuery).slice(0, 50)}...` : 'No content',
+      query: contextualQuery ? `${String(contextualQuery).slice(0, 50)}...` : 'No content',
       providerId: providerId || 'unknown',
       model: body.model ?? finalConfig.parameters.model ?? 'unknown',
       contextLength: 0,

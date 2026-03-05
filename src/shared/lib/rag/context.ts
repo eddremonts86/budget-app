@@ -331,8 +331,10 @@ async function loadAppKnowledge(): Promise<AppKnowledge | null> {
   if (cachedKnowledge) return cachedKnowledge
 
   try {
-    const { default: fs } = await import('node:fs/promises')
-    const { default: path } = await import('node:path')
+    const fsModule = 'node:fs/promises'
+    const pathModule = 'node:path'
+    const { default: fs } = await import(/* @vite-ignore */ fsModule)
+    const { default: path } = await import(/* @vite-ignore */ pathModule)
 
     const knowledgePath = path.resolve(process.cwd(), 'src/server/data/app-knowledge.json')
     const content = await fs.readFile(knowledgePath, 'utf-8')
@@ -677,6 +679,11 @@ export async function injectDynamicContext(query: string, locale: string = 'en')
 
 // Export for testing
 export {
-    buildActionInstructions, buildAppNavigationContext, detectActionIntent, detectIntent, fetchDynamicContext, loadAppKnowledge
+  buildActionInstructions,
+  buildAppNavigationContext,
+  detectActionIntent,
+  detectIntent,
+  fetchDynamicContext,
+  loadAppKnowledge,
 }
 export type { ActionEntity, ActionIntent, ActionType, AppKnowledge, Intent }

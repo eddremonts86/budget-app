@@ -5,8 +5,10 @@ export const Route = createFileRoute('/api/ai/audit')({
   server: {
     handlers: {
       GET: async () => {
-        const { promises: fs } = await import('fs')
-        const path = await import('path')
+        const fsModule = 'node:fs/promises'
+        const pathModule = 'node:path'
+        const { default: fs } = await import(/* @vite-ignore */ fsModule)
+        const { default: path } = await import(/* @vite-ignore */ pathModule)
 
         try {
           const logPath = path.resolve(process.cwd(), 'src/server/data/audit-logs.json')
@@ -33,8 +35,10 @@ export const Route = createFileRoute('/api/ai/audit')({
         }
       },
       POST: async ({ request }: { request: Request }) => {
-        const { promises: fs } = await import('fs')
-        const path = await import('path')
+        const fsModule = 'node:fs/promises'
+        const pathModule = 'node:path'
+        const { default: fs } = await import(/* @vite-ignore */ fsModule)
+        const { default: path } = await import(/* @vite-ignore */ pathModule)
 
         try {
           const body = await request.json()

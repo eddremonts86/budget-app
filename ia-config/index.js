@@ -23,10 +23,14 @@ async function getNodeModules() {
     return null
   }
   try {
-    const childProcess = await import('node:child_process')
-    const dns = await import('node:dns/promises')
-    const os = await import('node:os')
-    const util = await import('node:util')
+    const childProcessModule = 'node:child_process'
+    const dnsModule = 'node:dns/promises'
+    const osModule = 'node:os'
+    const utilModule = 'node:util'
+    const childProcess = await import(/* @vite-ignore */ childProcessModule)
+    const dns = await import(/* @vite-ignore */ dnsModule)
+    const os = await import(/* @vite-ignore */ osModule)
+    const util = await import(/* @vite-ignore */ utilModule)
     return { childProcess, dns, os, util }
   } catch {
     return null

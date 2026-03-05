@@ -1,5 +1,6 @@
 import { useUser } from '@clerk/tanstack-react-start'
 import * as React from 'react'
+import { getClientTestUserId, isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
 import { upsertUserFn } from '../api/users.fn'
 import type { User } from '../model/types'
 import { UserContext } from './UserContext'
@@ -9,14 +10,15 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const [syncedUser, setSyncedUser] = React.useState<User | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
   const hasRun = React.useRef(false)
-  const isE2E = import.meta.env.VITE_E2E === 'true'
+  const isAuthBypassEnabled = isClientAuthBypassEnabled()
 
   React.useEffect(() => {
     // If we're in E2E mode, we use a mock local user
-    if (isE2E) {
+    if (isAuthBypassEnabled) {
+      const testUserId = getClientTestUserId()
       if (!syncedUser) {
         setSyncedUser({
-          id: 'user_e2e_local',
+          id: testUserId,
           name: 'Local Test User',
           email: 'local-test@example.com',
           avatar: null,
@@ -81,10 +83,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
 
     syncUser()
-  }, [clerkIsLoaded, clerkUser, syncedUser?.id, isE2E])
+  }, [clerkIsLoaded, clerkUser, syncedUser, isAuthBypassEnabled])
 
   const value = React.useMemo(() => {
-    const isReady = (isE2E && !!syncedUser) || (clerkIsLoaded && !!syncedUser)
+    const isReady = (isAuthBypassEnabled && !!syncedUser) || (clerkIsLoaded && !!syncedUser)
     return {
       syncedUserId: syncedUser?.id ?? null,
       userRole: (syncedUser?.roleName === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
@@ -92,7 +94,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       isLoading: !isReady || isLoading,
       isReady,
     }
-  }, [syncedUser, clerkIsLoaded, isLoading, isE2E])
+  }, [syncedUser, clerkIsLoaded, isLoading, isAuthBypassEnabled])
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }

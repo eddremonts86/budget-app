@@ -18,6 +18,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AiSearchProvider } from '@/features/Ai/context/AiSearchContext'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import { UserProvider } from '@/features/Users/context/UserProvider'
+import { isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
 import { cn } from '@/shared/utils'
 import { NotificationBell } from './NotificationBell'
 
@@ -25,7 +26,7 @@ export function DashboardLayout() {
   const { isLoaded, userId } = useAuth()
   const { pathname } = useLocation()
   const { t } = useTranslation()
-  const isE2E = import.meta.env.VITE_E2E === 'true'
+  const isAuthBypassEnabled = isClientAuthBypassEnabled()
 
   // Get current page title from pathname
   const segments = pathname.split('/').filter(Boolean)
@@ -36,13 +37,13 @@ export function DashboardLayout() {
       : 'Dashboard',
   })
 
-  if (!isE2E && isLoaded && !userId) {
+  if (!isAuthBypassEnabled && isLoaded && !userId) {
     throw redirect({
       to: '/',
     })
   }
 
-  if (!isE2E && !isLoaded) {
+  if (!isAuthBypassEnabled && !isLoaded) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p>Loading...</p>

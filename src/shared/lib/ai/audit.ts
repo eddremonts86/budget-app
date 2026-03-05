@@ -9,8 +9,10 @@ export interface AuditEntry {
 
 export async function logAudit(entry: AuditEntry) {
   try {
-    const { default: fs } = await import('node:fs/promises')
-    const { default: path } = await import('node:path')
+    const fsModule = 'node:fs/promises'
+    const pathModule = 'node:path'
+    const { default: fs } = await import(/* @vite-ignore */ fsModule)
+    const { default: path } = await import(/* @vite-ignore */ pathModule)
 
     const logPath = path.resolve(process.cwd(), 'src/server/data/audit-logs.json')
 
