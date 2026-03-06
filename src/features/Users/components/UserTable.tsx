@@ -67,11 +67,11 @@ export function UserTable({
         },
       },
       {
-        accessorKey: 'role',
+        accessorKey: 'roleName',
         header: t('users.table.role'),
         cell: ({ row }) => {
-          const role = row.getValue('role') as string
-          const isAdmin = role === 'admin'
+          const role = (row.getValue('roleName') as string) || '-'
+          const isAdmin = role.toLowerCase().includes('admin')
           return (
             <Badge
               variant="outline"
@@ -89,10 +89,10 @@ export function UserTable({
         },
       },
       {
-        accessorKey: 'jobTitle',
+        accessorKey: 'jobTitleName',
         header: t('users.table.jobTitle'),
         cell: ({ row }) => (
-          <span className="text-sm text-muted-foreground">{row.original.jobTitle || '-'}</span>
+          <span className="text-sm text-muted-foreground">{row.original.jobTitleName || '-'}</span>
         ),
       },
       {

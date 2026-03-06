@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,14 +13,9 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useProjects } from '@/features/Projects/api/projects.queries'
 import { useUsers } from '@/features/Users/api/users.queries'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
@@ -54,54 +50,54 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
 
   const handleApprove = (transaction: Transaction) => {
     if (!currentUserId) return
-    if (confirm(t('transactions.pending.approveConfirm'))) {
-      updateMutation.mutate(
-        {
-          id: transaction.id,
-          data: {
-            status: 'Approved',
-            approvedBy: currentUserId,
-            approvedAt: new Date().toISOString(),
-          },
+    toast.warning(t('transactions.pending.approveConfirm'), {
+      action: {
+        label: t('transactions.pending.approve'),
+        onClick: () => {
+          updateMutation.mutate(
+            {
+              id: transaction.id,
+              data: {
+                status: 'Approved',
+                approvedBy: currentUserId,
+                approvedAt: new Date().toISOString(),
+              },
+            },
+            {
+              onSuccess: () => toast.success(t('transactions.pending.approveSuccess')),
+            },
+          )
         },
-        {
-          onSuccess: () => toast.success(t('transactions.pending.approveSuccess')),
-        },
-      )
-    }
+      },
+    })
   }
 
   const handleReject = (transaction: Transaction) => {
     if (!currentUserId) return
-    const reason = prompt(t('transactions.pending.rejectPrompt'))
-    if (reason) {
-      updateMutation.mutate(
-        {
-          id: transaction.id,
-          data: {
-            status: 'Rejected',
-            rejectionReason: reason,
-            approvedBy: currentUserId,
-            approvedAt: new Date().toISOString(),
-          },
+    toast.warning(t('transactions.pending.rejectPrompt'), {
+      action: {
+        label: t('transactions.pending.reject'),
+        onClick: () => {
+          updateMutation.mutate(
+            {
+              id: transaction.id,
+              data: {
+                status: 'Rejected',
+                rejectionReason: t('transactions.pending.reject'),
+                approvedBy: currentUserId,
+                approvedAt: new Date().toISOString(),
+              },
+            },
+            {
+              onSuccess: () => toast.success(t('transactions.pending.rejectSuccess')),
+            },
+          )
         },
-        {
-          onSuccess: () => toast.success(t('transactions.pending.rejectSuccess')),
-        },
-      )
-    }
+      },
+    })
   }
 
   const columns: ColumnDef<Transaction>[] = [
-    {
-      accessorKey: 'id',
-      header: 'ID',
-      cell: ({ row }) => (
-        <span className="font-mono text-xs text-muted-foreground">
-          #{row.original.id?.slice(0, 8)}
-        </span>
-      ),
-    },
     {
       accessorKey: 'customer.name',
       id: 'customer_name',
@@ -192,16 +188,14 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
   }
 
   return (
-    <div className="space-y-4 border rounded-xl p-4 bg-muted/30">
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold flex items-center gap-2 text-orange-600">
-          {t('transactions.pending.title')}
-          <Badge variant="destructive" className="rounded-full px-2">
-            {pendingTransactions.length}
-          </Badge>
-        </h3>
+    <div className="h-full min-h-0 flex flex-col gap-4 border rounded-xl p-4 bg-muted/30">
+      <div className="flex items-start justify-between gap-3 shrink-0">
+        <h3 className="text-lg font-semibold text-orange-600">{t('transactions.pending.title')}</h3>
+        <Badge variant="destructive" className="rounded-full px-2.5 py-0.5 text-xs">
+          {pendingTransactions.length}
+        </Badge>
       </div>
-      <DataTable columns={columns} data={pendingTransactions} className="max-h-[300px]" />
+      <DataTable columns={columns} data={pendingTransactions} className="pb-4" fullHeight />
     </div>
   )
 }
@@ -348,9 +342,12 @@ export function TransactionsPage() {
               <DropdownMenuItem
                 className="text-destructive focus:text-destructive"
                 onClick={() => {
-                  if (confirm(t('common.undoWarning'))) {
-                    deleteMutation.mutate(transaction.id)
-                  }
+                  toast.warning(t('common.undoWarning'), {
+                    action: {
+                      label: t('common.delete'),
+                      onClick: () => deleteMutation.mutate(transaction.id),
+                    },
+                  })
                 }}
               >
                 <Trash2 className="mr-2 h-4 w-4" />
@@ -368,7 +365,7 @@ export function TransactionsPage() {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-8">
+    <div className="flex flex-col h-full min-h-0 gap-8">
       <div className="flex items-center justify-between shrink-0">
         <h2 className="text-3xl font-bold tracking-tight">{t('transactions.title')}</h2>
         <Button onClick={() => setIsCreateOpen(true)}>
@@ -377,40 +374,59 @@ export function TransactionsPage() {
         </Button>
       </div>
 
-      {/* Pending Approval Section */}
-      {currentUserId && (
-        <div className="shrink-0">
-          <PendingTransactionsTable transactions={allTransactions} currentUserId={currentUserId} />
-        </div>
-      )}
+      <Tabs defaultValue="approval" className="flex-1 min-h-0 flex flex-col">
+        <TabsList className="w-full grid grid-cols-2 shrink-0">
+          <TabsTrigger value="approval">Request your approval</TabsTrigger>
+          <TabsTrigger value="history">{t('transactions.history')}</TabsTrigger>
+        </TabsList>
 
-      <div className="flex-1 min-h-0 flex flex-col space-y-4">
-        <h3 className="text-xl font-semibold tracking-tight shrink-0">
-          {t('transactions.history')}
-        </h3>
-        {isLoading ? (
-          <div className="space-y-2">
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
-            <Skeleton className="h-10 w-full" />
+        <TabsContent value="approval" className="pt-4 flex-1 min-h-0 overflow-hidden">
+          <div className="h-full min-h-0 overflow-hidden">
+            {currentUserId ? (
+              <PendingTransactionsTable
+                transactions={allTransactions}
+                currentUserId={currentUserId}
+              />
+            ) : (
+              <div className="h-full border rounded-xl p-4 bg-muted/30 text-sm text-muted-foreground">
+                {t('transactions.pending.title')}
+              </div>
+            )}
           </div>
-        ) : (
-          <DataTable
-            columns={columns}
-            data={displayedTransactions}
-            filterColumn="customer_name"
-            fullHeight
-          />
-        )}
-      </div>
+        </TabsContent>
+
+        <TabsContent value="history" className="pt-4 flex-1 min-h-0 flex flex-col gap-4">
+          <div className="flex-1 min-h-0 flex flex-col gap-4">
+            <h3 className="text-xl font-semibold tracking-tight shrink-0">
+              {t('transactions.history')}
+            </h3>
+            {isLoading ? (
+              <div className="space-y-2">
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+                <Skeleton className="h-10 w-full" />
+              </div>
+            ) : (
+              <DataTable
+                columns={columns}
+                data={displayedTransactions}
+                filterColumn="customer_name"
+                className="pb-4"
+                fullHeight
+              />
+            )}
+          </div>
+        </TabsContent>
+      </Tabs>
 
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent>
-          <SheetHeader className="shrink-0">
-            <SheetTitle>{t('transactions.actions.create')}</SheetTitle>
-            <SheetDescription>{t('transactions.form.createDescription')}</SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+        <CrudSheetContent className="sm:max-w-[560px]">
+          <CrudSheetHeader
+            title={t('transactions.actions.create')}
+            description={t('transactions.form.createDescription')}
+            onClose={() => setIsCreateOpen(false)}
+          />
+          <CrudSheetBody className="p-6">
             <TransactionForm
               onSubmit={(values) => {
                 const { customer, ...rest } = values
@@ -431,20 +447,21 @@ export function TransactionsPage() {
               onCancel={() => setIsCreateOpen(false)}
               isLoading={createMutation.isPending}
             />
-          </div>
-        </SheetContent>
+          </CrudSheetBody>
+        </CrudSheetContent>
       </Sheet>
 
       <Sheet
         open={!!editingTransaction}
         onOpenChange={(open) => !open && setEditingTransaction(null)}
       >
-        <SheetContent>
-          <SheetHeader className="shrink-0">
-            <SheetTitle>{t('transactions.actions.edit')}</SheetTitle>
-            <SheetDescription>{t('transactions.form.editDescription')}</SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto px-4 pb-4">
+        <CrudSheetContent className="sm:max-w-[560px]">
+          <CrudSheetHeader
+            title={t('transactions.actions.edit')}
+            description={t('transactions.form.editDescription')}
+            onClose={() => setEditingTransaction(null)}
+          />
+          <CrudSheetBody className="p-6">
             {editingTransaction && (
               <TransactionForm
                 defaultValues={editingTransaction}
@@ -463,8 +480,8 @@ export function TransactionsPage() {
                 isLoading={updateMutation.isPending}
               />
             )}
-          </div>
-        </SheetContent>
+          </CrudSheetBody>
+        </CrudSheetContent>
       </Sheet>
     </div>
   )

@@ -49,7 +49,10 @@ export function TransactionForm({
   const { data: users = [] } = useUsers()
   const { data: projects = [] } = useProjects()
 
-  const admins = React.useMemo(() => users.filter((u) => u.role === 'admin'), [users])
+  const admins = React.useMemo(
+    () => users.filter((u) => (u.roleName || '').toLowerCase().includes('admin')),
+    [users],
+  )
 
   const transactionSchema = React.useMemo(() => createTransactionSchema(t), [t])
   const form = useForm({
@@ -264,7 +267,7 @@ export function TransactionForm({
         )}
       />
 
-      <div className="flex justify-end gap-2">
+      <div className="grid grid-cols-2 gap-2 pt-4 border-t border-border/40">
         <Button type="button" variant="outline" onClick={onCancel}>
           {t('common.cancel')}
         </Button>

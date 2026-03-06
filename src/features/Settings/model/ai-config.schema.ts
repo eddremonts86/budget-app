@@ -1,16 +1,10 @@
 import { z } from 'zod'
 
-export const aiProviderSchema = z.enum([
-  'llama-cpp',
-  'ollama',
-  'lm-studio',
-  'openai',
-  'anthropic',
-])
+export const aiProviderSchema = z.enum(['llama-cpp', 'ollama', 'lm-studio', 'openai', 'anthropic'])
 export type AiProvider = z.infer<typeof aiProviderSchema>
 
 export const aiParametersSchema = z.object({
-  model: z.string().min(1, 'El modelo es obligatorio'),
+  model: z.string().min(1, 'El modelo es obligatorio').default('auto'),
   temperature: z.coerce.number().min(0).max(2).default(0.7),
   max_tokens: z.coerce.number().min(1).default(2048),
   top_p: z.coerce.number().min(0).max(1).default(1),

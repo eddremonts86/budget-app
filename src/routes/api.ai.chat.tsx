@@ -49,6 +49,11 @@ type ExtendedModelOptions = {
     type: 'enabled'
     budget_tokens: number
   }
+  think?: boolean
+  chat_template_kwargs?: {
+    enable_thinking: boolean
+  }
+  reasoning_format?: 'none'
 }
 
 const localeToLanguage: Record<string, string> = {
@@ -260,6 +265,35 @@ const buildModelOptions = (
   }
 
   return options
+}
+
+const buildProviderSpecificOptions = (
+  providerId: AiProviderId,
+  model: string | undefined,
+): Partial<ExtendedModelOptions> => {
+  const normalizedModel = (model || '').toLowerCase()
+  const isQwenReasoningModel = /qwen(?:3|3\.5|35)/.test(normalizedModel)
+
+  if (!isQwenReasoningModel) {
+    return {}
+  }
+
+  if (providerId === 'ollama') {
+    return {
+      think: false,
+    }
+  }
+
+  if (providerId === 'llama-cpp') {
+    return {
+      chat_template_kwargs: {
+        enable_thinking: false,
+      },
+      reasoning_format: 'none',
+    }
+  }
+
+  return {}
 }
 
 const mapFinishReason = (finishReason: string | null | undefined) => {
@@ -526,6 +560,7 @@ const streamLmStudioChat = async (
   config: AiConfigFormData,
   body: ChatRequestBody,
   messages: ChatMessage[],
+  resolvedModel: string,
 ) => {
   const { getProviderHeaders } = await import('@/shared/lib/ai/server/providers')
 
@@ -541,11 +576,13 @@ const streamLmStudioChat = async (
     }))
     .filter((message) => message.content.length > 0)
 
+  const providerSpecificOptions = buildProviderSpecificOptions(config.provider, resolvedModel)
+
   const response = await fetch(`${baseUrl}${chatEndpoint}`, {
     method: 'POST',
     headers: getProviderHeaders(config),
     body: JSON.stringify({
-      model: body.model ?? config.parameters.model,
+      model: resolvedModel,
       messages: payloadMessages,
       temperature: body.params?.temperature ?? config.parameters.temperature,
       max_tokens: body.params?.maxTokens ?? config.parameters.max_tokens,
@@ -553,6 +590,7 @@ const streamLmStudioChat = async (
       frequency_penalty: config.parameters.frequency_penalty,
       presence_penalty: config.parameters.presence_penalty,
       stream: true,
+      ...providerSpecificOptions,
     }),
   })
 
@@ -564,7 +602,7 @@ const streamLmStudioChat = async (
     })
   }
 
-  const stream = createLmStudioAgUiStream(response.body, body.model ?? config.parameters.model)
+  const stream = createLmStudioAgUiStream(response.body, resolvedModel)
   return toServerSentEventsResponse(stream)
 }
 
@@ -667,6 +705,16 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
     }
 
     const contextualQuery = await injectReferenceContext(messages, locale)
+    const { discoverProviderModels } = await import('@/shared/lib/ai/server/model-discovery')
+    const modelDiscovery = await discoverProviderModels({
+      ...finalConfig,
+      parameters: {
+        ...finalConfig.parameters,
+        model: body.model ?? finalConfig.parameters.model,
+      },
+    })
+    const resolvedModel =
+      modelDiscovery.resolvedModelId || body.model || finalConfig.parameters.model
 
     // Consolidate messages to merge consecutive user/assistant messages
     // This is crucial for providers like Anthropic that disallow consecutive user messages
@@ -678,7 +726,7 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
       locale,
       query: contextualQuery ? `${String(contextualQuery).slice(0, 50)}...` : 'No content',
       providerId: providerId || 'unknown',
-      model: body.model ?? finalConfig.parameters.model ?? 'unknown',
+      model: resolvedModel ?? 'unknown',
       contextLength: 0,
       // eslint-disable-next-line no-console
     }).catch((err) => console.error('Audit log failed:', err))
@@ -692,16 +740,19 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
     }
 
     if (providerId === 'lm-studio') {
-      return await streamLmStudioChat(finalConfig, body, consolidatedMessages)
+      return await streamLmStudioChat(finalConfig, body, consolidatedMessages, resolvedModel)
     }
 
-    const adapter = provider.buildAdapter(finalConfig)(body.model ?? finalConfig.parameters.model)
+    const adapter = provider.buildAdapter(finalConfig)(resolvedModel)
 
-    const modelOptions = buildModelOptions(providerId, body, finalConfig)
+    const modelOptions = {
+      ...buildModelOptions(providerId, body, finalConfig),
+      ...buildProviderSpecificOptions(providerId, resolvedModel),
+    }
 
     const stream = chat({
       adapter,
-      messages: consolidatedMessages,
+      messages: consolidatedMessages as Parameters<typeof chat>[0]['messages'],
       conversationId: body.conversationId,
       modelOptions: modelOptions as Parameters<typeof chat>[0]['modelOptions'],
     })

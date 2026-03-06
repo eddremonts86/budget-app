@@ -432,7 +432,23 @@
     }
   },
   "team": {
-    "title": "Team"
+    "title": "Team",
+    "actions": {
+      "new": "Nyt team",
+      "create": "Opret team",
+      "edit": "Rediger team"
+    },
+    "members": "Medlemmer",
+    "emptyMembers": "Ingen medlemmer tildelt.",
+    "emptyUsers": "Ingen brugere tilgængelige.",
+    "confirm": {
+      "delete": "Er du sikker på, at du vil slette \"{{name}}\"?"
+    },
+    "toast": {
+      "created": "Team oprettet",
+      "updated": "Team opdateret",
+      "deleted": "Team slettet"
+    }
   },
   "todos": {
     "title": "Opgaver",

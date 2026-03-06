@@ -851,10 +851,10 @@ export function TodoForm({
         variants={itemVariants}
         className="pt-6 border-t border-border/50 mt-auto sticky bottom-0 bg-secondary/30 backdrop-blur-md pb-4 z-10"
       >
-        <Field className="flex items-center justify-end gap-3">
+        <Field className="grid grid-cols-2 gap-3">
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             onClick={onCancel}
             className="rounded-lg px-6 hover:bg-secondary/50 transition-colors"
           >
@@ -864,7 +864,7 @@ export function TodoForm({
           <Button
             type="submit"
             disabled={isLoading}
-            className="rounded-lg px-8 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
+            className="rounded-lg bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
           >
             {isLoading ? (
               <div className="flex items-center gap-2">

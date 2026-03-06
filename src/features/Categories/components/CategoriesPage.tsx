@@ -4,6 +4,7 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
+import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,13 +13,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { toast } from '@/shared/lib/toast'
@@ -188,16 +183,13 @@ export function CategoriesPage() {
 
       {/* Create Sheet */}
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
-          <SheetHeader className="p-6 border-b border-border/40 shrink-0">
-            <SheetTitle className="text-2xl font-bold tracking-tight">
-              {t('categories.add')}
-            </SheetTitle>
-            <SheetDescription className="text-base">
-              {t('categories.description.create')}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto p-6">
+        <CrudSheetContent className="sm:max-w-[540px]">
+          <CrudSheetHeader
+            title={t('categories.add')}
+            description={t('categories.description.create')}
+            onClose={() => setIsCreateOpen(false)}
+          />
+          <CrudSheetBody className="p-6">
             <CategoryForm
               onSubmit={async (values) => {
                 await createMutation.mutateAsync(values)
@@ -206,22 +198,19 @@ export function CategoriesPage() {
               onCancel={() => setIsCreateOpen(false)}
               isLoading={createMutation.isPending}
             />
-          </div>
-        </SheetContent>
+          </CrudSheetBody>
+        </CrudSheetContent>
       </Sheet>
 
       {/* Edit Sheet */}
       <Sheet open={!!editingCategory} onOpenChange={(open) => !open && setEditingCategory(null)}>
-        <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
-          <SheetHeader className="p-6 border-b border-border/40 shrink-0">
-            <SheetTitle className="text-2xl font-bold tracking-tight">
-              {t('common.edit')}
-            </SheetTitle>
-            <SheetDescription className="text-base">
-              {t('categories.description.edit')}
-            </SheetDescription>
-          </SheetHeader>
-          <div className="flex-1 overflow-y-auto p-6">
+        <CrudSheetContent className="sm:max-w-[540px]">
+          <CrudSheetHeader
+            title={t('common.edit')}
+            description={t('categories.description.edit')}
+            onClose={() => setEditingCategory(null)}
+          />
+          <CrudSheetBody className="p-6">
             {editingCategory && (
               <CategoryForm
                 defaultValues={editingCategory}
@@ -233,8 +222,8 @@ export function CategoriesPage() {
                 isLoading={updateMutation.isPending}
               />
             )}
-          </div>
-        </SheetContent>
+          </CrudSheetBody>
+        </CrudSheetContent>
       </Sheet>
     </div>
   )

@@ -1,5 +1,5 @@
-import { apiClient } from '@/shared/lib/api'
 import axios from 'axios'
+import { apiClient } from '@/shared/lib/api'
 import type {
   AiConfigAuditLog,
   AiConfigFormData,
@@ -24,11 +24,20 @@ const getEnv = (key: string, defaultValue: string) => {
 
 const LLAMA_CPP_BASE_URL = getEnv('VITE_AI_LLAMA_CPP_BASE_URL', 'http://localhost:8080/v1')
 const OLLAMA_BASE_URL = getEnv('VITE_AI_OLLAMA_BASE_URL', 'http://localhost:11434/v1')
-const LLAMA_CPP_MODEL = getEnv(
-  'VITE_AI_LLAMA_CPP_MODEL',
-  '.docker_data/llm-models/llama-cpp/qwen3.5-9b-instruct-q4_k_m.gguf',
-)
-const OLLAMA_MODEL = getEnv('VITE_AI_OLLAMA_MODEL', 'qwen3.5:9b')
+
+export interface AiProviderModelInfo {
+  id: string
+  label: string
+  active: boolean
+}
+
+export interface AiProviderModelsResponse {
+  provider: AiProvider
+  models: AiProviderModelInfo[]
+  activeModelId: string | null
+  configuredModelId: string | null
+  resolvedModelId: string | null
+}
 
 const PROVIDERS = new Set<AiProvider>(['llama-cpp', 'ollama', 'lm-studio', 'openai', 'anthropic'])
 
@@ -40,7 +49,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: LLAMA_CPP_MODEL,
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -64,7 +73,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: OLLAMA_MODEL,
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -88,7 +97,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'gpt-4o',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -112,7 +121,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'claude-3-5-sonnet-20240620',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -136,7 +145,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'qwen3.5:9b',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -301,6 +310,11 @@ export const aiConfigApi = {
     } catch {
       return []
     }
+  },
+
+  getProviderModels: async (config: AiConfigFormData): Promise<AiProviderModelsResponse> => {
+    const { data } = await apiClient.post<AiProviderModelsResponse>('/api/ai/models', config)
+    return data
   },
 
   getHeaders: (config: AiConfigFormData) => {

@@ -111,7 +111,7 @@ services:
       - ./ia-config:/etc/ia-config:ro
     command:
       - |
-        MAIN_MODEL="$${LLAMA_CPP_MAIN_MODEL:-/models/qwen3.5-9b-instruct-q4_k_m.gguf}"
+        MAIN_MODEL="$${LLAMA_CPP_MAIN_MODEL:-/models/qwen3.5-2b-instruct-q4_k_m.gguf}"
         DRAFT_MODEL="$${LLAMA_CPP_DRAFT_MODEL:-/models/qwen3.5-0.8b-instruct-q8_0.gguf}"
         CTX_SIZE="$${LLAMA_CPP_CTX_SIZE:-4096}"
         DRAFT_MAX="$${LLAMA_CPP_DRAFT_MAX:-16}"

@@ -605,8 +605,8 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
         )}
       </form.Field>
 
-      <div className="flex justify-end gap-2 pt-4">
-        <Button type="button" variant="ghost" onClick={onCancel} disabled={isLoading}>
+      <div className="grid grid-cols-2 gap-2 pt-4 border-t border-border/40">
+        <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>
           {t('common.cancel')}
         </Button>
         <Button type="submit" disabled={isLoading}>

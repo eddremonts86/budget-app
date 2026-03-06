@@ -94,9 +94,7 @@ export const resolveAiConfig = (
       frequency_penalty: 0,
       presence_penalty: 0,
       ...baseConfig.defaults,
-      // Select model based on environment or hardware if implemented
-      // For now, default to the first model in the list or a specific default
-      model: baseConfig.models ? Object.values(baseConfig.models)[0]?.id : 'default-model',
+      model: userConfig?.parameters?.model || 'auto',
     },
     endpoints: {
       chat: '/chat/completions',

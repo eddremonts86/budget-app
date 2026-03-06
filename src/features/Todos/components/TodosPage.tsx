@@ -1,17 +1,11 @@
 import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
-import { Plus, Pin, PinOff, X } from 'lucide-react'
+import { Plus, Pin, PinOff } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { CrudSheetHeader } from '@/components/ui/crud-sheet'
 import { Label } from '@/components/ui/label'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-  SheetClose,
-} from '@/components/ui/sheet'
+import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { cn } from '@/shared/utils/index'
@@ -164,48 +158,28 @@ export function TodosPage() {
               if (isPinned) e.preventDefault()
             }}
           >
-            <SheetHeader className="p-6 pb-4 border-b border-border/40 shrink-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex flex-col gap-1 pr-4">
-                  <SheetTitle className="text-2xl font-bold tracking-tight">
-                    {t('todos.sheet.createTitle', 'Create Task')}
-                  </SheetTitle>
-                  <SheetDescription className="text-base leading-relaxed">
-                    {t('todos.sheet.createDescription', 'Add a new task to your list.')}
-                  </SheetDescription>
-                </div>
-                <div className="flex items-center gap-1 -mt-1 -mr-2 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      'h-9 w-9 rounded-full transition-colors hidden sm:flex items-center justify-center',
-                      isPinned
-                        ? 'text-primary bg-primary/10'
-                        : 'text-muted-foreground hover:bg-muted/50',
-                    )}
-                    onClick={() => setIsPinned(!isPinned)}
-                    title={isPinned ? t('common.unpin') : t('common.pinVisible')}
-                  >
-                    {isPinned ? (
-                      <PinOff className="h-4.5 w-4.5" />
-                    ) : (
-                      <Pin className="h-4.5 w-4.5" />
-                    )}
-                  </Button>
-                  <SheetClose asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 rounded-full text-muted-foreground hover:bg-muted/50 flex items-center justify-center"
-                      title={t('common.close', 'Close')}
-                    >
-                      <X className="h-4.5 w-4.5" />
-                    </Button>
-                  </SheetClose>
-                </div>
-              </div>
-            </SheetHeader>
+            <CrudSheetHeader
+              title={t('todos.sheet.createTitle', 'Create Task')}
+              description={t('todos.sheet.createDescription', 'Add a new task to your list.')}
+              onClose={() => {
+                setIsCreateOpen(false)
+                setCreateDefaultValues({})
+              }}
+              actionsSlot={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    'h-8 w-8 text-muted-foreground hover:text-foreground hidden sm:inline-flex',
+                    isPinned && 'text-primary',
+                  )}
+                  onClick={() => setIsPinned(!isPinned)}
+                  title={isPinned ? t('common.unpin') : t('common.pinVisible')}
+                >
+                  {isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
+                </Button>
+              }
+            />
             <div className="flex-1 overflow-y-auto p-6">
               <TodoForm
                 defaultValues={createDefaultValues}
@@ -257,48 +231,28 @@ export function TodosPage() {
               if (isEditPinned) e.preventDefault()
             }}
           >
-            <SheetHeader className="p-6 pb-4 border-b border-border/40 shrink-0">
-              <div className="flex items-start justify-between gap-4">
-                <div className="flex flex-col gap-1 pr-4">
-                  <SheetTitle className="text-2xl font-bold tracking-tight">
-                    {t('todos.sheet.editTitle', 'Edit Task')}
-                  </SheetTitle>
-                  <SheetDescription className="text-base leading-relaxed">
-                    {t('todos.sheet.editDescription', 'Update task details.')}
-                  </SheetDescription>
-                </div>
-                <div className="flex items-center gap-1 -mt-1 -mr-2 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className={cn(
-                      'h-9 w-9 rounded-full transition-colors hidden sm:flex items-center justify-center',
-                      isEditPinned
-                        ? 'text-primary bg-primary/10'
-                        : 'text-muted-foreground hover:bg-muted/50',
-                    )}
-                    onClick={() => setIsEditPinned(!isEditPinned)}
-                    title={isEditPinned ? t('common.unpin') : t('common.pinVisible')}
-                  >
-                    {isEditPinned ? (
-                      <PinOff className="h-4.5 w-4.5" />
-                    ) : (
-                      <Pin className="h-4.5 w-4.5" />
-                    )}
-                  </Button>
-                  <SheetClose asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="h-9 w-9 rounded-full text-muted-foreground hover:bg-muted/50 flex items-center justify-center"
-                      title={t('common.close', 'Close')}
-                    >
-                      <X className="h-4.5 w-4.5" />
-                    </Button>
-                  </SheetClose>
-                </div>
-              </div>
-            </SheetHeader>
+            <CrudSheetHeader
+              title={t('todos.sheet.editTitle', 'Edit Task')}
+              description={t('todos.sheet.editDescription', 'Update task details.')}
+              onClose={() => {
+                setEditingTodo(null)
+                setIsEditPinned(false)
+              }}
+              actionsSlot={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={cn(
+                    'h-8 w-8 text-muted-foreground hover:text-foreground hidden sm:inline-flex',
+                    isEditPinned && 'text-primary',
+                  )}
+                  onClick={() => setIsEditPinned(!isEditPinned)}
+                  title={isEditPinned ? t('common.unpin') : t('common.pinVisible')}
+                >
+                  {isEditPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
+                </Button>
+              }
+            />
             <div className="flex-1 overflow-y-auto p-6">
               {editingTodo && (
                 <TodoForm

@@ -1,12 +1,132 @@
+import { IconEdit, IconTrash, IconUsers } from '@tabler/icons-react'
+import { Plus, Search } from 'lucide-react'
+import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card'
+import {
+  CrudSheetActions,
+  CrudSheetBody,
+  CrudSheetContent,
+  CrudSheetHeader,
+  CrudSheetSection,
+} from '@/components/ui/crud-sheet'
+import { Input } from '@/components/ui/input'
+import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useTeamsWithMembers } from '../api/teams.queries'
+import { Textarea } from '@/components/ui/textarea'
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+import { useUsers } from '@/features/Users/api/users.queries'
+import { cn } from '@/shared/lib/utils'
+import {
+  useCreateTeam,
+  useDeleteTeam,
+  useTeamsWithMembers,
+  useUpdateTeam,
+} from '../api/teams.queries'
+import type { TeamWithUsers } from '../model/types'
+
+interface TeamFormState {
+  name: string
+  description: string
+  members: string[]
+}
+
+const initialFormState: TeamFormState = {
+  name: '',
+  description: '',
+  members: [],
+}
 
 export function TeamPage() {
   const { t } = useTranslation()
+  const { data: users = [] } = useUsers()
   const { data: teams, isLoading } = useTeamsWithMembers()
+  const createTeam = useCreateTeam()
+  const updateTeam = useUpdateTeam()
+  const deleteTeam = useDeleteTeam()
+  const [isSheetOpen, setIsSheetOpen] = React.useState(false)
+  const [editingTeamId, setEditingTeamId] = React.useState<string | null>(null)
+  const [memberSearch, setMemberSearch] = React.useState('')
+  const [formData, setFormData] = React.useState<TeamFormState>(initialFormState)
+
+  const isEditing = !!editingTeamId
+  const selectedTeam = React.useMemo(
+    () => teams.find((team) => team.id === editingTeamId) ?? null,
+    [teams, editingTeamId],
+  )
+
+  const filteredUsers = React.useMemo(() => {
+    if (!memberSearch.trim()) return users
+    const term = memberSearch.toLowerCase()
+    return users.filter(
+      (user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term),
+    )
+  }, [users, memberSearch])
+
+  const resetForm = React.useCallback(() => {
+    setFormData(initialFormState)
+    setMemberSearch('')
+    setEditingTeamId(null)
+  }, [])
+
+  const handleCreateOpen = () => {
+    resetForm()
+    setIsSheetOpen(true)
+  }
+
+  const handleEditOpen = (team: TeamWithUsers) => {
+    setEditingTeamId(team.id)
+    setMemberSearch('')
+    setFormData({
+      name: team.name,
+      description: team.description ?? '',
+      members: team.members.map((member) => member.id),
+    })
+    setIsSheetOpen(true)
+  }
+
+  const toggleMember = (userId: string) => {
+    setFormData((prev) => ({
+      ...prev,
+      members: prev.members.includes(userId)
+        ? prev.members.filter((id) => id !== userId)
+        : [...prev.members, userId],
+    }))
+  }
+
+  const isSubmitting = createTeam.isPending || updateTeam.isPending
+
+  const handleSubmit = async (event: React.FormEvent) => {
+    event.preventDefault()
+    if (!formData.name.trim()) return
+
+    const payload = {
+      name: formData.name.trim(),
+      description: formData.description.trim() || undefined,
+      members: formData.members,
+    }
+
+    if (isEditing && selectedTeam) {
+      await updateTeam.mutateAsync({
+        id: selectedTeam.id,
+        data: payload,
+      })
+    } else {
+      await createTeam.mutateAsync(payload)
+    }
+
+    setIsSheetOpen(false)
+    resetForm()
+  }
+
+  const handleDelete = async (team: TeamWithUsers) => {
+    if (!window.confirm(t('team.confirm.delete', { defaultValue: `Delete "${team.name}"?` }))) {
+      return
+    }
+    await deleteTeam.mutateAsync(team.id)
+  }
 
   if (isLoading) {
     return (
@@ -25,37 +145,260 @@ export function TeamPage() {
     <div className="flex flex-col h-full space-y-4">
       <div className="flex items-center justify-between shrink-0">
         <h2 className="text-3xl font-bold tracking-tight">{t('team.title')}</h2>
+        <Button onClick={handleCreateOpen} className="gap-2">
+          <Plus className="h-4 w-4" />
+          {t('team.actions.new', { defaultValue: 'New Team' })}
+        </Button>
       </div>
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 flex-1 content-start min-h-0 overflow-y-auto">
-        {teams.map((team) => (
-          <Card key={team.id} className="flex flex-col h-full">
-            <CardHeader>
-              <CardTitle>{team.name}</CardTitle>
-              <CardDescription>{team.description}</CardDescription>
-            </CardHeader>
-            <CardContent className="flex-1">
-              <h4 className="mb-4 text-sm font-medium text-muted-foreground">Members</h4>
-              <div className="flex flex-col gap-3">
-                {team.members.map((member) => (
-                  <div
-                    key={member.id}
-                    className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted/50 transition-colors"
+      {teams.length === 0 ? (
+        <div className="flex flex-col items-center justify-center flex-1 text-center p-8 border-2 border-dashed rounded-lg">
+          <IconUsers className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
+          <h3 className="text-lg font-medium">
+            {t('team.empty.title', { defaultValue: 'No teams yet' })}
+          </h3>
+          <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-6">
+            {t('team.empty.description', {
+              defaultValue: 'Create your first team and assign members from the organization.',
+            })}
+          </p>
+          <Button onClick={handleCreateOpen} variant="outline" className="gap-2">
+            <Plus className="h-4 w-4" />
+            {t('team.actions.new', { defaultValue: 'New Team' })}
+          </Button>
+        </div>
+      ) : (
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 flex-1 content-start min-h-0 overflow-y-auto">
+          {teams.map((team) => (
+            <Card key={team.id} className="flex flex-col h-full hover:shadow-md transition-shadow">
+              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
+                <div className="space-y-1.5 pr-2">
+                  <CardTitle className="text-base font-semibold leading-tight">
+                    {team.name}
+                  </CardTitle>
+                  <CardDescription className="line-clamp-2">
+                    {team.description || t('common.optional')}
+                  </CardDescription>
+                </div>
+                <div className="flex items-center gap-1 shrink-0">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-primary"
+                    onClick={() => handleEditOpen(team)}
                   >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={member.avatar} alt={member.name} />
-                      <AvatarFallback>{member.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="flex flex-col">
-                      <span className="text-sm font-medium leading-none">{member.name}</span>
-                      <span className="text-xs text-muted-foreground">{member.role}</span>
-                    </div>
+                    <IconEdit className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                    onClick={() => handleDelete(team)}
+                  >
+                    <IconTrash className="h-4 w-4" />
+                  </Button>
+                  <div className="h-8 w-8 flex items-center justify-center">
+                    <IconUsers className="h-4 w-4 text-muted-foreground" />
                   </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                </div>
+              </CardHeader>
+              <CardContent className="flex-1">
+                <h4 className="mb-4 text-sm font-medium text-muted-foreground">
+                  {t('team.members', { defaultValue: 'Members' })}
+                </h4>
+                <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                  <div className="flex -space-x-2 overflow-hidden">
+                    <TooltipProvider>
+                      {team.members.slice(0, 5).map((member) => (
+                        <Tooltip key={member.id}>
+                          <TooltipTrigger asChild>
+                            <Avatar className="inline-block h-7 w-7 rounded-full ring-2 ring-background">
+                              <AvatarImage src={member.avatar || undefined} alt={member.name} />
+                              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                                {member.name.charAt(0)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p className="text-xs font-medium">{member.name}</p>
+                            <p className="text-[10px] text-muted-foreground">{member.email}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                      {team.members.length > 5 && (
+                        <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium ring-2 ring-background">
+                          +{team.members.length - 5}
+                        </div>
+                      )}
+                    </TooltipProvider>
+                    {team.members.length === 0 && (
+                      <span className="text-xs text-muted-foreground italic">
+                        {t('team.emptyMembers', { defaultValue: 'No members assigned.' })}
+                      </span>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                    <IconUsers className="h-3.5 w-3.5" />
+                    <span>{team.members.length}</span>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
+
+      <Sheet
+        open={isSheetOpen}
+        onOpenChange={(open) => {
+          setIsSheetOpen(open)
+          if (!open) {
+            resetForm()
+          }
+        }}
+      >
+        <CrudSheetContent>
+          <CrudSheetHeader
+            title={
+              isEditing
+                ? t('team.actions.edit', { defaultValue: 'Edit Team' })
+                : t('team.actions.create', { defaultValue: 'Create Team' })
+            }
+            description={
+              isEditing
+                ? t('team.sheet.editDescription', {
+                    defaultValue: 'Update team information and assigned members.',
+                  })
+                : t('team.sheet.createDescription', {
+                    defaultValue: 'Create a team and choose the members.',
+                  })
+            }
+            onClose={() => {
+              setIsSheetOpen(false)
+              resetForm()
+            }}
+          />
+
+          <form onSubmit={handleSubmit} className="flex flex-col h-full min-h-0">
+            <CrudSheetBody>
+              <CrudSheetSection>
+                <div className="space-y-2">
+                  <label htmlFor="team-name" className="text-sm font-medium">
+                    {t('team.fields.name', { defaultValue: 'Team name' })}
+                  </label>
+                  <Input
+                    id="team-name"
+                    value={formData.name}
+                    onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
+                    placeholder={t('team.placeholders.name', {
+                      defaultValue: 'e.g. Platform Team',
+                    })}
+                    className="bg-muted/20"
+                    required
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="team-description" className="text-sm font-medium">
+                    {t('team.fields.description', { defaultValue: 'Description' })}
+                  </label>
+                  <Textarea
+                    id="team-description"
+                    value={formData.description}
+                    onChange={(e) =>
+                      setFormData((prev) => ({ ...prev, description: e.target.value }))
+                    }
+                    rows={4}
+                    placeholder={t('team.placeholders.description', {
+                      defaultValue: 'Describe this team responsibilities...',
+                    })}
+                    className="bg-muted/20"
+                  />
+                </div>
+              </CrudSheetSection>
+
+              <CrudSheetSection>
+                <div className="flex items-center justify-between">
+                  <h4 className="text-sm font-medium">
+                    {t('team.fields.members', { defaultValue: 'Members' })}
+                  </h4>
+                  <span className="text-xs text-muted-foreground">{formData.members.length}</span>
+                </div>
+
+                <div className="relative">
+                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                  <Input
+                    id="member-search"
+                    value={memberSearch}
+                    onChange={(e) => setMemberSearch(e.target.value)}
+                    placeholder={t('team.placeholders.membersSearch', {
+                      defaultValue: 'Search users...',
+                    })}
+                    className="pl-8 bg-muted/20"
+                  />
+                </div>
+
+                <div className="space-y-2 rounded-lg border p-3 max-h-[320px] overflow-y-auto">
+                  {filteredUsers.length === 0 ? (
+                    <div className="text-sm text-muted-foreground py-4 text-center">
+                      {t('team.emptyUsers', { defaultValue: 'No users available.' })}
+                    </div>
+                  ) : (
+                    filteredUsers.map((user) => {
+                      const checked = formData.members.includes(user.id)
+                      return (
+                        <button
+                          key={user.id}
+                          type="button"
+                          onClick={() => toggleMember(user.id)}
+                          className={cn(
+                            'w-full text-left p-2 rounded-md border transition-colors',
+                            checked
+                              ? 'bg-primary/10 border-primary/40'
+                              : 'border-transparent hover:bg-muted/40',
+                          )}
+                        >
+                          <div className="flex items-center gap-3">
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage src={user.avatar || undefined} alt={user.name} />
+                              <AvatarFallback>{user.name.charAt(0)}</AvatarFallback>
+                            </Avatar>
+                            <div className="min-w-0">
+                              <div className="text-sm font-medium truncate">{user.name}</div>
+                              <div className="text-xs text-muted-foreground truncate">
+                                {user.email}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    })
+                  )}
+                </div>
+              </CrudSheetSection>
+            </CrudSheetBody>
+
+            <CrudSheetActions className="grid-cols-2">
+              <Button
+                type="submit"
+                disabled={isSubmitting || !formData.name.trim()}
+                className="flex-1 shadow-md"
+              >
+                {isEditing ? t('common.save') : t('common.create')}
+              </Button>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={() => {
+                  setIsSheetOpen(false)
+                  resetForm()
+                }}
+              >
+                {t('common.cancel')}
+              </Button>
+            </CrudSheetActions>
+          </form>
+        </CrudSheetContent>
+      </Sheet>
     </div>
   )
 }

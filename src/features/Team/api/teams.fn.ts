@@ -1,9 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq } from 'drizzle-orm'
+import { desc, eq, inArray } from 'drizzle-orm'
 import { z } from 'zod'
-// import { db } from '@/shared/lib/db'
-import { teams } from '@/shared/lib/db/schema'
-// import type { Team } from '../model/types'
+import { teamMembers, teams, users } from '@/shared/lib/db/schema'
 
 export const teamSchema = z.object({
   name: z.string().min(1),
@@ -43,12 +41,33 @@ export const getTeamsFn = createServerFn({ method: 'GET' }).handler(
         db.$count(teams),
       ])
 
+      const teamIds = items.map((item) => item.id)
+      const membersByTeamId: Record<string, string[]> = {}
+
+      if (teamIds.length > 0) {
+        const memberRows = await db
+          .select({
+            teamId: teamMembers.teamId,
+            userId: teamMembers.userId,
+          })
+          .from(teamMembers)
+          .where(inArray(teamMembers.teamId, teamIds))
+
+        for (const row of memberRows) {
+          if (!membersByTeamId[row.teamId]) {
+            membersByTeamId[row.teamId] = []
+          }
+          membersByTeamId[row.teamId].push(row.userId)
+        }
+      }
+
       const totalPages = Math.ceil(total / limit)
       const nextPage = page < totalPages ? page + 1 : undefined
 
       return {
         data: items.map((item) => ({
           ...item,
+          members: membersByTeamId[item.id] || [],
           createdAt: item.createdAt.toISOString(),
           updatedAt: item.updatedAt.toISOString(),
         })),
@@ -86,8 +105,14 @@ export const getTeamByIdFn = createServerFn({ method: 'GET' }).handler(
       const result = await db.select().from(teams).where(eq(teams.id, id))
       if (!result.length) return null
       const item = result[0]
+      const memberRows = await db
+        .select({ userId: teamMembers.userId })
+        .from(teamMembers)
+        .where(eq(teamMembers.teamId, id))
+
       return {
         ...item,
+        members: memberRows.map((row) => row.userId),
         createdAt: item.createdAt.toISOString(),
         updatedAt: item.updatedAt.toISOString(),
       }
@@ -121,19 +146,57 @@ export const createTeamFn = createServerFn({ method: 'POST' }).handler(
         throw new Error(`Invalid input: ${parsed.error.message}`)
       }
       const input = parsed.data
+      const normalizedName = input.name.trim()
 
+      const existingTeam = await db
+        .select({ id: teams.id })
+        .from(teams)
+        .where(eq(teams.name, normalizedName))
+        .limit(1)
+      if (existingTeam.length > 0) {
+        throw new Error('A team with this name already exists')
+      }
+
+      const [existingUsers, duplicatedUsers] = await Promise.all([
+        input.members.length
+          ? db
+              .select({ id: users.id })
+              .from(users)
+              .where(inArray(users.id, Array.from(new Set(input.members))))
+          : Promise.resolve([]),
+        Promise.resolve(input.members.filter((member, index) => input.members.indexOf(member) !== index)),
+      ])
+
+      if (duplicatedUsers.length > 0) {
+        throw new Error('Team members contain duplicated users')
+      }
+
+      if (input.members.length > 0 && existingUsers.length !== input.members.length) {
+        throw new Error('Some selected users do not exist')
+      }
+
+      const teamId = crypto.randomUUID()
       const [newItem] = await db
         .insert(teams)
         .values({
-          id: crypto.randomUUID(),
-          name: input.name,
+          id: teamId,
+          name: normalizedName,
           description: input.description,
-          members: input.members,
         })
         .returning()
 
+      if (input.members.length > 0) {
+        await db.insert(teamMembers).values(
+          input.members.map((userId) => ({
+            teamId,
+            userId,
+          })),
+        )
+      }
+
       return {
         ...newItem,
+        members: input.members,
         createdAt: newItem.createdAt.toISOString(),
         updatedAt: newItem.updatedAt.toISOString(),
       }
@@ -164,22 +227,90 @@ export const updateTeamFn = createServerFn({ method: 'POST' }).handler(
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const { id, data: updateData } = data as {
+      const updatePayloadSchema = z.object({
+        id: z.string().min(1),
+        data: teamSchema.partial(),
+      })
+      const parsed = updatePayloadSchema.safeParse(data)
+      if (!parsed.success) {
+        throw new Error(`Invalid input: ${parsed.error.message}`)
+      }
+
+      const { id, data: updateData } = parsed.data as {
         id: string
         data: Partial<z.infer<typeof teamSchema>>
+      }
+
+      if (updateData.members) {
+        const uniqueMembers = Array.from(new Set(updateData.members))
+        if (uniqueMembers.length !== updateData.members.length) {
+          throw new Error('Team members contain duplicated users')
+        }
+
+        if (uniqueMembers.length > 0) {
+          const existingUsers = await db
+            .select({ id: users.id })
+            .from(users)
+            .where(inArray(users.id, uniqueMembers))
+          if (existingUsers.length !== uniqueMembers.length) {
+            throw new Error('Some selected users do not exist')
+          }
+        }
+      }
+
+      if (updateData.name !== undefined) {
+        const normalizedName = updateData.name.trim()
+        if (!normalizedName) {
+          throw new Error('Team name is required')
+        }
+        const existingTeam = await db
+          .select({ id: teams.id })
+          .from(teams)
+          .where(eq(teams.name, normalizedName))
+          .limit(1)
+        if (existingTeam.length > 0 && existingTeam[0].id !== id) {
+          throw new Error('A team with this name already exists')
+        }
+        updateData.name = normalizedName
       }
 
       const [updatedItem] = await db
         .update(teams)
         .set({
-          ...updateData,
+          ...(updateData.name !== undefined ? { name: updateData.name } : {}),
+          ...(updateData.description !== undefined ? { description: updateData.description } : {}),
           updatedAt: new Date(),
         })
         .where(eq(teams.id, id))
         .returning()
 
+      if (!updatedItem) {
+        throw new Error('Team not found')
+      }
+
+      let members: string[] = []
+      if (updateData.members !== undefined) {
+        await db.delete(teamMembers).where(eq(teamMembers.teamId, id))
+        if (updateData.members.length > 0) {
+          await db.insert(teamMembers).values(
+            updateData.members.map((userId) => ({
+              teamId: id,
+              userId,
+            })),
+          )
+        }
+        members = updateData.members
+      } else {
+        const memberRows = await db
+          .select({ userId: teamMembers.userId })
+          .from(teamMembers)
+          .where(eq(teamMembers.teamId, id))
+        members = memberRows.map((row) => row.userId)
+      }
+
       return {
         ...updatedItem,
+        members,
         createdAt: updatedItem.createdAt.toISOString(),
         updatedAt: updatedItem.updatedAt.toISOString(),
       }
@@ -200,6 +331,7 @@ export const deleteTeamFn = createServerFn({ method: 'POST' }).handler(
       if (!id) throw new Error('ID is required')
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
+      await db.delete(teamMembers).where(eq(teamMembers.teamId, id))
       await db.delete(teams).where(eq(teams.id, id))
       return { success: true }
     } catch (error) {

@@ -20,7 +20,7 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Field, FieldGroup } from '@/components/ui/field'
+import { FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
   Table,
@@ -76,6 +76,8 @@ export function DataTable<TData, TValue>({
     (filterColumn ? (table.getColumn(filterColumn)?.getFilterValue() as string) : '') ?? '',
   )
   const debouncedSearchValue = useDebounce(searchValue, 300)
+  const hideableColumns = table.getAllColumns().filter((column) => column.getCanHide())
+  const showToolbar = Boolean(filterColumn) || hideableColumns.length > 0
 
   React.useEffect(() => {
     if (filterColumn) {
@@ -84,54 +86,65 @@ export function DataTable<TData, TValue>({
   }, [debouncedSearchValue, filterColumn, table])
 
   return (
-    <FieldGroup className={cn('w-full space-y-6', fullHeight && 'h-full flex flex-col')}>
-      <Field className="flex flex-col md:flex-row items-center justify-between gap-4 shrink-0">
-        {filterColumn && (
-          <div className="relative w-full md:max-w-sm group">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
-            <Input
-              placeholder={`Buscar por ${filterColumn}...`}
-              value={searchValue}
-              onChange={(event) => setSearchValue(event.target.value)}
-              className="pl-10 h-11 bg-secondary/20 border-transparent focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all"
-            />
-          </div>
-        )}
-        <div className="flex items-center gap-2 w-full md:w-auto">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="h-11 px-4 gap-2 border-dashed border-border/60 hover:border-primary/30 rounded-2xl ml-auto"
-              >
-                <SlidersHorizontal className="w-4 h-4" />
-                Columnas
-                <ChevronDown className="w-4 h-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent
-              align="end"
-              className="w-48 p-2 rounded-2xl shadow-2xl backdrop-blur-xl border-border/40"
-            >
-              {table
-                .getAllColumns()
-                .filter((column) => column.getCanHide())
-                .map((column) => {
-                  return (
-                    <DropdownMenuCheckboxItem
-                      key={column.id}
-                      className="capitalize rounded-lg m-1"
-                      checked={column.getIsVisible()}
-                      onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                    >
-                      {column.id}
-                    </DropdownMenuCheckboxItem>
-                  )
-                })}
-            </DropdownMenuContent>
-          </DropdownMenu>
+    <FieldGroup
+      className={cn(
+        'w-full space-y-6',
+        fullHeight && 'h-full min-h-0 flex flex-col gap-6 space-y-0',
+      )}
+    >
+      {showToolbar && (
+        <div
+          className={cn(
+            'flex flex-col md:flex-row gap-4 shrink-0',
+            filterColumn ? 'md:items-center justify-between' : 'items-end justify-end',
+          )}
+        >
+          {filterColumn && (
+            <div className="relative w-full md:max-w-sm group">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              <Input
+                placeholder={`Buscar por ${filterColumn}...`}
+                value={searchValue}
+                onChange={(event) => setSearchValue(event.target.value)}
+                className="pl-10 h-11 bg-secondary/20 border-transparent focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all"
+              />
+            </div>
+          )}
+          {hideableColumns.length > 0 && (
+            <div className={cn('flex items-center gap-2', filterColumn ? 'w-full md:w-auto' : 'w-auto')}>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="h-11 px-4 gap-2 border-dashed border-border/60 hover:border-primary/30 rounded-2xl ml-auto"
+                  >
+                    <SlidersHorizontal className="w-4 h-4" />
+                    Columnas
+                    <ChevronDown className="w-4 h-4 opacity-50" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-48 p-2 rounded-2xl shadow-2xl backdrop-blur-xl border-border/40"
+                >
+                  {hideableColumns.map((column) => {
+                    return (
+                      <DropdownMenuCheckboxItem
+                        key={column.id}
+                        className="capitalize rounded-lg m-1"
+                        checked={column.getIsVisible()}
+                        onCheckedChange={(value) => column.toggleVisibility(!!value)}
+                      >
+                        {column.id}
+                      </DropdownMenuCheckboxItem>
+                    )
+                  })}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+          )}
         </div>
-      </Field>
+      )}
 
       <div
         className={cn(

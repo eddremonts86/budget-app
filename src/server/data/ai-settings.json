@@ -1,17 +1,17 @@
 {
   "forceLocale": "",
   "source": "playwright",
-  "id": "dee562cd-5fb2-49a1-8ec5-9eb47367e5aa",
-  "timestamp": "2026-03-05T07:11:14.253Z",
+  "id": "b3dcba48-ca16-4c71-82e1-153d408247a7",
+  "timestamp": "2026-03-05T14:39:19.214Z",
   "action": "update",
   "changes": {
-    "provider": "ollama",
-    "baseUrl": "http://ollama:11434/v1",
-    "port": 11434,
+    "provider": "lm-studio",
+    "baseUrl": "http://lmstudio:1234/v1",
+    "port": 1234,
     "token": "",
     "apiKey": "",
     "parameters": {
-      "model": "llama3.2",
+      "model": "auto",
       "temperature": 0.7,
       "max_tokens": 2048,
       "top_p": 0.9,
@@ -21,9 +21,9 @@
     "endpoints": {
       "chat": "/chat/completions",
       "models": "/models",
-      "load": "/api/pull",
-      "download": "/api/pull",
-      "status": ""
+      "load": "/models/load",
+      "download": "/models/download",
+      "status": "/models/download/status/:job_id"
     },
     "timeout": 60000,
     "additionalParams": ""

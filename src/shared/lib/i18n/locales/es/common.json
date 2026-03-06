@@ -239,6 +239,25 @@
       "deleted": "Usuario eliminado correctamente"
     }
   },
+  "team": {
+    "title": "Equipo",
+    "actions": {
+      "new": "Nuevo equipo",
+      "create": "Crear equipo",
+      "edit": "Editar equipo"
+    },
+    "members": "Miembros",
+    "emptyMembers": "No hay miembros asignados.",
+    "emptyUsers": "No hay usuarios disponibles.",
+    "confirm": {
+      "delete": "¿Seguro que quieres eliminar \"{{name}}\"?"
+    },
+    "toast": {
+      "created": "Equipo creado correctamente",
+      "updated": "Equipo actualizado correctamente",
+      "deleted": "Equipo eliminado correctamente"
+    }
+  },
   "sidebar": {
     "main": {
       "dashboard": "Dashboard",

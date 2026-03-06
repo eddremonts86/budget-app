@@ -1,20 +1,11 @@
 import { motion } from 'framer-motion'
-import {
-  Pencil,
-  Trash2,
-  UserPlus,
-} from 'lucide-react'
+import { Trash2, UserPlus } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/shared/lib/toast'
 import { useCreateUser, useDeleteUser, useInfiniteUsers, useUpdateUser } from '../api/users.queries'
@@ -123,23 +114,13 @@ export function UsersPage() {
 
       {/* Sheets with custom styling */}
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <SheetContent className="sm:max-w-[540px] p-0 gap-0 border-l border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl">
-          <SheetHeader className="p-6 border-b bg-muted/10">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 mt-1">
-                <UserPlus className="w-5 h-5" />
-              </div>
-              <div className="space-y-1 text-left">
-                <SheetTitle className="text-xl font-bold tracking-tight text-foreground">
-                  {t('users.sheet.createTitle')}
-                </SheetTitle>
-                <SheetDescription className="text-sm text-muted-foreground/80 leading-relaxed">
-                  {t('users.sheet.createDescription')}
-                </SheetDescription>
-              </div>
-            </div>
-          </SheetHeader>
-          <div className="p-6">
+        <CrudSheetContent className="sm:max-w-[540px] bg-background/95 backdrop-blur-xl shadow-2xl">
+          <CrudSheetHeader
+            title={t('users.sheet.createTitle')}
+            description={t('users.sheet.createDescription')}
+            onClose={() => setIsCreateOpen(false)}
+          />
+          <CrudSheetBody className="p-6">
             <UserForm
               onSubmit={async (values) => {
                 await createMutation.mutateAsync(values)
@@ -148,28 +129,18 @@ export function UsersPage() {
               onCancel={() => setIsCreateOpen(false)}
               isLoading={createMutation.isPending}
             />
-          </div>
-        </SheetContent>
+          </CrudSheetBody>
+        </CrudSheetContent>
       </Sheet>
 
       <Sheet open={!!editingUser} onOpenChange={(open) => !open && setEditingUser(null)}>
-        <SheetContent className="sm:max-w-[540px] p-0 gap-0 border-l border-border/40 bg-background/95 backdrop-blur-xl shadow-2xl">
-          <SheetHeader className="p-6 border-b bg-muted/10">
-            <div className="flex items-start gap-4">
-              <div className="p-3 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 mt-1">
-                <Pencil className="w-5 h-5" />
-              </div>
-              <div className="space-y-1 text-left">
-                <SheetTitle className="text-xl font-bold tracking-tight text-foreground">
-                  {t('users.sheet.editTitle')}
-                </SheetTitle>
-                <SheetDescription className="text-sm text-muted-foreground/80 leading-relaxed">
-                  {t('users.sheet.editDescription')}
-                </SheetDescription>
-              </div>
-            </div>
-          </SheetHeader>
-          <div className="p-6">
+        <CrudSheetContent className="sm:max-w-[540px] bg-background/95 backdrop-blur-xl shadow-2xl">
+          <CrudSheetHeader
+            title={t('users.sheet.editTitle')}
+            description={t('users.sheet.editDescription')}
+            onClose={() => setEditingUser(null)}
+          />
+          <CrudSheetBody className="p-6">
             {editingUser && (
               <UserForm
                 defaultValues={editingUser}
@@ -181,8 +152,8 @@ export function UsersPage() {
                 isLoading={updateMutation.isPending}
               />
             )}
-          </div>
-        </SheetContent>
+          </CrudSheetBody>
+        </CrudSheetContent>
       </Sheet>
     </div>
   )

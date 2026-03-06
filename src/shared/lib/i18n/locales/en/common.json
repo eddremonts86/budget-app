@@ -484,7 +484,23 @@
     }
   },
   "team": {
-    "title": "Team"
+    "title": "Team",
+    "actions": {
+      "new": "New Team",
+      "create": "Create Team",
+      "edit": "Edit Team"
+    },
+    "members": "Members",
+    "emptyMembers": "No members assigned.",
+    "emptyUsers": "No users available.",
+    "confirm": {
+      "delete": "Are you sure you want to delete \"{{name}}\"?"
+    },
+    "toast": {
+      "created": "Team created successfully",
+      "updated": "Team updated successfully",
+      "deleted": "Team deleted successfully"
+    }
   },
   "todos": {
     "title": "Todos",

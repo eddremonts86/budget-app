@@ -72,7 +72,7 @@ export const aiConfig: AiConfig = {
         models: '/models',
       },
       headers: llamaCppHeaders,
-      defaultModel: readEnv('AI_LLAMA_CPP_MODEL') ?? 'llama-3.2',
+      defaultModel: readEnv('AI_LLAMA_CPP_MODEL') ?? 'auto',
       generation: {
         temperature: 0.7,
         maxTokens: 2048,
@@ -87,7 +87,7 @@ export const aiConfig: AiConfig = {
         models: '/models',
       },
       headers: ollamaHeaders,
-      defaultModel: readEnv('AI_OLLAMA_MODEL') ?? 'llama3.2',
+      defaultModel: readEnv('AI_OLLAMA_MODEL') ?? 'auto',
       generation: {
         temperature: 0.7,
         maxTokens: 2048,
@@ -102,7 +102,7 @@ export const aiConfig: AiConfig = {
         models: '/models',
       },
       headers: lmstudioHeaders,
-      defaultModel: readEnv('AI_LMSTUDIO_MODEL') ?? 'local-model',
+      defaultModel: readEnv('AI_LMSTUDIO_MODEL') ?? 'auto',
       generation: {
         temperature: 0.4,
         maxTokens: 1024,
@@ -117,7 +117,7 @@ export const aiConfig: AiConfig = {
         models: '/v1/models',
       },
       headers: openaiHeaders,
-      defaultModel: readEnv('AI_OPENAI_MODEL') ?? 'gpt-4o-mini',
+      defaultModel: readEnv('AI_OPENAI_MODEL') ?? 'auto',
       generation: {
         temperature: 0.4,
         maxTokens: 1024,
@@ -132,7 +132,7 @@ export const aiConfig: AiConfig = {
         models: '/v1/messages', // Use /v1/messages to probe availability (expects 405 Method Not Allowed)
       },
       headers: anthropicHeaders,
-      defaultModel: readEnv('AI_ANTHROPIC_MODEL') ?? 'claude-3-5-sonnet-20240620',
+      defaultModel: readEnv('AI_ANTHROPIC_MODEL') ?? 'auto',
       generation: {
         temperature: 0.4,
         maxTokens: 1024,

@@ -17,6 +17,7 @@ import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard
 import { Route as ApiAiTestConnectionRouteImport } from './routes/api.ai.test-connection'
 import { Route as ApiAiStatusRouteImport } from './routes/api.ai.status'
 import { Route as ApiAiSearchRouteImport } from './routes/api.ai.search'
+import { Route as ApiAiModelsRouteImport } from './routes/api.ai.models'
 import { Route as ApiAiConfigStoreRouteImport } from './routes/api.ai.config-store'
 import { Route as ApiAiChatRouteImport } from './routes/api.ai.chat'
 import { Route as ApiAiAuditRouteImport } from './routes/api.ai.audit'
@@ -70,6 +71,11 @@ const ApiAiStatusRoute = ApiAiStatusRouteImport.update({
 const ApiAiSearchRoute = ApiAiSearchRouteImport.update({
   id: '/api/ai/search',
   path: '/api/ai/search',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAiModelsRoute = ApiAiModelsRouteImport.update({
+  id: '/api/ai/models',
+  path: '/api/ai/models',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiConfigStoreRoute = ApiAiConfigStoreRouteImport.update({
@@ -176,6 +182,7 @@ export interface FileRoutesByFullPath {
   '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
+  '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
@@ -198,6 +205,7 @@ export interface FileRoutesByTo {
   '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
+  '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
@@ -225,6 +233,7 @@ export interface FileRoutesById {
   '/api/ai/audit': typeof ApiAiAuditRoute
   '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
+  '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
@@ -251,6 +260,7 @@ export interface FileRouteTypes {
     | '/api/ai/audit'
     | '/api/ai/chat'
     | '/api/ai/config-store'
+    | '/api/ai/models'
     | '/api/ai/search'
     | '/api/ai/status'
     | '/api/ai/test-connection'
@@ -273,6 +283,7 @@ export interface FileRouteTypes {
     | '/api/ai/audit'
     | '/api/ai/chat'
     | '/api/ai/config-store'
+    | '/api/ai/models'
     | '/api/ai/search'
     | '/api/ai/status'
     | '/api/ai/test-connection'
@@ -299,6 +310,7 @@ export interface FileRouteTypes {
     | '/api/ai/audit'
     | '/api/ai/chat'
     | '/api/ai/config-store'
+    | '/api/ai/models'
     | '/api/ai/search'
     | '/api/ai/status'
     | '/api/ai/test-connection'
@@ -315,6 +327,7 @@ export interface RootRouteChildren {
   ApiAiAuditRoute: typeof ApiAiAuditRoute
   ApiAiChatRoute: typeof ApiAiChatRouteWithChildren
   ApiAiConfigStoreRoute: typeof ApiAiConfigStoreRoute
+  ApiAiModelsRoute: typeof ApiAiModelsRoute
   ApiAiSearchRoute: typeof ApiAiSearchRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
   ApiAiTestConnectionRoute: typeof ApiAiTestConnectionRoute
@@ -376,6 +389,13 @@ declare module '@tanstack/react-router' {
       path: '/api/ai/search'
       fullPath: '/api/ai/search'
       preLoaderRoute: typeof ApiAiSearchRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/ai/models': {
+      id: '/api/ai/models'
+      path: '/api/ai/models'
+      fullPath: '/api/ai/models'
+      preLoaderRoute: typeof ApiAiModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/api/ai/config-store': {
@@ -583,6 +603,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiAuditRoute: ApiAiAuditRoute,
   ApiAiChatRoute: ApiAiChatRouteWithChildren,
   ApiAiConfigStoreRoute: ApiAiConfigStoreRoute,
+  ApiAiModelsRoute: ApiAiModelsRoute,
   ApiAiSearchRoute: ApiAiSearchRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
   ApiAiTestConnectionRoute: ApiAiTestConnectionRoute,

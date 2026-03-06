@@ -3,14 +3,10 @@ import type {
   AiConfigStore,
   AiProvider,
 } from '@/features/Settings/model/ai-config.schema'
-import axios from 'axios'
-
-const API_URL = process.env.API_URL_INTERNAL || process.env.VITE_API_URL || 'http://localhost:3000'
 const LMSTUDIO_BASE_URL =
   process.env.AI_BASE_URL_INTERNAL ||
   process.env.VITE_AI_LMSTUDIO_BASE_URL ||
   process.env.VITE_AI_BASE_URL
-const LMSTUDIO_MODEL = process.env.AI_LMSTUDIO_MODEL || process.env.LMSTUDIO_IDENTIFIER
 
 const LLAMA_CPP_BASE_URL =
   process.env.AI_LLAMA_CPP_BASE_URL ||
@@ -22,13 +18,6 @@ const OLLAMA_BASE_URL =
   process.env.VITE_AI_OLLAMA_BASE_URL ||
   'http://localhost:11434/v1'
 
-const LLAMA_CPP_MODEL =
-  process.env.AI_LLAMA_CPP_MODEL ||
-  process.env.VITE_AI_LLAMA_CPP_MODEL ||
-  '.docker_data/llm-models/llama-cpp/qwen3.5-9b-instruct-q4_k_m.gguf'
-
-const OLLAMA_MODEL = process.env.AI_OLLAMA_MODEL || process.env.VITE_AI_OLLAMA_MODEL || 'qwen3.5:9b'
-
 const PROVIDERS = new Set<AiProvider>(['llama-cpp', 'ollama', 'lm-studio', 'openai', 'anthropic'])
 
 const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
@@ -39,7 +28,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: LLAMA_CPP_MODEL,
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -63,7 +52,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: OLLAMA_MODEL,
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -87,7 +76,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'gpt-4o',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -111,7 +100,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'claude-3-5-sonnet-20240620',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -135,7 +124,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, AiConfigFormData> = {
     token: '',
     apiKey: '',
     parameters: {
-      model: 'qwen3.5:9b',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -171,11 +160,6 @@ const normalizeConfig = (
   const mergedEndpoints = config?.endpoints
     ? { ...fallback.endpoints, ...config.endpoints }
     : fallback.endpoints
-
-  // Fix for LM Studio requiring a valid model name (not local-model)
-  if (provider === 'lm-studio' && mergedParameters.model === 'local-model') {
-    mergedParameters.model = 'qwen3.5:9b'
-  }
 
   return {
     ...fallback,
@@ -215,10 +199,6 @@ const withLmStudioRuntimeOverrides = (config: AiConfigFormData): AiConfigFormDat
   return {
     ...config,
     baseUrl: LMSTUDIO_BASE_URL || config.baseUrl,
-    parameters: {
-      ...config.parameters,
-      model: LMSTUDIO_MODEL || config.parameters.model,
-    },
   }
 }
 
@@ -228,8 +208,8 @@ const withLmStudioRuntimeOverrides = (config: AiConfigFormData): AiConfigFormDat
  */
 export async function getActiveAiConfig(): Promise<AiConfigFormData> {
   try {
-    const { data } = await axios.get<AiConfigStore>(`${API_URL}/api/ai/config-store`)
-    const store = normalizeStore(data)
+    const { readAiConfig } = await import('@/server/utils/ai-config-helper')
+    const store = normalizeStore(await readAiConfig())
     return withLmStudioRuntimeOverrides(store.providers[store.activeProvider])
   } catch {
     return buildDefaultConfig('llama-cpp')
@@ -238,8 +218,8 @@ export async function getActiveAiConfig(): Promise<AiConfigFormData> {
 
 export async function getAllAiConfigs(): Promise<AiConfigStore> {
   try {
-    const { data } = await axios.get<AiConfigStore>(`${API_URL}/api/ai/config-store`)
-    return normalizeStore(data)
+    const { readAiConfig } = await import('@/server/utils/ai-config-helper')
+    return normalizeStore(await readAiConfig())
   } catch {
     return normalizeStore(null)
   }

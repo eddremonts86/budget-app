@@ -1830,5 +1830,493 @@
     "providerId": "ollama",
     "model": "llama3.2",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T13:09:45.376Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "ollama",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T13:13:10.165Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-9b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T13:13:56.394Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:39:03.498Z",
+    "locale": "en",
+    "query": "etas?...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:39:29.140Z",
+    "locale": "en",
+    "query": "tete...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:39:37.341Z",
+    "locale": "en",
+    "query": "kdlnc...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-9b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:40:42.725Z",
+    "locale": "en",
+    "query": "quiero saber quien es el precidente de eeuu...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-9b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:41:22.950Z",
+    "locale": "en",
+    "query": "cuanto es 32234 +234...",
+    "providerId": "ollama",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:43:15.735Z",
+    "locale": "en",
+    "query": "dime que es 0202020 + 9393903...",
+    "providerId": "ollama",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:04:00.156Z",
+    "locale": "en",
+    "query": "dime como estas?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:30:37.631Z",
+    "locale": "en",
+    "query": "dime que?...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:33:45.970Z",
+    "locale": "en",
+    "query": "hola!!!...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:34:13.535Z",
+    "locale": "en",
+    "query": "hota que tal ?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:45:58.990Z",
+    "locale": "es",
+    "query": "¿quién es el presidente de los estados unidos? res...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:46:26.946Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:58:47.663Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:59:30.402Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:59:58.307Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:00:16.582Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:00:43.053Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:01.595Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:24.200Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:28.558Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:46.259Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:08.270Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:13.535Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:32.761Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:53.774Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:58.992Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:03:16.519Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:03:37.610Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:03:38.223Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:04:23.210Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:05:07.416Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:05:53.086Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:05.713Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:17.988Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:30.632Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:42.516Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:53.820Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:06.942Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:18.708Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:30.746Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:42.579Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:54.728Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:06.801Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:19.531Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:31.321Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:43.212Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:55.439Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:09:07.998Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:09:19.601Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:41:43.098Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:41:54.496Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:06.870Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:18.290Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:30.265Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:42.219Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-06T08:15:41.472Z",
+    "locale": "es",
+    "query": "Say hello...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-06T08:43:15.410Z",
+    "locale": "es",
+    "query": "Di hola...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-06T10:44:26.919Z",
+    "locale": "en",
+    "query": "como creo una tarea?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
   }
 ]

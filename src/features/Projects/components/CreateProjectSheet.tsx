@@ -3,13 +3,8 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { toast } from '@/shared/lib/toast'
 import { useCreateProject } from '../api/projects.queries'
 import type { Project } from '../model/types'
@@ -59,19 +54,18 @@ export function CreateProjectSheet({ open, onOpenChange, onSuccess }: CreateProj
         else onOpenChange(true)
       }}
     >
-      <SheetContent className="sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
-        <SheetHeader className="p-6 border-b border-border/40 shrink-0">
-          <SheetTitle className="text-2xl font-bold tracking-tight">
-            {createdProject ? t('projects.success.created') : t('projects.form.createTitle')}
-          </SheetTitle>
-          <SheetDescription className="text-base">
-            {createdProject
+      <CrudSheetContent className="sm:max-w-[540px]">
+        <CrudSheetHeader
+          title={createdProject ? t('projects.success.created') : t('projects.form.createTitle')}
+          description={
+            createdProject
               ? t('projects.form.confirmationDescription')
-              : t('projects.form.createDescription')}
-          </SheetDescription>
-        </SheetHeader>
+              : t('projects.form.createDescription')
+          }
+          onClose={handleClose}
+        />
 
-        <div className="flex-1 overflow-y-auto">
+        <CrudSheetBody className="p-0 space-y-0">
           {createdProject ? (
             <div className="p-8 space-y-8 animate-in fade-in zoom-in duration-300">
               <div className="flex flex-col items-center text-center space-y-4">
@@ -166,8 +160,8 @@ export function CreateProjectSheet({ open, onOpenChange, onSuccess }: CreateProj
               />
             </div>
           )}
-        </div>
-      </SheetContent>
+        </CrudSheetBody>
+      </CrudSheetContent>
     </Sheet>
   )
 }

@@ -7,6 +7,9 @@
 export async function generateEmbedding(text: string): Promise<number[]> {
   const EMBEDDING_API_URL = process.env.AI_EMBEDDING_URL || 'http://localhost:1234/v1/embeddings'
   const EMBEDDING_MODEL = process.env.AI_EMBEDDING_MODEL || 'text-embedding-nomic-embed-text-v1.5'
+  const controller = new AbortController()
+  const timeoutMs = Number(process.env.AI_EMBEDDING_TIMEOUT_MS || 4000)
+  const timeoutId = setTimeout(() => controller.abort(), timeoutMs)
 
   try {
     const response = await fetch(EMBEDDING_API_URL, {
@@ -15,6 +18,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
         'Content-Type': 'application/json',
         Authorization: `Bearer ${process.env.AI_API_KEY || 'lm-studio'}`, // LMStudio doesn't check key usually
       },
+      signal: controller.signal,
       body: JSON.stringify({
         input: text,
         model: EMBEDDING_MODEL,
@@ -39,5 +43,7 @@ export async function generateEmbedding(text: string): Promise<number[]> {
     // Return a zero vector or throw depending on resilience needs
     // For now, return empty to handle gracefully upstream
     return []
+  } finally {
+    clearTimeout(timeoutId)
   }
 }

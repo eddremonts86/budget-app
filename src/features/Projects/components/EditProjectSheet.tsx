@@ -1,11 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import {
-  Sheet,
-  SheetContent,
-  SheetDescription,
-  SheetHeader,
-  SheetTitle,
-} from '@/components/ui/sheet'
+import { CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { toast } from '@/shared/lib/toast'
 import { useUpdateProject } from '../api/projects.queries'
@@ -54,15 +49,12 @@ export function EditProjectSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent className="sm:max-w-[600px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0">
-        <SheetHeader className="p-6 border-b border-border/40 shrink-0">
-          <SheetTitle className="text-2xl font-bold tracking-tight">
-            {t('projects.form.editTitle')}
-          </SheetTitle>
-          <SheetDescription className="text-base">
-            {t('projects.form.editDescription')}
-          </SheetDescription>
-        </SheetHeader>
+      <CrudSheetContent className="sm:max-w-[600px]">
+        <CrudSheetHeader
+          title={t('projects.form.editTitle')}
+          description={t('projects.form.editDescription')}
+          onClose={() => onOpenChange(false)}
+        />
 
         <Tabs defaultValue="general" className="flex-1 flex flex-col min-h-0">
           <div className="px-6 py-2 border-b border-border/40 bg-muted/30">
@@ -100,7 +92,7 @@ export function EditProjectSheet({
             )}
           </div>
         </Tabs>
-      </SheetContent>
+      </CrudSheetContent>
     </Sheet>
   )
 }

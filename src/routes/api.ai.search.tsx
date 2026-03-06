@@ -1,9 +1,9 @@
+import { chat, toServerSentEventsResponse } from '@tanstack/ai'
+import { createFileRoute } from '@tanstack/react-router'
 import { formatKnowledgeBase, type SearchRequestBody } from '@/features/Ai/api/search.fn'
 import appKnowledge from '@/server/data/app-knowledge.json'
 import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { retrieveContext } from '@/shared/lib/rag/retrieval'
-import { chat, toServerSentEventsResponse } from '@tanstack/ai'
-import { createFileRoute } from '@tanstack/react-router'
 
 const normalizeIncomingMessages = (query: string, systemPrompt: string): any[] => {
   const content = `${systemPrompt}\n\nQuery: ${query}`
@@ -35,6 +35,32 @@ const buildSystemPrompt = (ragContext: string = '') => {
     '4. If the user asks about a page, include the URL in your response.',
     '5. Do NOT invent information that is not in the knowledge base.',
   ].join('\n')
+}
+
+const buildProviderSpecificOptions = (providerId: AiProviderId, model?: string) => {
+  const normalizedModel = (model || '').toLowerCase()
+  const isQwenReasoningModel = /qwen(?:3|3\.5|35)/.test(normalizedModel)
+
+  if (!isQwenReasoningModel) {
+    return {}
+  }
+
+  if (providerId === 'ollama') {
+    return {
+      think: false,
+    }
+  }
+
+  if (providerId === 'llama-cpp') {
+    return {
+      chat_template_kwargs: {
+        enable_thinking: false,
+      },
+      reasoning_format: 'none' as const,
+    }
+  }
+
+  return {}
 }
 
 export const handleSearchPost = async ({ request }: { request: Request }) => {
@@ -73,7 +99,7 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
     }
 
     const config = await getActiveAiConfig()
-    const validation = validateAiConfig(config)
+    validateAiConfig(config)
 
     // Fallback logic
     let providerId: AiProviderId | undefined = body.providerId ?? config.provider
@@ -133,7 +159,18 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
     const systemPrompt = buildSystemPrompt(ragContext)
     const messages = normalizeIncomingMessages(query, systemPrompt)
 
-    const adapter = provider.buildAdapter(finalConfig)(body.model ?? finalConfig.parameters.model)
+    const { discoverProviderModels } = await import('@/shared/lib/ai/server/model-discovery')
+    const modelDiscovery = await discoverProviderModels({
+      ...finalConfig,
+      parameters: {
+        ...finalConfig.parameters,
+        model: body.model ?? finalConfig.parameters.model,
+      },
+    })
+    const resolvedModel =
+      modelDiscovery.resolvedModelId || body.model || finalConfig.parameters.model
+
+    const adapter = provider.buildAdapter(finalConfig)(resolvedModel)
 
     // We reuse the buildProviderModelOptions helper but need to adapt it
     // because chat expects specific options format
@@ -155,6 +192,7 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
             },
           }
         : {}),
+      ...buildProviderSpecificOptions(providerId, resolvedModel),
     }
 
     const stream = chat({

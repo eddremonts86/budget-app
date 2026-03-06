@@ -41,7 +41,7 @@ export const useTeamsWithMembers = () => {
 export const useCreateTeam = () => {
   return useTQMutation(['teams', 'create'], (data: TeamInput) => createTeamFn({ data }), {
     invalidateKeys: [teamKeys.all],
-    successMessage: i18n.t('teams.toast.created'),
+    successMessage: i18n.t('team.toast.created'),
   })
 }
 
@@ -52,7 +52,7 @@ export const useUpdateTeam = () => {
       updateTeamFn({ data: { id, data } }),
     {
       invalidateKeys: [teamKeys.all],
-      successMessage: i18n.t('teams.toast.updated'),
+      successMessage: i18n.t('team.toast.updated'),
     },
   )
 }
@@ -60,6 +60,6 @@ export const useUpdateTeam = () => {
 export const useDeleteTeam = () => {
   return useTQMutation(['teams', 'delete'], (id: string) => deleteTeamFn({ data: id }), {
     invalidateKeys: [teamKeys.all],
-    successMessage: i18n.t('teams.toast.deleted'),
+    successMessage: i18n.t('team.toast.deleted'),
   })
 }

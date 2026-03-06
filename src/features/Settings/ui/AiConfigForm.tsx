@@ -10,6 +10,7 @@ import {
   IconPlayerPlay,
 } from '@tabler/icons-react'
 import { useForm } from '@tanstack/react-form'
+import { useStore } from '@tanstack/react-store'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -28,6 +29,7 @@ import { toast } from '@/shared/lib/toast'
 import {
   useAiConfig,
   useAiConfigStore,
+  useAiProviderModels,
   useAiProviderStatuses,
   useResetAiConfig,
   useTestAiConnection,
@@ -49,7 +51,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       status: '',
     },
     parameters: {
-      model: '.docker_data/llm-models/llama-cpp/qwen3.5-9b-instruct-q4_k_m.gguf',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -68,7 +70,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       status: '',
     },
     parameters: {
-      model: 'qwen3.5:9b',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 0.9,
@@ -84,7 +86,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       models: '/models',
     },
     parameters: {
-      model: 'gpt-4o',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -100,7 +102,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       models: '/messages',
     },
     parameters: {
-      model: 'claude-3-5-sonnet-20240620',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -119,7 +121,7 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
       status: '/models/download/status/:job_id',
     },
     parameters: {
-      model: 'qwen3.5:9b',
+      model: 'auto',
       temperature: 0.7,
       max_tokens: 2048,
       top_p: 1,
@@ -188,6 +190,61 @@ export function AiConfigForm() {
       form.reset(defaultValues)
     }
   }, [config, defaultValues, form])
+
+  const currentProvider = useStore(form.store, (state) => state.values.provider)
+  const currentBaseUrl = useStore(form.store, (state) => state.values.baseUrl)
+  const currentPort = useStore(form.store, (state) => state.values.port)
+  const currentToken = useStore(form.store, (state) => state.values.token)
+  const currentApiKey = useStore(form.store, (state) => state.values.apiKey)
+  const currentTimeout = useStore(form.store, (state) => state.values.timeout)
+  const currentChatEndpoint = useStore(form.store, (state) => state.values.endpoints.chat)
+  const currentModelsEndpoint = useStore(form.store, (state) => state.values.endpoints.models)
+  const currentLoadEndpoint = useStore(form.store, (state) => state.values.endpoints.load)
+  const currentDownloadEndpoint = useStore(form.store, (state) => state.values.endpoints.download)
+  const currentStatusEndpoint = useStore(form.store, (state) => state.values.endpoints.status)
+
+  const providerModelConfig: AiConfigFormData = React.useMemo(
+    () => ({
+      provider: currentProvider,
+      baseUrl: currentBaseUrl,
+      port: currentPort,
+      token: currentToken,
+      apiKey: currentApiKey,
+      parameters: {
+        model: 'auto',
+        temperature: 0.7,
+        max_tokens: 2048,
+        top_p: 1,
+        frequency_penalty: 0,
+        presence_penalty: 0,
+      },
+      endpoints: {
+        chat: currentChatEndpoint,
+        models: currentModelsEndpoint,
+        load: currentLoadEndpoint,
+        download: currentDownloadEndpoint,
+        status: currentStatusEndpoint,
+      },
+      timeout: currentTimeout,
+      additionalParams: '',
+    }),
+    [
+      currentApiKey,
+      currentBaseUrl,
+      currentChatEndpoint,
+      currentDownloadEndpoint,
+      currentLoadEndpoint,
+      currentModelsEndpoint,
+      currentPort,
+      currentProvider,
+      currentStatusEndpoint,
+      currentTimeout,
+      currentToken,
+    ],
+  )
+
+  const { data: providerModels, isLoading: isModelsLoading } =
+    useAiProviderModels(providerModelConfig)
 
   const handleReset = async () => {
     if (confirm(t('settings.ai.actions.confirmReset'))) {
@@ -801,13 +858,33 @@ export function AiConfigForm() {
                         <FieldLabel htmlFor={field.name}>
                           {t('settings.ai.fields.model')}
                         </FieldLabel>
-                        <Input
-                          id={field.name}
-                          value={field.state.value}
-                          onBlur={field.handleBlur}
-                          onChange={(e) => field.handleChange(e.target.value)}
-                          className="bg-muted/20"
-                        />
+                        <Select
+                          value={field.state.value || 'auto'}
+                          onValueChange={(value) => field.handleChange(value)}
+                        >
+                          <SelectTrigger id={field.name} className="w-full bg-muted/20">
+                            <SelectValue placeholder={t('settings.ai.fields.model')} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="auto">
+                              {providerModels?.activeModelId
+                                ? `Auto (${providerModels.activeModelId})`
+                                : 'Auto'}
+                            </SelectItem>
+                            {providerModels?.models.map((model) => (
+                              <SelectItem key={model.id} value={model.id}>
+                                {model.active ? `${model.label} · active` : model.label}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <p className="text-xs text-muted-foreground mt-2">
+                          {isModelsLoading
+                            ? 'Loading models from provider API...'
+                            : providerModels?.resolvedModelId
+                              ? `Resolved by API: ${providerModels.resolvedModelId}`
+                              : 'The model list is discovered from the provider API.'}
+                        </p>
                         <FieldError
                           errors={field.state.meta.errors.map((e) =>
                             typeof e === 'string' ? e : String(e),

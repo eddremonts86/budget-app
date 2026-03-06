@@ -2,10 +2,46 @@
 
 set -eu
 
-MODEL="${1:-${OLLAMA_MODEL:-qwen3.5:9b}}"
+MODEL="${1:-${OLLAMA_MODEL:-qwen3.5:2b}}"
 DRAFT_MODEL="${2:-${OLLAMA_DRAFT_MODEL:-qwen3.5:0.8b}}"
+MAIN_CANDIDATES="${OLLAMA_MAIN_CANDIDATES:-$MODEL,qwen3.5:2b,qwen3.5:4b}"
 MAX_RETRIES="${OLLAMA_HEALTH_RETRIES:-60}"
 SLEEP_SECONDS="${OLLAMA_HEALTH_SLEEP_SECONDS:-2}"
+
+pull_first_available() {
+  candidates_csv="$1"
+  resolved_model=""
+
+  OLD_IFS="$IFS"
+  IFS=','
+  for candidate in $candidates_csv; do
+    IFS="$OLD_IFS"
+    candidate_trimmed="$(printf '%s' "$candidate" | sed 's/^ *//; s/ *$//')"
+    [ -n "$candidate_trimmed" ] || continue
+
+    if docker compose exec -T ollama ollama list | grep -Fq "$candidate_trimmed"; then
+      echo "[ollama] main model already exists: $candidate_trimmed"
+      resolved_model="$candidate_trimmed"
+      break
+    fi
+
+    echo "[ollama] trying to download main model: $candidate_trimmed"
+    if docker compose exec -T ollama ollama pull "$candidate_trimmed"; then
+      resolved_model="$candidate_trimmed"
+      break
+    fi
+
+    echo "[ollama] candidate failed: $candidate_trimmed"
+    IFS=','
+  done
+  IFS="$OLD_IFS"
+
+  if [ -z "$resolved_model" ]; then
+    return 1
+  fi
+
+  printf '%s\n' "$resolved_model"
+}
 
 echo "[ollama] ensuring container is running..."
 docker compose up -d ollama
@@ -26,13 +62,11 @@ done
 
 echo "[ollama] container is healthy"
 
-echo "[ollama] pulling main model: $MODEL"
-if docker compose exec -T ollama ollama list | grep -q "$MODEL"; then
-  echo "[ollama] main model already exists: $MODEL"
-else
-  echo "[ollama] downloading main model $MODEL..."
-  docker compose exec -T ollama ollama pull "$MODEL"
-fi
+echo "[ollama] resolving main model from candidates: $MAIN_CANDIDATES"
+MODEL="$(pull_first_available "$MAIN_CANDIDATES")" || {
+  echo "[ollama] failed to resolve a main model (2B/4B)"
+  exit 1
+}
 
 echo "[ollama] pulling draft model: $DRAFT_MODEL"
 if docker compose exec -T ollama ollama list | grep -q "$DRAFT_MODEL"; then

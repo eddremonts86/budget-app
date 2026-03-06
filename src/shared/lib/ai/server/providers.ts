@@ -13,6 +13,8 @@ export type AiProviderStatus = {
   latencyMs: number
   message?: string
   modelCount?: number
+  activeModelId?: string | null
+  resolvedModelId?: string | null
 }
 
 type ProviderRegistryItem = {
@@ -169,6 +171,8 @@ export const probeProvider = async (config: AiConfigFormData): Promise<AiProvide
     const latencyMs = Date.now() - start
     if (res.ok) {
       let modelCount = 0
+      let activeModelId: string | null = null
+      let resolvedModelId: string | null = null
       try {
         const data = await res.json()
         if (data && Array.isArray(data.data)) {
@@ -180,6 +184,15 @@ export const probeProvider = async (config: AiConfigFormData): Promise<AiProvide
         // Ignore JSON parse error
       }
 
+      try {
+        const { discoverProviderModels } = await import('./model-discovery')
+        const discovered = await discoverProviderModels(config)
+        activeModelId = discovered.activeModelId
+        resolvedModelId = discovered.resolvedModelId
+      } catch {
+        // Ignore discovery errors for status probes
+      }
+
       if (modelCount === 0 && id !== 'anthropic') {
         return {
           id,
@@ -188,11 +201,22 @@ export const probeProvider = async (config: AiConfigFormData): Promise<AiProvide
           status: 'error',
           latencyMs,
           modelCount,
+          activeModelId,
+          resolvedModelId,
           message: 'NO_MODELS_FOUND',
         }
       }
 
-      return { id, label, available: true, status: 'available', latencyMs, modelCount }
+      return {
+        id,
+        label,
+        available: true,
+        status: 'available',
+        latencyMs,
+        modelCount,
+        activeModelId,
+        resolvedModelId,
+      }
     }
 
     // Handle 405 Method Not Allowed (used for Anthropic probe on /v1/messages)

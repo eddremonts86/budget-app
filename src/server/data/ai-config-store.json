@@ -8,7 +8,7 @@
       "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "qwen3.5-9b-instruct-q4_k_m.gguf",
+        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 2048,
         "top_p": 0.9,
@@ -34,7 +34,7 @@
       "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "qwen3.5:9b",
+        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 2048,
         "top_p": 0.9,
@@ -60,7 +60,7 @@
       "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "gpt-4o",
+        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 2048,
         "top_p": 1,
@@ -84,7 +84,7 @@
       "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "claude-3-5-sonnet-latest",
+        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 4096,
         "top_p": 0.9,
@@ -109,7 +109,7 @@
       "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "qwen3.5:9b",
+        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 2048,
         "top_p": 0.9,
