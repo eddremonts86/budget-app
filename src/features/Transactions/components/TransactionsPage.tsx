@@ -21,7 +21,7 @@ import { useUsers } from '@/features/Users/api/users.queries'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
-import { DataTable } from '@/shared/ui/DataTable'
+import { DataTable, UnifiedDataTable, type DataTableBulkAction } from '@/shared/ui/DataTable'
 import {
   useCreateTransaction,
   useDeleteTransaction,
@@ -230,6 +230,74 @@ export function TransactionsPage() {
   const updateMutation = useUpdateTransaction()
   const deleteMutation = useDeleteTransaction()
 
+  const historyFilters = React.useMemo(
+    () => [
+      {
+        columnId: 'status',
+        label: t('transactions.table.status'),
+        type: 'select' as const,
+        options: [
+          { label: t('transactions.form.statusApproved'), value: 'Approved' },
+          { label: t('transactions.form.statusPending'), value: 'Pending' },
+          { label: t('transactions.form.statusRejected'), value: 'Rejected' },
+        ],
+      },
+      {
+        columnId: 'userId',
+        label: t('transactions.form.userLabel'),
+        type: 'select' as const,
+        options: users.map((user) => ({ label: user.name, value: user.id })),
+      },
+      {
+        columnId: 'projectId',
+        label: t('transactions.form.projectLabel'),
+        type: 'select' as const,
+        options: projects.map((project) => ({ label: project.name, value: project.id })),
+      },
+    ],
+    [projects, t, users],
+  )
+
+  const historyBulkActions = React.useMemo<DataTableBulkAction<Transaction>[]>(
+    () => [
+      {
+        label: t('transactions.form.statusApproved'),
+        onClick: (rows) => {
+          rows.forEach((row) => {
+            updateMutation.mutate({
+              id: row.id,
+              data: {
+                status: 'Approved',
+                approvedBy: currentUserId ?? undefined,
+                approvedAt: new Date().toISOString(),
+              },
+            })
+          })
+          toast.success(t('transactions.pending.approveSuccess'))
+        },
+      },
+      {
+        label: t('transactions.form.statusRejected'),
+        variant: 'destructive',
+        onClick: (rows) => {
+          rows.forEach((row) => {
+            updateMutation.mutate({
+              id: row.id,
+              data: {
+                status: 'Rejected',
+                approvedBy: currentUserId ?? undefined,
+                approvedAt: new Date().toISOString(),
+                rejectionReason: t('transactions.form.statusRejected'),
+              },
+            })
+          })
+          toast.success(t('transactions.pending.rejectSuccess'))
+        },
+      },
+    ],
+    [currentUserId, t, updateMutation],
+  )
+
   const columns: ColumnDef<Transaction>[] = [
     {
       accessorKey: 'customer.name',
@@ -407,10 +475,20 @@ export function TransactionsPage() {
                 <Skeleton className="h-10 w-full" />
               </div>
             ) : (
-              <DataTable
+              <UnifiedDataTable
                 columns={columns}
                 data={displayedTransactions}
                 filterColumn="customer_name"
+                filters={historyFilters}
+                bulkActions={historyBulkActions}
+                enableSelection
+                enableGrouping
+                groupableColumns={['status', 'userId', 'projectId']}
+                enablePagination
+                pageSizeOptions={[10, 20, 50]}
+                initialPageSize={10}
+                enableExport
+                exportFileName="transactions-history.csv"
                 className="pb-4"
                 fullHeight
               />
