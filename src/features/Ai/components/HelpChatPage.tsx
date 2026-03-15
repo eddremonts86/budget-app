@@ -1,42 +1,5 @@
 'use client'
 
-import {
-  Button,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from '@/components/ui'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { aiConfigApi } from '@/features/Settings/api/ai-config.api'
-import { useAiConfigStore } from '@/features/Settings/api/ai-config.queries'
-import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
-import type { AiProviderId } from '@/shared/lib/ai/ai-config'
-import { useTQuery } from '@/shared/lib/query'
-import type {
-  Conversation,
-  PersistedActionState,
-  StoredMessage,
-} from '@/shared/lib/storage/chat-storage'
-import {
-  createConversationObject,
-  deleteAllConversations,
-  deleteConversation,
-  generateTitle,
-  getConversation,
-  getConversations,
-  migrateFromLocalStorage,
-  saveConversation,
-} from '@/shared/lib/storage/chat-storage'
-import { toast } from '@/shared/lib/toast'
-import { cn } from '@/shared/utils/index'
 import { useUser } from '@clerk/tanstack-react-start'
 import { fetchServerSentEvents, useChat, type UIMessage } from '@tanstack/ai-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -64,6 +27,39 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import vscDarkPlus from 'react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus.js'
 import remarkGfm from 'remark-gfm'
+import type { AiProviderId } from '@/ai/config'
+import {
+  createConversationObject,
+  deleteAllConversations,
+  deleteConversation,
+  generateTitle,
+  getConversation,
+  getConversations,
+  migrateFromLocalStorage,
+  saveConversation,
+} from '@/ai/storage/chat-storage'
+import type { Conversation, PersistedActionState, StoredMessage } from '@/ai/storage/chat-storage'
+import {
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from '@/components/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { aiConfigApi } from '@/features/Settings/api/ai-config.api'
+import { useAiConfigStore } from '@/features/Settings/api/ai-config.queries'
+import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
+import { useTQuery } from '@/shared/lib/query'
+import { toast } from '@/shared/lib/toast'
+import { cn } from '@/shared/utils/index'
 import { ActionConfirmationCard } from './ActionConfirmationCard'
 import { ActionStatesProvider } from './ActionStatesContext'
 import { ConversationPanel } from './ConversationPanel'
@@ -103,10 +99,9 @@ const formatMessage = (message: UIMessage): string => {
 const toUiMessage = (message: StoredMessage, index: number): UIMessage => ({
   id: `stored-${index}`,
   role: message.role,
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   parts: (Array.isArray(message.parts)
     ? message.parts
-    : [{ type: 'text', content: message.content }]) as any,
+    : [{ type: 'text', content: message.content }]) as UIMessage['parts'],
 })
 
 function messagesToStored(messages: UIMessage[]): StoredMessage[] {
@@ -819,7 +814,7 @@ export function HelpChatPage() {
   const queryClient = useQueryClient()
 
   const setActiveProviderMutation = useMutation({
-    mutationFn: (provider: string) => aiConfigApi.setActiveProvider(provider as any),
+    mutationFn: (provider: AiProviderId) => aiConfigApi.setActiveProvider(provider),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['ai-config'] })
       queryClient.invalidateQueries({ queryKey: ['ai', 'status'] })
@@ -833,7 +828,7 @@ export function HelpChatPage() {
   })
 
   const handleProviderChange = (value: string) => {
-    setActiveProviderMutation.mutate(value)
+    setActiveProviderMutation.mutate(value as AiProviderId)
   }
 
   const handleSend = async (overrideContent?: string) => {

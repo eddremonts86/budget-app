@@ -1,12 +1,12 @@
-/* eslint-disable no-console */
+ 
 import fs from 'fs/promises'
 import * as dotenv from 'dotenv'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import { glob } from 'glob'
 import postgres from 'postgres'
+import { getCollection } from '../src/ai/rag/chroma-client'
+import { generateEmbedding } from '../src/ai/rag/embeddings'
 import * as schema from '../src/shared/lib/db/schema'
-import { getCollection } from '../src/shared/lib/rag/chroma-client'
-import { generateEmbedding } from '../src/shared/lib/rag/embeddings'
 
 dotenv.config()
 
@@ -31,7 +31,7 @@ async function ingest() {
       console.log(`Found ${users.length} users in DB`)
 
       for (const user of users) {
-        const doc = `User: ${user.name} (${user.email}). Role: ${user.role}. ID: ${user.id}`
+        const doc = `User: ${user.name} (${user.email}). Role ID: ${user.roleId || 'unknown'}. ID: ${user.id}`
         const embedding = await generateEmbedding(doc)
         await collection.upsert({
           ids: [`user-${user.id}`],
@@ -61,7 +61,7 @@ async function ingest() {
       console.log(`Found ${projects.length} projects in DB`)
 
       for (const project of projects) {
-        const doc = `Project: ${project.name}. Status: ${project.status}. Description: ${project.description || ''}. Tech: ${project.technologies?.join(', ') || ''}`
+        const doc = `Project: ${project.name}. Status: ${project.status}. Type: ${project.type}. Priority: ${project.priority || 'unknown'}. Description: ${project.description || ''}`
         const embedding = await generateEmbedding(doc)
         await collection.upsert({
           ids: [`project-${project.id}`],
@@ -106,7 +106,7 @@ async function ingest() {
       console.log(`Found ${teams.length} teams in DB`)
 
       for (const team of teams) {
-        const doc = `Team: ${team.name}. Description: ${team.description || ''}. Members count: ${team.members?.length || 0}`
+        const doc = `Team: ${team.name}. Description: ${team.description || ''}. Specialization: ${team.specialization || 'general'}. Lead ID: ${team.leadId || 'unassigned'}`
         const embedding = await generateEmbedding(doc)
         await collection.upsert({
           ids: [`team-${team.id}`],

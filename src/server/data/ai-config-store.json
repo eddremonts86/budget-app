@@ -4,18 +4,16 @@
     "llama-cpp": {
       "provider": "llama-cpp",
       "baseUrl": "http://llama-cpp:8080/v1",
-      "port": 8080,
-      "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 2048,
         "top_p": 0.9,
         "frequency_penalty": 0,
         "presence_penalty": 0,
         "top_k": 50,
-        "repetition_penalty": 1.1
+        "repetition_penalty": 1.1,
+        "model": "auto"
       },
       "endpoints": {
         "chat": "/chat/completions",
@@ -25,23 +23,23 @@
         "status": ""
       },
       "timeout": 60000,
+      "port": 8080,
+      "token": "",
       "additionalParams": ""
     },
     "ollama": {
       "provider": "ollama",
       "baseUrl": "http://ollama:11434/v1",
-      "port": 11434,
-      "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 2048,
         "top_p": 0.9,
         "frequency_penalty": 0,
         "presence_penalty": 0,
         "top_k": 50,
-        "repetition_penalty": 1.1
+        "repetition_penalty": 1.1,
+        "model": "qwen3.5:2b"
       },
       "endpoints": {
         "chat": "/chat/completions",
@@ -51,72 +49,23 @@
         "status": ""
       },
       "timeout": 60000,
-      "additionalParams": ""
-    },
-    "openai": {
-      "provider": "openai",
-      "baseUrl": "https://api.openai.com/v1",
-      "port": 443,
+      "port": 11434,
       "token": "",
-      "apiKey": "",
-      "parameters": {
-        "model": "auto",
-        "temperature": 0.7,
-        "max_tokens": 2048,
-        "top_p": 1,
-        "frequency_penalty": 0,
-        "presence_penalty": 0
-      },
-      "endpoints": {
-        "chat": "/chat/completions",
-        "models": "/models",
-        "load": "",
-        "download": "",
-        "status": ""
-      },
-      "timeout": 60000,
-      "additionalParams": ""
-    },
-    "anthropic": {
-      "provider": "anthropic",
-      "baseUrl": "https://api.anthropic.com/v1",
-      "port": 443,
-      "token": "",
-      "apiKey": "",
-      "parameters": {
-        "model": "auto",
-        "temperature": 0.7,
-        "max_tokens": 4096,
-        "top_p": 0.9,
-        "frequency_penalty": 0,
-        "presence_penalty": 0,
-        "top_k": 50
-      },
-      "endpoints": {
-        "chat": "/chat/completions",
-        "models": "/models",
-        "load": "",
-        "download": "",
-        "status": ""
-      },
-      "timeout": 60000,
       "additionalParams": ""
     },
     "lm-studio": {
       "provider": "lm-studio",
       "baseUrl": "http://lmstudio:1234/v1",
-      "port": 1234,
-      "token": "",
       "apiKey": "",
       "parameters": {
-        "model": "auto",
         "temperature": 0.7,
         "max_tokens": 2048,
         "top_p": 0.9,
         "frequency_penalty": 0,
         "presence_penalty": 0,
         "top_k": 50,
-        "repetition_penalty": 1.1
+        "repetition_penalty": 1.1,
+        "model": "qwen3.5-2b"
       },
       "endpoints": {
         "chat": "/chat/completions",
@@ -126,6 +75,57 @@
         "status": "/models/download/status/:job_id"
       },
       "timeout": 60000,
+      "port": 1234,
+      "token": "",
+      "additionalParams": ""
+    },
+    "openai": {
+      "provider": "openai",
+      "baseUrl": "https://api.openai.com/v1",
+      "apiKey": "",
+      "parameters": {
+        "temperature": 0.7,
+        "max_tokens": 2048,
+        "top_p": 1,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "model": "auto"
+      },
+      "endpoints": {
+        "chat": "/chat/completions",
+        "models": "/models",
+        "load": "",
+        "download": "",
+        "status": ""
+      },
+      "timeout": 60000,
+      "port": 443,
+      "token": "",
+      "additionalParams": ""
+    },
+    "anthropic": {
+      "provider": "anthropic",
+      "baseUrl": "https://api.anthropic.com/v1",
+      "apiKey": "",
+      "parameters": {
+        "temperature": 0.7,
+        "max_tokens": 4096,
+        "top_p": 0.9,
+        "frequency_penalty": 0,
+        "presence_penalty": 0,
+        "top_k": 50,
+        "model": "auto"
+      },
+      "endpoints": {
+        "chat": "/chat/completions",
+        "models": "/models",
+        "load": "",
+        "download": "",
+        "status": ""
+      },
+      "timeout": 60000,
+      "port": 443,
+      "token": "",
       "additionalParams": ""
     }
   }

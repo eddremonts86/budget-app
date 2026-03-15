@@ -1,6 +1,12 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
-import { discoverProviderModels } from '@/shared/lib/ai/server/model-discovery'
+import type { AiConfigFormData } from '@/ai/config'
+import {
+  createJsonErrorResponse,
+  createJsonResponse,
+  discoverConfiguredProviderModels,
+  discoverModelsFromConfig,
+  getErrorMessage,
+} from '@/ai/server'
 
 export const Route = createFileRoute('/api/ai/models')({
   component: () => null,
@@ -10,42 +16,21 @@ export const Route = createFileRoute('/api/ai/models')({
         try {
           const url = new URL(request.url)
           const provider = url.searchParams.get('provider')
+          const result = await discoverConfiguredProviderModels(provider)
 
-          const { getAllAiConfigs } = await import('@/shared/lib/ai/server/config-store')
-          const store = await getAllAiConfigs()
-          const targetProvider =
-            provider && provider in store.providers
-              ? (provider as keyof typeof store.providers)
-              : store.activeProvider
-          const result = await discoverProviderModels(store.providers[targetProvider])
-
-          return new Response(JSON.stringify(result), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return createJsonResponse(result)
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'UNKNOWN_ERROR'
-          return new Response(JSON.stringify({ error: message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return createJsonErrorResponse(getErrorMessage(error), 500)
         }
       },
       POST: async ({ request }) => {
         try {
           const config = (await request.json()) as AiConfigFormData
-          const result = await discoverProviderModels(config)
+          const result = await discoverModelsFromConfig(config)
 
-          return new Response(JSON.stringify(result), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return createJsonResponse(result)
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'UNKNOWN_ERROR'
-          return new Response(JSON.stringify({ error: message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return createJsonErrorResponse(getErrorMessage(error), 500)
         }
       },
     },

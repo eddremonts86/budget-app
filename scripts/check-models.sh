@@ -1,27 +1,34 @@
 #!/usr/bin/env sh
 set -e
 
-# Define model paths
-LLAMA_MODEL_PATH=".docker_data/llm-models/llama-cpp/llama-3.2-1b-instruct-q4_k_m.gguf"
-LEGACY_MODEL_PATH=".docker_data/models/llama-3.2-1b-instruct-q4_k_m.gguf"
+MODEL_DIR=".docker_data/llm-models/llama-cpp"
+LEGACY_DIR=".docker_data/models"
 
-# Check Llama.cpp model
-if [ ! -f "$LLAMA_MODEL_PATH" ] && [ -f "$LEGACY_MODEL_PATH" ]; then
-  mkdir -p ".docker_data/llm-models/llama-cpp"
-  mv "$LEGACY_MODEL_PATH" "$LLAMA_MODEL_PATH"
+mkdir -p "$MODEL_DIR"
+
+if [ -d "$LEGACY_DIR" ]; then
+  legacy_models="$(ls -1 "$LEGACY_DIR"/*.gguf 2>/dev/null || true)"
+  if [ -n "$legacy_models" ]; then
+    for model_path in $legacy_models; do
+      model_file="$(basename "$model_path")"
+      if [ ! -f "$MODEL_DIR/$model_file" ]; then
+        mv "$model_path" "$MODEL_DIR/$model_file"
+      fi
+    done
+  fi
 fi
 
-if [ ! -f "$LLAMA_MODEL_PATH" ]; then
-  echo "❌ ERROR: Llama.cpp model not found at $LLAMA_MODEL_PATH"
-  echo "The application requires this model to start the AI service."
+models="$(ls -1 "$MODEL_DIR"/*.gguf 2>/dev/null || true)"
+if [ -z "$models" ]; then
+  echo "❌ ERROR: No llama.cpp GGUF models found in $MODEL_DIR"
   echo ""
-  echo "👉 ACTION REQUIRED: Run the following command to download the model:"
+  echo "👉 ACTION REQUIRED: Run one of:"
   echo "   pnpm docker:up:full"
-  echo "   OR"
-  echo "   sh scripts/bootstrap-llama-cpp.sh"
+  echo "   sh scripts/ai/bootstrap-llama-cpp.sh"
   echo ""
   exit 1
 fi
 
-echo "✅ All required AI models are present."
+echo "✅ AI models detected:"
+echo "$models" | sed 's/^/ - /'
 exit 0

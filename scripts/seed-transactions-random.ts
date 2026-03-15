@@ -1,7 +1,5 @@
 import { randomUUID } from 'node:crypto'
 import * as dotenv from 'dotenv'
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from '../src/shared/lib/db/schema'

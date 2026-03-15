@@ -1,4 +1,3 @@
-/* global console */
 /**
  * @fileoverview Master configuration index.
  * Aggregates all agent configurations and provides a unified interface.

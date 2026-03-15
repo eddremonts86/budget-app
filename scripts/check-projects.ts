@@ -1,7 +1,7 @@
-import { getDb } from '../src/shared/lib/db/index.js'
-import { projects } from '../src/shared/lib/db/schema.js'
 import 'dotenv/config'
 import postgres from 'postgres'
+import { getDb } from '../src/shared/lib/db/index.js'
+import { projects } from '../src/shared/lib/db/schema.js'
 
 async function check() {
   const connectionString = process.env.DATABASE_URL

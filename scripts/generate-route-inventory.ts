@@ -58,7 +58,7 @@ const uniqueSorted = (items: string[]) =>
     .sort((a, b) => a.localeCompare(b))
 
 const escapeYamlScalar = (value: string) => {
-  if (value === '' || /[:#\-\[\]\{\},&*!|>'"%@`]/.test(value) || value.includes(' ')) {
+  if (value === '' || /[:#\-[]{},&*!|>'"%@`]/.test(value) || value.includes(' ')) {
     return JSON.stringify(value)
   }
   return value

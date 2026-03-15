@@ -20,7 +20,7 @@ export function NotificationBell() {
 
   // MOCK AUTH: Assume the logged in user is one of the admins for demonstration
   const currentUserId = React.useMemo(() => {
-    const admin = users.find((u) => u.role === 'admin')
+    const admin = users.find((u) => u.roleName?.toLowerCase() === 'admin')
     return admin ? admin.id : ''
   }, [users])
 

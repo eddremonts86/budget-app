@@ -17,10 +17,10 @@ echo "[ai-ensure] starting services..."
 docker compose up -d db chromadb ollama lmstudio llama-cpp app
 
 echo "[ai-ensure] ensuring Ollama models..."
-sh scripts/bootstrap-ollama.sh
+sh scripts/ai/bootstrap-ollama.sh
 
 echo "[ai-ensure] ensuring LM Studio compatible model is loaded..."
-sh scripts/bootstrap-lmstudio.sh
+sh scripts/ai/bootstrap-lmstudio.sh
 
 wait_http() {
   name="$1"

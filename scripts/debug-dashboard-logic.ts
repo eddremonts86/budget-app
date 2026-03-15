@@ -1,8 +1,8 @@
 
 import 'dotenv/config'
 import { eq, count } from 'drizzle-orm'
-import { todos, users } from '@/shared/lib/db/schema'
 import { getDb } from '@/shared/lib/db'
+import { todos, users } from '@/shared/lib/db/schema'
 
 async function run() {
   try {

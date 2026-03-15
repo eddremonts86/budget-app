@@ -50,8 +50,8 @@ export function AnalyticsPage() {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
-    } catch (error) {
-      console.error('Failed to export data', error)
+    } catch {
+      // Ignore export failures triggered by the browser download flow.
     }
   }
 
@@ -60,7 +60,7 @@ export function AnalyticsPage() {
       <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0">
         <h2 className="text-3xl font-bold tracking-tight">{t('analytics.title')}</h2>
         <div className="flex items-center space-x-2">
-          <InputGroup className="w-[200px]">
+          <InputGroup className="w-50">
             <InputGroupAddon>
               <IconSearch />
             </InputGroupAddon>
@@ -69,7 +69,7 @@ export function AnalyticsPage() {
             />
           </InputGroup>
           <Select value={days.toString()} onValueChange={(val) => setDays(Number(val))}>
-            <SelectTrigger className="w-[120px]">
+            <SelectTrigger className="w-30">
               <SelectValue placeholder="Select days" />
             </SelectTrigger>
             <SelectContent>

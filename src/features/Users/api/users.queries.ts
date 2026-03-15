@@ -1,6 +1,12 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
 import {
+  getRolesFn,
+  getSkillsFn,
+  getJobTitlesFn,
+  getExperienceLevelsFn,
+} from './master-data.fn'
+import {
   type UserInput,
   createUserFn,
   deleteUserFn,
@@ -8,12 +14,6 @@ import {
   getUsersFn,
   updateUserFn,
 } from './users.fn'
-import {
-  getRolesFn,
-  getSkillsFn,
-  getJobTitlesFn,
-  getExperienceLevelsFn,
-} from './master-data.fn'
 
 export const userKeys = {
   all: ['users'] as const,

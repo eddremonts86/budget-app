@@ -17,21 +17,13 @@ export const dashboardKeys = {
 }
 
 export const useExpenseDistribution = () => {
-  return useTQuery(dashboardKeys.expenseDistribution(), () => getExpenseDistributionFn({ data: undefined }))
+  return useTQuery(dashboardKeys.expenseDistribution(), () =>
+    getExpenseDistributionFn({ data: undefined }),
+  )
 }
 
 export const useDashboardStats = () => {
-  return useTQuery(dashboardKeys.stats(), async () => {
-    console.log('useDashboardStats: calling getDashboardStatsFn')
-    try {
-      const result = await getDashboardStatsFn({ data: undefined })
-      console.log('useDashboardStats: result', result)
-      return result
-    } catch (error) {
-      console.error('useDashboardStats: error', error)
-      throw error
-    }
-  })
+  return useTQuery(dashboardKeys.stats(), () => getDashboardStatsFn({ data: undefined }))
 }
 
 export const useRecentTransactions = () => {

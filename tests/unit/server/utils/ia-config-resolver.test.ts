@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveAiConfig } from '../../../../src/server/utils/ia-config-resolver'
+import { resolveAiConfig } from '../../../../src/ai/config/resolver'
 
 describe('ia-config-resolver', () => {
   it('should resolve default configuration for llama-cpp', () => {
@@ -21,12 +21,12 @@ describe('ia-config-resolver', () => {
     const userConfig = {
       parameters: {
         temperature: 0.9,
-        model: 'custom-model'
+        model: 'custom-model',
       },
-      baseUrl: 'http://custom-url:1234'
+      baseUrl: 'http://custom-url:1234',
     }
     const config = resolveAiConfig('ollama', userConfig as any)
-    
+
     expect(config.provider).toBe('ollama')
     expect(config.parameters.temperature).toBe(0.9)
     expect(config.parameters.model).toBe('custom-model')
@@ -36,14 +36,16 @@ describe('ia-config-resolver', () => {
   })
 
   it('should handle unknown provider gracefully', () => {
-    const config = resolveAiConfig('unknown-provider')
+    const config = resolveAiConfig(
+      'unknown-provider' as unknown as Parameters<typeof resolveAiConfig>[0],
+    )
     expect(config.provider).toBe('unknown-provider')
     expect(config.endpoints.chat).toBe('/chat/completions')
   })
 
   it('should correctly extract port from baseUrl', () => {
     const userConfig = {
-      baseUrl: 'http://localhost:9999'
+      baseUrl: 'http://localhost:9999',
     }
     const config = resolveAiConfig('ollama', userConfig as any)
     expect(config.port).toBe(9999)

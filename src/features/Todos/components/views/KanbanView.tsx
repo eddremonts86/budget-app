@@ -77,7 +77,6 @@ export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
   ])
 
   const handleDragStart = (event: DragStartEvent) => {
-    console.log('[Kanban] Drag Start:', event.active.id)
     setActiveTodo(event.active.data.current as Todo)
   }
 
@@ -85,10 +84,7 @@ export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
     const { active, over } = event
     setActiveTodo(null)
 
-    console.log('[Kanban] Drag End - Active:', active.id, 'Over:', over?.id)
-
     if (!over) {
-      console.warn('[Kanban] Drag End: No over target detected')
       return
     }
 
@@ -116,7 +112,6 @@ export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
         'cancelled',
       ].includes(newStatus)
     ) {
-      console.log(`[Kanban] Updating todo ${todoId} from ${todo.status} to ${newStatus}`)
       const previousStatus = todo.status
       const sourceQueryKey = [
         ...todoKeys.infinite(),

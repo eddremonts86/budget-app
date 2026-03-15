@@ -27,6 +27,7 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import type { AiProviderId } from '@/ai/config'
 import { NavMain } from '@/components/nav-main'
 import { NavSecondary } from '@/components/nav-secondary'
 import { NavUser } from '@/components/nav-user'
@@ -55,7 +56,6 @@ import {
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import { useTransactions } from '@/features/Transactions/api/transactions.queries'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
-import type { AiProviderId } from '@/shared/lib/ai/ai-config'
 import { cn } from '@/shared/utils'
 
 type SearchResultPayload = {
@@ -187,7 +187,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         }
       }
     } catch (error) {
-      console.error(error)
       setSearchError(error instanceof Error ? error.message : 'Unknown error')
     } finally {
       setIsSearching(false)

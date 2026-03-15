@@ -2318,5 +2318,173 @@
     "providerId": "ollama",
     "model": "qwen3.5:2b",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:52:09.098Z",
+    "locale": "en-US",
+    "query": "Responde solo: ok...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:52:43.514Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:56:19.352Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:57:04.155Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:01:39.967Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:02:01.583Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "lm-studio",
+    "model": "llama-3.2-1b-instruct",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:02:32.798Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:03:20.167Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "lm-studio",
+    "model": "llama-3.2-1b-instruct",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:03:52.726Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:04:12.814Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:04:32.893Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:05:39.591Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:06:34.199Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T07:21:44.556Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T07:22:08.922Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T07:22:52.008Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:12:41.504Z",
+    "locale": "en",
+    "query": "Write an email draft...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:45:36.980Z",
+    "locale": "en",
+    "query": "ok, dime cual es el modelo que estas usando?...",
+    "providerId": "lm-studio",
+    "model": "text-embedding-nomic-embed-text-v1.5",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:46:02.694Z",
+    "locale": "en",
+    "query": "ok, dime cual es el modelo que estas usando?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:52:21.286Z",
+    "locale": "es-ES",
+    "query": "Responde SOLO OK...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5-2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:56:53.775Z",
+    "locale": "es-ES",
+    "query": "Responde SOLO OK...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
   }
 ]

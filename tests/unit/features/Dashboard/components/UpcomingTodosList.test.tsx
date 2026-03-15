@@ -1,5 +1,4 @@
 import { render, screen, fireEvent } from '@testing-library/react'
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import * as dashboardQueries from '@/features/Dashboard/api/dashboard.queries'
 import { UpcomingTodosList } from '@/features/Dashboard/components/UpcomingTodosList'
@@ -8,7 +7,7 @@ import * as userQueries from '@/features/Users/api/users.queries'
 // Mock translations
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (key: string, defaultValue: string) => defaultValue,
+    t: (_key: string, defaultValue: string) => defaultValue,
   }),
   initReactI18next: {
     type: '3rdParty',

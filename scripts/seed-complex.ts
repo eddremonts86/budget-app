@@ -36,7 +36,6 @@ async function seed() {
     // 2. Users (50)
     console.log('👤 Generating 50 users...')
     const usersData = []
-    const roles = ['admin', 'user'] as const
     const jobTitles = [
       'Project Manager',
       'Product Owner',
@@ -181,7 +180,14 @@ async function seed() {
 
     // 5. Categories (15)
     console.log('🏷️ Generating 15 categories...')
-    const categoriesData = []
+    const categoriesData: Array<{
+      id: string
+      name: string
+      description: string
+      color: string
+      sla: number
+      parentId: string | null
+    }> = []
     const mainCats = ['Development', 'Design', 'QA', 'DevOps', 'Management']
     const subCats = [
       'Frontend',

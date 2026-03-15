@@ -51,13 +51,12 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
     refetchInterval: 5000, // Refresh every 5s
   })
 
-  const logs = data?.logs || []
   const settings = data?.settings
 
   // Memoize sorted logs to prevent re-sorting on every render
   const sortedLogs = useMemo(() => {
-    return [...logs].reverse()
-  }, [logs])
+    return [...(data?.logs ?? [])].reverse()
+  }, [data?.logs])
 
   const mutation = useMutation({
     mutationFn: async (newSettings: { forceLocale?: string }) => {
@@ -112,7 +111,7 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
               >
                 <SelectTrigger
                   id="force-locale"
-                  className="h-7 w-[140px] border-none bg-transparent px-2 text-xs font-medium focus:ring-0 hover:bg-muted/50 transition-colors"
+                  className="h-7 w-35 border-none bg-transparent px-2 text-xs font-medium focus:ring-0 hover:bg-muted/50 transition-colors"
                 >
                   <SelectValue placeholder="Auto" />
                 </SelectTrigger>
@@ -140,23 +139,23 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
       </CardHeader>
 
       <CardContent className="p-0">
-        <ScrollArea className="h-[400px] w-full">
+        <ScrollArea className="h-100 w-full">
           <Table>
             <TableHeader className="bg-muted/20 sticky top-0 z-10 backdrop-blur-md">
               <TableRow className="hover:bg-transparent">
-                <TableHead className="w-[180px] pl-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+                <TableHead className="w-45 pl-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
                   <div className="flex items-center gap-2">
                     <Clock className="h-3.5 w-3.5" />
                     Timestamp
                   </div>
                 </TableHead>
-                <TableHead className="w-[120px] text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+                <TableHead className="w-30 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
                   <div className="flex items-center gap-2">
                     <Globe className="h-3.5 w-3.5" />
                     Locale
                   </div>
                 </TableHead>
-                <TableHead className="w-[200px] text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
+                <TableHead className="w-50 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
                   <div className="flex items-center gap-2">
                     <Cpu className="h-3.5 w-3.5" />
                     Provider
@@ -205,7 +204,7 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell className="max-w-[300px] pr-6">
+                    <TableCell className="max-w-75 pr-6">
                       <div
                         className="truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors bg-muted/20 px-2.5 py-1.5 rounded-md border border-transparent group-hover:border-border/50 group-hover:bg-background shadow-sm"
                         title={log.query}
@@ -226,7 +225,7 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
                         <p className="text-sm font-medium text-foreground">
                           No audit logs found yet
                         </p>
-                        <p className="text-xs opacity-60 max-w-[240px] mx-auto">
+                        <p className="mx-auto max-w-60 text-xs opacity-60">
                           Start chatting with the AI to see language enforcement logs appear here in
                           real-time.
                         </p>

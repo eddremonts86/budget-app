@@ -1,8 +1,6 @@
 import * as dotenv from 'dotenv'
 import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/postgres-js'
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable no-console */
 import postgres from 'postgres'
 import * as schema from '../src/shared/lib/db/schema'
 import * as seedData from './seed-data'

@@ -1,5 +1,5 @@
 import * as React from 'react'
-import type { PersistedActionState } from '@/shared/lib/storage/chat-storage'
+import type { PersistedActionState } from '@/ai/storage/chat-storage'
 
 // --- Context ---
 

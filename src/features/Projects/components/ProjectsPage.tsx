@@ -40,8 +40,7 @@ export function ProjectsPage() {
         queryClient.invalidateQueries({ queryKey: projectsKeys.all })
         toast.success(t('projects.success.deleted'))
       }
-    } catch (error) {
-      console.error('ProjectsPage: delete error', error)
+    } catch {
       toast.error(t('projects.error.delete'))
     }
   }

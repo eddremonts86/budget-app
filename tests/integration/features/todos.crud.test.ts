@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { deleteRagDocument, syncRagDocument } from '@/ai/rag/sync'
 import { createTodoFn, deleteTodoFn, updateTodoFn } from '@/features/Todos/api/todos.fn'
 import { getDb } from '@/shared/lib/db'
-import { deleteRagDocument, syncRagDocument } from '@/shared/lib/rag/sync'
 
 vi.mock('@tanstack/react-start', () => ({
   createServerFn: () => {
@@ -20,7 +20,7 @@ vi.mock('@/shared/lib/db', () => ({
   getDb: vi.fn(),
 }))
 
-vi.mock('@/shared/lib/rag/sync', () => ({
+vi.mock('@/ai/rag/sync', () => ({
   syncRagDocument: vi.fn().mockResolvedValue(undefined),
   deleteRagDocument: vi.fn().mockResolvedValue(undefined),
 }))

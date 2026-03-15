@@ -11,8 +11,21 @@ export const teamSchema = z.object({
 
 export type TeamInput = z.infer<typeof teamSchema>
 
-export const getTeamsFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data }: { data?: { pageParam?: number; limit?: number } }) => {
+const teamListParamsSchema = z
+  .object({
+    pageParam: z.number().optional(),
+    limit: z.number().optional(),
+  })
+  .optional()
+
+const updateTeamPayloadSchema = z.object({
+  id: z.string().min(1),
+  data: teamSchema.partial(),
+})
+
+export const getTeamsFn = createServerFn({ method: 'GET' })
+  .inputValidator(teamListParamsSchema)
+  .handler(async ({ data }) => {
     if (process.env.VITE_E2E === 'true') {
       return {
         data: Array.from({ length: 5 }).map((_, i) => ({
@@ -82,11 +95,11 @@ export const getTeamsFn = createServerFn({ method: 'GET' }).handler(
         totalCount: 0,
       }
     }
-  },
-)
+  })
 
-export const getTeamByIdFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
+export const getTeamByIdFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.string().optional())
+  .handler(async ({ data: id }) => {
     if (process.env.VITE_E2E === 'true') {
       return {
         id: id || '1',
@@ -120,18 +133,17 @@ export const getTeamByIdFn = createServerFn({ method: 'GET' }).handler(
       console.error('Error in getTeamByIdFn:', error)
       return null
     }
-  },
-)
+  })
 
-export const createTeamFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
+export const createTeamFn = createServerFn({ method: 'POST' })
+  .inputValidator(teamSchema)
+  .handler(async ({ data }) => {
     if (process.env.VITE_E2E === 'true') {
-      const input = data as TeamInput
       return {
         id: crypto.randomUUID(),
-        name: input.name,
-        description: input.description,
-        members: input.members,
+        name: data.name,
+        description: data.description,
+        members: data.members,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
@@ -140,13 +152,7 @@ export const createTeamFn = createServerFn({ method: 'POST' }).handler(
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      // Manual validation
-      const parsed = teamSchema.safeParse(data)
-      if (!parsed.success) {
-        throw new Error(`Invalid input: ${parsed.error.message}`)
-      }
-      const input = parsed.data
-      const normalizedName = input.name.trim()
+      const normalizedName = data.name.trim()
 
       const existingTeam = await db
         .select({ id: teams.id })
@@ -158,20 +164,22 @@ export const createTeamFn = createServerFn({ method: 'POST' }).handler(
       }
 
       const [existingUsers, duplicatedUsers] = await Promise.all([
-        input.members.length
+        data.members.length
           ? db
               .select({ id: users.id })
               .from(users)
-              .where(inArray(users.id, Array.from(new Set(input.members))))
+              .where(inArray(users.id, Array.from(new Set(data.members))))
           : Promise.resolve([]),
-        Promise.resolve(input.members.filter((member, index) => input.members.indexOf(member) !== index)),
+        Promise.resolve(
+          data.members.filter((member, index) => data.members.indexOf(member) !== index),
+        ),
       ])
 
       if (duplicatedUsers.length > 0) {
         throw new Error('Team members contain duplicated users')
       }
 
-      if (input.members.length > 0 && existingUsers.length !== input.members.length) {
+      if (data.members.length > 0 && existingUsers.length !== data.members.length) {
         throw new Error('Some selected users do not exist')
       }
 
@@ -181,13 +189,13 @@ export const createTeamFn = createServerFn({ method: 'POST' }).handler(
         .values({
           id: teamId,
           name: normalizedName,
-          description: input.description,
+          description: data.description,
         })
         .returning()
 
-      if (input.members.length > 0) {
+      if (data.members.length > 0) {
         await db.insert(teamMembers).values(
-          input.members.map((userId) => ({
+          data.members.map((userId) => ({
             teamId,
             userId,
           })),
@@ -196,7 +204,7 @@ export const createTeamFn = createServerFn({ method: 'POST' }).handler(
 
       return {
         ...newItem,
-        members: input.members,
+        members: data.members,
         createdAt: newItem.createdAt.toISOString(),
         updatedAt: newItem.updatedAt.toISOString(),
       }
@@ -204,21 +212,17 @@ export const createTeamFn = createServerFn({ method: 'POST' }).handler(
       console.error('Error in createTeamFn:', error)
       throw error
     }
-  },
-)
+  })
 
-export const updateTeamFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
+export const updateTeamFn = createServerFn({ method: 'POST' })
+  .inputValidator(updateTeamPayloadSchema)
+  .handler(async ({ data }) => {
     if (process.env.VITE_E2E === 'true') {
-      const { id, data: updateData } = data as {
-        id: string
-        data: Partial<TeamInput>
-      }
       return {
-        id,
-        name: updateData.name || 'Team 1',
-        description: updateData.description || 'Description',
-        members: updateData.members || [],
+        id: data.id,
+        name: data.data.name || 'Team 1',
+        description: data.data.description || 'Description',
+        members: data.data.members || [],
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       }
@@ -227,19 +231,7 @@ export const updateTeamFn = createServerFn({ method: 'POST' }).handler(
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const updatePayloadSchema = z.object({
-        id: z.string().min(1),
-        data: teamSchema.partial(),
-      })
-      const parsed = updatePayloadSchema.safeParse(data)
-      if (!parsed.success) {
-        throw new Error(`Invalid input: ${parsed.error.message}`)
-      }
-
-      const { id, data: updateData } = parsed.data as {
-        id: string
-        data: Partial<z.infer<typeof teamSchema>>
-      }
+      const { id, data: updateData } = data
 
       if (updateData.members) {
         const uniqueMembers = Array.from(new Set(updateData.members))
@@ -318,11 +310,11 @@ export const updateTeamFn = createServerFn({ method: 'POST' }).handler(
       console.error('Error in updateTeamFn:', error)
       throw error
     }
-  },
-)
+  })
 
-export const deleteTeamFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
+export const deleteTeamFn = createServerFn({ method: 'POST' })
+  .inputValidator(z.string().optional())
+  .handler(async ({ data: id }) => {
     if (process.env.VITE_E2E === 'true') {
       return { success: true }
     }
@@ -338,5 +330,4 @@ export const deleteTeamFn = createServerFn({ method: 'POST' }).handler(
       console.error('Error in deleteTeamFn:', error)
       throw error
     }
-  },
-)
+  })

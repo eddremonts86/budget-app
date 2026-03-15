@@ -1,8 +1,8 @@
 import * as Sentry from '@sentry/react'
 import axios from 'axios'
-import { toast } from '@/shared/lib/toast'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { setupErrorInterceptor } from '@/shared/lib/api/interceptors/error.interceptor'
+import { toast } from '@/shared/lib/toast'
 
 vi.mock('@/shared/lib/toast', () => ({
   toast: {

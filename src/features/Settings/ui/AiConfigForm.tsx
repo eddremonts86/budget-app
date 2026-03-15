@@ -13,6 +13,7 @@ import { useForm } from '@tanstack/react-form'
 import { useStore } from '@tanstack/react-store'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
+import type { AiConfigFormData, AiProvider } from '@/ai/config'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -35,7 +36,6 @@ import {
   useTestAiConnection,
   useUpdateAiConfig,
 } from '../api/ai-config.queries'
-import { type AiConfigFormData, type AiProvider } from '../model/ai-config.schema'
 import { AnthropicIcon, LlamaCppIcon, LMStudioIcon, OllamaIcon, OpenAIIcon } from './AiIcons'
 import { AiLanguageAudit } from './AiLanguageAudit'
 
@@ -245,6 +245,45 @@ export function AiConfigForm() {
 
   const { data: providerModels, isLoading: isModelsLoading } =
     useAiProviderModels(providerModelConfig)
+  const [testingProviderId, setTestingProviderId] = React.useState<AiProvider | null>(null)
+  const [providerTestResults, setProviderTestResults] = React.useState<
+    Partial<Record<AiProvider, { ok: boolean; message: string; testedAt: number }>>
+  >({})
+
+  const resolveProviderConfig = React.useCallback(
+    (provider: AiProvider): AiConfigFormData => {
+      const defaults = PROVIDER_DEFAULTS[provider]
+      const saved = configStore?.providers?.[provider]
+
+      return {
+        provider,
+        baseUrl: saved?.baseUrl ?? defaults.baseUrl!,
+        port: saved?.port ?? defaults.port!,
+        token: saved?.token ?? '',
+        apiKey: saved?.apiKey ?? '',
+        endpoints: {
+          chat: saved?.endpoints?.chat ?? defaults.endpoints!.chat,
+          models: saved?.endpoints?.models ?? defaults.endpoints!.models,
+          load: saved?.endpoints?.load ?? defaults.endpoints?.load ?? '',
+          download: saved?.endpoints?.download ?? defaults.endpoints?.download ?? '',
+          status: saved?.endpoints?.status ?? defaults.endpoints?.status ?? '',
+        },
+        parameters: {
+          model: saved?.parameters?.model ?? defaults.parameters!.model,
+          temperature: saved?.parameters?.temperature ?? defaults.parameters!.temperature,
+          max_tokens: saved?.parameters?.max_tokens ?? defaults.parameters!.max_tokens,
+          top_p: saved?.parameters?.top_p ?? defaults.parameters!.top_p,
+          frequency_penalty:
+            saved?.parameters?.frequency_penalty ?? defaults.parameters!.frequency_penalty,
+          presence_penalty:
+            saved?.parameters?.presence_penalty ?? defaults.parameters!.presence_penalty,
+        },
+        timeout: saved?.timeout ?? 30000,
+        additionalParams: saved?.additionalParams ?? '',
+      }
+    },
+    [configStore],
+  )
 
   const handleReset = async () => {
     if (confirm(t('settings.ai.actions.confirmReset'))) {
@@ -272,34 +311,7 @@ export function AiConfigForm() {
   }
 
   const handleProviderChange = (provider: AiProvider) => {
-    const defaults = PROVIDER_DEFAULTS[provider]
-    const saved = configStore?.providers?.[provider]
-    const nextConfig = {
-      provider,
-      baseUrl: saved?.baseUrl ?? defaults.baseUrl!,
-      port: saved?.port ?? defaults.port!,
-      token: saved?.token ?? '',
-      apiKey: saved?.apiKey ?? '',
-      endpoints: {
-        chat: saved?.endpoints?.chat ?? defaults.endpoints!.chat,
-        models: saved?.endpoints?.models ?? defaults.endpoints!.models,
-        load: saved?.endpoints?.load ?? defaults.endpoints?.load ?? '',
-        download: saved?.endpoints?.download ?? defaults.endpoints?.download ?? '',
-        status: saved?.endpoints?.status ?? defaults.endpoints?.status ?? '',
-      },
-      parameters: {
-        model: saved?.parameters?.model ?? defaults.parameters!.model,
-        temperature: saved?.parameters?.temperature ?? defaults.parameters!.temperature,
-        max_tokens: saved?.parameters?.max_tokens ?? defaults.parameters!.max_tokens,
-        top_p: saved?.parameters?.top_p ?? defaults.parameters!.top_p,
-        frequency_penalty:
-          saved?.parameters?.frequency_penalty ?? defaults.parameters!.frequency_penalty,
-        presence_penalty:
-          saved?.parameters?.presence_penalty ?? defaults.parameters!.presence_penalty,
-      },
-      timeout: saved?.timeout ?? 30000,
-      additionalParams: saved?.additionalParams ?? '',
-    }
+    const nextConfig = resolveProviderConfig(provider)
 
     form.setFieldValue('provider', nextConfig.provider)
     form.setFieldValue('baseUrl', nextConfig.baseUrl)
@@ -319,6 +331,44 @@ export function AiConfigForm() {
     form.setFieldValue('parameters.presence_penalty', nextConfig.parameters.presence_penalty)
     form.setFieldValue('timeout', nextConfig.timeout)
     form.setFieldValue('additionalParams', nextConfig.additionalParams)
+  }
+
+  const handleTestProvider = async (provider: AiProvider) => {
+    setTestingProviderId(provider)
+    try {
+      const success = await testMutation.mutateAsync(resolveProviderConfig(provider))
+      const message = success
+        ? t('settings.ai.messages.testSuccess')
+        : t('settings.ai.messages.testError')
+
+      setProviderTestResults((prev) => ({
+        ...prev,
+        [provider]: {
+          ok: success,
+          message,
+          testedAt: Date.now(),
+        },
+      }))
+
+      if (success) {
+        toast.success(`${provider.toUpperCase()}: ${message}`)
+      } else {
+        toast.error(`${provider.toUpperCase()}: ${message}`)
+      }
+    } catch {
+      const message = t('settings.ai.messages.testError')
+      setProviderTestResults((prev) => ({
+        ...prev,
+        [provider]: {
+          ok: false,
+          message,
+          testedAt: Date.now(),
+        },
+      }))
+      toast.error(`${provider.toUpperCase()}: ${message}`)
+    } finally {
+      setTestingProviderId(null)
+    }
   }
 
   if (isConfigLoading) {
@@ -379,8 +429,8 @@ export function AiConfigForm() {
                 Current system status and intelligent fallback priority sequence.
               </p>
             </div>
-            <div className="p-6 pt-0">
-              <div className="grid grid-cols-[repeat(auto-fit,minmax(200px,1fr))] gap-6">
+            <div className="p-6 pt-0 max-h-[70vh] overflow-y-auto pr-2 md:max-h-none md:overflow-visible">
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 xl:grid-cols-3">
                 {[
                   {
                     id: 'llama-cpp',
@@ -418,15 +468,26 @@ export function AiConfigForm() {
                     Icon: AnthropicIcon,
                   },
                 ].map((provider, index) => {
+                  const providerId = provider.id as AiProvider
                   const status = providerStatuses?.find((s) => s.id === provider.id)
                   const isActive = config?.provider === provider.id
                   const isAvailable = status?.available
                   const isError = status?.status === 'error' || status?.status === 'unreachable'
+                  const providerConfig = configStore?.providers?.[providerId]
+                  const providerDefault = PROVIDER_DEFAULTS[providerId]
+                  const apiBaseUrl = providerConfig?.baseUrl ?? providerDefault.baseUrl ?? ''
+                  const resolvedModel =
+                    status?.resolvedModelId ||
+                    status?.activeModelId ||
+                    providerConfig?.parameters?.model ||
+                    'auto'
+                  const testResult = providerTestResults[providerId]
+                  const isTesting = testingProviderId === providerId
 
                   return (
                     <div
                       key={provider.id}
-                      onClick={() => handleProviderChange(provider.id as AiProvider)}
+                      onClick={() => handleProviderChange(providerId)}
                       className={`group relative flex flex-col items-center text-center p-6 rounded-xl border transition-all duration-300 cursor-pointer hover:-translate-y-1 ${
                         isActive
                           ? 'bg-black/80 border-primary shadow-md ring-1 ring-primary/20'
@@ -434,7 +495,7 @@ export function AiConfigForm() {
                       }`}
                     >
                       {/* Priority Index */}
-                      <div className="absolute top-3 left-4 text-xs font-bold text-muted-foreground/20 font-mono text-lg">
+                      <div className="absolute top-3 left-4 text-lg font-bold text-muted-foreground/20 font-mono">
                         {String(index + 1).padStart(2, '0')}
                       </div>
 
@@ -501,32 +562,54 @@ export function AiConfigForm() {
                         {provider.description}
                       </p>
 
-                      {/* Footer Info */}
-                      <div className="mt-auto w-full pt-3 border-t border-border/50 flex items-center justify-between text-[10px] text-muted-foreground font-medium">
-                        <span>
-                          {status?.modelCount ? `${status.modelCount} models` : 'No models'}
-                        </span>
-                        {isActive && (
-                          <Button
-                            size="icon"
-                            variant="secondary"
-                            className="size-7 shadow-sm hover:scale-105 transition-transform"
-                            onClick={(e) => {
-                              e.stopPropagation()
-                              handleTestConnection()
-                            }}
-                            title="Test Connection"
+                      <div className="mt-auto w-full pt-3 border-t border-border/50 space-y-2">
+                        <div className="flex items-center justify-between text-[10px] text-muted-foreground font-medium">
+                          <span>{status?.modelCount ? `${status.modelCount} models` : 'No models'}</span>
+                          {status?.message && !isAvailable && (
+                            <span className="text-red-500 max-w-28 truncate" title={status.message}>
+                              {status.message}
+                            </span>
+                          )}
+                        </div>
+                        <div className="rounded-md border border-border/40 bg-background/50 px-2 py-1.5 text-left space-y-1">
+                          <p className="text-[10px] text-muted-foreground">
+                            API URL
+                            <span className="ml-1 block truncate font-mono text-foreground/90">
+                              {apiBaseUrl}
+                            </span>
+                          </p>
+                          <p className="text-[10px] text-muted-foreground">
+                            Modelo activo
+                            <span className="ml-1 block truncate font-mono text-foreground/90">
+                              {resolvedModel}
+                            </span>
+                          </p>
+                        </div>
+                        <Button
+                          size="sm"
+                          variant={isActive ? 'default' : 'secondary'}
+                          className="h-8 w-full text-xs shadow-sm"
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleTestProvider(providerId)
+                          }}
+                          disabled={isTesting}
+                        >
+                          {isTesting ? (
+                            <IconLoader2 className="mr-1.5 size-3.5 animate-spin" />
+                          ) : (
+                            <IconPlayerPlay className="mr-1.5 size-3.5 fill-current" />
+                          )}
+                          Probar ahora
+                        </Button>
+                        {testResult && (
+                          <p
+                            className={`text-[10px] text-left ${
+                              testResult.ok ? 'text-emerald-500' : 'text-red-500'
+                            }`}
                           >
-                            <IconPlayerPlay className="size-3.5 fill-current" />
-                          </Button>
-                        )}
-                        {!isActive && status?.message && !isAvailable && (
-                          <span
-                            className="text-red-500 max-w-[80px] truncate"
-                            title={status.message}
-                          >
-                            {status.message}
-                          </span>
+                            {testResult.message} · {new Date(testResult.testedAt).toLocaleTimeString()}
+                          </p>
                         )}
                       </div>
                     </div>

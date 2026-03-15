@@ -104,6 +104,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
           createdAt: item.createdAt.toISOString(),
           updatedAt: item.updatedAt.toISOString(),
           completedAt: item.completedAt ? item.completedAt.toISOString() : null,
+          dependencies: [],
         })),
         nextPage,
         totalCount: total,
@@ -179,6 +180,8 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
         dueDate: item.dueDate ? item.dueDate.toISOString() : '',
         createdAt: item.createdAt.toISOString(),
         updatedAt: item.updatedAt.toISOString(),
+        completedAt: item.completedAt ? item.completedAt.toISOString() : null,
+        dependencies: [],
       }
     } catch (error) {
       if (isE2E && id) {
@@ -278,7 +281,7 @@ export const createTodoFn = createServerFn({ method: 'POST' })
 
     try {
       const db = getDb()
-      const { syncRagDocument } = await import('@/shared/lib/rag/sync')
+      const { syncRagDocument } = await import('@/ai/rag/sync')
 
       const userId = 'user_1' // await requireAuth()
 
@@ -336,7 +339,7 @@ export const updateTodoFn = createServerFn({ method: 'POST' })
 
     try {
       const db = getDb()
-      const { syncRagDocument } = await import('@/shared/lib/rag/sync')
+      const { syncRagDocument } = await import('@/ai/rag/sync')
 
       const [updatedItem] = await db
         .update(todos)
@@ -388,7 +391,7 @@ export const deleteTodoFn = createServerFn({ method: 'POST' })
 
     try {
       const db = getDb()
-      const { deleteRagDocument } = await import('@/shared/lib/rag/sync')
+      const { deleteRagDocument } = await import('@/ai/rag/sync')
       await db.delete(todos).where(eq(todos.id, id))
       await deleteRagDocument('todo', id)
       return { success: true }

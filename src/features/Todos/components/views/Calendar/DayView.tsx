@@ -1,6 +1,5 @@
 import { format, isSameDay, isToday } from 'date-fns'
 import { Plus } from 'lucide-react'
-import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { cn } from '@/shared/lib/utils'

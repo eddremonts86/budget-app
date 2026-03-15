@@ -1,0 +1,21 @@
+# AI Docs Index
+
+Esta carpeta agrupa la documentacion operativa y arquitectonica de AI para que quede alineada con la nueva organizacion del codigo bajo `src/ai`.
+
+## Estado actual
+
+La reorganizacion ya centralizo configuracion, providers, prompts, RAG, storage y audit dentro de `src/ai`.
+La capa de providers ya esta separada por carpeta y por responsabilidad interna (`adapter`, `config`, `models`, `probe`, `types`).
+Las rutas `api.ai.*` ya consumen helpers compartidos desde `src/ai/server` y prompts desde `src/ai/prompts` en lugar de mantener esa logica embebida.
+
+## Documentos
+
+- `architecture.md`: arquitectura actual y criterios de integracion.
+- `agents.md`: configuracion y uso de agentes.
+- `setup.md`: setup operativo de providers y entorno.
+- `language-system.md`: reglas del sistema de idioma y prompts.
+- `reorganization-plan.mdx`: plan de reorganizacion integral hacia `src/ai`.
+
+## Nota de transicion
+
+Las rutas antiguas de documentacion en `docs/AI-*.md` se mantienen como punto de entrada y redireccion humana. La referencia recomendada para desarrollo nuevo es esta carpeta y el dominio `src/ai`.

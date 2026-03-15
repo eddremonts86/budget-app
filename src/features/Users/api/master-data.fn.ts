@@ -1,7 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
+import { asc } from 'drizzle-orm'
 import { getDb } from '@/shared/lib/db'
 import { roles, skills, jobTitles, experienceLevels } from '@/shared/lib/db/schema'
-import { asc } from 'drizzle-orm'
 
 export const getRolesFn = createServerFn({ method: 'GET' }).handler(async () => {
   const db = getDb()

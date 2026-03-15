@@ -1,11 +1,5 @@
 import { expect, test, type Locator, type Page } from '@playwright/test'
-import {
-  applyLanguage,
-  getByLabelI18n,
-  getByPlaceholderI18n,
-  getByRoleI18n,
-  getByTextI18n,
-} from './utils/i18n'
+import { applyLanguage, getByLabelI18n, getByPlaceholderI18n, getByRoleI18n } from './utils/i18n'
 
 const unique = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Math.random() * 1000)}`
 

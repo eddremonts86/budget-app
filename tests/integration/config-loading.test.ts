@@ -1,15 +1,14 @@
-
 // @vitest-environment node
 import fs from 'node:fs/promises'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import { readAiConfig } from '../../src/ai/config/file-store'
 
 // Mock dependencies before import
 vi.mock('node:fs/promises')
 vi.mock('node:child_process', () => ({
-  exec: (cmd: any, cb: any) => cb(null, { stdout: '' })
+  exec: (_cmd: unknown, cb: (error: Error | null, result: { stdout: string }) => void) =>
+    cb(null, { stdout: '' }),
 }))
-
-import { readAiConfig } from '../../src/server/utils/ai-config-helper'
 
 describe('Configuration Loading System Integration', () => {
   beforeEach(() => {
@@ -30,17 +29,19 @@ describe('Configuration Loading System Integration', () => {
   it('should load and merge user configuration correctly', async () => {
     // Simulate existing config file
     vi.mocked(fs.access).mockResolvedValue(undefined)
-    vi.mocked(fs.readFile).mockResolvedValue(JSON.stringify({
-      activeProvider: 'ollama',
-      providers: {
-        ollama: {
-          parameters: {
-            temperature: 0.9,
-            model: 'custom-model'
-          }
-        }
-      }
-    }))
+    vi.mocked(fs.readFile).mockResolvedValue(
+      JSON.stringify({
+        activeProvider: 'ollama',
+        providers: {
+          ollama: {
+            parameters: {
+              temperature: 0.9,
+              model: 'custom-model',
+            },
+          },
+        },
+      }),
+    )
 
     const config = await readAiConfig()
 

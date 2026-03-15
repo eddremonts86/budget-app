@@ -6,9 +6,12 @@
 .playwright-mcp
 
 node_modules
+.pnpm-store
 dist
 playwright-report
 test-results
+.docker_data
+env.zip
 
 .env
 .env.development

@@ -1,5 +1,4 @@
 import { IconEdit, IconFolder, IconTrash, IconUsers } from '@tabler/icons-react'
-import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle, Button, CardFooter } from '@/components/ui'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -47,7 +46,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
       <CardContent className="flex-1 pb-4">
         <div className="text-sm text-muted-foreground mb-4 line-clamp-3">{project.description}</div>
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {project.technologies?.map((tech: string) => (
+          {project.skills?.map((tech) => (
             <Badge key={tech} variant="secondary" className="px-2 py-0.5 text-xs font-normal">
               {tech}
             </Badge>

@@ -75,8 +75,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
 
         setSyncedUser(synced)
-      } catch (error) {
-        console.error('UserProvider: Failed to sync auth user:', error)
+      } catch {
+        // Ignore sync failures; auth state can still render unauthenticated UI.
       } finally {
         setIsLoading(false)
       }

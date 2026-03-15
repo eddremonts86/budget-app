@@ -1,9 +1,17 @@
-/// <reference types="vinxi/types/server" />
-import { getRouterManifest } from '@tanstack/react-start/router-manifest'
+import type { Register } from '@tanstack/react-router'
 import { createStartHandler, defaultStreamHandler } from '@tanstack/react-start/server'
-import { createRouter } from './router'
+import type { RequestHandler } from '@tanstack/react-start/server'
 
-export default createStartHandler({
-  createRouter,
-  getRouterManifest,
-})(defaultStreamHandler)
+const fetch = createStartHandler(defaultStreamHandler)
+
+export type ServerEntry = { fetch: RequestHandler<Register> }
+
+export function createServerEntry(entry: ServerEntry): ServerEntry {
+  return {
+    async fetch(...args) {
+      return await entry.fetch(...args)
+    },
+  }
+}
+
+export default createServerEntry({ fetch })

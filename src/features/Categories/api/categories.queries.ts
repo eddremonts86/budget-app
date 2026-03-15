@@ -28,8 +28,10 @@ export const useInfiniteCategories = (limit = 10) => {
 }
 
 export const useCategories = () => {
+  type CategoryListResponse = Awaited<ReturnType<typeof getCategoriesFn>>
+
   return useTQuery(categoryKeys.lists(), () =>
-    getCategoriesFn({ data: { limit: 1000 } }).then((res: any) => res.data),
+    getCategoriesFn({ data: { limit: 1000 } }).then((res: CategoryListResponse) => res.data),
   )
 }
 

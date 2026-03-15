@@ -1,4 +1,5 @@
 import { useQueryClient, type InfiniteData } from '@tanstack/react-query'
+import { getSkillsFn } from '@/features/Users/api/master-data.fn'
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQMutation, useTQInfinite } from '@/shared/lib/query'
 import {
@@ -18,7 +19,6 @@ import {
   type ProjectMember,
   type ProjectListResponse,
 } from './projects.fn'
-import { getSkillsFn } from '@/features/Users/api/master-data.fn'
 
 export const projectsKeys = {
   all: ['projects'] as const,

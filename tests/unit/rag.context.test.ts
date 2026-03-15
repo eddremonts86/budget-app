@@ -6,7 +6,7 @@ import {
   loadAppKnowledge,
   buildAppNavigationContext,
   buildActionInstructions,
-} from '@/shared/lib/rag/context'
+} from '@/ai/rag/context'
 
 vi.mock('@/shared/lib/db', () => {
   const mockSelect = {

@@ -1,16 +1,16 @@
-import { Button } from '@/components/ui/button'
 import {
   IconAdjustmentsHorizontal,
   IconLoader2,
   IconSettings,
 } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
+import { toast } from '@/shared/lib/toast'
 import { useSettings } from '../hooks/useSettings'
 import type { Theme } from '../model'
 import { DevtoolsToggle } from './DevtoolsToggle'
 import { LanguageSelector } from './LanguageSelector'
 import { ThemeSelector } from './ThemeSelector'
-import { toast } from '@/shared/lib/toast'
 
 export function SystemSettings() {
   const { t } = useTranslation()

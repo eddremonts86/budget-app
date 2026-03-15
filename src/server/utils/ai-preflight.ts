@@ -1,8 +1,7 @@
-
-import os from 'node:os'
 import { exec } from 'node:child_process'
-import util from 'node:util'
 import dns from 'node:dns/promises'
+import os from 'node:os'
+import util from 'node:util'
 
 const execAsync = util.promisify(exec)
 
@@ -30,26 +29,29 @@ interface PreFlightStatus {
  */
 async function checkGpu(): Promise<PreFlightStatus['gpu']> {
   try {
-    const { stdout } = await execAsync('nvidia-smi --query-gpu=driver_version,memory.total --format=csv,noheader')
+    const { stdout } = await execAsync(
+      'nvidia-smi --query-gpu=driver_version,memory.total --format=csv,noheader',
+    )
     const [driver, memory] = stdout.trim().split(',')
     return {
       available: true,
       driver: driver?.trim(),
-      memory: memory?.trim()
+      memory: memory?.trim(),
     }
-  } catch (error) {
+  } catch {
     // If nvidia-smi fails, check for Apple Silicon (Metal)
     if (os.platform() === 'darwin' && os.cpus()[0].model.includes('Apple')) {
-       return {
-         available: true,
-         driver: 'Apple Metal',
-         memory: 'Shared System Memory'
-       }
+      return {
+        available: true,
+        driver: 'Apple Metal',
+        memory: 'Shared System Memory',
+      }
     }
 
     return {
       available: false,
-      error: 'No NVIDIA GPU detected or nvidia-smi not found. (If on Mac, Metal is used automatically)'
+      error:
+        'No NVIDIA GPU detected or nvidia-smi not found. (If on Mac, Metal is used automatically)',
     }
   }
 }
@@ -61,13 +63,13 @@ function checkMemory(): PreFlightStatus['memory'] {
   const total = os.totalmem()
   const free = os.freemem()
   const usedPercent = ((total - free) / total) * 100
-  
+
   const status = usedPercent > 90 ? 'CRITICAL' : usedPercent > 75 ? 'WARNING' : 'OK'
 
   return {
-    total: (total / (1024 * 1024 * 1024)).toFixed(2) + ' GB',
-    free: (free / (1024 * 1024 * 1024)).toFixed(2) + ' GB',
-    status
+    total: `${(total / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+    free: `${(free / (1024 * 1024 * 1024)).toFixed(2)} GB`,
+    status,
   }
 }
 
@@ -82,31 +84,32 @@ async function checkNetwork(): Promise<PreFlightStatus['network']> {
   try {
     await dns.lookup('google.com')
     internet = true
-  } catch {}
+  } catch {
+    // Ignore transient internet lookup failures.
+  }
 
   try {
     await dns.lookup('localhost')
     local_dns = true
-  } catch {}
+  } catch {
+    // Ignore transient local DNS lookup failures.
+  }
 
   return {
     internet,
     local_dns,
-    latency_ms: Date.now() - start
+    latency_ms: Date.now() - start,
   }
 }
 
 export async function runPreFlightChecks(): Promise<PreFlightStatus> {
-  const [gpu, network] = await Promise.all([
-    checkGpu(),
-    checkNetwork()
-  ])
-  
+  const [gpu, network] = await Promise.all([checkGpu(), checkNetwork()])
+
   const memory = checkMemory()
 
   return {
     gpu,
     memory,
-    network
+    network,
   }
 }

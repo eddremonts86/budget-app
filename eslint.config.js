@@ -83,7 +83,47 @@ export default tseslint.config(
     },
   },
   {
+    files: ['scripts/**/*.{ts,js}', 'ia-config/**/*.js', '**/*.cjs'],
+    languageOptions: {
+      globals: {
+        Buffer: 'readonly',
+        __dirname: 'readonly',
+        console: 'readonly',
+        module: 'readonly',
+        process: 'readonly',
+        require: 'readonly',
+      },
+    },
+    rules: {
+      '@typescript-eslint/ban-ts-comment': 'off',
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+      '@typescript-eslint/no-require-imports': 'off',
+      'no-console': 'off',
+      'no-undef': 'off',
+    },
+  },
+  {
+    files: ['tests/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-explicit-any': 'off',
+    },
+  },
+  {
+    files: ['src/**/*.fn.ts', 'src/ai/**/*.ts', 'src/server/**/*.ts', 'src/shared/lib/db/index.ts'],
+    rules: {
+      'no-console': 'off',
+    },
+  },
+  {
     files: ['src/components/data-table.tsx', 'src/shared/ui/DataTable.tsx'],
+    rules: {
+      'react-hooks/incompatible-library': 'off',
+    },
+  },
+  {
+    files: ['src/features/Todos/components/views/KanbanBoard.tsx'],
     rules: {
       'react-hooks/incompatible-library': 'off',
     },

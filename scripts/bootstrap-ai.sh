@@ -5,11 +5,11 @@ echo "[ai-bootstrap] Starting AI services bootstrap..."
 
 # 1. Bootstrap Ollama
 echo "[ai-bootstrap] Configuring Ollama..."
-sh scripts/bootstrap-ollama.sh
+sh scripts/ai/bootstrap-ollama.sh
 
 # 2. Bootstrap Llama.cpp (download model)
 echo "[ai-bootstrap] Configuring Llama.cpp..."
-sh scripts/bootstrap-llama-cpp.sh
+sh scripts/ai/bootstrap-llama-cpp.sh
 
 # 3. Check for LM Studio (optional check)
 echo "[ai-bootstrap] Checking LM Studio..."

@@ -1,12 +1,4 @@
-import {
-  AlertTriangle,
-  Check,
-  Loader2,
-  Lock,
-  Trash2,
-  X,
-} from 'lucide-react'
-import * as React from 'react'
+import { AlertTriangle, Check, Loader2, Lock, Trash2, X } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { cn } from '@/shared/utils/index'
 import type { ActionVerb } from '../ActionConfirmationCard.utils'
@@ -19,13 +11,13 @@ interface ActionCardFooterProps {
   }
   onConfirm: () => void
   onCancel: () => void // Note: onCancel logic was implicitly "do nothing" or handled by parent/UI state, but here we might need it if we want a cancel button.
-  // In the original code, there was no explicit Cancel button action other than visual state, 
+  // In the original code, there was no explicit Cancel button action other than visual state,
   // but looking at the snippet, there is a Cancel button that does `setStatus('denied')` or similar?
   // Let's check the original code snippet for the footer actions.
   // The original code has:
   // Button onClick={handleConfirm}
   // Button variant="ghost" onClick={() => setStatus('denied')}
-  
+
   // So we need setStatus equivalent passed down or handlers.
   resultMessage: string
   confirmText: string

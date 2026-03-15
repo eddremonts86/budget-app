@@ -11,7 +11,7 @@ import {
   migrateFromLocalStorage,
   saveConversation,
   type StoredMessage,
-} from '@/shared/lib/storage/chat-storage'
+} from '@/ai/storage/chat-storage'
 
 // Clean up IndexedDB between tests
 function clearIndexedDB(): Promise<void> {

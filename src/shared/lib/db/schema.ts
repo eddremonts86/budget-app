@@ -5,6 +5,7 @@ import {
   integer,
   pgEnum,
   primaryKey,
+  unique,
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 
@@ -327,15 +328,24 @@ export const teamMembers = pgTable(
   }),
 )
 
-export const projectMembers = pgTable('project_members', {
-  id: text('id').primaryKey(),
-  projectId: text('project_id')
-    .notNull()
-    .references(() => projects.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  userId: text('user_id')
-    .notNull()
-    .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
-  role: projectMemberRoleEnum('role').default('contributor').notNull(),
-  joinedAt: timestamp('joined_at').defaultNow().notNull(),
-  updatedAt: timestamp('updated_at').defaultNow().notNull(),
-})
+export const projectMembers = pgTable(
+  'project_members',
+  {
+    id: text('id').primaryKey(),
+    projectId: text('project_id')
+      .notNull()
+      .references(() => projects.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    role: projectMemberRoleEnum('role').default('contributor').notNull(),
+    joinedAt: timestamp('joined_at').defaultNow().notNull(),
+    updatedAt: timestamp('updated_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    projectUserUnique: unique('project_members_project_id_user_id_unique').on(
+      t.projectId,
+      t.userId,
+    ),
+  }),
+)

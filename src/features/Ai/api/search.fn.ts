@@ -1,17 +1,35 @@
-import type { AiConfigFormData } from '@/features/Settings/model/ai-config.schema'
-import appKnowledge from '@/server/data/app-knowledge.json'
-import type { AiProviderId } from '@/shared/lib/ai/ai-config'
+import type { AiConfigFormData, AiProviderId } from '@/ai/config'
+
+interface AppKnowledgeSection {
+  label: string
+  url?: string
+  action?: string
+  description?: string
+}
+
+interface AppKnowledge {
+  application: {
+    name: string
+    description: string
+    baseUrl: string
+  }
+  navigation: {
+    main: AppKnowledgeSection[]
+    secondary: AppKnowledgeSection[]
+  }
+}
 
 // --- Helpers ---
 
-export function formatKnowledgeBase(knowledge: typeof appKnowledge): string {
+export function formatKnowledgeBase(knowledge: AppKnowledge): string {
   const mainNav = knowledge.navigation.main.map(
     (item) => `- **${item.label}** (${item.url}): ${item.description}`,
   )
 
   const secondaryNav = knowledge.navigation.secondary.map((item) => {
     const desc = 'description' in item ? ` - ${item.description}` : ''
-    return `- **${item.label}** (${item.url})${desc}`
+    const location = item.url ?? item.action ?? '#'
+    return `- **${item.label}** (${location})${desc}`
   })
 
   return [

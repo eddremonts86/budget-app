@@ -1,7 +1,3 @@
-
-import { SQL, sql } from 'drizzle-orm'
-import { PgTable } from 'drizzle-orm/pg-core'
-
 export interface JsonServerResponse<T> {
   data: T[]
   items: number
@@ -40,10 +36,10 @@ export function buildPaginationResponse<T>(
   data: T[],
   totalItems: number,
   page: number,
-  perPage: number
+  perPage: number,
 ): JsonServerResponse<T> {
   const totalPages = Math.ceil(totalItems / perPage)
-  
+
   return {
     data,
     items: totalItems,

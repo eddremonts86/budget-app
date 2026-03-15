@@ -47,8 +47,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import type { Project } from '@/features/Projects/api/projects.fn'
 import { useProjectMembers, useInfiniteProjects } from '@/features/Projects/api/projects.queries'
-import type { User } from '@/features/Users/api/users.fn'
 import { useInfiniteUsers } from '@/features/Users/api/users.queries'
+import type { User } from '@/features/Users/model/types'
 import { cn } from '@/shared/lib/utils'
 import type { Todo } from '../model/types'
 

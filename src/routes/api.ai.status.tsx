@@ -1,5 +1,10 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { listProviderStatuses } from '@/shared/lib/ai/server/providers'
+import {
+  createJsonErrorResponse,
+  createJsonResponse,
+  getErrorMessage,
+  getProviderStatuses,
+} from '@/ai/server'
 
 export const Route = createFileRoute('/api/ai/status')({
   component: () => null,
@@ -7,17 +12,10 @@ export const Route = createFileRoute('/api/ai/status')({
     handlers: {
       GET: async () => {
         try {
-          const statuses = await listProviderStatuses()
-          return new Response(JSON.stringify({ statuses }), {
-            status: 200,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          const statuses = await getProviderStatuses()
+          return createJsonResponse({ statuses })
         } catch (error) {
-          const message = error instanceof Error ? error.message : 'UNKNOWN_ERROR'
-          return new Response(JSON.stringify({ error: message }), {
-            status: 500,
-            headers: { 'Content-Type': 'application/json' },
-          })
+          return createJsonErrorResponse(getErrorMessage(error), 500)
         }
       },
     },

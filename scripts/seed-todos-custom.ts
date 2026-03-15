@@ -215,7 +215,7 @@ async function seed() {
       const user = allUsers[Math.floor(Math.random() * allUsers.length)]
       const project = allProjects[Math.floor(Math.random() * allProjects.length)]
       // Assign to Admin User (user_1) to ensure visibility in Pending list if status is Pending
-      const assignedAdmin = allUsers.find((u) => u.role === 'admin') || allUsers[0]
+      const assignedAdmin = allUsers[0]
 
       newTransactions.push({
         id: randomUUID(),
@@ -235,7 +235,7 @@ async function seed() {
 
     // Ensure at least 5 Pending transactions assigned to Admin
     for (let i = 0; i < 5; i++) {
-      const assignedAdmin = allUsers.find((u) => u.role === 'admin') || allUsers[0]
+      const assignedAdmin = allUsers[0]
       const project = allProjects[Math.floor(Math.random() * allProjects.length)]
       newTransactions.push({
         id: randomUUID(),

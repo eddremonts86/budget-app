@@ -11,8 +11,21 @@ export const categorySchema = z.object({
 
 export type CategoryInput = z.infer<typeof categorySchema>
 
-export const getCategoriesFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data }: { data?: { pageParam?: number; limit?: number } }) => {
+const categoryListParamsSchema = z
+  .object({
+    pageParam: z.number().optional(),
+    limit: z.number().optional(),
+  })
+  .optional()
+
+const updateCategoryPayloadSchema = z.object({
+  id: z.string().min(1),
+  data: categorySchema.partial(),
+})
+
+export const getCategoriesFn = createServerFn({ method: 'GET' })
+  .inputValidator(categoryListParamsSchema)
+  .handler(async ({ data }) => {
     if (process.env.VITE_E2E === 'true') {
       return {
         data: Array.from({ length: 5 }).map((_, i) => ({
@@ -46,19 +59,18 @@ export const getCategoriesFn = createServerFn({ method: 'GET' }).handler(
         nextPage,
         totalCount: total,
       }
-    } catch (error) {
-      console.error('Error in getCategoriesFn:', error)
+    } catch {
       return {
         data: [],
         nextPage: undefined,
         totalCount: 0,
       }
     }
-  },
-)
+  })
 
-export const getCategoryByIdFn = createServerFn({ method: 'GET' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
+export const getCategoryByIdFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.string().optional())
+  .handler(async ({ data: id }) => {
     if (process.env.VITE_E2E === 'true') {
       return {
         id: id || '1',
@@ -73,99 +85,67 @@ export const getCategoryByIdFn = createServerFn({ method: 'GET' }).handler(
       const db = getDb()
       const result = await db.select().from(categories).where(eq(categories.id, id))
       return result[0] || null
-    } catch (error) {
-      console.error('Error in getCategoryByIdFn:', error)
+    } catch {
       return null
     }
-  },
-)
+  })
 
-export const createCategoryFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
+export const createCategoryFn = createServerFn({ method: 'POST' })
+  .inputValidator(categorySchema)
+  .handler(async ({ data }) => {
     if (process.env.VITE_E2E === 'true') {
-      const input = data as CategoryInput
       return {
         id: crypto.randomUUID(),
-        name: input.name,
-        color: input.color,
+        name: data.name,
+        color: data.color,
       }
     }
 
-    try {
-      const { getDb } = await import('@/shared/lib/db')
-      const db = getDb()
-      // Manual validation
-      const parsed = categorySchema.safeParse(data)
-      if (!parsed.success) {
-        throw new Error(`Invalid input: ${parsed.error.message}`)
-      }
-      const input = parsed.data
+    const { getDb } = await import('@/shared/lib/db')
+    const db = getDb()
 
-      const [newItem] = await db
-        .insert(categories)
-        .values({
-          id: crypto.randomUUID(),
-          name: input.name,
-          color: input.color,
-        })
-        .returning()
-      return newItem
-    } catch (error) {
-      console.error('Error in createCategoryFn:', error)
-      throw error
-    }
-  },
-)
+    const [newItem] = await db
+      .insert(categories)
+      .values({
+        id: crypto.randomUUID(),
+        name: data.name,
+        color: data.color,
+      })
+      .returning()
+    return newItem
+  })
 
-export const updateCategoryFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data }: { data: unknown }) => {
+export const updateCategoryFn = createServerFn({ method: 'POST' })
+  .inputValidator(updateCategoryPayloadSchema)
+  .handler(async ({ data }) => {
     if (process.env.VITE_E2E === 'true') {
-      const { id, data: updateData } = data as {
-        id: string
-        data: Partial<CategoryInput>
-      }
       return {
-        id,
-        name: updateData.name || 'Category 1',
-        color: updateData.color || '#000000',
+        id: data.id,
+        name: data.data.name || 'Category 1',
+        color: data.data.color || '#000000',
       }
     }
 
-    try {
-      const { getDb } = await import('@/shared/lib/db')
-      const db = getDb()
-      const { id, data: updateData } = data as {
-        id: string
-        data: Partial<z.infer<typeof categorySchema>>
-      }
-      const [updatedItem] = await db
-        .update(categories)
-        .set(updateData)
-        .where(eq(categories.id, id))
-        .returning()
-      return updatedItem
-    } catch (error) {
-      console.error('Error in updateCategoryFn:', error)
-      throw error
-    }
-  },
-)
+    const { getDb } = await import('@/shared/lib/db')
+    const db = getDb()
+    const [updatedItem] = await db
+      .update(categories)
+      .set(data.data)
+      .where(eq(categories.id, data.id))
+      .returning()
+    return updatedItem
+  })
 
-export const deleteCategoryFn = createServerFn({ method: 'POST' }).handler(
-  async ({ data: id }: { data: string | undefined }) => {
+export const deleteCategoryFn = createServerFn({ method: 'POST' })
+  .inputValidator(z.string().optional())
+  .handler(async ({ data: id }) => {
     if (process.env.VITE_E2E === 'true') {
       return { success: true }
     }
 
-    try {
-      if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
-      const db = getDb()
-      await db.delete(categories).where(eq(categories.id, id))
-      return { success: true }
-    } catch (error) {
-      console.error('Error in deleteCategoryFn:', error)
-      throw error
-    }
-  },
-)
+    if (!id) throw new Error('ID is required')
+    const { getDb } = await import('@/shared/lib/db')
+    const db = getDb()
+    await db.delete(categories).where(eq(categories.id, id))
+    return { success: true }
+  })

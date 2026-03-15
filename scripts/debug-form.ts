@@ -1,5 +1,5 @@
-import { chromium } from '@playwright/test';
 import fs from 'fs';
+import { chromium } from '@playwright/test';
 
 async function debugProjectCreation() {
   const browser = await chromium.launch();

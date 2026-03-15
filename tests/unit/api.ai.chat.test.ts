@@ -1,24 +1,24 @@
 import { chat } from '@tanstack/ai'
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { logAudit } from '@/ai/audit'
+import { getActiveAiConfig, getAllAiConfigs, validateAiConfig } from '@/ai/config'
+import { detectBestProvider, probeProvider } from '@/ai/providers'
 import { Route } from '@/routes/api.ai.chat'
-import { logAudit } from '@/shared/lib/ai/audit'
-import {
-  getActiveAiConfig,
-  getAllAiConfigs,
-  validateAiConfig,
-} from '@/shared/lib/ai/server/config-store'
-import { detectBestProvider, probeProvider } from '@/shared/lib/ai/server/providers'
 
 // Mock dependencies
-vi.mock('@/shared/lib/ai/server/config-store', () => ({
+vi.mock('@/ai/config', () => ({
   getActiveAiConfig: vi.fn(),
   getAllAiConfigs: vi.fn(),
   validateAiConfig: vi.fn(),
 }))
-vi.mock('@/shared/lib/ai/server/providers', () => ({
+vi.mock('@/ai/providers', () => ({
   detectBestProvider: vi.fn(),
   probeProvider: vi.fn(),
+  discoverProviderModels: vi.fn(async (config) => ({
+    models: [],
+    resolvedModelId: config.parameters.model,
+    source: 'configured',
+  })),
   getProvider: vi.fn((id) => {
     if (id === 'openai') {
       return {
@@ -30,13 +30,19 @@ vi.mock('@/shared/lib/ai/server/providers', () => ({
     return null
   }),
 }))
-vi.mock('@/shared/lib/rag/context', () => ({
-  injectDynamicContext: vi.fn().mockResolvedValue(''),
-}))
-vi.mock('@/shared/lib/rag/retrieval', () => ({
+vi.mock('@/ai/rag/context', async () => {
+  const actual = await vi.importActual<typeof import('@/ai/rag/context')>('@/ai/rag/context')
+  return {
+    ...actual,
+    detectIntent: vi.fn(() => []),
+    detectActionIntent: vi.fn(() => null),
+    injectDynamicContext: vi.fn().mockResolvedValue(''),
+  }
+})
+vi.mock('@/ai/rag/retrieval', () => ({
   retrieveContext: vi.fn().mockResolvedValue(''),
 }))
-vi.mock('@/shared/lib/ai/audit', () => ({
+vi.mock('@/ai/audit', () => ({
   logAudit: vi.fn().mockResolvedValue(undefined),
 }))
 vi.mock('@tanstack/ai', () => ({
@@ -115,8 +121,8 @@ describe('AI Chat API - Language Enforcement', () => {
     const callArgs = vi.mocked(chat).mock.calls[0][0] as any
     const messages = callArgs.messages
 
-    // System prompt is injected as leading user message for provider compatibility
-    expect(messages[0].role).toBe('user')
+    // The route currently injects the locale instruction as a leading system message.
+    expect(messages[0].role).toBe('system')
     expect(messages[0].content).toContain('Always respond in Spanish')
   })
 

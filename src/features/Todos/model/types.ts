@@ -13,7 +13,7 @@ export interface Todo {
   complexity: number | null
   estimatedTime: number | null
   actualTime: number | null
-  dependencies: string[] | null
+  dependencies?: string[] | null
   acceptanceCriteria: string | null
   createdAt: string
   updatedAt: string

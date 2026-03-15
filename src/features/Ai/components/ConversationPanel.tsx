@@ -4,6 +4,7 @@ import { AnimatePresence, motion } from 'framer-motion'
 import { MessageSquarePlus, MessagesSquare, Trash2, X, ShieldAlert, Search } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
+import type { Conversation } from '@/ai/storage/chat-storage'
 import {
   Button,
   Tabs,
@@ -15,7 +16,6 @@ import {
   Avatar,
   AvatarFallback,
 } from '@/components/ui'
-import type { Conversation } from '@/shared/lib/storage/chat-storage'
 import { cn } from '@/shared/utils/index'
 
 // --- Types ---

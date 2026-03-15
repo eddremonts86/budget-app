@@ -1,10 +1,14 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getAllAiConfigs } from '@/shared/lib/ai/server/config-store'
-import { detectBestProvider, probeProvider } from '@/shared/lib/ai/server/providers'
+import { getAllAiConfigs } from '@/ai/config/store'
+import { detectBestProvider, probeProvider } from '@/ai/providers'
 
-vi.mock('@/shared/lib/ai/server/config-store', () => ({
-  getAllAiConfigs: vi.fn(),
-}))
+vi.mock('@/ai/config/store', async () => {
+  const actual = await vi.importActual<typeof import('@/ai/config/store')>('@/ai/config/store')
+  return {
+    ...actual,
+    getAllAiConfigs: vi.fn(),
+  }
+})
 
 describe('ai providers', () => {
   beforeEach(() => {
@@ -25,7 +29,7 @@ describe('ai providers', () => {
       new Response(JSON.stringify({ data: [{ id: 'model-1' }] }), { status: 200 }),
     )
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const status = await probeProvider({ ...mockConfig, provider: 'lm-studio' } as any)
 
     expect(status.available).toBe(true)
@@ -36,7 +40,7 @@ describe('ai providers', () => {
     const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }))
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+     
     const status = await probeProvider({ ...mockConfig, provider: 'openai' } as any)
 
     expect(status.available).toBe(true)
@@ -65,5 +69,26 @@ describe('ai providers', () => {
     expect(result.provider).toBe('openai')
     expect(result.statuses).toHaveLength(1)
     expect(result.statuses[0].status).toBe('available')
+  })
+
+  it('falls back to localhost when llama-cpp hostname is unreachable', async () => {
+    const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>
+    fetchMock
+      .mockRejectedValueOnce(new TypeError('fetch failed'))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }))
+      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }))
+
+    const status = await probeProvider({
+      ...mockConfig,
+      provider: 'llama-cpp',
+      baseUrl: 'http://llama-cpp:8080/v1',
+      endpoints: { models: '/models', chat: '/chat/completions' },
+    } as any)
+
+    expect(status.available).toBe(true)
+    expect(status.status).toBe('available')
+    expect(fetchMock).toHaveBeenCalled()
+    expect(fetchMock.mock.calls[1]?.[0]).toContain('http://localhost:8080/v1/models')
   })
 })
