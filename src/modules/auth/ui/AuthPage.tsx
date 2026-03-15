@@ -58,7 +58,10 @@ function getRequestedAuthTab(searchStr: string): AuthTab | null {
   return null
 }
 
-function getRequestedAuthError(searchStr: string, translate: (key: string) => string): string | null {
+function getRequestedAuthError(
+  searchStr: string,
+  translate: (key: string) => string,
+): string | null {
   const searchParams = readSearchParams(searchStr)
   const errorCode = searchParams.get('errorCode')
   const errorMessage = searchParams.get('errorMessage')
@@ -96,7 +99,12 @@ function getAuthErrorMessage(error: unknown, translate: (key: string) => string)
     }
   }
 
-  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+  if (
+    error &&
+    typeof error === 'object' &&
+    'message' in error &&
+    typeof error.message === 'string'
+  ) {
     return error.message
   }
 
@@ -324,108 +332,116 @@ export function AuthPage(): React.JSX.Element {
                           )}
 
                           {activeTab === 'sign-in' ? (
-                            <div role="tabpanel" id="auth-panel-sign-in" aria-labelledby="auth-tab-sign-in">
-                            <form className="space-y-4" action="/auth/sign-in" method="post">
-                              <AuthField
-                                autoComplete="email"
-                                id="sign-in-email"
-                                label={t('auth.emailLabel')}
-                                name="email"
-                                placeholder={t('auth.emailPlaceholder')}
-                                testId="auth-input-sign-in-email"
-                                type="email"
-                                value={signInValues.email}
-                                onChange={(value) =>
-                                  setSignInValues((current) => ({ ...current, email: value }))
-                                }
-                              />
-                              <AuthField
-                                autoComplete="current-password"
-                                id="sign-in-password"
-                                label={t('auth.passwordLabel')}
-                                name="password"
-                                placeholder={t('auth.passwordPlaceholder')}
-                                testId="auth-input-sign-in-password"
-                                type="password"
-                                value={signInValues.password}
-                                onChange={(value) =>
-                                  setSignInValues((current) => ({ ...current, password: value }))
-                                }
-                              />
+                            <div
+                              role="tabpanel"
+                              id="auth-panel-sign-in"
+                              aria-labelledby="auth-tab-sign-in"
+                            >
+                              <form className="space-y-4" action="/auth/sign-in" method="post">
+                                <AuthField
+                                  autoComplete="email"
+                                  id="sign-in-email"
+                                  label={t('auth.emailLabel')}
+                                  name="email"
+                                  placeholder={t('auth.emailPlaceholder')}
+                                  testId="auth-input-sign-in-email"
+                                  type="email"
+                                  value={signInValues.email}
+                                  onChange={(value) =>
+                                    setSignInValues((current) => ({ ...current, email: value }))
+                                  }
+                                />
+                                <AuthField
+                                  autoComplete="current-password"
+                                  id="sign-in-password"
+                                  label={t('auth.passwordLabel')}
+                                  name="password"
+                                  placeholder={t('auth.passwordPlaceholder')}
+                                  testId="auth-input-sign-in-password"
+                                  type="password"
+                                  value={signInValues.password}
+                                  onChange={(value) =>
+                                    setSignInValues((current) => ({ ...current, password: value }))
+                                  }
+                                />
 
-                              <Button
-                                type="submit"
-                                data-testid="auth-submit-sign-in"
-                                className="h-12 w-full rounded-xl bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(255,255,255,0.14)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/95 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)]"
-                              >
-                                <LogIn className="h-4 w-4" />
-                                {t('auth.signInAction')}
-                              </Button>
-                            </form>
+                                <Button
+                                  type="submit"
+                                  data-testid="auth-submit-sign-in"
+                                  className="h-12 w-full rounded-xl bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(255,255,255,0.14)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/95 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)]"
+                                >
+                                  <LogIn className="h-4 w-4" />
+                                  {t('auth.signInAction')}
+                                </Button>
+                              </form>
                             </div>
                           ) : null}
 
                           {activeTab === 'sign-up' ? (
-                            <div role="tabpanel" id="auth-panel-sign-up" aria-labelledby="auth-tab-sign-up">
-                            <form className="space-y-4" action="/auth/sign-up" method="post">
-                              <AuthField
-                                autoComplete="name"
-                                id="sign-up-name"
-                                label={t('auth.nameLabel')}
-                                name="name"
-                                pattern={AUTH_SIGN_UP_NAME_HTML_PATTERN}
-                                placeholder={t('auth.namePlaceholder')}
-                                testId="auth-input-sign-up-name"
-                                value={signUpValues.name}
-                                onChange={(value) =>
-                                  setSignUpValues((current) => ({ ...current, name: value }))
-                                }
-                              />
-                              <AuthField
-                                autoComplete="email"
-                                id="sign-up-email"
-                                label={t('auth.emailLabel')}
-                                name="email"
-                                placeholder={t('auth.emailPlaceholder')}
-                                testId="auth-input-sign-up-email"
-                                type="email"
-                                value={signUpValues.email}
-                                onChange={(value) =>
-                                  setSignUpValues((current) => ({ ...current, email: value }))
-                                }
-                              />
-                              <AuthField
-                                autoComplete="new-password"
-                                id="sign-up-password"
-                                label={t('auth.passwordLabel')}
-                                minLength={AUTH_SIGN_UP_MIN_PASSWORD_LENGTH}
-                                name="password"
-                                pattern={AUTH_SIGN_UP_PASSWORD_HTML_PATTERN}
-                                placeholder={t('auth.passwordPlaceholder')}
-                                testId="auth-input-sign-up-password"
-                                type="password"
-                                value={signUpValues.password}
-                                onChange={(value) =>
-                                  setSignUpValues((current) => ({ ...current, password: value }))
-                                }
-                              />
-                              <p className="text-sm text-muted-foreground">
-                                {t('auth.passwordRequirementHint').replace(
-                                  '{{min}}',
-                                  String(AUTH_SIGN_UP_MIN_PASSWORD_LENGTH),
-                                )}
-                              </p>
+                            <div
+                              role="tabpanel"
+                              id="auth-panel-sign-up"
+                              aria-labelledby="auth-tab-sign-up"
+                            >
+                              <form className="space-y-4" action="/auth/sign-up" method="post">
+                                <AuthField
+                                  autoComplete="name"
+                                  id="sign-up-name"
+                                  label={t('auth.nameLabel')}
+                                  name="name"
+                                  pattern={AUTH_SIGN_UP_NAME_HTML_PATTERN}
+                                  placeholder={t('auth.namePlaceholder')}
+                                  testId="auth-input-sign-up-name"
+                                  value={signUpValues.name}
+                                  onChange={(value) =>
+                                    setSignUpValues((current) => ({ ...current, name: value }))
+                                  }
+                                />
+                                <AuthField
+                                  autoComplete="email"
+                                  id="sign-up-email"
+                                  label={t('auth.emailLabel')}
+                                  name="email"
+                                  placeholder={t('auth.emailPlaceholder')}
+                                  testId="auth-input-sign-up-email"
+                                  type="email"
+                                  value={signUpValues.email}
+                                  onChange={(value) =>
+                                    setSignUpValues((current) => ({ ...current, email: value }))
+                                  }
+                                />
+                                <AuthField
+                                  autoComplete="new-password"
+                                  id="sign-up-password"
+                                  label={t('auth.passwordLabel')}
+                                  minLength={AUTH_SIGN_UP_MIN_PASSWORD_LENGTH}
+                                  name="password"
+                                  pattern={AUTH_SIGN_UP_PASSWORD_HTML_PATTERN}
+                                  placeholder={t('auth.passwordPlaceholder')}
+                                  testId="auth-input-sign-up-password"
+                                  type="password"
+                                  value={signUpValues.password}
+                                  onChange={(value) =>
+                                    setSignUpValues((current) => ({ ...current, password: value }))
+                                  }
+                                />
+                                <p className="text-sm text-muted-foreground">
+                                  {t('auth.passwordRequirementHint').replace(
+                                    '{{min}}',
+                                    String(AUTH_SIGN_UP_MIN_PASSWORD_LENGTH),
+                                  )}
+                                </p>
 
-                              <Button
-                                type="submit"
-                                variant="secondary"
-                                data-testid="auth-submit-sign-up"
-                                className="h-11 w-full rounded-xl border border-border/60 bg-secondary/70 text-secondary-foreground transition-colors hover:bg-secondary"
-                              >
-                                <UserPlus className="h-4 w-4" />
-                                {t('auth.signUpAction')}
-                              </Button>
-                            </form>
+                                <Button
+                                  type="submit"
+                                  variant="secondary"
+                                  data-testid="auth-submit-sign-up"
+                                  className="h-11 w-full rounded-xl border border-border/60 bg-secondary/70 text-secondary-foreground transition-colors hover:bg-secondary"
+                                >
+                                  <UserPlus className="h-4 w-4" />
+                                  {t('auth.signUpAction')}
+                                </Button>
+                              </form>
                             </div>
                           ) : null}
                         </div>

@@ -174,9 +174,7 @@ test.describe.serial('local auth sign up', () => {
     await request.dispose()
   })
 
-  test('blocks weak passwords in the browser before creating the user', async ({
-    page,
-  }) => {
+  test('blocks weak passwords in the browser before creating the user', async ({ page }) => {
     const credentials = createAuthCredentials('ui-weak-password')
     let signUpRequestCount = 0
 
@@ -213,7 +211,10 @@ test.describe.serial('local auth sign up', () => {
     ).toBeTruthy()
   })
 
-  test('shows the duplicate-email error after a progressive sign-up submit', async ({ page, request }) => {
+  test('shows the duplicate-email error after a progressive sign-up submit', async ({
+    page,
+    request,
+  }) => {
     const credentials = createAuthCredentials('ui-duplicate-email')
 
     await provisionAccount(request, credentials)

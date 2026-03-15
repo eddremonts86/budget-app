@@ -30,9 +30,7 @@ export function validateSignUpPayload(
   return null
 }
 
-export function getSignUpValidationErrorMessage(
-  code: SignUpValidationErrorCode,
-): string {
+export function getSignUpValidationErrorMessage(code: SignUpValidationErrorCode): string {
   switch (code) {
     case 'AUTH_NAME_REQUIRED':
       return 'Enter your full name to create an account.'
@@ -41,9 +39,7 @@ export function getSignUpValidationErrorMessage(
   }
 }
 
-export function createSignUpValidationErrorResponse(
-  code: SignUpValidationErrorCode,
-): Response {
+export function createSignUpValidationErrorResponse(code: SignUpValidationErrorCode): Response {
   return Response.json(
     {
       code,

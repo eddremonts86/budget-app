@@ -1,9 +1,5 @@
 import { expect, test } from '@playwright/test'
-import {
-  createAuthCredentials,
-  expectDashboard,
-  provisionAccount,
-} from './utils/auth-local'
+import { createAuthCredentials, expectDashboard, provisionAccount } from './utils/auth-local'
 
 const credentials = createAuthCredentials('login')
 
