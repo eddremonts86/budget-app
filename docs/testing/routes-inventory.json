@@ -1,7 +1,10 @@
 {
   "metadata": {
-    "generatedAt": "2026-03-03",
-    "source": ["src/routes", "src/routeTree.gen.ts"],
+    "generatedAt": "2026-03-15",
+    "source": [
+      "src/routes",
+      "src/routeTree.gen.ts"
+    ],
     "notes": "No dynamic URL params were detected in current route tree"
   },
   "uiRoutes": [
@@ -10,6 +13,13 @@
       "module": "landing",
       "authRequired": false,
       "nestedUnder": null,
+      "params": []
+    },
+    {
+      "path": "/dashboard",
+      "module": "dashboard",
+      "authRequired": true,
+      "nestedUnder": "/dashboard",
       "params": []
     },
     {
@@ -35,7 +45,7 @@
     },
     {
       "path": "/dashboard/help",
-      "module": "ai-help",
+      "module": "help",
       "authRequired": true,
       "nestedUnder": "/dashboard",
       "params": []
@@ -52,19 +62,27 @@
       "module": "settings",
       "authRequired": true,
       "nestedUnder": "/dashboard",
-      "redirectTo": "/dashboard/settings/system",
-      "params": []
+      "params": [],
+      "redirectTo": "/dashboard/settings/system"
     },
     {
-      "path": "/dashboard/settings/system",
-      "module": "settings-system",
+      "path": "/dashboard/settings",
+      "module": "settings",
+      "authRequired": true,
+      "nestedUnder": "/dashboard",
+      "params": [],
+      "redirectTo": "/dashboard/settings/system"
+    },
+    {
+      "path": "/dashboard/settings/ia_config",
+      "module": "settings-ai",
       "authRequired": true,
       "nestedUnder": "/dashboard/settings",
       "params": []
     },
     {
-      "path": "/dashboard/settings/ia_config",
-      "module": "settings-ai",
+      "path": "/dashboard/settings/system",
+      "module": "system",
       "authRequired": true,
       "nestedUnder": "/dashboard/settings",
       "params": []
@@ -102,43 +120,69 @@
     {
       "path": "/api/ai/audit",
       "module": "ai-api",
-      "methods": ["GET", "POST"],
+      "methods": [
+        "GET",
+        "POST"
+      ],
       "params": []
     },
     {
       "path": "/api/ai/chat",
       "module": "ai-api",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "params": []
     },
     {
       "path": "/api/ai/chat/completions",
       "module": "ai-api",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "params": []
     },
     {
       "path": "/api/ai/config-store",
       "module": "ai-api",
-      "methods": ["GET", "POST", "PUT"],
+      "methods": [
+        "GET",
+        "POST",
+        "PUT"
+      ],
+      "params": []
+    },
+    {
+      "path": "/api/ai/models",
+      "module": "ai-api",
+      "methods": [
+        "GET",
+        "POST"
+      ],
       "params": []
     },
     {
       "path": "/api/ai/search",
       "module": "ai-api",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "params": []
     },
     {
       "path": "/api/ai/status",
       "module": "ai-api",
-      "methods": ["GET"],
+      "methods": [
+        "GET"
+      ],
       "params": []
     },
     {
       "path": "/api/ai/test-connection",
       "module": "ai-api",
-      "methods": ["POST"],
+      "methods": [
+        "POST"
+      ],
       "params": []
     }
   ]

@@ -1,5 +1,5 @@
 import type { AiConfigFormData, AiProviderId } from '@/ai/config'
-import { getActiveAiConfig, getAllAiConfigs } from '@/ai/config'
+import { getActiveAiConfig, getAllAiConfigs } from '@/ai/config/store'
 import { detectBestProvider, probeProvider } from '@/ai/providers'
 import { resolveLlamaCppReachableConfig } from '@/ai/providers/llama-cpp'
 

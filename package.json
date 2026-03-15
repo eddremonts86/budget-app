@@ -22,6 +22,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "type-check": "tsc --noEmit",
+    "auth:generate": "pnpm dlx auth@latest generate",
     "test:visual": "percy exec -- playwright test",
     "rag:ingest": "tsx scripts/ai/ingest-rag.ts",
     "db:up": "docker compose up -d",
@@ -53,6 +54,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.74.0",
     "@base-ui/react": "^1.1.0",
+    "@better-auth/drizzle-adapter": "^1.5.5",
     "@chroma-core/default-embed": "^0.1.9",
     "@clerk/tanstack-react-start": "^0.29.1",
     "@dnd-kit/core": "^6.3.1",
@@ -88,6 +90,7 @@
     "@tanstack/zod-form-adapter": "^0.42.1",
     "@uidotdev/usehooks": "^2.4.1",
     "axios": "^1.13.4",
+    "better-auth": "^1.5.5",
     "chromadb": "^3.3.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",

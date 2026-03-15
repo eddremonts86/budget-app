@@ -1,4 +1,4 @@
-export { getActiveAiConfig, getAllAiConfigs, validateAiConfig } from '@/ai/config'
+export { getActiveAiConfig, getAllAiConfigs, validateAiConfig } from '@/ai/config/store'
 export {
   detectBestProvider,
   getProvider,

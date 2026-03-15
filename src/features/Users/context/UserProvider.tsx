@@ -1,15 +1,15 @@
-import { useUser } from '@clerk/tanstack-react-start'
 import * as React from 'react'
+import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { getClientTestUserId, isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
-import { upsertUserFn } from '../api/users.fn'
+import { syncAuthenticatedUserFn } from '../api/users.fn'
 import type { User } from '../model/types'
 import { UserContext } from './UserContext'
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
-  const { user: clerkUser, isLoaded: clerkIsLoaded } = useUser()
+  const auth = useAppAuth()
   const [syncedUser, setSyncedUser] = React.useState<User | null>(null)
   const [isLoading, setIsLoading] = React.useState(false)
-  const hasRun = React.useRef(false)
+  const lastSyncedIdentity = React.useRef<string | null>(null)
   const isAuthBypassEnabled = isClientAuthBypassEnabled()
 
   React.useEffect(() => {
@@ -30,52 +30,47 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       return
     }
 
-    if (!clerkIsLoaded) {
+    if (!auth.isLoaded) {
       return
     }
 
-    if (!clerkUser) {
+    if (!auth.isAuthenticated || !auth.user || !auth.provider) {
+      lastSyncedIdentity.current = null
+      setSyncedUser(null)
       return
     }
 
-    // If we already synced this user session, don't run again unless clerkUser changes significantly
-    if (hasRun.current && syncedUser?.id === clerkUser.id) {
+    const currentAuthUser = auth.user
+    const identityKey = `${auth.provider}:${auth.user.id}`
+
+    if (lastSyncedIdentity.current === identityKey) {
       return
     }
 
-    hasRun.current = true
+    lastSyncedIdentity.current = identityKey
     setIsLoading(true)
 
     const syncUser = async () => {
       try {
-        const email = clerkUser.primaryEmailAddress?.emailAddress || ''
-        const name = clerkUser.fullName || clerkUser.username || 'User'
-        const avatar = clerkUser.imageUrl || null
+        const safeEmail = currentAuthUser.email || `user-${currentAuthUser.id}@example.com`
 
-        // Ensure we have a valid email or placeholder
-        const safeEmail = email || `user-${clerkUser.id}@example.com`
-
-        const userData = {
-          id: clerkUser.id,
-          name,
-          email: safeEmail,
-          avatar,
-          role: 'user' as const,
-        }
-
-        const synced = await upsertUserFn({
+        const synced = await syncAuthenticatedUserFn({
           data: {
-            ...userData,
-            roleId: 'role_user', // Provide a default roleId for new synced users
+            provider: auth.provider === 'better-auth' ? 'better-auth' : 'clerk',
+            providerUserId: currentAuthUser.id,
+            name: currentAuthUser.name || 'User',
+            email: safeEmail,
+            avatar: currentAuthUser.image,
           },
         })
 
         if (!synced) {
-          throw new Error('upsertUserFn returned null or undefined')
+          throw new Error('syncAuthenticatedUserFn returned null or undefined')
         }
 
         setSyncedUser(synced)
       } catch {
+        lastSyncedIdentity.current = null
         // Ignore sync failures; auth state can still render unauthenticated UI.
       } finally {
         setIsLoading(false)
@@ -83,10 +78,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     }
 
     syncUser()
-  }, [clerkIsLoaded, clerkUser, syncedUser, isAuthBypassEnabled])
+  }, [auth, isAuthBypassEnabled])
 
   const value = React.useMemo(() => {
-    const isReady = (isAuthBypassEnabled && !!syncedUser) || (clerkIsLoaded && !!syncedUser)
+    const isReady = (isAuthBypassEnabled && !!syncedUser) || (auth.isLoaded && !!syncedUser)
     return {
       syncedUserId: syncedUser?.id ?? null,
       userRole: (syncedUser?.roleName === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
@@ -94,7 +89,7 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
       isLoading: !isReady || isLoading,
       isReady,
     }
-  }, [syncedUser, clerkIsLoaded, isLoading, isAuthBypassEnabled])
+  }, [auth.isLoaded, syncedUser, isLoading, isAuthBypassEnabled])
 
   return <UserContext.Provider value={value}>{children}</UserContext.Provider>
 }

@@ -1,7 +1,12 @@
 import type { AiConfigStore } from '@/ai/config'
 
+async function loadFileStoreModule() {
+  const modulePath = '@/ai/config/file-store'
+  return await import(/* @vite-ignore */ modulePath)
+}
+
 export async function readPersistedAiConfig() {
-  const { readAiConfig } = await import('@/ai/config/file-store')
+  const { readAiConfig } = await loadFileStoreModule()
   return readAiConfig()
 }
 
@@ -14,7 +19,7 @@ export async function readPersistedAiConfigOrEmpty() {
 }
 
 export async function writePersistedAiConfig(config: AiConfigStore) {
-  const { writeAiConfig } = await import('@/ai/config/file-store')
+  const { writeAiConfig } = await loadFileStoreModule()
   await writeAiConfig(config)
   return config
 }

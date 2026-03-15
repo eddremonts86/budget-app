@@ -1,14 +1,15 @@
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq, count, like, or, inArray, sql } from 'drizzle-orm'
+import { and, desc, eq, count, like, or, inArray, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import {
-  users,
   departments,
-  roles,
-  jobTitles,
   experienceLevels,
-  userSkills,
+  externalIdentities,
+  jobTitles,
+  roles,
   skills,
+  userSkills,
+  users,
 } from '@/shared/lib/db/schema'
 import type { User as UserType } from '../model/types'
 
@@ -391,6 +392,179 @@ export const upsertUserFn = createServerFn({ method: 'POST' })
       }
     } catch (error) {
       console.error('Error in upsertUserFn:', error)
+      throw error
+    }
+  })
+
+const syncedAuthUserSchema = z.object({
+  provider: z.enum(['clerk', 'better-auth']),
+  providerUserId: z.string().min(1),
+  email: z.string().email(),
+  name: z.string().min(1),
+  avatar: z.string().nullable().optional(),
+})
+
+export const syncAuthenticatedUserFn = createServerFn({ method: 'POST' })
+  .inputValidator(syncedAuthUserSchema)
+  .handler(async ({ data: input }) => {
+    const { getDb } = await import('@/shared/lib/db')
+    const db = getDb()
+    const now = new Date()
+    const defaultRoleId = 'role_user'
+
+    try {
+      if (input.provider === 'better-auth') {
+        const [linkedUser] = await db
+          .select()
+          .from(users)
+          .where(eq(users.authUserId, input.providerUserId))
+          .limit(1)
+
+        const [sameEmailUser] = linkedUser
+          ? [undefined]
+          : await db.select().from(users).where(eq(users.email, input.email)).limit(1)
+
+        const targetUser = linkedUser ?? sameEmailUser
+
+        if (targetUser) {
+          const [updatedUser] = await db
+            .update(users)
+            .set({
+              name: input.name,
+              email: input.email,
+              avatar: input.avatar,
+              authUserId: input.providerUserId,
+              updatedAt: now,
+            })
+            .where(eq(users.id, targetUser.id))
+            .returning()
+
+          return {
+            ...updatedUser,
+            createdAt: updatedUser.createdAt.toISOString(),
+            updatedAt: updatedUser.updatedAt.toISOString(),
+          }
+        }
+
+        const [createdUser] = await db
+          .insert(users)
+          .values({
+            id: crypto.randomUUID(),
+            name: input.name,
+            email: input.email,
+            avatar: input.avatar,
+            roleId: defaultRoleId,
+            authUserId: input.providerUserId,
+          })
+          .returning()
+
+        return {
+          ...createdUser,
+          createdAt: createdUser.createdAt.toISOString(),
+          updatedAt: createdUser.updatedAt.toISOString(),
+        }
+      }
+
+      const [identity] = await db
+        .select()
+        .from(externalIdentities)
+        .where(
+          and(
+            eq(externalIdentities.provider, input.provider),
+            eq(externalIdentities.externalUserId, input.providerUserId),
+          ),
+        )
+        .limit(1)
+
+      const [linkedUser] = identity
+        ? await db.select().from(users).where(eq(users.id, identity.userId)).limit(1)
+        : [undefined]
+
+      const [sameEmailUser] = linkedUser
+        ? [undefined]
+        : await db.select().from(users).where(eq(users.email, input.email)).limit(1)
+
+      let targetUser = linkedUser ?? sameEmailUser
+
+      if (targetUser) {
+        const [updatedUser] = await db
+          .update(users)
+          .set({
+            name: input.name,
+            email: input.email,
+            avatar: input.avatar,
+            updatedAt: now,
+          })
+          .where(eq(users.id, targetUser.id))
+          .returning()
+
+        targetUser = updatedUser
+      } else {
+        const [createdUser] = await db
+          .insert(users)
+          .values({
+            id: crypto.randomUUID(),
+            name: input.name,
+            email: input.email,
+            avatar: input.avatar,
+            roleId: defaultRoleId,
+          })
+          .returning()
+
+        targetUser = createdUser
+      }
+
+      if (identity) {
+        await db
+          .update(externalIdentities)
+          .set({
+            userId: targetUser.id,
+            email: input.email,
+            updatedAt: now,
+            lastLoginAt: now,
+          })
+          .where(eq(externalIdentities.id, identity.id))
+      } else {
+        const [existingProviderLink] = await db
+          .select()
+          .from(externalIdentities)
+          .where(
+            and(
+              eq(externalIdentities.userId, targetUser.id),
+              eq(externalIdentities.provider, input.provider),
+            ),
+          )
+          .limit(1)
+
+        if (existingProviderLink) {
+          await db
+            .update(externalIdentities)
+            .set({
+              externalUserId: input.providerUserId,
+              email: input.email,
+              updatedAt: now,
+              lastLoginAt: now,
+            })
+            .where(eq(externalIdentities.id, existingProviderLink.id))
+        } else {
+          await db.insert(externalIdentities).values({
+            id: crypto.randomUUID(),
+            userId: targetUser.id,
+            provider: input.provider,
+            externalUserId: input.providerUserId,
+            email: input.email,
+            lastLoginAt: now,
+          })
+        }
+      }
+
+      return {
+        ...targetUser,
+        createdAt: targetUser.createdAt.toISOString(),
+        updatedAt: targetUser.updatedAt.toISOString(),
+      }
+    } catch (error) {
+      console.error('Error in syncAuthenticatedUserFn:', error)
       throw error
     }
   })

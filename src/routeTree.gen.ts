@@ -9,11 +9,13 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as LandingRouteImport } from './routes/_landing'
 import { Route as DashboardRouteImport } from './routes/_dashboard'
 import { Route as LandingIndexRouteImport } from './routes/_landing.index'
 import { Route as DashboardDashboardRouteImport } from './routes/_dashboard.dashboard'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard.dashboard.index'
+import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiTestConnectionRouteImport } from './routes/api.ai.test-connection'
 import { Route as ApiAiStatusRouteImport } from './routes/api.ai.status'
 import { Route as ApiAiSearchRouteImport } from './routes/api.ai.search'
@@ -35,6 +37,11 @@ import { Route as ApiAiChatCompletionsRouteImport } from './routes/api.ai.chat.c
 import { Route as DashboardDashboardSettingsSystemRouteImport } from './routes/_dashboard.dashboard.settings.system'
 import { Route as DashboardDashboardSettingsIa_configRouteImport } from './routes/_dashboard.dashboard.settings.ia_config'
 
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LandingRoute = LandingRouteImport.update({
   id: '/_landing',
   getParentRoute: () => rootRouteImport,
@@ -57,6 +64,11 @@ const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardDashboardRoute,
+} as any)
+const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
+  id: '/api/auth/$',
+  path: '/api/auth/$',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiAiTestConnectionRoute = ApiAiTestConnectionRouteImport.update({
   id: '/api/ai/test-connection',
@@ -169,6 +181,7 @@ const DashboardDashboardSettingsIa_configRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof LandingIndexRoute
+  '/auth': typeof AuthRoute
   '/dashboard': typeof DashboardDashboardRouteWithChildren
   '/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
   '/dashboard/categories': typeof DashboardDashboardCategoriesRoute
@@ -186,6 +199,7 @@ export interface FileRoutesByFullPath {
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard/': typeof DashboardDashboardIndexRoute
   '/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
   '/dashboard/settings/system': typeof DashboardDashboardSettingsSystemRoute
@@ -194,6 +208,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof LandingIndexRoute
+  '/auth': typeof AuthRoute
   '/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
   '/dashboard/categories': typeof DashboardDashboardCategoriesRoute
   '/dashboard/help': typeof DashboardDashboardHelpRoute
@@ -209,6 +224,7 @@ export interface FileRoutesByTo {
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
   '/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
   '/dashboard/settings/system': typeof DashboardDashboardSettingsSystemRoute
@@ -219,6 +235,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_dashboard': typeof DashboardRouteWithChildren
   '/_landing': typeof LandingRouteWithChildren
+  '/auth': typeof AuthRoute
   '/_dashboard/dashboard': typeof DashboardDashboardRouteWithChildren
   '/_landing/': typeof LandingIndexRoute
   '/_dashboard/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
@@ -237,6 +254,7 @@ export interface FileRoutesById {
   '/api/ai/search': typeof ApiAiSearchRoute
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
+  '/api/auth/$': typeof ApiAuthSplatRoute
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
   '/_dashboard/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
   '/_dashboard/dashboard/settings/system': typeof DashboardDashboardSettingsSystemRoute
@@ -247,6 +265,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/auth'
     | '/dashboard'
     | '/dashboard/analytics'
     | '/dashboard/categories'
@@ -264,6 +283,7 @@ export interface FileRouteTypes {
     | '/api/ai/search'
     | '/api/ai/status'
     | '/api/ai/test-connection'
+    | '/api/auth/$'
     | '/dashboard/'
     | '/dashboard/settings/ia_config'
     | '/dashboard/settings/system'
@@ -272,6 +292,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/auth'
     | '/dashboard/analytics'
     | '/dashboard/categories'
     | '/dashboard/help'
@@ -287,6 +308,7 @@ export interface FileRouteTypes {
     | '/api/ai/search'
     | '/api/ai/status'
     | '/api/ai/test-connection'
+    | '/api/auth/$'
     | '/dashboard'
     | '/dashboard/settings/ia_config'
     | '/dashboard/settings/system'
@@ -296,6 +318,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/_dashboard'
     | '/_landing'
+    | '/auth'
     | '/_dashboard/dashboard'
     | '/_landing/'
     | '/_dashboard/dashboard/analytics'
@@ -314,6 +337,7 @@ export interface FileRouteTypes {
     | '/api/ai/search'
     | '/api/ai/status'
     | '/api/ai/test-connection'
+    | '/api/auth/$'
     | '/_dashboard/dashboard/'
     | '/_dashboard/dashboard/settings/ia_config'
     | '/_dashboard/dashboard/settings/system'
@@ -324,6 +348,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   DashboardRoute: typeof DashboardRouteWithChildren
   LandingRoute: typeof LandingRouteWithChildren
+  AuthRoute: typeof AuthRoute
   ApiAiAuditRoute: typeof ApiAiAuditRoute
   ApiAiChatRoute: typeof ApiAiChatRouteWithChildren
   ApiAiConfigStoreRoute: typeof ApiAiConfigStoreRoute
@@ -331,10 +356,18 @@ export interface RootRouteChildren {
   ApiAiSearchRoute: typeof ApiAiSearchRoute
   ApiAiStatusRoute: typeof ApiAiStatusRoute
   ApiAiTestConnectionRoute: typeof ApiAiTestConnectionRoute
+  ApiAuthSplatRoute: typeof ApiAuthSplatRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_landing': {
       id: '/_landing'
       path: ''
@@ -369,6 +402,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardDashboardIndexRouteImport
       parentRoute: typeof DashboardDashboardRoute
+    }
+    '/api/auth/$': {
+      id: '/api/auth/$'
+      path: '/api/auth/$'
+      fullPath: '/api/auth/$'
+      preLoaderRoute: typeof ApiAuthSplatRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/ai/test-connection': {
       id: '/api/ai/test-connection'
@@ -600,6 +640,7 @@ const ApiAiChatRouteWithChildren = ApiAiChatRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   DashboardRoute: DashboardRouteWithChildren,
   LandingRoute: LandingRouteWithChildren,
+  AuthRoute: AuthRoute,
   ApiAiAuditRoute: ApiAiAuditRoute,
   ApiAiChatRoute: ApiAiChatRouteWithChildren,
   ApiAiConfigStoreRoute: ApiAiConfigStoreRoute,
@@ -607,6 +648,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiSearchRoute: ApiAiSearchRoute,
   ApiAiStatusRoute: ApiAiStatusRoute,
   ApiAiTestConnectionRoute: ApiAiTestConnectionRoute,
+  ApiAuthSplatRoute: ApiAuthSplatRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

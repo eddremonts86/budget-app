@@ -1,12 +1,14 @@
 'use client'
 
-import { SignedIn, SignedOut, SignInButton, UserButton } from '@clerk/tanstack-react-start'
 import { Link } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { Rocket, LogIn, Menu } from 'lucide-react'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import {
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Button,
   Sheet,
   SheetContent,
@@ -15,6 +17,12 @@ import {
   SheetTrigger,
   Separator,
 } from '@/components/ui'
+import { useAppAuth } from '@/shared/lib/auth/app-auth'
+import {
+  getClerkPublishableKey,
+  isBetterAuthEnabled,
+  isClerkEnabled,
+} from '@/shared/lib/auth/config'
 import { LanguageSelector } from '../LanguageSelector'
 import { ThemeToggle } from '../ThemeToggle'
 import { TOPBAR_HEIGHT } from './constants'
@@ -24,7 +32,11 @@ import type { NavItem } from './types'
 
 export const Topbar = memo(function Topbar() {
   const { t } = useTranslation()
+  const auth = useAppAuth()
   const [isOpen, setIsOpen] = useState(false)
+  const hasClerkRuntime = isClerkEnabled() && !!getClerkPublishableKey()
+  const hasBetterAuthRuntime = isBetterAuthEnabled()
+  const hasUnifiedAuthEntry = hasBetterAuthRuntime || hasClerkRuntime
 
   const handleScroll = useCallback((e: React.MouseEvent<HTMLAnchorElement>, id: string) => {
     setIsOpen(false)
@@ -71,9 +83,7 @@ export const Topbar = memo(function Topbar() {
             {navItems.map((item) => (
               <NavLink key={item.id} item={item} onClick={handleScroll} />
             ))}
-            <SignedIn>
-              <NavLink item={dashboardItem} onClick={handleScroll} />
-            </SignedIn>
+            {auth.isAuthenticated && <NavLink item={dashboardItem} onClick={handleScroll} />}
           </nav>
 
           <div className="md:hidden">
@@ -102,13 +112,13 @@ export const Topbar = memo(function Topbar() {
                         className="text-lg w-full justify-start px-4 py-3 h-auto hover:bg-secondary rounded-lg transition-colors"
                       />
                     ))}
-                    <SignedIn>
+                    {auth.isAuthenticated && (
                       <NavLink
                         item={dashboardItem}
                         onClick={handleScroll}
                         className="text-lg w-full justify-start px-4 py-3 h-auto hover:bg-secondary rounded-lg transition-colors"
                       />
-                    </SignedIn>
+                    )}
                   </div>
 
                   <div className="mt-auto border-t p-6 flex flex-col gap-4 bg-muted/30">
@@ -137,27 +147,36 @@ export const Topbar = memo(function Topbar() {
             <ThemeToggle />
           </div>
 
-          <SignedOut>
-            <SignInButton mode="modal">
-              <Button variant="ghost" size="sm" className="gap-2">
+          {!auth.isAuthenticated && hasUnifiedAuthEntry && (
+            <Button variant="ghost" size="sm" className="gap-2" asChild>
+              <Link to="/auth">
                 <LogIn className="h-4 w-4" />
-                {t('nav.signIn')}
-              </Button>
-            </SignInButton>
-          </SignedOut>
+                {t('auth.topbarCta', 'Access workspace')}
+              </Link>
+            </Button>
+          )}
 
-          <SignedIn>
+          {auth.isAuthenticated && auth.user && (
             <div className="flex items-center gap-2">
-              <UserButton
-                afterSignOutUrl="/"
-                appearance={{
-                  elements: {
-                    avatarBox: 'h-8 w-8',
-                  },
-                }}
-              />
+              <Button variant="ghost" size="sm" className="gap-3 px-2" asChild>
+                <Link to="/dashboard">
+                  <Avatar className="h-8 w-8 border border-border/60">
+                    <AvatarImage src={auth.user.image ?? undefined} alt={auth.user.name} />
+                    <AvatarFallback>{auth.user.name.slice(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <span className="hidden sm:inline max-w-32 truncate">{auth.user.name}</span>
+                </Link>
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="gap-2"
+                onClick={() => void auth.signOut()}
+              >
+                {t('nav.signOut', 'Sign out')}
+              </Button>
             </div>
-          </SignedIn>
+          )}
         </div>
       </div>
     </header>

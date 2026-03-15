@@ -1,5 +1,6 @@
 import type { AiConfigFormData, AiProviderId } from '@/ai/config'
-import { aiConfig, getAllAiConfigs } from '@/ai/config'
+import { aiConfig } from '@/ai/config'
+import { getAllAiConfigs } from '@/ai/config/store'
 import { probeAnthropicProvider } from './anthropic'
 import { probeLlamaCppProvider } from './llama-cpp'
 import { probeLmStudioProvider } from './lmstudio'

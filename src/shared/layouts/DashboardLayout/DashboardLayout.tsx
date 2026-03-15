@@ -1,4 +1,3 @@
-import { useAuth } from '@clerk/tanstack-react-start'
 import { Outlet, redirect, useLocation } from '@tanstack/react-router'
 import { Home } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
@@ -18,12 +17,13 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AiSearchProvider } from '@/features/Ai/context/AiSearchContext'
 import { useAiSearch } from '@/features/Ai/context/useAiSearch'
 import { UserProvider } from '@/features/Users/context/UserProvider'
+import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
 import { cn } from '@/shared/utils'
 import { NotificationBell } from './NotificationBell'
 
 export function DashboardLayout() {
-  const { isLoaded, userId } = useAuth()
+  const auth = useAppAuth()
   const { pathname } = useLocation()
   const { t } = useTranslation()
   const isAuthBypassEnabled = isClientAuthBypassEnabled()
@@ -37,13 +37,13 @@ export function DashboardLayout() {
       : 'Dashboard',
   })
 
-  if (!isAuthBypassEnabled && isLoaded && !userId) {
+  if (!isAuthBypassEnabled && auth.isLoaded && !auth.isAuthenticated) {
     throw redirect({
       to: '/',
     })
   }
 
-  if (!isAuthBypassEnabled && !isLoaded) {
+  if (!isAuthBypassEnabled && !auth.isLoaded) {
     return (
       <div className="flex h-screen items-center justify-center">
         <p>Loading...</p>

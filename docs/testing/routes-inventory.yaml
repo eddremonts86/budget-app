@@ -1,104 +1,144 @@
 metadata:
-  generatedAt: '2026-03-03'
+  generatedAt: 2026-03-15
   source:
     - src/routes
     - src/routeTree.gen.ts
-  notes: No dynamic URL params were detected in current route tree
-
+  notes: "No dynamic URL params were detected in current route tree"
 uiRoutes:
-  - path: /
+  -
+    path: /
     module: landing
     authRequired: false
     nestedUnder: null
     params: []
-  - path: /dashboard
+  -
+    path: /dashboard
     module: dashboard
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/analytics
+  -
+    path: /dashboard
+    module: dashboard
+    authRequired: true
+    nestedUnder: /dashboard
+    params: []
+  -
+    path: /dashboard/analytics
     module: analytics
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/categories
+  -
+    path: /dashboard/categories
     module: categories
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/help
-    module: ai-help
+  -
+    path: /dashboard/help
+    module: help
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/projects
+  -
+    path: /dashboard/projects
     module: projects
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/settings
+  -
+    path: /dashboard/settings
     module: settings
     authRequired: true
     nestedUnder: /dashboard
+    params: []
     redirectTo: /dashboard/settings/system
-    params: []
-  - path: /dashboard/settings/system
-    module: settings-system
+  -
+    path: /dashboard/settings
+    module: settings
     authRequired: true
-    nestedUnder: /dashboard/settings
+    nestedUnder: /dashboard
     params: []
-  - path: /dashboard/settings/ia_config
+    redirectTo: /dashboard/settings/system
+  -
+    path: /dashboard/settings/ia_config
     module: settings-ai
     authRequired: true
     nestedUnder: /dashboard/settings
     params: []
-  - path: /dashboard/team
+  -
+    path: /dashboard/settings/system
+    module: system
+    authRequired: true
+    nestedUnder: /dashboard/settings
+    params: []
+  -
+    path: /dashboard/team
     module: team
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/todos
+  -
+    path: /dashboard/todos
     module: todos
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/transactions
+  -
+    path: /dashboard/transactions
     module: transactions
     authRequired: true
     nestedUnder: /dashboard
     params: []
-  - path: /dashboard/users
+  -
+    path: /dashboard/users
     module: users
     authRequired: true
     nestedUnder: /dashboard
     params: []
-
 apiRoutes:
-  - path: /api/ai/audit
+  -
+    path: /api/ai/audit
     module: ai-api
-    methods: [GET, POST]
+    methods:     - GET
+    - POST
     params: []
-  - path: /api/ai/chat
+  -
+    path: /api/ai/chat
     module: ai-api
-    methods: [POST]
+    methods:     - POST
     params: []
-  - path: /api/ai/chat/completions
+  -
+    path: /api/ai/chat/completions
     module: ai-api
-    methods: [POST]
+    methods:     - POST
     params: []
-  - path: /api/ai/config-store
+  -
+    path: /api/ai/config-store
     module: ai-api
-    methods: [GET, POST, PUT]
+    methods:     - GET
+    - POST
+    - PUT
     params: []
-  - path: /api/ai/search
+  -
+    path: /api/ai/models
     module: ai-api
-    methods: [POST]
+    methods:     - GET
+    - POST
     params: []
-  - path: /api/ai/status
+  -
+    path: /api/ai/search
     module: ai-api
-    methods: [GET]
+    methods:     - POST
     params: []
-  - path: /api/ai/test-connection
+  -
+    path: /api/ai/status
     module: ai-api
-    methods: [POST]
+    methods:     - GET
+    params: []
+  -
+    path: /api/ai/test-connection
+    module: ai-api
+    methods:     - POST
     params: []

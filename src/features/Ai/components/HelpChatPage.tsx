@@ -1,6 +1,5 @@
 'use client'
 
-import { useUser } from '@clerk/tanstack-react-start'
 import { fetchServerSentEvents, useChat, type UIMessage } from '@tanstack/ai-react'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from '@tanstack/react-router'
@@ -57,6 +56,7 @@ import {
 import { aiConfigApi } from '@/features/Settings/api/ai-config.api'
 import { useAiConfigStore } from '@/features/Settings/api/ai-config.queries'
 import { useCurrentUser } from '@/features/Users/hooks/useCurrentUser'
+import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { useTQuery } from '@/shared/lib/query'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/utils/index'
@@ -648,7 +648,7 @@ function EmptyState({ onSuggestionClick }: { onSuggestionClick: (text: string) =
 
 export function HelpChatPage() {
   const { t, i18n } = useTranslation()
-  const { user } = useUser()
+  const auth = useAppAuth()
   const { userRole, syncedUserId } = useCurrentUser()
   const navigate = useNavigate()
   const [input, setInput] = React.useState('')
@@ -697,8 +697,7 @@ export function HelpChatPage() {
     }
   }, [])
 
-  const userId = user?.id ?? null
-  const convManager = useConversationManager(userId, userRole)
+  const convManager = useConversationManager(syncedUserId, userRole)
 
   // Compute initial messages from the active conversation (for first useChat mount)
   const initialMessages = React.useMemo(
@@ -1058,7 +1057,7 @@ export function HelpChatPage() {
                     key={message.id}
                     message={message}
                     onImageClick={setIsPreviewOpen}
-                    userAvatar={user?.imageUrl}
+                    userAvatar={auth.user?.image ?? undefined}
                     isTyping={
                       isLoading &&
                       index === visibleMessages.length - 1 &&

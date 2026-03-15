@@ -1,8 +1,13 @@
 import { buildDefaultConfig, LMSTUDIO_BASE_URL, normalizeStore } from './defaults'
 import type { AiConfigFormData, AiConfigStore } from './schema'
 
+async function loadFileStoreModule() {
+  const modulePath = './file-store'
+  return await import(/* @vite-ignore */ modulePath)
+}
+
 async function loadAiConfigStore() {
-  const { readAiConfig } = await import('./file-store')
+  const { readAiConfig } = await loadFileStoreModule()
   return readAiConfig()
 }
 
