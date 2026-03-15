@@ -3,7 +3,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { logAudit } from '@/ai/audit'
 import { getActiveAiConfig, getAllAiConfigs, validateAiConfig } from '@/ai/config/store'
 import { detectBestProvider, probeProvider } from '@/ai/providers'
-import { Route } from '@/routes/api.ai.chat'
+import { Route } from '@/routes/api/ai/chat/route'
 
 // Mock dependencies
 vi.mock('@/ai/config', () => ({

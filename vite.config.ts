@@ -63,6 +63,9 @@ const config = defineConfig({
     !isTest &&
       tanstackStart({
         srcDirectory: './src',
+        router: {
+          routeToken: 'route',
+        },
       }),
     viteReact(),
     // netlify(),

@@ -9,61 +9,61 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as AuthRouteImport } from './routes/auth'
-import { Route as LandingRouteImport } from './routes/_landing'
-import { Route as DashboardRouteImport } from './routes/_dashboard'
-import { Route as LandingIndexRouteImport } from './routes/_landing.index'
-import { Route as DashboardDashboardRouteImport } from './routes/_dashboard.dashboard'
-import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard.dashboard.index'
+import { Route as AuthRouteRouteImport } from './routes/auth/route'
+import { Route as LandingRouteRouteImport } from './routes/_landing/route'
+import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
+import { Route as LandingIndexRouteImport } from './routes/_landing/index'
+import { Route as DashboardDashboardRouteRouteImport } from './routes/_dashboard/dashboard/route'
+import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
-import { Route as ApiAiTestConnectionRouteImport } from './routes/api.ai.test-connection'
-import { Route as ApiAiStatusRouteImport } from './routes/api.ai.status'
-import { Route as ApiAiSearchRouteImport } from './routes/api.ai.search'
-import { Route as ApiAiModelsRouteImport } from './routes/api.ai.models'
-import { Route as ApiAiConfigStoreRouteImport } from './routes/api.ai.config-store'
-import { Route as ApiAiChatRouteImport } from './routes/api.ai.chat'
-import { Route as ApiAiAuditRouteImport } from './routes/api.ai.audit'
-import { Route as DashboardDashboardUsersRouteImport } from './routes/_dashboard.dashboard.users'
-import { Route as DashboardDashboardTransactionsRouteImport } from './routes/_dashboard.dashboard.transactions'
-import { Route as DashboardDashboardTodosRouteImport } from './routes/_dashboard.dashboard.todos'
-import { Route as DashboardDashboardTeamRouteImport } from './routes/_dashboard.dashboard.team'
-import { Route as DashboardDashboardSettingsRouteImport } from './routes/_dashboard.dashboard.settings'
-import { Route as DashboardDashboardProjectsRouteImport } from './routes/_dashboard.dashboard.projects'
-import { Route as DashboardDashboardHelpRouteImport } from './routes/_dashboard.dashboard.help'
-import { Route as DashboardDashboardCategoriesRouteImport } from './routes/_dashboard.dashboard.categories'
-import { Route as DashboardDashboardAnalyticsRouteImport } from './routes/_dashboard.dashboard.analytics'
-import { Route as DashboardDashboardSettingsIndexRouteImport } from './routes/_dashboard.dashboard.settings.index'
-import { Route as ApiAiChatCompletionsRouteImport } from './routes/api.ai.chat.completions'
-import { Route as DashboardDashboardSettingsSystemRouteImport } from './routes/_dashboard.dashboard.settings.system'
-import { Route as DashboardDashboardSettingsIa_configRouteImport } from './routes/_dashboard.dashboard.settings.ia_config'
+import { Route as ApiAiTestConnectionRouteImport } from './routes/api/ai/test-connection'
+import { Route as ApiAiStatusRouteImport } from './routes/api/ai/status'
+import { Route as ApiAiSearchRouteImport } from './routes/api/ai/search'
+import { Route as ApiAiModelsRouteImport } from './routes/api/ai/models'
+import { Route as ApiAiConfigStoreRouteImport } from './routes/api/ai/config-store'
+import { Route as ApiAiAuditRouteImport } from './routes/api/ai/audit'
+import { Route as DashboardDashboardUsersRouteImport } from './routes/_dashboard/dashboard/users'
+import { Route as DashboardDashboardTransactionsRouteImport } from './routes/_dashboard/dashboard/transactions'
+import { Route as DashboardDashboardTodosRouteImport } from './routes/_dashboard/dashboard/todos'
+import { Route as DashboardDashboardTeamRouteImport } from './routes/_dashboard/dashboard/team'
+import { Route as DashboardDashboardProjectsRouteImport } from './routes/_dashboard/dashboard/projects'
+import { Route as DashboardDashboardHelpRouteImport } from './routes/_dashboard/dashboard/help'
+import { Route as DashboardDashboardCategoriesRouteImport } from './routes/_dashboard/dashboard/categories'
+import { Route as DashboardDashboardAnalyticsRouteImport } from './routes/_dashboard/dashboard/analytics'
+import { Route as ApiAiChatRouteRouteImport } from './routes/api/ai/chat/route'
+import { Route as DashboardDashboardSettingsRouteRouteImport } from './routes/_dashboard/dashboard/settings/route'
+import { Route as DashboardDashboardSettingsIndexRouteImport } from './routes/_dashboard/dashboard/settings/index'
+import { Route as ApiAiChatCompletionsRouteImport } from './routes/api/ai/chat/completions'
+import { Route as DashboardDashboardSettingsSystemRouteImport } from './routes/_dashboard/dashboard/settings/system'
+import { Route as DashboardDashboardSettingsIa_configRouteImport } from './routes/_dashboard/dashboard/settings/ia_config'
 
-const AuthRoute = AuthRouteImport.update({
+const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LandingRoute = LandingRouteImport.update({
+const LandingRouteRoute = LandingRouteRouteImport.update({
   id: '/_landing',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DashboardRoute = DashboardRouteImport.update({
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
   id: '/_dashboard',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LandingIndexRoute = LandingIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => LandingRoute,
+  getParentRoute: () => LandingRouteRoute,
 } as any)
-const DashboardDashboardRoute = DashboardDashboardRouteImport.update({
+const DashboardDashboardRouteRoute = DashboardDashboardRouteRouteImport.update({
   id: '/dashboard',
   path: '/dashboard',
-  getParentRoute: () => DashboardRoute,
+  getParentRoute: () => DashboardRouteRoute,
 } as any)
 const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => DashboardDashboardRoute,
+  getParentRoute: () => DashboardDashboardRouteRoute,
 } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
@@ -95,11 +95,6 @@ const ApiAiConfigStoreRoute = ApiAiConfigStoreRouteImport.update({
   path: '/api/ai/config-store',
   getParentRoute: () => rootRouteImport,
 } as any)
-const ApiAiChatRoute = ApiAiChatRouteImport.update({
-  id: '/api/ai/chat',
-  path: '/api/ai/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ApiAiAuditRoute = ApiAiAuditRouteImport.update({
   id: '/api/ai/audit',
   path: '/api/ai/audit',
@@ -108,92 +103,97 @@ const ApiAiAuditRoute = ApiAiAuditRouteImport.update({
 const DashboardDashboardUsersRoute = DashboardDashboardUsersRouteImport.update({
   id: '/users',
   path: '/users',
-  getParentRoute: () => DashboardDashboardRoute,
+  getParentRoute: () => DashboardDashboardRouteRoute,
 } as any)
 const DashboardDashboardTransactionsRoute =
   DashboardDashboardTransactionsRouteImport.update({
     id: '/transactions',
     path: '/transactions',
-    getParentRoute: () => DashboardDashboardRoute,
+    getParentRoute: () => DashboardDashboardRouteRoute,
   } as any)
 const DashboardDashboardTodosRoute = DashboardDashboardTodosRouteImport.update({
   id: '/todos',
   path: '/todos',
-  getParentRoute: () => DashboardDashboardRoute,
+  getParentRoute: () => DashboardDashboardRouteRoute,
 } as any)
 const DashboardDashboardTeamRoute = DashboardDashboardTeamRouteImport.update({
   id: '/team',
   path: '/team',
-  getParentRoute: () => DashboardDashboardRoute,
+  getParentRoute: () => DashboardDashboardRouteRoute,
 } as any)
-const DashboardDashboardSettingsRoute =
-  DashboardDashboardSettingsRouteImport.update({
-    id: '/settings',
-    path: '/settings',
-    getParentRoute: () => DashboardDashboardRoute,
-  } as any)
 const DashboardDashboardProjectsRoute =
   DashboardDashboardProjectsRouteImport.update({
     id: '/projects',
     path: '/projects',
-    getParentRoute: () => DashboardDashboardRoute,
+    getParentRoute: () => DashboardDashboardRouteRoute,
   } as any)
 const DashboardDashboardHelpRoute = DashboardDashboardHelpRouteImport.update({
   id: '/help',
   path: '/help',
-  getParentRoute: () => DashboardDashboardRoute,
+  getParentRoute: () => DashboardDashboardRouteRoute,
 } as any)
 const DashboardDashboardCategoriesRoute =
   DashboardDashboardCategoriesRouteImport.update({
     id: '/categories',
     path: '/categories',
-    getParentRoute: () => DashboardDashboardRoute,
+    getParentRoute: () => DashboardDashboardRouteRoute,
   } as any)
 const DashboardDashboardAnalyticsRoute =
   DashboardDashboardAnalyticsRouteImport.update({
     id: '/analytics',
     path: '/analytics',
-    getParentRoute: () => DashboardDashboardRoute,
+    getParentRoute: () => DashboardDashboardRouteRoute,
+  } as any)
+const ApiAiChatRouteRoute = ApiAiChatRouteRouteImport.update({
+  id: '/api/ai/chat',
+  path: '/api/ai/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DashboardDashboardSettingsRouteRoute =
+  DashboardDashboardSettingsRouteRouteImport.update({
+    id: '/settings',
+    path: '/settings',
+    getParentRoute: () => DashboardDashboardRouteRoute,
   } as any)
 const DashboardDashboardSettingsIndexRoute =
   DashboardDashboardSettingsIndexRouteImport.update({
     id: '/',
     path: '/',
-    getParentRoute: () => DashboardDashboardSettingsRoute,
+    getParentRoute: () => DashboardDashboardSettingsRouteRoute,
   } as any)
 const ApiAiChatCompletionsRoute = ApiAiChatCompletionsRouteImport.update({
   id: '/completions',
   path: '/completions',
-  getParentRoute: () => ApiAiChatRoute,
+  getParentRoute: () => ApiAiChatRouteRoute,
 } as any)
 const DashboardDashboardSettingsSystemRoute =
   DashboardDashboardSettingsSystemRouteImport.update({
     id: '/system',
     path: '/system',
-    getParentRoute: () => DashboardDashboardSettingsRoute,
+    getParentRoute: () => DashboardDashboardSettingsRouteRoute,
   } as any)
 const DashboardDashboardSettingsIa_configRoute =
   DashboardDashboardSettingsIa_configRouteImport.update({
     id: '/ia_config',
     path: '/ia_config',
-    getParentRoute: () => DashboardDashboardSettingsRoute,
+    getParentRoute: () => DashboardDashboardSettingsRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LandingIndexRoute
-  '/auth': typeof AuthRoute
-  '/dashboard': typeof DashboardDashboardRouteWithChildren
+  '/auth': typeof AuthRouteRoute
+  '/dashboard': typeof DashboardDashboardRouteRouteWithChildren
+  '/dashboard/settings': typeof DashboardDashboardSettingsRouteRouteWithChildren
+  '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
   '/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
   '/dashboard/categories': typeof DashboardDashboardCategoriesRoute
   '/dashboard/help': typeof DashboardDashboardHelpRoute
   '/dashboard/projects': typeof DashboardDashboardProjectsRoute
-  '/dashboard/settings': typeof DashboardDashboardSettingsRouteWithChildren
   '/dashboard/team': typeof DashboardDashboardTeamRoute
   '/dashboard/todos': typeof DashboardDashboardTodosRoute
   '/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
-  '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/search': typeof ApiAiSearchRoute
@@ -208,7 +208,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof LandingIndexRoute
-  '/auth': typeof AuthRoute
+  '/auth': typeof AuthRouteRoute
+  '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
   '/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
   '/dashboard/categories': typeof DashboardDashboardCategoriesRoute
   '/dashboard/help': typeof DashboardDashboardHelpRoute
@@ -218,7 +219,6 @@ export interface FileRoutesByTo {
   '/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
-  '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/search': typeof ApiAiSearchRoute
@@ -233,22 +233,22 @@ export interface FileRoutesByTo {
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/_dashboard': typeof DashboardRouteWithChildren
-  '/_landing': typeof LandingRouteWithChildren
-  '/auth': typeof AuthRoute
-  '/_dashboard/dashboard': typeof DashboardDashboardRouteWithChildren
+  '/_dashboard': typeof DashboardRouteRouteWithChildren
+  '/_landing': typeof LandingRouteRouteWithChildren
+  '/auth': typeof AuthRouteRoute
+  '/_dashboard/dashboard': typeof DashboardDashboardRouteRouteWithChildren
   '/_landing/': typeof LandingIndexRoute
+  '/_dashboard/dashboard/settings': typeof DashboardDashboardSettingsRouteRouteWithChildren
+  '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
   '/_dashboard/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
   '/_dashboard/dashboard/categories': typeof DashboardDashboardCategoriesRoute
   '/_dashboard/dashboard/help': typeof DashboardDashboardHelpRoute
   '/_dashboard/dashboard/projects': typeof DashboardDashboardProjectsRoute
-  '/_dashboard/dashboard/settings': typeof DashboardDashboardSettingsRouteWithChildren
   '/_dashboard/dashboard/team': typeof DashboardDashboardTeamRoute
   '/_dashboard/dashboard/todos': typeof DashboardDashboardTodosRoute
   '/_dashboard/dashboard/transactions': typeof DashboardDashboardTransactionsRoute
   '/_dashboard/dashboard/users': typeof DashboardDashboardUsersRoute
   '/api/ai/audit': typeof ApiAiAuditRoute
-  '/api/ai/chat': typeof ApiAiChatRouteWithChildren
   '/api/ai/config-store': typeof ApiAiConfigStoreRoute
   '/api/ai/models': typeof ApiAiModelsRoute
   '/api/ai/search': typeof ApiAiSearchRoute
@@ -267,17 +267,17 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/dashboard/settings'
+    | '/api/ai/chat'
     | '/dashboard/analytics'
     | '/dashboard/categories'
     | '/dashboard/help'
     | '/dashboard/projects'
-    | '/dashboard/settings'
     | '/dashboard/team'
     | '/dashboard/todos'
     | '/dashboard/transactions'
     | '/dashboard/users'
     | '/api/ai/audit'
-    | '/api/ai/chat'
     | '/api/ai/config-store'
     | '/api/ai/models'
     | '/api/ai/search'
@@ -293,6 +293,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/api/ai/chat'
     | '/dashboard/analytics'
     | '/dashboard/categories'
     | '/dashboard/help'
@@ -302,7 +303,6 @@ export interface FileRouteTypes {
     | '/dashboard/transactions'
     | '/dashboard/users'
     | '/api/ai/audit'
-    | '/api/ai/chat'
     | '/api/ai/config-store'
     | '/api/ai/models'
     | '/api/ai/search'
@@ -321,17 +321,17 @@ export interface FileRouteTypes {
     | '/auth'
     | '/_dashboard/dashboard'
     | '/_landing/'
+    | '/_dashboard/dashboard/settings'
+    | '/api/ai/chat'
     | '/_dashboard/dashboard/analytics'
     | '/_dashboard/dashboard/categories'
     | '/_dashboard/dashboard/help'
     | '/_dashboard/dashboard/projects'
-    | '/_dashboard/dashboard/settings'
     | '/_dashboard/dashboard/team'
     | '/_dashboard/dashboard/todos'
     | '/_dashboard/dashboard/transactions'
     | '/_dashboard/dashboard/users'
     | '/api/ai/audit'
-    | '/api/ai/chat'
     | '/api/ai/config-store'
     | '/api/ai/models'
     | '/api/ai/search'
@@ -346,11 +346,11 @@ export interface FileRouteTypes {
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  DashboardRoute: typeof DashboardRouteWithChildren
-  LandingRoute: typeof LandingRouteWithChildren
-  AuthRoute: typeof AuthRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
+  LandingRouteRoute: typeof LandingRouteRouteWithChildren
+  AuthRouteRoute: typeof AuthRouteRoute
+  ApiAiChatRouteRoute: typeof ApiAiChatRouteRouteWithChildren
   ApiAiAuditRoute: typeof ApiAiAuditRoute
-  ApiAiChatRoute: typeof ApiAiChatRouteWithChildren
   ApiAiConfigStoreRoute: typeof ApiAiConfigStoreRoute
   ApiAiModelsRoute: typeof ApiAiModelsRoute
   ApiAiSearchRoute: typeof ApiAiSearchRoute
@@ -365,21 +365,21 @@ declare module '@tanstack/react-router' {
       id: '/auth'
       path: '/auth'
       fullPath: '/auth'
-      preLoaderRoute: typeof AuthRouteImport
+      preLoaderRoute: typeof AuthRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_landing': {
       id: '/_landing'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof LandingRouteImport
+      preLoaderRoute: typeof LandingRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_dashboard': {
       id: '/_dashboard'
       path: ''
       fullPath: '/'
-      preLoaderRoute: typeof DashboardRouteImport
+      preLoaderRoute: typeof DashboardRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_landing/': {
@@ -387,21 +387,21 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof LandingIndexRouteImport
-      parentRoute: typeof LandingRoute
+      parentRoute: typeof LandingRouteRoute
     }
     '/_dashboard/dashboard': {
       id: '/_dashboard/dashboard'
       path: '/dashboard'
       fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardDashboardRouteImport
-      parentRoute: typeof DashboardRoute
+      preLoaderRoute: typeof DashboardDashboardRouteRouteImport
+      parentRoute: typeof DashboardRouteRoute
     }
     '/_dashboard/dashboard/': {
       id: '/_dashboard/dashboard/'
       path: '/'
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardDashboardIndexRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -445,13 +445,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAiConfigStoreRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/api/ai/chat': {
-      id: '/api/ai/chat'
-      path: '/api/ai/chat'
-      fullPath: '/api/ai/chat'
-      preLoaderRoute: typeof ApiAiChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/api/ai/audit': {
       id: '/api/ai/audit'
       path: '/api/ai/audit'
@@ -464,102 +457,109 @@ declare module '@tanstack/react-router' {
       path: '/users'
       fullPath: '/dashboard/users'
       preLoaderRoute: typeof DashboardDashboardUsersRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/transactions': {
       id: '/_dashboard/dashboard/transactions'
       path: '/transactions'
       fullPath: '/dashboard/transactions'
       preLoaderRoute: typeof DashboardDashboardTransactionsRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/todos': {
       id: '/_dashboard/dashboard/todos'
       path: '/todos'
       fullPath: '/dashboard/todos'
       preLoaderRoute: typeof DashboardDashboardTodosRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/team': {
       id: '/_dashboard/dashboard/team'
       path: '/team'
       fullPath: '/dashboard/team'
       preLoaderRoute: typeof DashboardDashboardTeamRouteImport
-      parentRoute: typeof DashboardDashboardRoute
-    }
-    '/_dashboard/dashboard/settings': {
-      id: '/_dashboard/dashboard/settings'
-      path: '/settings'
-      fullPath: '/dashboard/settings'
-      preLoaderRoute: typeof DashboardDashboardSettingsRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/projects': {
       id: '/_dashboard/dashboard/projects'
       path: '/projects'
       fullPath: '/dashboard/projects'
       preLoaderRoute: typeof DashboardDashboardProjectsRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/help': {
       id: '/_dashboard/dashboard/help'
       path: '/help'
       fullPath: '/dashboard/help'
       preLoaderRoute: typeof DashboardDashboardHelpRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/categories': {
       id: '/_dashboard/dashboard/categories'
       path: '/categories'
       fullPath: '/dashboard/categories'
       preLoaderRoute: typeof DashboardDashboardCategoriesRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/analytics': {
       id: '/_dashboard/dashboard/analytics'
       path: '/analytics'
       fullPath: '/dashboard/analytics'
       preLoaderRoute: typeof DashboardDashboardAnalyticsRouteImport
-      parentRoute: typeof DashboardDashboardRoute
+      parentRoute: typeof DashboardDashboardRouteRoute
+    }
+    '/api/ai/chat': {
+      id: '/api/ai/chat'
+      path: '/api/ai/chat'
+      fullPath: '/api/ai/chat'
+      preLoaderRoute: typeof ApiAiChatRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_dashboard/dashboard/settings': {
+      id: '/_dashboard/dashboard/settings'
+      path: '/settings'
+      fullPath: '/dashboard/settings'
+      preLoaderRoute: typeof DashboardDashboardSettingsRouteRouteImport
+      parentRoute: typeof DashboardDashboardRouteRoute
     }
     '/_dashboard/dashboard/settings/': {
       id: '/_dashboard/dashboard/settings/'
       path: '/'
       fullPath: '/dashboard/settings/'
       preLoaderRoute: typeof DashboardDashboardSettingsIndexRouteImport
-      parentRoute: typeof DashboardDashboardSettingsRoute
+      parentRoute: typeof DashboardDashboardSettingsRouteRoute
     }
     '/api/ai/chat/completions': {
       id: '/api/ai/chat/completions'
       path: '/completions'
       fullPath: '/api/ai/chat/completions'
       preLoaderRoute: typeof ApiAiChatCompletionsRouteImport
-      parentRoute: typeof ApiAiChatRoute
+      parentRoute: typeof ApiAiChatRouteRoute
     }
     '/_dashboard/dashboard/settings/system': {
       id: '/_dashboard/dashboard/settings/system'
       path: '/system'
       fullPath: '/dashboard/settings/system'
       preLoaderRoute: typeof DashboardDashboardSettingsSystemRouteImport
-      parentRoute: typeof DashboardDashboardSettingsRoute
+      parentRoute: typeof DashboardDashboardSettingsRouteRoute
     }
     '/_dashboard/dashboard/settings/ia_config': {
       id: '/_dashboard/dashboard/settings/ia_config'
       path: '/ia_config'
       fullPath: '/dashboard/settings/ia_config'
       preLoaderRoute: typeof DashboardDashboardSettingsIa_configRouteImport
-      parentRoute: typeof DashboardDashboardSettingsRoute
+      parentRoute: typeof DashboardDashboardSettingsRouteRoute
     }
   }
 }
 
-interface DashboardDashboardSettingsRouteChildren {
+interface DashboardDashboardSettingsRouteRouteChildren {
   DashboardDashboardSettingsIa_configRoute: typeof DashboardDashboardSettingsIa_configRoute
   DashboardDashboardSettingsSystemRoute: typeof DashboardDashboardSettingsSystemRoute
   DashboardDashboardSettingsIndexRoute: typeof DashboardDashboardSettingsIndexRoute
 }
 
-const DashboardDashboardSettingsRouteChildren: DashboardDashboardSettingsRouteChildren =
+const DashboardDashboardSettingsRouteRouteChildren: DashboardDashboardSettingsRouteRouteChildren =
   {
     DashboardDashboardSettingsIa_configRoute:
       DashboardDashboardSettingsIa_configRoute,
@@ -568,17 +568,17 @@ const DashboardDashboardSettingsRouteChildren: DashboardDashboardSettingsRouteCh
     DashboardDashboardSettingsIndexRoute: DashboardDashboardSettingsIndexRoute,
   }
 
-const DashboardDashboardSettingsRouteWithChildren =
-  DashboardDashboardSettingsRoute._addFileChildren(
-    DashboardDashboardSettingsRouteChildren,
+const DashboardDashboardSettingsRouteRouteWithChildren =
+  DashboardDashboardSettingsRouteRoute._addFileChildren(
+    DashboardDashboardSettingsRouteRouteChildren,
   )
 
-interface DashboardDashboardRouteChildren {
+interface DashboardDashboardRouteRouteChildren {
+  DashboardDashboardSettingsRouteRoute: typeof DashboardDashboardSettingsRouteRouteWithChildren
   DashboardDashboardAnalyticsRoute: typeof DashboardDashboardAnalyticsRoute
   DashboardDashboardCategoriesRoute: typeof DashboardDashboardCategoriesRoute
   DashboardDashboardHelpRoute: typeof DashboardDashboardHelpRoute
   DashboardDashboardProjectsRoute: typeof DashboardDashboardProjectsRoute
-  DashboardDashboardSettingsRoute: typeof DashboardDashboardSettingsRouteWithChildren
   DashboardDashboardTeamRoute: typeof DashboardDashboardTeamRoute
   DashboardDashboardTodosRoute: typeof DashboardDashboardTodosRoute
   DashboardDashboardTransactionsRoute: typeof DashboardDashboardTransactionsRoute
@@ -586,63 +586,68 @@ interface DashboardDashboardRouteChildren {
   DashboardDashboardIndexRoute: typeof DashboardDashboardIndexRoute
 }
 
-const DashboardDashboardRouteChildren: DashboardDashboardRouteChildren = {
-  DashboardDashboardAnalyticsRoute: DashboardDashboardAnalyticsRoute,
-  DashboardDashboardCategoriesRoute: DashboardDashboardCategoriesRoute,
-  DashboardDashboardHelpRoute: DashboardDashboardHelpRoute,
-  DashboardDashboardProjectsRoute: DashboardDashboardProjectsRoute,
-  DashboardDashboardSettingsRoute: DashboardDashboardSettingsRouteWithChildren,
-  DashboardDashboardTeamRoute: DashboardDashboardTeamRoute,
-  DashboardDashboardTodosRoute: DashboardDashboardTodosRoute,
-  DashboardDashboardTransactionsRoute: DashboardDashboardTransactionsRoute,
-  DashboardDashboardUsersRoute: DashboardDashboardUsersRoute,
-  DashboardDashboardIndexRoute: DashboardDashboardIndexRoute,
+const DashboardDashboardRouteRouteChildren: DashboardDashboardRouteRouteChildren =
+  {
+    DashboardDashboardSettingsRouteRoute:
+      DashboardDashboardSettingsRouteRouteWithChildren,
+    DashboardDashboardAnalyticsRoute: DashboardDashboardAnalyticsRoute,
+    DashboardDashboardCategoriesRoute: DashboardDashboardCategoriesRoute,
+    DashboardDashboardHelpRoute: DashboardDashboardHelpRoute,
+    DashboardDashboardProjectsRoute: DashboardDashboardProjectsRoute,
+    DashboardDashboardTeamRoute: DashboardDashboardTeamRoute,
+    DashboardDashboardTodosRoute: DashboardDashboardTodosRoute,
+    DashboardDashboardTransactionsRoute: DashboardDashboardTransactionsRoute,
+    DashboardDashboardUsersRoute: DashboardDashboardUsersRoute,
+    DashboardDashboardIndexRoute: DashboardDashboardIndexRoute,
+  }
+
+const DashboardDashboardRouteRouteWithChildren =
+  DashboardDashboardRouteRoute._addFileChildren(
+    DashboardDashboardRouteRouteChildren,
+  )
+
+interface DashboardRouteRouteChildren {
+  DashboardDashboardRouteRoute: typeof DashboardDashboardRouteRouteWithChildren
 }
 
-const DashboardDashboardRouteWithChildren =
-  DashboardDashboardRoute._addFileChildren(DashboardDashboardRouteChildren)
-
-interface DashboardRouteChildren {
-  DashboardDashboardRoute: typeof DashboardDashboardRouteWithChildren
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardDashboardRouteRoute: DashboardDashboardRouteRouteWithChildren,
 }
 
-const DashboardRouteChildren: DashboardRouteChildren = {
-  DashboardDashboardRoute: DashboardDashboardRouteWithChildren,
-}
-
-const DashboardRouteWithChildren = DashboardRoute._addFileChildren(
-  DashboardRouteChildren,
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
 )
 
-interface LandingRouteChildren {
+interface LandingRouteRouteChildren {
   LandingIndexRoute: typeof LandingIndexRoute
 }
 
-const LandingRouteChildren: LandingRouteChildren = {
+const LandingRouteRouteChildren: LandingRouteRouteChildren = {
   LandingIndexRoute: LandingIndexRoute,
 }
 
-const LandingRouteWithChildren =
-  LandingRoute._addFileChildren(LandingRouteChildren)
+const LandingRouteRouteWithChildren = LandingRouteRoute._addFileChildren(
+  LandingRouteRouteChildren,
+)
 
-interface ApiAiChatRouteChildren {
+interface ApiAiChatRouteRouteChildren {
   ApiAiChatCompletionsRoute: typeof ApiAiChatCompletionsRoute
 }
 
-const ApiAiChatRouteChildren: ApiAiChatRouteChildren = {
+const ApiAiChatRouteRouteChildren: ApiAiChatRouteRouteChildren = {
   ApiAiChatCompletionsRoute: ApiAiChatCompletionsRoute,
 }
 
-const ApiAiChatRouteWithChildren = ApiAiChatRoute._addFileChildren(
-  ApiAiChatRouteChildren,
+const ApiAiChatRouteRouteWithChildren = ApiAiChatRouteRoute._addFileChildren(
+  ApiAiChatRouteRouteChildren,
 )
 
 const rootRouteChildren: RootRouteChildren = {
-  DashboardRoute: DashboardRouteWithChildren,
-  LandingRoute: LandingRouteWithChildren,
-  AuthRoute: AuthRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
+  LandingRouteRoute: LandingRouteRouteWithChildren,
+  AuthRouteRoute: AuthRouteRoute,
+  ApiAiChatRouteRoute: ApiAiChatRouteRouteWithChildren,
   ApiAiAuditRoute: ApiAiAuditRoute,
-  ApiAiChatRoute: ApiAiChatRouteWithChildren,
   ApiAiConfigStoreRoute: ApiAiConfigStoreRoute,
   ApiAiModelsRoute: ApiAiModelsRoute,
   ApiAiSearchRoute: ApiAiSearchRoute,
