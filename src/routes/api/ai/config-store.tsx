@@ -6,7 +6,7 @@ import {
   getErrorMessage,
   readPersistedAiConfigOrEmpty,
   writePersistedAiConfig,
-} from '@/ai/server'
+} from '@/modules/ai/server'
 
 async function handleConfigStoreWrite(request: Request): Promise<Response> {
   try {

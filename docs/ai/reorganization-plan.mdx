@@ -4,7 +4,7 @@
 
 El sistema de AI del proyecto ha crecido en varias direcciones a la vez: providers, configuracion, prompts, RAG, rutas API, UI, scripts y documentacion. Hoy esas piezas funcionan, pero estan repartidas por demasiadas zonas del repositorio. Eso vuelve mas costoso entender el sistema, modificarlo con seguridad y agregar nuevos providers o agentes.
 
-La propuesta es concentrar todo el dominio AI bajo `src/ai`, manteniendo las features de UI como consumidoras del dominio, no como duenas de la logica central. El objetivo no es cambiar el comportamiento del producto, sino mejorar la arquitectura para que el sistema sea mas facil de mantener, extender y documentar.
+La propuesta es concentrar todo el dominio AI bajo `src/modules/ai`, manteniendo rutas y adaptadores externos como consumidores del dominio, no como duenos de la logica central. El objetivo no es cambiar el comportamiento del producto, sino mejorar la arquitectura para que el sistema sea mas facil de mantener, extender y documentar.
 
 ## Problema Inicial
 
@@ -14,8 +14,7 @@ Antes de la reorganizacion, la logica AI estaba dispersa entre varias capas del 
 - `src/shared/lib/rag`
 - `src/server/utils`
 - `src/routes/api.ai.*`
-- `src/features/Ai`
-- `src/features/Settings`
+- capas de UI y configuracion entonces dispersas
 - `ia-config`
 - `scripts`
 - `docs`
@@ -31,7 +30,7 @@ Esa dispersion generaba varios problemas concretos:
 
 ## Objetivos
 
-- Crear un unico modulo de dominio para AI en `src/ai`.
+- Crear un unico modulo de dominio para AI en `src/modules/ai`.
 - Separar infraestructura de providers de comportamiento de agentes, prompts y RAG.
 - Eliminar dependencias cruzadas incorrectas entre capas.
 - Hacer que el alta o modificacion de providers sea localizada y predecible.
@@ -42,11 +41,11 @@ Esa dispersion generaba varios problemas concretos:
 
 ### 1. Un solo hogar para el dominio AI
 
-Todo lo que sea core AI debe vivir en `src/ai`.
+Todo lo que sea core AI debe vivir en `src/modules/ai`.
 
 ### 2. La UI consume, no define el dominio
 
-`src/features/Ai` y `src/features/Settings` deben seguir existiendo, pero solo como capas de presentacion y consumo.
+La UI y el runtime especificos de AI deben vivir en `src/modules/ai`, mientras que las rutas solo deben consumir el modulo.
 
 ### 3. Providers no son agentes
 
@@ -62,7 +61,8 @@ La estructura objetivo recomendada es esta:
 
 ```text
 src/
-  ai/
+  modules/
+    ai/
     config/
     providers/
       anthropic/
@@ -80,25 +80,25 @@ src/
 
 ### Responsabilidad por zona
 
-- `src/ai/config`
+- `src/modules/ai/config`
   Source of truth para tipos, schemas, defaults, validacion y resolucion de entorno.
 
-- `src/ai/providers`
+- `src/modules/ai/providers`
   Implementacion por provider: config, adaptadores, models, probes y cualquier helper tecnico del provider.
 
-- `src/ai/prompts`
+- `src/modules/ai/prompts`
   System prompts, instruction builders, politicas y helpers de composicion de prompts.
 
-- `src/ai/rag`
+- `src/modules/ai/rag`
   Retrieval, embeddings, context building, sync e integraciones con vector store.
 
-- `src/ai/storage`
+- `src/modules/ai/storage`
   Persistencia local del chat y artefactos del dominio AI del lado cliente.
 
-- `src/ai/audit`
+- `src/modules/ai/audit`
   Logging, trazabilidad y auditoria de interacciones AI.
 
-- `src/ai/server`
+- `src/modules/ai/server`
   Orquestadores o helpers server-side que expongan el dominio AI a rutas o server functions.
 
 ## Estructura Recomendada por Provider
@@ -106,7 +106,7 @@ src/
 Cada provider deberia seguir una forma interna homogenea para que el sistema sea facil de navegar y extender.
 
 ```text
-src/ai/providers/lmstudio/
+src/modules/ai/providers/lmstudio/
   adapter.ts
   config.ts
   models.ts
@@ -117,15 +117,9 @@ src/ai/providers/lmstudio/
 
 La misma forma puede repetirse para `ollama`, `llama-cpp`, `openai` y `anthropic`.
 
-## Que Se Mantiene Fuera de `src/ai`
+## Que Se Mantiene Fuera de `src/modules/ai`
 
 Estas piezas no deben ser absorbidas como dominio central:
-
-- `src/features/Ai`
-  Sigue siendo la capa de UI del chat, paneles y acciones.
-
-- `src/features/Settings`
-  Sigue siendo la capa de UI para configurar providers y opciones.
 
 - `src/routes/api.ai.*`
   Siguen existiendo como capa HTTP, pero deben consumir el dominio AI en vez de contener la mayor parte de la logica.
@@ -134,7 +128,7 @@ Estas piezas no deben ser absorbidas como dominio central:
 
 Durante el analisis inicial se identificaron estos puntos criticos:
 
-- La configuracion y los defaults estaban repartidos entre `ia-config`, `src/shared/lib/ai`, `src/server/utils` y parte de `src/features/Settings`.
+- La configuracion y los defaults estaban repartidos entre `ia-config`, capas shared antiguas, utilidades server antiguas y UI de configuracion.
 - El source of truth de tipos y schemas de configuracion estaba mal ubicado en la feature de Settings.
 - Los prompts y parte de la logica de orquestacion vivian dentro de rutas grandes como `api.ai.chat` y `api.ai.search`.
 - La capa RAG estaba separada del resto de AI, aunque conceptualmente forma parte del mismo dominio.
@@ -150,7 +144,7 @@ Entregable:
 
 - plan aprobado con arquitectura objetivo y limites claros
 
-## Fase 1: Crear la base de `src/ai`
+## Fase 1: Crear la base de `src/modules/ai`
 
 Objetivo: mover el source of truth de tipos, schemas, defaults y contratos compartidos.
 
@@ -163,7 +157,7 @@ Incluye:
 
 Entregable:
 
-- `src/ai/config` como base estable del dominio
+- `src/modules/ai/config` como base estable del dominio
 
 ## Fase 2: Consolidar providers
 
@@ -177,7 +171,7 @@ Incluye:
 
 Entregable:
 
-- `src/ai/providers` como capa unica de infraestructura AI
+- `src/modules/ai/providers` como capa unica de infraestructura AI
 
 ## Fase 3: Mover prompts, RAG, audit y storage
 
@@ -185,10 +179,10 @@ Objetivo: sacar logica de dominio de rutas y shared disperso.
 
 Incluye:
 
-- extraer prompts a `src/ai/prompts`
-- mover RAG a `src/ai/rag`
-- mover audit a `src/ai/audit`
-- mover chat storage a `src/ai/storage`
+- extraer prompts a `src/modules/ai/prompts`
+- mover RAG a `src/modules/ai/rag`
+- mover audit a `src/modules/ai/audit`
+- mover chat storage a `src/modules/ai/storage`
 
 Entregable:
 
@@ -257,12 +251,12 @@ Estado general: la reorganizacion AI ya corre sobre `src/ai` y el trabajo princi
 
 ### Completado
 
-- `src/ai/config` es la fuente principal de configuracion, defaults y validacion.
-- `src/ai/providers` quedo consolidado por provider con estructura uniforme.
-- prompts compartidos centralizados en `src/ai/prompts`.
+- `src/modules/ai/config` es la fuente principal de configuracion, defaults y validacion.
+- `src/modules/ai/providers` quedo consolidado por provider con estructura uniforme.
+- prompts compartidos centralizados en `src/modules/ai/prompts`.
 - RAG, storage y audit movidos al dominio AI.
-- rutas `api.ai.*` reducidas a capa HTTP que consume helpers de `src/ai/server`.
-- resolucion de provider runtime, model discovery, chat execution, streaming y respuestas JSON centralizadas en `src/ai/server`.
+- rutas `api.ai.*` reducidas a capa HTTP que consume helpers de `src/modules/ai/server`.
+- resolucion de provider runtime, model discovery, chat execution, streaming y respuestas JSON centralizadas en `src/modules/ai/server`.
 - scripts AI y documentacion canonica reagrupados bajo `scripts/ai` y `docs/ai`.
 - wrappers legacy e imports antiguos ya eliminados del runtime principal.
 - suites enfocadas de AI pasando despues de los refactors incrementales.
@@ -304,7 +298,7 @@ definir una unica fuente de verdad y usar adaptadores temporales cortos.
 ### Riesgo: rutas grandes como `api.ai.chat` queden parcialmente refactorizadas
 
 Mitigacion:
-riesgo ya mitigado al extraer prompts, contexto, resolucion de provider, streaming y ejecucion compartida a `src/ai/server` y `src/ai/prompts`.
+riesgo ya mitigado al extraer prompts, contexto, resolucion de provider, streaming y ejecucion compartida a `src/modules/ai/server` y `src/modules/ai/prompts`.
 
 ### Riesgo: scripts o docs queden desalineados
 
@@ -343,7 +337,7 @@ La reorganizacion se considerara exitosa cuando se cumplan estas condiciones:
 ### Seguimiento opcional
 
 - mover la implementacion interna restante de algunos scripts raiz a `scripts/ai` si se quiere eliminar wrappers por completo
-- mantener `src/ai/prompts` y `src/ai/server` como punto unico para nueva orquestacion, evitando regresar logica a rutas HTTP
+- mantener `src/modules/ai/prompts` y `src/modules/ai/server` como punto unico para nueva orquestacion, evitando regresar logica a rutas HTTP
 
 ## Decision Principal
 

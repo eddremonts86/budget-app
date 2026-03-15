@@ -1,5 +1,6 @@
 import axios from 'axios'
-import { setupAuthInterceptor, setupErrorInterceptor } from './interceptors'
+import { setupAuthInterceptor } from './interceptors/auth.interceptor'
+import { setupErrorInterceptor } from './interceptors/error.interceptor'
 
 /**
  * Pre-configured Axios instance for API requests

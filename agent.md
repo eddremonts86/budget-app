@@ -13,7 +13,7 @@ El proyecto es una plantilla full-stack moderna diseñada para aplicaciones empr
 - **UI/UX**: Tailwind CSS con componentes de shadcn/ui y Radix UI, siguiendo principios de accesibilidad y diseño responsivo.
 - **Internacionalización**: i18next con soporte para múltiples idiomas (ES, EN, DK).
 
-La arquitectura sigue un enfoque **Feature-Based**, donde cada funcionalidad principal (Proyectos, Usuarios, Tareas) reside en su propio directorio dentro de `src/features/`, encapsulando su lógica de negocio, componentes y llamadas a API.
+La arquitectura sigue un enfoque **Module-Based**, donde cada capacidad principal (Proyectos, Usuarios, Tareas, AI, Auth) reside en su propio directorio dentro de `src/modules/`, encapsulando su lógica de negocio, UI y runtime.
 
 ---
 
@@ -25,7 +25,7 @@ Basado en las recomendaciones de [Patterns.dev](https://www.patterns.dev/), se h
 
 - **Descripción**: Separa la lógica (Container) de la vista (Presentational). Los contenedores manejan datos y estado; los componentes presentacionales solo reciben props y renderizan UI.
 - **Justificación**: Facilita la reutilización de componentes UI y simplifica las pruebas unitarias.
-- **Implementación**: [ProjectsPage.tsx](file:///Volumes/Works/github/tanstack-template/src/features/Projects/components/ProjectsPage.tsx) actúa como contenedor, delegando el formulario a [ProjectForm.tsx](file:///Volumes/Works/github/tanstack-template/src/features/Projects/components/ProjectForm.tsx).
+- **Implementación**: la UI y lógica de proyectos viven en `src/modules/projects/*`, con páginas y componentes definidos dentro del módulo dueño.
 
 ### B. Higher-Order Components (HOC)
 
@@ -43,7 +43,7 @@ Basado en las recomendaciones de [Patterns.dev](https://www.patterns.dev/), se h
 
 - **Descripción**: Encapsulación de lógica de estado y efectos en funciones reutilizables.
 - **Justificación**: Reemplaza patrones antiguos como Render Props y HOCs para lógica de negocio, mejorando la legibilidad.
-- **Implementación**: [useProjects.ts](file:///Volumes/Works/github/tanstack-template/src/features/Projects/api/projects.queries.ts) encapsula la lógica de fetching y caché.
+- **Implementación**: los hooks de datos viven dentro del módulo dueño, por ejemplo en `src/modules/projects/api/*`.
 
 ### E. Provider Pattern
 
@@ -68,7 +68,7 @@ Basado en las recomendaciones de [Patterns.dev](https://www.patterns.dev/), se h
 
 Para cada nueva funcionalidad o refactorización, verificar:
 
-- [ ] **Type Safety**: ¿Todos los datos tienen interfaces definidas? (Ver [model/types.ts](file:///Volumes/Works/github/tanstack-template/src/features/Projects/model/types.ts)).
+- [ ] **Type Safety**: ¿Todos los datos tienen interfaces definidas dentro del módulo dueño?
 - [ ] **Separación de Preocupaciones**: ¿La lógica de API está en `*.fn.ts` y las queries en `*.queries.ts`?
 - [ ] **Reutilización**: ¿Se han extraído los Hooks comunes a `src/shared/hooks/` o a la carpeta `api/` de la feature?
 - [ ] **Clean Code**: ¿Los componentes presentacionales son puros y fáciles de leer?
@@ -80,6 +80,6 @@ Para cada nueva funcionalidad o refactorización, verificar:
 ## 5. Plan de Mantenimiento de Clean Code
 
 1. **Revisión de Pares Automática**: Uso de linters (ESLint) y formateadores (Prettier) configurados.
-2. **Estructura de Carpetas Estricta**: Prohibido mezclar lógica de diferentes "features" sin pasar por `shared`.
+2. **Estructura de Carpetas Estricta**: Prohibido mezclar lógica de diferentes módulos sin pasar por `shared` o por un módulo explícitamente compartido.
 3. **Documentación Proactiva**: Actualizar este archivo `agent.md` cuando se introduzcan nuevos patrones arquitectónicos.
 4. **Pruebas Continuas**: Validar flujos críticos con Playwright antes de cada despliegue.

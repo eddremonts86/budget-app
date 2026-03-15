@@ -9,8 +9,8 @@
   - `src/shared/lib/auth/bypass.client.ts`
 - Updated auth guard and user sync path to use bypass helpers:
   - `src/shared/lib/auth/server.ts`
-  - `src/shared/layouts/DashboardLayout/DashboardLayout.tsx`
-  - `src/features/Users/context/UserProvider.tsx`
+  - `src/modules/dashboard/ui/shell/DashboardLayout.tsx`
+  - `src/modules/users/context/UserProvider.tsx`
   - `src/routes/-root-components/RootErrorContent.tsx`
 - Enforced production safety and localhost constraints.
 

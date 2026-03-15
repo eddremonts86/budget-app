@@ -1,7 +1,7 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { AiProviderId } from '@/ai/config'
-import { buildChatSystemPrompt, resolveLanguageName } from '@/ai/prompts'
-import type { ChatMessages } from '@/ai/server'
+import type { AiProviderId } from '@/modules/ai/config'
+import { buildChatSystemPrompt, resolveLanguageName } from '@/modules/ai/prompts'
+import type { ChatMessages } from '@/modules/ai/server'
 import {
   consolidateChatMessages,
   createAiChatResponse,
@@ -15,8 +15,8 @@ import {
   resolveProviderRuntime,
   streamLmStudioChat,
   streamOllamaChat,
-} from '@/ai/server'
-import type { IncomingChatMessage } from '@/ai/server/chat-messages'
+} from '@/modules/ai/server'
+import type { IncomingChatMessage } from '@/modules/ai/server/chat-messages'
 
 const DEFAULT_OLLAMA_CHAT_MODEL = process.env.AI_CHAT_OLLAMA_MODEL || 'qwen3.5:0.8b'
 
@@ -36,7 +36,7 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
   try {
     const isE2E = process.env.VITE_E2E === 'true'
 
-    const [{ logAudit }] = await Promise.all([import('@/ai/audit')])
+    const [{ logAudit }] = await Promise.all([import('@/modules/ai/audit')])
 
     const body = (await request.json()) as ChatRequestBody
     const rawMessages = Array.isArray(body.messages) ? body.messages : []

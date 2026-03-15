@@ -16,17 +16,17 @@ The application supports five providers:
 
 The AI domain is now centered in `src/ai`:
 
-- `src/ai/config`: schemas, defaults, environment resolution, persisted config store, validation.
-- `src/ai/providers`: registry, headers, discovery, probing and per-provider implementations.
-- `src/ai/rag`: retrieval, embeddings, context injection and sync.
-- `src/ai/prompts`: shared prompt construction for chat and search flows.
-- `src/ai/storage`: client-side chat persistence.
-- `src/ai/audit`: AI audit logging.
-- `src/ai/server`: shared server-side helpers for provider resolution, model selection, model discovery, message normalization, contextual injection, HTTP responses and streaming orchestration.
+- `src/modules/ai/config`: schemas, defaults, environment resolution, persisted config store, validation.
+- `src/modules/ai/providers`: registry, headers, discovery, probing and per-provider implementations.
+- `src/modules/ai/rag`: retrieval, embeddings, context injection and sync.
+- `src/modules/ai/prompts`: shared prompt construction for chat and search flows.
+- `src/modules/ai/storage`: client-side chat persistence.
+- `src/modules/ai/audit`: AI audit logging.
+- `src/modules/ai/server`: shared server-side helpers for provider resolution, model selection, model discovery, message normalization, contextual injection, HTTP responses and streaming orchestration.
 
 ## Provider Structure
 
-Each provider lives in its own folder under `src/ai/providers` and is split into:
+Each provider lives in its own folder under `src/modules/ai/providers` and is split into:
 
 - `adapter.ts`: adapter construction for `@tanstack/ai`.
 - `config.ts`: provider defaults entrypoint.
@@ -39,17 +39,17 @@ This structure is implemented for `anthropic`, `lmstudio`, `llama-cpp`, `ollama`
 
 ## Configuration Store
 
-The configuration source of truth lives in `src/ai/config`.
+The configuration source of truth lives in `src/modules/ai/config`.
 
-- `getActiveAiConfig()` and `getAllAiConfigs()` are exported from `src/ai/config/store.ts`.
-- `readAiConfig()` and `writeAiConfig()` are exported from `src/ai/config/file-store.ts`.
+- `getActiveAiConfig()` and `getAllAiConfigs()` are exported from `src/modules/ai/config/store.ts`.
+- `readAiConfig()` and `writeAiConfig()` are exported from `src/modules/ai/config/file-store.ts`.
 - `validateAiConfig()` enforces required base URL, chat endpoint and provider-specific credentials.
 
 The Settings UI remains a consumer of this domain, but no longer owns the core schemas.
 
 ## Public API
 
-The top-level barrel in `src/ai/index.ts` now exposes the domain with direct exports for config, providers, rag, storage, audit and server helpers.
+The top-level barrel in `src/modules/ai/index.ts` now exposes the domain with direct exports for config, providers, rag, storage, audit and server helpers.
 Namespace aliases such as `aiConfig` and `aiProviders` are still available for compatibility.
 
 ## Server-Side Flow
@@ -63,11 +63,11 @@ The HTTP layer remains in the route handlers under `src/routes/api.ai.*`, but it
 - `/api/ai/test-connection`: probe for a specific provider config.
 - `/api/ai/config-store`: persisted configuration read/write.
 
-To reduce route-level duplication, provider fallback and model resolution helpers now live in `src/ai/server/provider-resolution.ts` and `src/ai/server/provider-models.ts`.
-`src/ai/server/provider-runtime.ts` now resolves the effective provider, adapter registry entry and model in one place.
-`src/ai/server/chat-execution.ts` centralizes the final `@tanstack/ai` execution for routes that stream assistant responses.
-`src/ai/server/model-discovery.ts` centralizes config-based model discovery used by `/api/ai/models`.
-Prompt construction now lives in `src/ai/prompts`, while chat message normalization, contextual injection, provider-specific streaming adapters and shared JSON response helpers live in `src/ai/server`.
+To reduce route-level duplication, provider fallback and model resolution helpers now live in `src/modules/ai/server/provider-resolution.ts` and `src/modules/ai/server/provider-models.ts`.
+`src/modules/ai/server/provider-runtime.ts` now resolves the effective provider, adapter registry entry and model in one place.
+`src/modules/ai/server/chat-execution.ts` centralizes the final `@tanstack/ai` execution for routes that stream assistant responses.
+`src/modules/ai/server/model-discovery.ts` centralizes config-based model discovery used by `/api/ai/models`.
+Prompt construction now lives in `src/modules/ai/prompts`, while chat message normalization, contextual injection, provider-specific streaming adapters and shared JSON response helpers live in `src/modules/ai/server`.
 
 ## Integration in Features
 

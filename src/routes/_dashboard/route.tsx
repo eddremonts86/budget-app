@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { DashboardLayout } from '@/shared/layouts/DashboardLayout/DashboardLayout'
+import { DashboardLayout } from '@/modules/dashboard'
 import { ensureAppAuthSession } from '@/shared/lib/auth/app-auth.functions'
 import { isBetterAuthEnabled } from '@/shared/lib/auth/config'
 

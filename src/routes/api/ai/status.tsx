@@ -4,7 +4,7 @@ import {
   createJsonResponse,
   getErrorMessage,
   getProviderStatuses,
-} from '@/ai/server'
+} from '@/modules/ai/server'
 
 export const Route = createFileRoute('/api/ai/status')({
   component: () => null,

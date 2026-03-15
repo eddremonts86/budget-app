@@ -59,7 +59,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/utils'
 
 export interface DataTableFilterConfig {

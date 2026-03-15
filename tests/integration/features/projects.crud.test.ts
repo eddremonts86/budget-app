@@ -3,7 +3,7 @@ import {
   createProjectFn,
   deleteProjectFn,
   updateProjectFn,
-} from '@/features/Projects/api/projects.fn'
+} from '@/modules/projects'
 import { getDb } from '@/shared/lib/db'
 
 vi.mock('@tanstack/react-start', () => ({

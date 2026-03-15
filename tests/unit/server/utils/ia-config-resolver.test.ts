@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { resolveAiConfig } from '../../../../src/ai/config/resolver'
+import { resolveAiConfig } from '../../../../src/modules/ai/config/resolver'
 
 describe('ia-config-resolver', () => {
   it('should resolve default configuration for llama-cpp', () => {

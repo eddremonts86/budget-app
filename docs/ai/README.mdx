@@ -6,7 +6,7 @@ Esta carpeta agrupa la documentacion operativa y arquitectonica de AI para que q
 
 La reorganizacion ya centralizo configuracion, providers, prompts, RAG, storage y audit dentro de `src/ai`.
 La capa de providers ya esta separada por carpeta y por responsabilidad interna (`adapter`, `config`, `models`, `probe`, `types`).
-Las rutas `api.ai.*` ya consumen helpers compartidos desde `src/ai/server` y prompts desde `src/ai/prompts` en lugar de mantener esa logica embebida.
+Las rutas `api.ai.*` ya consumen helpers compartidos desde `src/modules/ai/server` y prompts desde `src/modules/ai/prompts` en lugar de mantener esa logica embebida.
 
 ## Documentos
 

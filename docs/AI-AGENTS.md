@@ -204,7 +204,7 @@ When working with any AI assistant, provide this context:
 - **Linting**: Biome (strict config)
 
 ### Key Files to Reference
-- `src/features/ToDo/` - Functional features like todo management
+- `src/modules/tasks/` - Task module implementation and server functions
 - `src/shared/lib/query/` - Query wrapper implementations
 - `src/shared/lib/api/` - Axios client setup
 - `src/shared/utils/index.ts` - Shared utilities
@@ -214,7 +214,7 @@ When working with any AI assistant, provide this context:
 ### Import Aliases
 - `@/` → `src/`
 - `@/shared/` → `src/shared/`
-- `@/features/` → `src/features/`
+- `@/modules/` → `src/modules/`
 
 ## Useful Skills (skills.sh)
 

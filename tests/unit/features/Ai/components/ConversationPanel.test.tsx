@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Conversation } from '@/ai/storage/chat-storage'
-import { ConversationPanel } from '@/features/Ai/components/ConversationPanel'
+import type { Conversation } from '@/modules/ai/storage/chat-storage'
+import { ConversationPanel } from '@/modules/ai/components/ConversationPanel'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({

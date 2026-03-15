@@ -1,8 +1,8 @@
 import { act, cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import type { PersistedActionState } from '@/ai/storage/chat-storage'
-import { ActionStatesProvider } from '@/features/Ai/components/ActionStatesContext'
-import { useActionStates } from '@/features/Ai/components/useActionStates'
+import type { PersistedActionState } from '@/modules/ai/storage/chat-storage'
+import { ActionStatesProvider } from '@/modules/ai/components/ActionStatesContext'
+import { useActionStates } from '@/modules/ai/components/useActionStates'
 
 function TestConsumer() {
   const { states, saveState } = useActionStates()

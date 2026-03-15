@@ -17,15 +17,15 @@ This system guarantees that the AI Chat Assistant always responds in the user's 
 - **Endpoint**: `src/routes/api.ai.chat.tsx`
 - **Mechanism**:
   1.  **Extraction**: Reads `locale` from request URL.
-  2.  **Prompt Construction**: Builds the language-aware system prompt through `src/ai/prompts/chat.ts`.
-  3.  **Injection**: Prepends this instruction before provider execution, while contextual data injection is handled through `src/ai/server/chat-messages.ts`.
+  2.  **Prompt Construction**: Builds the language-aware system prompt through `src/modules/ai/prompts/chat.ts`.
+  3.  **Injection**: Prepends this instruction before provider execution, while contextual data injection is handled through `src/modules/ai/server/chat-messages.ts`.
 - **Validation**:
   - A "Language Guard" logic (audit) checks the response metadata (in a real production system, this would analyze the text).
   - For this implementation, we rely on the Strong System Prompt + Logging.
 
 ### Audit System
 
-- **Storage**: `src/server/data/audit-logs.json` and `src/server/data/ai-settings.json`.
+- **Storage**: `src/modules/ai/data/audit-logs.json` and `src/modules/ai/data/ai-settings.json`.
 - **Events Logged**: Timestamp, User Locale, Detected Intent, and Response Metadata.
 
 ## 2. Implementation Details
@@ -52,6 +52,6 @@ RULES:
 
 ## 5. Current Placement
 
-- Prompt helpers: `src/ai/prompts/chat.ts`
+- Prompt helpers: `src/modules/ai/prompts/chat.ts`
 - Route adapter: `src/routes/api.ai.chat.tsx`
-- Context injection helpers: `src/ai/server/chat-messages.ts`
+- Context injection helpers: `src/modules/ai/server/chat-messages.ts`

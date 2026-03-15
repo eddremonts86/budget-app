@@ -1,15 +1,15 @@
 import { createFileRoute } from '@tanstack/react-router'
-import { buildSearchSystemPrompt, normalizeSearchMessages } from '@/ai/prompts'
-import { retrieveContext } from '@/ai/rag/retrieval'
+import { buildSearchSystemPrompt, normalizeSearchMessages } from '@/modules/ai/prompts'
+import { retrieveContext } from '@/modules/ai/rag/retrieval'
 import {
   createAiChatResponse,
   createJsonErrorResponse,
   createJsonResponse,
   getErrorMessage,
   resolveProviderRuntime,
-} from '@/ai/server'
-import type { ChatMessages } from '@/ai/server'
-import type { SearchRequestBody } from '@/features/Ai/api/search.fn'
+} from '@/modules/ai/server'
+import type { ChatMessages } from '@/modules/ai/server'
+import type { SearchRequestBody } from '@/modules/ai'
 
 const DEFAULT_OLLAMA_SEARCH_MODEL = process.env.AI_SEARCH_OLLAMA_MODEL || 'qwen3.5:0.8b'
 

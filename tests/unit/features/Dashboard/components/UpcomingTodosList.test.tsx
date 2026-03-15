@@ -1,8 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import * as dashboardQueries from '@/features/Dashboard/api/dashboard.queries'
-import { UpcomingTodosList } from '@/features/Dashboard/components/UpcomingTodosList'
-import * as userQueries from '@/features/Users/api/users.queries'
+import * as dashboardQueries from '@/modules/dashboard/api/dashboard.queries'
+import { UpcomingTodosList } from '@/modules/dashboard/components/UpcomingTodosList'
+import * as userQueries from '@/modules/users'
 
 // Mock translations
 vi.mock('react-i18next', () => ({

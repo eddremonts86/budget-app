@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { AiConfigFormData } from '@/ai/config/schema'
-import { validateAiConfig } from '@/ai/config/store'
+import type { AiConfigFormData } from '@/modules/ai/config/schema'
+import { validateAiConfig } from '@/modules/ai/config/store'
 
 describe('AI Config Integration', () => {
   const mockLmStudioConfig: AiConfigFormData = {

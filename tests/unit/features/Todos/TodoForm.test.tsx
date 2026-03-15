@@ -1,9 +1,9 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { useInfiniteProjects, useProjectMembers } from '@/features/Projects/api/projects.queries'
-import { TodoForm } from '@/features/Todos/components/TodoForm'
-import { useInfiniteUsers } from '@/features/Users/api/users.queries'
+import { useInfiniteProjects, useProjectMembers } from '@/modules/projects'
+import { TodoForm } from '@/modules/tasks/components/TodoForm'
+import { useInfiniteUsers } from '@/modules/users'
 
 // Mock dependencies
 vi.mock('react-i18next', () => ({
@@ -13,12 +13,12 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('@/features/Projects/api/projects.queries', () => ({
+vi.mock('@/modules/projects', () => ({
   useInfiniteProjects: vi.fn(),
   useProjectMembers: vi.fn(),
 }))
 
-vi.mock('@/features/Users/api/users.queries', () => ({
+vi.mock('@/modules/users', () => ({
   useInfiniteUsers: vi.fn(),
 }))
 

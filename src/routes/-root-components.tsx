@@ -3,7 +3,7 @@ import { TanStackDevtools } from '@tanstack/react-devtools'
 import { HeadContent, Scripts } from '@tanstack/react-router'
 import { TanStackRouterDevtoolsPanel } from '@tanstack/react-router-devtools'
 import * as React from 'react'
-import { useDevtoolsVisibility } from '@/features/Settings'
+import { useDevtoolsVisibility } from '@/modules/settings'
 import { AppProviders } from '@/shared/providers'
 import { RootErrorContent } from './-root-components/RootErrorContent'
 

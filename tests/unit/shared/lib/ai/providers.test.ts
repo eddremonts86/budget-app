@@ -1,9 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { getAllAiConfigs } from '@/ai/config/store'
-import { detectBestProvider, probeProvider } from '@/ai/providers'
+import { getAllAiConfigs } from '@/modules/ai/config/store'
+import { detectBestProvider, probeProvider } from '@/modules/ai/providers'
 
-vi.mock('@/ai/config/store', async () => {
-  const actual = await vi.importActual<typeof import('@/ai/config/store')>('@/ai/config/store')
+vi.mock('@/modules/ai/config/store', async () => {
+  const actual = await vi.importActual<typeof import('@/modules/ai/config/store')>('@/modules/ai/config/store')
   return {
     ...actual,
     getAllAiConfigs: vi.fn(),

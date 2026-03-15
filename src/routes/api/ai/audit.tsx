@@ -4,7 +4,7 @@ import {
   createJsonResponse,
   readAuditData,
   writeAuditSettings,
-} from '@/ai/server'
+} from '@/modules/ai/server'
 
 export const Route = createFileRoute('/api/ai/audit')({
   component: () => null,

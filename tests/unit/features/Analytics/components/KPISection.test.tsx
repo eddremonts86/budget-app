@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, type Mock } from 'vitest'
-import { KPISection } from '@/features/Analytics/components/KPISection'
+import { KPISection } from '@/modules/analytics/components/KPISection'
 
 // Mock useQuery
 vi.mock('@tanstack/react-query', async () => {

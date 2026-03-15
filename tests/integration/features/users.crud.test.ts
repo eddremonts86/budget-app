@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { createUserFn, deleteUserFn, updateUserFn } from '@/features/Users/api/users.fn'
+import { createUserFn, deleteUserFn, updateUserFn } from '@/modules/users'
 import { getDb } from '@/shared/lib/db'
 
 vi.mock('@tanstack/react-start', () => ({

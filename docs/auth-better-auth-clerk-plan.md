@@ -25,15 +25,15 @@ No se recomienda usar directamente el `id` de Clerk como `users.id`, porque ese 
 El proyecto esta acoplado a Clerk en varios puntos clave:
 
 1. El provider raiz rompe si no existe `VITE_CLERK_PUBLISHABLE_KEY` en `src/shared/providers/index.tsx`.
-2. La proteccion del dashboard depende de `useAuth()` de Clerk en `src/shared/layouts/DashboardLayout/DashboardLayout.tsx`.
-3. La sincronizacion del usuario actual depende de `useUser()` de Clerk en `src/features/Users/context/UserProvider.tsx`.
+2. La proteccion del dashboard dependia de `useAuth()` de Clerk en el layout de dashboard, hoy movido a `src/modules/dashboard/ui/shell/DashboardLayout.tsx`.
+3. La sincronizacion del usuario actual dependia de `useUser()` de Clerk en `src/modules/users/context/UserProvider.tsx`.
 4. La capa server-side de auth es Clerk-first en `src/shared/lib/auth/server.ts`.
-5. La UI publica usa `SignedIn`, `SignedOut`, `SignInButton` y `UserButton` en `src/components/composite/Topbar/Topbar.tsx`.
-6. La sidebar del usuario depende de Clerk en `src/components/nav-user.tsx`.
+5. La UI publica usaba `SignedIn`, `SignedOut`, `SignInButton` y `UserButton` en la topbar, hoy movida a `src/modules/landing/ui/topbar/Topbar.tsx`.
+6. La sidebar del usuario dependia de Clerk en la navegacion de dashboard, hoy ubicada en `src/modules/dashboard/ui/navigation/NavUser.tsx`.
 7. El interceptor HTTP intenta extraer el token desde `window.Clerk` en `src/shared/lib/api/interceptors/auth.interceptor.ts`.
 8. El error boundary raiz sigue leyendo `useAuth()` y `useUser()` de Clerk en `src/routes/-root-components/RootErrorContent.tsx`.
-9. Hay componentes funcionales que todavia leen `useUser()` directamente, por ejemplo `src/features/Ai/components/HelpChatPage.tsx`.
-10. Existen puntos donde la autenticacion real aun no esta conectada y hay placeholders, por ejemplo `src/features/Todos/api/todos.fn.ts`.
+9. Hay componentes funcionales que leian `useUser()` directamente, por ejemplo `src/modules/ai/components/HelpChatPage.tsx`.
+10. Existen puntos donde la autenticacion real aun no esta conectada y hay placeholders, por ejemplo `src/modules/tasks/api/todos.fn.ts`.
 
 Conclusion: antes de implementar Better Auth hay que desacoplar la app de Clerk como dependencia primaria.
 
@@ -281,23 +281,17 @@ Agregar:
 
 #### Capa UI/Auth
 
-7. `src/features/Auth/context/AppAuthProvider.tsx`
-   Provider propio de autenticacion de la app.
+7. `src/shared/lib/auth/app-auth.tsx`
+   Provider, contexto y hook propios de autenticacion de la app.
 
-8. `src/features/Auth/context/AppAuthContext.tsx`
-   Contexto y tipos de sesion.
+8. `src/modules/auth/ui/AuthPage.tsx`
+   Pantalla principal de login con modo local, Clerk o hibrido.
 
-9. `src/features/Auth/hooks/useAppAuth.ts`
-   Hook unico para consumir el estado auth.
+9. `src/modules/auth/ui/components/AuthField.tsx`
+   Componente base de campos para la UI auth.
 
-10. `src/features/Auth/ui/LoginPage.tsx`
-    Pantalla principal de login con modo local, Clerk o hibrido.
-
-11. `src/features/Auth/ui/LocalLoginForm.tsx`
-    Formulario email/password usando Better Auth.
-
-12. `src/features/Auth/ui/AuthButtons.tsx`
-    Wrapper para botones de login por modo.
+10. `src/modules/auth/ui/components/InsightCard.tsx`
+    Componente de apoyo visual para la experiencia de autenticacion.
 
 ### Archivos A Modificar
 
@@ -327,42 +321,42 @@ Agregar:
 6. `src/routes/_dashboard.tsx`
    Mover la proteccion auth a `beforeLoad` con server function propia, siguiendo el patron recomendado para TanStack Start.
 
-7. `src/shared/layouts/DashboardLayout/DashboardLayout.tsx`
+7. `src/modules/dashboard/ui/shell/DashboardLayout.tsx`
    Eliminar dependencia directa de `useAuth()` de Clerk.
 
 #### Estado De Usuario Actual
 
-8. `src/features/Users/context/UserProvider.tsx`
+8. `src/modules/users/context/UserProvider.tsx`
    Dejar de sincronizar exclusivamente desde `useUser()` de Clerk.
 
-9. `src/features/Users/context/UserContext.tsx`
+9. `src/modules/users/context/UserContext.tsx`
    Ajustar para depender de `AppAuth` y del usuario de negocio resuelto.
 
 #### UI Publica Y Navegacion
 
-10. `src/components/composite/Topbar/Topbar.tsx`
+10. `src/modules/landing/ui/topbar/Topbar.tsx`
     Sustituir `SignedIn`, `SignedOut`, `SignInButton`, `UserButton` por wrappers propios controlados por `AppAuth`.
 
-11. `src/components/nav-user.tsx`
+11. `src/modules/dashboard/ui/navigation/NavUser.tsx`
     Sustituir `useUser()` y `useClerk()` por `useAppAuth()` y accion de logout unificada.
 
 12. `src/routes/-root-components/RootErrorContent.tsx`
     Dejar de depender directamente de hooks Clerk.
 
-13. `src/features/Ai/components/HelpChatPage.tsx`
+13. `src/modules/ai/components/HelpChatPage.tsx`
     Sustituir lectura directa de usuario Clerk por la capa `AppAuth` o por `useCurrentUser()` ya resuelto desde `AppAuth`.
 
 #### Tipos Y Funciones De Usuarios
 
-14. `src/features/Users/api/users.fn.ts`
+14. `src/modules/users/api/users.fn.ts`
     Añadir funciones auxiliares para resolver usuario por `auth_user_id` o por `external_identities`.
 
-15. `src/features/Users/model/types.ts`
+15. `src/modules/users/model/types.ts`
     Extender tipos si se expone metadata de auth en cliente.
 
 #### Server Functions Y Puntos Deuda
 
-16. `src/features/Todos/api/todos.fn.ts`
+16. `src/modules/tasks/api/todos.fn.ts`
     Reemplazar placeholders de usuario fijo por `requireAppAuth()` una vez exista la nueva capa.
 
 ### Archivos A Mantener Temporalmente
@@ -452,23 +446,22 @@ Dependencia: este bloque debe completarse antes de refactorizar rutas y componen
 ### Bloque 4: Providers Y Proteccion De Rutas
 
 1. Modificar `src/shared/providers/index.tsx` para que Clerk sea opcional.
-2. Crear `src/features/Auth/context/AppAuthContext.tsx`.
-3. Crear `src/features/Auth/context/AppAuthProvider.tsx`.
-4. Crear `src/features/Auth/hooks/useAppAuth.ts`.
-5. Mover la proteccion de `src/routes/_dashboard.tsx` a `beforeLoad` con `getAppSession()`.
-6. Simplificar `src/shared/layouts/DashboardLayout/DashboardLayout.tsx` para que deje de depender de Clerk.
+2. Consolidar `src/shared/lib/auth/app-auth.tsx` como provider, contexto y hook unificados.
+3. Mantener `src/shared/providers/index.tsx` envolviendo la app con `AppAuthProvider`.
+4. Mover la proteccion de dashboard a la capa de rutas y layout actual.
+5. Simplificar `src/modules/dashboard/ui/shell/DashboardLayout.tsx` para que deje de depender de Clerk.
 
 Dependencia: este bloque debe completarse antes de cambiar la UI publica y el menu de usuario.
 
 ### Bloque 5: Integracion Con El Usuario De Negocio
 
-1. Refactorizar `src/features/Users/context/UserProvider.tsx` para consumir `AppAuth` y no `useUser()` de Clerk.
-2. Ajustar `src/features/Users/context/UserContext.tsx` si hacen falta nuevos flags o metadata.
-3. Añadir funciones en `src/features/Users/api/users.fn.ts`:
+1. Refactorizar `src/modules/users/context/UserProvider.tsx` para consumir `AppAuth` y no `useUser()` de Clerk.
+2. Ajustar `src/modules/users/context/UserContext.tsx` si hacen falta nuevos flags o metadata.
+3. Añadir funciones en `src/modules/users/api/users.fn.ts`:
    1. resolver usuario por `auth_user_id`
    2. resolver usuario por identidad externa Clerk
    3. crear o enlazar usuario local al primer sign-up/sign-in
-4. Revisar tipado en `src/features/Users/model/types.ts`.
+4. Revisar tipado en `src/modules/users/model/types.ts`.
 
 Dependencia: este bloque debe completarse antes de conectar permisos y acciones de negocio al usuario autenticado real.
 
@@ -477,8 +470,8 @@ Dependencia: este bloque debe completarse antes de conectar permisos y acciones 
 1. Crear pantalla de login propia.
 2. Crear formulario local con Better Auth.
 3. Añadir botones por modo `local`, `clerk` y `hybrid`.
-4. Refactorizar `src/components/composite/Topbar/Topbar.tsx`.
-5. Refactorizar `src/components/nav-user.tsx`.
+4. Refactorizar `src/modules/landing/ui/topbar/Topbar.tsx`.
+5. Refactorizar `src/modules/dashboard/ui/navigation/NavUser.tsx`.
 6. Refactorizar `src/routes/-root-components/RootErrorContent.tsx`.
 
 Dependencia: este bloque debe completarse antes de considerar terminado el cambio de experiencia de usuario.
@@ -486,14 +479,14 @@ Dependencia: este bloque debe completarse antes de considerar terminado el cambi
 ### Bloque 7: Eliminacion De Acoplamiento Directo A Clerk
 
 1. Revisar y reemplazar imports directos de Clerk en todo `src/`.
-2. Refactorizar `src/features/Ai/components/HelpChatPage.tsx`.
+2. Refactorizar `src/modules/ai/components/HelpChatPage.tsx`.
 3. Refactorizar `src/shared/lib/api/interceptors/auth.interceptor.ts` para soportar modo Better Auth o desactivar la logica de token cuando no aplique.
 4. Revisar cualquier otro componente que lea `useUser()`, `useAuth()` o `useClerk()` directamente.
 
 ### Bloque 8: Server Functions Y Seguridad
 
 1. Reemplazar placeholders de auth en server functions por `requireAppAuth()`.
-2. Arreglar `src/features/Todos/api/todos.fn.ts`.
+2. Arreglar `src/modules/tasks/api/todos.fn.ts`.
 3. Revisar otras funciones que hoy asumen usuario hardcodeado o no protegido.
 4. Definir politica de errores: `Unauthorized`, redireccion y fallback de UI.
 

@@ -1,11 +1,11 @@
 import { createFileRoute } from '@tanstack/react-router'
-import type { AiConfigFormData } from '@/ai/config'
+import type { AiConfigFormData } from '@/modules/ai/config'
 import {
   createJsonErrorResponse,
   createJsonResponse,
   getErrorMessage,
   testProviderConnection,
-} from '@/ai/server'
+} from '@/modules/ai/server'
 
 export const Route = createFileRoute('/api/ai/test-connection')({
   component: () => null,

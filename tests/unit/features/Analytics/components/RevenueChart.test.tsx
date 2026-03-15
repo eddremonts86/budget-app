@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, type Mock } from 'vitest'
-import { RevenueChart } from '@/features/Analytics/components/RevenueChart'
+import { RevenueChart } from '@/modules/analytics/components/RevenueChart'
 
 // Mock useQuery
 vi.mock('@tanstack/react-query', async () => {
