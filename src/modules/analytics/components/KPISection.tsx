@@ -92,8 +92,8 @@ export function KPISection() {
 function KPISkeleton() {
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
-      {[1, 2, 3, 4, 5, 6].map((i) => (
-        <Card key={i}>
+      {(['kpi-1', 'kpi-2', 'kpi-3', 'kpi-4', 'kpi-5', 'kpi-6'] as const).map((id) => (
+        <Card key={id}>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <Skeleton className="h-4 w-[100px]" />
             <Skeleton className="h-4 w-4" />

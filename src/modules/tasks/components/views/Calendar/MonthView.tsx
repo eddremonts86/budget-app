@@ -69,12 +69,15 @@ export function MonthView({
           return (
             <div
               key={day.toISOString()}
+              role="button"
+              tabIndex={0}
               className={cn(
                 'relative border-b border-r border-border/40 p-2 transition-colors hover:bg-secondary/5 flex flex-col gap-1 min-h-[80px] group',
                 !isCurrentMonth && 'bg-secondary/5 text-muted-foreground/50',
                 i % 7 === 0 && 'border-l-0', // Remove left border for first col if needed (not needed with grid)
               )}
               onClick={() => onCreateWithDate(day)}
+              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCreateWithDate(day) } }}
             >
               <div className="flex items-center justify-between">
                 <span
@@ -105,10 +108,13 @@ export function MonthView({
                   {dayTodos.map((todo) => (
                     <div
                       key={todo.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={(e) => {
                         e.stopPropagation()
                         onEdit(todo)
                       }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit(todo) } }}
                       className={cn(
                         'px-1.5 py-0.5 text-[10px] rounded-sm truncate cursor-pointer border hover:opacity-80 transition-opacity font-medium',
                         statusColors[todo.status as keyof typeof statusColors] ||

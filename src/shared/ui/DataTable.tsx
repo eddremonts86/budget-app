@@ -19,7 +19,7 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { useDebounce } from '@uidotdev/usehooks'
-import { motion, AnimatePresence } from 'framer-motion'
+import { m, AnimatePresence } from 'framer-motion'
 import {
   ChevronDown,
   ChevronLeft,
@@ -138,12 +138,43 @@ function downloadCsv(fileName: string, csvContent: string) {
   URL.revokeObjectURL(url)
 }
 
+const EMPTY_FILTERS: DataTableFilterConfig[] = []
+const EMPTY_BULK_ACTIONS: never[] = []
+
+function RowCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
+  if (cell.getIsGrouped()) {
+    return (
+      <Button
+        variant="ghost"
+        className="h-auto p-0 font-medium"
+        onClick={cell.row.getToggleExpandedHandler()}
+      >
+        {cell.row.getIsExpanded() ? (
+          <ChevronDown className="mr-2 h-4 w-4" />
+        ) : (
+          <ChevronRight className="mr-2 h-4 w-4" />
+        )}
+        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        <span className="ml-2 text-xs text-muted-foreground">({cell.row.subRows.length})</span>
+      </Button>
+    )
+  }
+  if (cell.getIsAggregated()) {
+    return flexRender(
+      cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell,
+      cell.getContext(),
+    )
+  }
+  if (cell.getIsPlaceholder()) return null
+  return flexRender(cell.column.columnDef.cell, cell.getContext())
+}
+
 export function UnifiedDataTable<TData, TValue>({
   columns,
   data,
   filterColumn,
-  filters = [],
-  bulkActions = [],
+  filters = EMPTY_FILTERS,
+  bulkActions = EMPTY_BULK_ACTIONS,
   children,
   className,
   fullHeight,
@@ -297,35 +328,6 @@ export function UnifiedDataTable<TData, TValue>({
     downloadCsv(exportFileName, [headers.join(','), ...body].join('\n'))
   }, [exportFileName, onExport, selectedRows, table])
 
-  const renderRowCell = React.useCallback((cell: Cell<TData, unknown>) => {
-    if (cell.getIsGrouped()) {
-      return (
-        <Button
-          variant="ghost"
-          className="h-auto p-0 font-medium"
-          onClick={cell.row.getToggleExpandedHandler()}
-        >
-          {cell.row.getIsExpanded() ? (
-            <ChevronDown className="mr-2 h-4 w-4" />
-          ) : (
-            <ChevronRight className="mr-2 h-4 w-4" />
-          )}
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          <span className="ml-2 text-xs text-muted-foreground">({cell.row.subRows.length})</span>
-        </Button>
-      )
-    }
-
-    if (cell.getIsAggregated()) {
-      return flexRender(
-        cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell,
-        cell.getContext(),
-      )
-    }
-
-    if (cell.getIsPlaceholder()) return null
-    return flexRender(cell.column.columnDef.cell, cell.getContext())
-  }, [])
 
   const rowModel = enablePagination ? table.getRowModel() : table.getPrePaginationRowModel()
   const canPaginate =
@@ -536,7 +538,7 @@ export function UnifiedDataTable<TData, TValue>({
                       <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {toHeaderLabel(cell.column.columnDef.header, cell.column.id)}
                       </span>
-                      <div className="text-right text-sm">{renderRowCell(cell)}</div>
+                      <div className="text-right text-sm"><RowCell cell={cell} /></div>
                     </div>
                   ))}
                 </div>
@@ -595,7 +597,7 @@ export function UnifiedDataTable<TData, TValue>({
             <TableBody>
               <AnimatePresence mode="popLayout" initial={false}>
                 {rowModel.rows.map((row, index) => (
-                  <motion.tr
+                  <m.tr
                     key={row.id}
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
@@ -608,10 +610,10 @@ export function UnifiedDataTable<TData, TValue>({
                         key={cell.id}
                         className="py-4 px-6 text-sm border-b border-border/40 align-top"
                       >
-                        {renderRowCell(cell)}
+                        <RowCell cell={cell} />
                       </TableCell>
                     ))}
-                  </motion.tr>
+                  </m.tr>
                 ))}
               </AnimatePresence>
               {children}
@@ -693,7 +695,6 @@ export function DataTable<TData, TValue>({
       columns={columns}
       data={data}
       filterColumn={filterColumn}
-      children={children}
       className={className}
       fullHeight={fullHeight}
       enableSelection={false}
@@ -703,6 +704,8 @@ export function DataTable<TData, TValue>({
       enableColumnVisibility
       filters={[]}
       bulkActions={[]}
-    />
+    >
+      {children}
+    </UnifiedDataTable>
   )
 }

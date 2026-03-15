@@ -14,12 +14,12 @@ export function FooterColumn({ title, links }: FooterColumnProps) {
       <ul className="space-y-2">
         {links.map((link, linkIndex) => (
           <li key={linkIndex}>
-            <a
-              href="#"
+            <button
+              type="button"
               className="text-sm text-muted-foreground transition-colors hover:text-primary"
             >
               {link}
-            </a>
+            </button>
           </li>
         ))}
       </ul>

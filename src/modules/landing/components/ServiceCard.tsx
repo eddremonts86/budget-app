@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import { Badge, Card, Button } from '@/components/ui'
 
@@ -23,9 +23,9 @@ export function ServiceCard({ icon: Icon, title, description, badge, ctaText }: 
       <p className="mb-4 text-muted-foreground">{description}</p>
       <Button variant="ghost" size="sm" className="group/btn">
         {ctaText}
-        <motion.span className="ml-1 inline-block" whileHover={{ x: 5 }}>
+        <m.span className="ml-1 inline-block" whileHover={{ x: 5 }}>
           →
-        </motion.span>
+        </m.span>
       </Button>
     </Card>
   )

@@ -117,8 +117,11 @@ function UserFilter({ users, selectedUsers, onSelectionChange }: UserFilterProps
             filteredUsers.map((user) => (
               <div
                 key={user.id}
+                role="button"
+                tabIndex={0}
                 className="flex items-center space-x-2 rounded-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground cursor-pointer"
                 onClick={() => toggleUser(user.id)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleUser(user.id) } }}
               >
                 <Checkbox
                   checked={selectedUsers.has(user.id)}
@@ -200,8 +203,8 @@ export function UpcomingTodosList() {
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-12 bg-muted rounded animate-pulse" />
+            {(['todo-1', 'todo-2', 'todo-3'] as const).map((id) => (
+              <div key={id} className="h-12 bg-muted rounded animate-pulse" />
             ))}
           </div>
         </CardContent>

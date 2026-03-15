@@ -1,16 +1,13 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Calendar, CheckCircle2 } from 'lucide-react'
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui'
 import { TimelineItem } from './TimelineItem'
 
 export function TimelineBlock() {
   const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
-
   const timelineEvents = [
     {
       year: '2020',
@@ -44,17 +41,10 @@ export function TimelineBlock() {
     },
   ]
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
   return (
     <section className="w-full bg-background px-4 py-16 md:py-24">
       <div className="mx-auto max-w-5xl">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -71,10 +61,10 @@ export function TimelineBlock() {
           <p className="mx-auto max-w-2xl text-base text-muted-foreground md:text-lg">
             {t('home.timeline.description')}
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="relative">
-          <motion.div
+          <m.div
             className="absolute left-4 top-0 h-full w-0.5 bg-gradient-to-b from-primary via-primary/50 to-primary/20 md:left-1/2 md:-translate-x-1/2"
             initial={{ scaleY: 0 }}
             whileInView={{ scaleY: 1 }}
@@ -90,7 +80,7 @@ export function TimelineBlock() {
           </div>
         </div>
 
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -98,14 +88,14 @@ export function TimelineBlock() {
           className="mt-12 text-center md:mt-16"
         >
           <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-6 py-3">
-            <motion.div
+            <m.div
               animate={{ scale: [1, 1.2, 1] }}
               transition={{ duration: 2, repeat: Infinity }}
               className="h-2 w-2 rounded-full bg-primary"
             />
             <span className="text-sm font-medium">{t('home.timeline.footer')}</span>
           </div>
-        </motion.div>
+        </m.div>
       </div>
     </section>
   )

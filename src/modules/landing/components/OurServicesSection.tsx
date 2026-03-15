@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, type Variants } from 'framer-motion'
+import { m, type Variants } from 'framer-motion'
 import { Code, Palette, Smartphone, Search, Rocket, Shield } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui'
@@ -44,7 +44,7 @@ export function OurServicesSection() {
       <div className="absolute left-1/2 top-1/2 -z-10 h-[500px] w-[500px] -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary/5 blur-[100px]" />
 
       <div className="mx-auto max-w-7xl">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: -20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -58,9 +58,9 @@ export function OurServicesSection() {
           <p className="mx-auto max-w-2xl text-lg text-muted-foreground">
             {t('home.services.description')}
           </p>
-        </motion.div>
+        </m.div>
 
-        <motion.div
+        <m.div
           variants={containerVariants}
           initial="hidden"
           whileInView="visible"
@@ -72,7 +72,7 @@ export function OurServicesSection() {
             const badge = t(badgeKey)
             const hasBadge = badge !== badgeKey
             return (
-              <motion.div key={service.id} variants={itemVariants}>
+              <m.div key={service.id} variants={itemVariants}>
                 <ServiceCard
                   icon={service.icon}
                   title={t(`home.services.items.${service.id}.title`)}
@@ -80,10 +80,10 @@ export function OurServicesSection() {
                   badge={hasBadge ? badge : undefined}
                   ctaText={t('home.services.cta')}
                 />
-              </motion.div>
+              </m.div>
             )
           })}
-        </motion.div>
+        </m.div>
       </div>
     </section>
   )

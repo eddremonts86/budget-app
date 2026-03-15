@@ -118,9 +118,8 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="md:col-span-2">
-                  <form.Field
-                    name="avatar"
-                    children={(field) => (
+                  <form.Field name="avatar">
+                    {(field) => (
                       <Field className="space-y-3">
                         <div className="flex items-center gap-2">
                           <FieldLabel htmlFor={field.name}>
@@ -190,12 +189,11 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                         />
                       </Field>
                     )}
-                  />
+                  </form.Field>
                 </div>
 
-                <form.Field
-                  name="name"
-                  children={(field) => (
+                <form.Field name="name">
+                  {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>{t('users.form.nameLabel')}</FieldLabel>
                       <Input
@@ -217,11 +215,10 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       />
                     </Field>
                   )}
-                />
+                </form.Field>
 
-                <form.Field
-                  name="email"
-                  children={(field) => (
+                <form.Field name="email">
+                  {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>{t('users.form.emailLabel')}</FieldLabel>
                       <Input
@@ -244,7 +241,7 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       />
                     </Field>
                   )}
-                />
+                </form.Field>
               </div>
             </div>
 
@@ -266,9 +263,8 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <form.Field
-                  name="roleId"
-                  children={(field) => (
+                <form.Field name="roleId">
+                  {(field) => (
                     <Field>
                       <div className="flex items-center gap-2">
                         <FieldLabel htmlFor={field.name}>{t('users.form.roleLabel')}</FieldLabel>
@@ -304,11 +300,10 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       />
                     </Field>
                   )}
-                />
+                </form.Field>
 
-                <form.Field
-                  name="jobTitleId"
-                  children={(field) => (
+                <form.Field name="jobTitleId">
+                  {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>{t('users.form.jobTitleLabel')}</FieldLabel>
                       <Select
@@ -331,11 +326,10 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       </Select>
                     </Field>
                   )}
-                />
+                </form.Field>
 
-                <form.Field
-                  name="experienceLevelId"
-                  children={(field) => (
+                <form.Field name="experienceLevelId">
+                  {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
                         {t('users.form.experienceLevelLabel')}
@@ -360,7 +354,7 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       </Select>
                     </Field>
                   )}
-                />
+                </form.Field>
               </div>
             </div>
 
@@ -382,9 +376,8 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
               </div>
 
               <div className="space-y-4">
-                <form.Field
-                  name="skills"
-                  children={(field) => (
+                <form.Field name="skills">
+                  {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>{t('users.form.skillsLabel')}</FieldLabel>
                       <Combobox
@@ -411,13 +404,12 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       </Combobox>
                     </Field>
                   )}
-                />
+                </form.Field>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <form.Field
-                  name="departmentId"
-                  children={(field) => (
+                <form.Field name="departmentId">
+                  {(field) => (
                     <Field>
                       <FieldLabel htmlFor={field.name}>
                         {t('users.form.departmentLabel')}
@@ -442,11 +434,10 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       </Select>
                     </Field>
                   )}
-                />
+                </form.Field>
 
-                <form.Field
-                  name="reportsTo"
-                  children={(field) => (
+                <form.Field name="reportsTo">
+                  {(field) => (
                     <Field>
                       <div className="flex items-center gap-2">
                         <FieldLabel htmlFor={field.name}>
@@ -481,7 +472,7 @@ export function UserForm({ defaultValues, onSubmit, onCancel, isLoading }: UserF
                       </Select>
                     </Field>
                   )}
-                />
+                </form.Field>
               </div>
             </div>
 

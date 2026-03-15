@@ -487,7 +487,10 @@ export function AiConfigForm() {
                   return (
                     <div
                       key={provider.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => handleProviderChange(providerId)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleProviderChange(providerId) } }}
                       className={`group relative flex flex-col items-center text-center p-6 rounded-xl border transition-all duration-300 cursor-pointer hover:-translate-y-1 ${
                         isActive
                           ? 'bg-black/80 border-primary shadow-md ring-1 ring-primary/20'
@@ -638,9 +641,8 @@ export function AiConfigForm() {
                   <p className="text-sm text-muted-foreground">{t('settings.ai.description')}</p>
                 </div>
                 <div className="p-6 pt-0 space-y-6">
-                  <form.Field
-                    name="provider"
-                    children={(field) => (
+                  <form.Field name="provider">
+                    {(field) => (
                       <Field>
                         <FieldLabel>{t('settings.ai.fields.provider')}</FieldLabel>
                         <Select value={field.state.value} onValueChange={handleProviderChange}>
@@ -663,7 +665,7 @@ export function AiConfigForm() {
                         </Select>
                       </Field>
                     )}
-                  />
+                  </form.Field>
 
                   <Separator className="opacity-50" />
 
@@ -673,9 +675,8 @@ export function AiConfigForm() {
                       {t('settings.ai.sections.connection')}
                     </div>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-4">
-                      <form.Field
-                        name="baseUrl"
-                        children={(field) => (
+                      <form.Field name="baseUrl">
+                        {(field) => (
                           <Field className="sm:col-span-3">
                             <FieldLabel htmlFor={field.name}>
                               {t('settings.ai.fields.baseUrl')}
@@ -694,11 +695,10 @@ export function AiConfigForm() {
                             />
                           </Field>
                         )}
-                      />
+                      </form.Field>
 
-                      <form.Field
-                        name="port"
-                        children={(field) => (
+                      <form.Field name="port">
+                        {(field) => (
                           <Field>
                             <FieldLabel htmlFor={field.name}>
                               {t('settings.ai.fields.port')}
@@ -718,11 +718,10 @@ export function AiConfigForm() {
                             />
                           </Field>
                         )}
-                      />
+                      </form.Field>
 
-                      <form.Field
-                        name="timeout"
-                        children={(field) => (
+                      <form.Field name="timeout">
+                        {(field) => (
                           <Field>
                             <FieldLabel htmlFor={field.name}>
                               {t('settings.ai.fields.timeout')}
@@ -742,14 +741,13 @@ export function AiConfigForm() {
                             />
                           </Field>
                         )}
-                      />
+                      </form.Field>
 
                       <form.Subscribe selector={(state) => state.values.provider}>
                         {(provider) =>
                           ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? null : (
-                            <form.Field
-                              name="token"
-                              children={(field) => {
+                            <form.Field name="token">
+                              {(field) => {
                                 const tokenPlaceholder =
                                   {
                                     openai: 'sk-proj-...',
@@ -780,7 +778,7 @@ export function AiConfigForm() {
                                   </Field>
                                 )
                               }}
-                            />
+                            </form.Field>
                           )
                         }
                       </form.Subscribe>
@@ -800,9 +798,8 @@ export function AiConfigForm() {
                 </div>
                 <div className="p-6 pt-0">
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <form.Field
-                      name="endpoints.chat"
-                      children={(field) => (
+                    <form.Field name="endpoints.chat">
+                      {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
                             {t('settings.ai.fields.chatEndpoint')}
@@ -821,11 +818,10 @@ export function AiConfigForm() {
                           />
                         </Field>
                       )}
-                    />
+                    </form.Field>
 
-                    <form.Field
-                      name="endpoints.models"
-                      children={(field) => (
+                    <form.Field name="endpoints.models">
+                      {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
                             {t('settings.ai.fields.modelsEndpoint')}
@@ -844,15 +840,14 @@ export function AiConfigForm() {
                           />
                         </Field>
                       )}
-                    />
+                    </form.Field>
 
                     <form.Subscribe selector={(state) => state.values.provider}>
                       {(provider) =>
                         ['lm-studio', 'ollama', 'llama-cpp'].includes(provider) ? (
                           <>
-                            <form.Field
-                              name="endpoints.load"
-                              children={(field) => (
+                            <form.Field name="endpoints.load">
+                              {(field) => (
                                 <Field>
                                   <FieldLabel htmlFor={field.name}>
                                     {t('settings.ai.fields.loadEndpoint')}
@@ -871,10 +866,9 @@ export function AiConfigForm() {
                                   />
                                 </Field>
                               )}
-                            />
-                            <form.Field
-                              name="endpoints.download"
-                              children={(field) => (
+                            </form.Field>
+                            <form.Field name="endpoints.download">
+                              {(field) => (
                                 <Field>
                                   <FieldLabel htmlFor={field.name}>
                                     {t('settings.ai.fields.downloadEndpoint')}
@@ -893,10 +887,9 @@ export function AiConfigForm() {
                                   />
                                 </Field>
                               )}
-                            />
-                            <form.Field
-                              name="endpoints.status"
-                              children={(field) => (
+                            </form.Field>
+                            <form.Field name="endpoints.status">
+                              {(field) => (
                                 <Field className="sm:col-span-2">
                                   <FieldLabel htmlFor={field.name}>
                                     {t('settings.ai.fields.statusEndpoint')}
@@ -915,7 +908,7 @@ export function AiConfigForm() {
                                   />
                                 </Field>
                               )}
-                            />
+                            </form.Field>
                           </>
                         ) : null
                       }
@@ -937,9 +930,8 @@ export function AiConfigForm() {
                   </div>
                 </div>
                 <div className="p-6 pt-0 space-y-4">
-                  <form.Field
-                    name="parameters.model"
-                    children={(field) => (
+                  <form.Field name="parameters.model">
+                    {(field) => (
                       <Field>
                         <FieldLabel htmlFor={field.name}>
                           {t('settings.ai.fields.model')}
@@ -978,12 +970,11 @@ export function AiConfigForm() {
                         />
                       </Field>
                     )}
-                  />
+                  </form.Field>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <form.Field
-                      name="parameters.temperature"
-                      children={(field) => (
+                    <form.Field name="parameters.temperature">
+                      {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
                             {t('settings.ai.fields.temperature')}
@@ -1006,10 +997,9 @@ export function AiConfigForm() {
                           />
                         </Field>
                       )}
-                    />
-                    <form.Field
-                      name="parameters.top_p"
-                      children={(field) => (
+                    </form.Field>
+                    <form.Field name="parameters.top_p">
+                      {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
                             {t('settings.ai.fields.topP')}
@@ -1032,12 +1022,11 @@ export function AiConfigForm() {
                           />
                         </Field>
                       )}
-                    />
+                    </form.Field>
                   </div>
 
-                  <form.Field
-                    name="parameters.max_tokens"
-                    children={(field) => (
+                  <form.Field name="parameters.max_tokens">
+                    {(field) => (
                       <Field>
                         <FieldLabel htmlFor={field.name}>
                           {t('settings.ai.fields.maxTokens')}
@@ -1057,12 +1046,11 @@ export function AiConfigForm() {
                         />
                       </Field>
                     )}
-                  />
+                  </form.Field>
 
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <form.Field
-                      name="parameters.frequency_penalty"
-                      children={(field) => (
+                    <form.Field name="parameters.frequency_penalty">
+                      {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
                             {t('settings.ai.fields.frequencyPenalty')}
@@ -1085,10 +1073,9 @@ export function AiConfigForm() {
                           />
                         </Field>
                       )}
-                    />
-                    <form.Field
-                      name="parameters.presence_penalty"
-                      children={(field) => (
+                    </form.Field>
+                    <form.Field name="parameters.presence_penalty">
+                      {(field) => (
                         <Field>
                           <FieldLabel htmlFor={field.name}>
                             {t('settings.ai.fields.presencePenalty')}
@@ -1111,12 +1098,11 @@ export function AiConfigForm() {
                           />
                         </Field>
                       )}
-                    />
+                    </form.Field>
                   </div>
 
-                  <form.Field
-                    name="additionalParams"
-                    children={(field) => (
+                  <form.Field name="additionalParams">
+                    {(field) => (
                       <Field>
                         <FieldLabel htmlFor={field.name}>
                           {t('settings.ai.fields.additionalParams')}
@@ -1136,7 +1122,7 @@ export function AiConfigForm() {
                         />
                       </Field>
                     )}
-                  />
+                  </form.Field>
 
                   <Separator className="my-2" />
 

@@ -72,7 +72,10 @@ export function AgendaView({ todos, onEdit, statusColors }: AgendaViewProps) {
                   {dayTodos.map((todo) => (
                     <div
                       key={todo.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={() => onEdit(todo)}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit(todo) } }}
                       className="bg-card hover:bg-card/80 transition-colors border border-border/40 rounded-xl p-4 shadow-sm cursor-pointer flex flex-col sm:flex-row gap-4 sm:items-center"
                     >
                       <div className="flex-1 space-y-1">

@@ -125,8 +125,8 @@ export function ExpenseDistributionChart() {
               }
             />
             <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={20}>
-              {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={entry.color} />
+              {chartData.map((entry) => (
+                <Cell key={`cell-${entry.category}`} fill={entry.color} />
               ))}
             </Bar>
           </BarChart>

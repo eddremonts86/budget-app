@@ -171,9 +171,9 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
             </TableHeader>
             <TableBody>
               {sortedLogs.length > 0 ? (
-                sortedLogs.map((log, i) => (
+                sortedLogs.map((log) => (
                   <TableRow
-                    key={i}
+                    key={`${log.timestamp}-${log.providerId}`}
                     className="group border-b last:border-0 hover:bg-muted/30 transition-colors data-[state=selected]:bg-muted"
                   >
                     <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground pl-6">

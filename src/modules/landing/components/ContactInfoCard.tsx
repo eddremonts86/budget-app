@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import type { LucideIcon } from 'lucide-react'
 import { Card } from '@/components/ui'
 
@@ -14,7 +14,7 @@ interface ContactInfoCardProps {
 
 export function ContactInfoCard({ icon: Icon, label, value, href, index }: ContactInfoCardProps) {
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -34,6 +34,6 @@ export function ContactInfoCard({ icon: Icon, label, value, href, index }: Conta
           </div>
         </a>
       </Card>
-    </motion.div>
+    </m.div>
   )
 }

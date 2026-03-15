@@ -1,6 +1,6 @@
 'use client'
 
-import { AnimatePresence, motion } from 'framer-motion'
+import { AnimatePresence, m } from 'framer-motion'
 import { MessageSquarePlus, MessagesSquare, Trash2, X, ShieldAlert, Search } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -141,7 +141,7 @@ export function ConversationPanel({
     <>
       {/* Toggle button (visible when panel is closed) */}
       {!isOpen && (
-        <motion.button
+        <m.button
           initial={{ opacity: 0, x: -10 }}
           animate={{ opacity: 1, x: 0 }}
           onClick={onToggle}
@@ -155,7 +155,7 @@ export function ConversationPanel({
               <span className="relative inline-flex h-3 w-3 rounded-full bg-red-500"></span>
             </span>
           )}
-        </motion.button>
+        </m.button>
       )}
 
       {/* Slide-in panel */}
@@ -163,7 +163,7 @@ export function ConversationPanel({
         {isOpen && (
           <>
             {/* Backdrop for mobile */}
-            <motion.div
+            <m.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
@@ -172,7 +172,7 @@ export function ConversationPanel({
             />
 
             {/* Panel */}
-            <motion.div
+            <m.div
               initial={{ x: -320 }}
               animate={{ x: 0 }}
               exit={{ x: -320 }}
@@ -260,6 +260,8 @@ export function ConversationPanel({
                             {groupItems.map((conv) => (
                               <div
                                 key={conv.id}
+                                role="button"
+                                tabIndex={0}
                                 className={cn(
                                   'group relative flex cursor-pointer items-center gap-3 rounded-lg px-3 py-2.5 transition-all',
                                   activeId === conv.id
@@ -267,6 +269,7 @@ export function ConversationPanel({
                                     : 'hover:bg-black/5 dark:hover:bg-white/5',
                                 )}
                                 onClick={() => onSelect(conv.id)}
+                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(conv.id) } }}
                               >
                                 {/* Chat Icon / Avatar */}
                                 {userRole === 'admin' && activeTab === 'all-chats' ? (
@@ -400,7 +403,7 @@ export function ConversationPanel({
                   </Button>
                 )}
               </div>
-            </motion.div>
+            </m.div>
           </>
         )}
       </AnimatePresence>

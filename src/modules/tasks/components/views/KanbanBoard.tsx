@@ -350,6 +350,12 @@ export function KanbanBoard({
     }),
   )
 
+  const fetchNextPagePending = React.useCallback(() => onFetchNextPage('pending'), [onFetchNextPage])
+  const fetchNextPageInProgress = React.useCallback(() => onFetchNextPage('in_progress'), [onFetchNextPage])
+  const fetchNextPageTesting = React.useCallback(() => onFetchNextPage('testing'), [onFetchNextPage])
+  const fetchNextPageOnHold = React.useCallback(() => onFetchNextPage('on_hold'), [onFetchNextPage])
+  const fetchNextPageCompleted = React.useCallback(() => onFetchNextPage('completed'), [onFetchNextPage])
+
   return (
     <div className="h-full flex gap-4 overflow-x-auto pb-4 snap-x">
       <DndContext
@@ -366,7 +372,7 @@ export function KanbanBoard({
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={() => onFetchNextPage('pending')}
+          onFetchNextPage={fetchNextPagePending}
           hasNextPage={hasNextPage.pending}
           isFetchingNextPage={isFetchingNextPage.pending}
           canModifyTodo={canModifyTodo}
@@ -379,7 +385,7 @@ export function KanbanBoard({
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={() => onFetchNextPage('in_progress')}
+          onFetchNextPage={fetchNextPageInProgress}
           hasNextPage={hasNextPage.in_progress}
           isFetchingNextPage={isFetchingNextPage.in_progress}
           canModifyTodo={canModifyTodo}
@@ -392,7 +398,7 @@ export function KanbanBoard({
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={() => onFetchNextPage('testing')}
+          onFetchNextPage={fetchNextPageTesting}
           hasNextPage={hasNextPage.testing}
           isFetchingNextPage={isFetchingNextPage.testing}
           canModifyTodo={canModifyTodo}
@@ -405,7 +411,7 @@ export function KanbanBoard({
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={() => onFetchNextPage('on_hold')}
+          onFetchNextPage={fetchNextPageOnHold}
           hasNextPage={hasNextPage.on_hold}
           isFetchingNextPage={isFetchingNextPage.on_hold}
           canModifyTodo={canModifyTodo}
@@ -418,7 +424,7 @@ export function KanbanBoard({
           userMap={userMap}
           onEdit={onEdit}
           onDelete={onDelete}
-          onFetchNextPage={() => onFetchNextPage('completed')}
+          onFetchNextPage={fetchNextPageCompleted}
           hasNextPage={hasNextPage.completed}
           isFetchingNextPage={isFetchingNextPage.completed}
           canModifyTodo={canModifyTodo}

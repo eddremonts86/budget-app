@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Trash2, UserPlus } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -46,7 +46,7 @@ export function UsersPage() {
 
   if (isError) {
     return (
-      <motion.div
+      <m.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         className="flex items-center justify-center h-[400px]"
@@ -63,7 +63,7 @@ export function UsersPage() {
             {t('users.error.retry')}
           </Button>
         </div>
-      </motion.div>
+      </m.div>
     )
   }
 

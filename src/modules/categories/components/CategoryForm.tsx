@@ -47,9 +47,8 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
       }}
       className="space-y-4"
     >
-      <form.Field
-        name="name"
-        children={(field) => (
+      <form.Field name="name">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('categories.nameLabel')}</FieldLabel>
             <Input
@@ -64,11 +63,10 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
             />
           </Field>
         )}
-      />
+      </form.Field>
 
-      <form.Field
-        name="color"
-        children={(field) => (
+      <form.Field name="color">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('categories.colorLabel')}</FieldLabel>
             <div className="flex gap-2">
@@ -92,7 +90,7 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
             />
           </Field>
         )}
-      />
+      </form.Field>
 
       <div className="grid grid-cols-2 gap-3 pt-6 border-t border-border/40 mt-4">
         <Button type="button" variant="outline" onClick={onCancel} disabled={isLoading}>

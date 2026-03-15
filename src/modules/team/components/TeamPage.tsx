@@ -133,8 +133,8 @@ export function TeamPage() {
       <div className="space-y-4">
         <Skeleton className="h-8 w-48" />
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-48 rounded-xl" />
+          {(['member-1', 'member-2', 'member-3'] as const).map((id) => (
+            <Skeleton key={id} className="h-48 rounded-xl" />
           ))}
         </div>
       </div>

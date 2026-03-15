@@ -13,9 +13,9 @@ const socialLinks = [
 export function SocialLinks() {
   return (
     <div className="mt-4 flex gap-4 sm:mt-0">
-      {socialLinks.map((social, index) => (
+      {socialLinks.map((social) => (
         <a
-          key={index}
+          key={social.label}
           href={social.href}
           className="text-muted-foreground transition-colors hover:text-primary"
           aria-label={social.label}

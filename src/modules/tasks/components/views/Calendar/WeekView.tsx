@@ -112,12 +112,15 @@ export function WeekView({
                   return (
                     <div
                       key={hour}
+                      role="button"
+                      tabIndex={0}
                       className="h-16 relative hover:bg-secondary/5 transition-colors group/slot"
                       onClick={() => {
                         const dateWithTime = new Date(day)
                         dateWithTime.setHours(hour)
                         onCreateWithDate(dateWithTime)
                       }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); const dateWithTime = new Date(day); dateWithTime.setHours(hour); onCreateWithDate(dateWithTime) } }}
                     >
                       {/* Quick Add Button */}
                       <Button
@@ -133,10 +136,13 @@ export function WeekView({
                           (todo) => (
                             <div
                               key={todo.id}
+                              role="button"
+                              tabIndex={0}
                               onClick={(e) => {
                                 e.stopPropagation()
                                 onEdit(todo)
                               }}
+                              onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit(todo) } }}
                               className={cn(
                                 'px-1.5 py-0.5 text-[10px] rounded-sm truncate cursor-pointer border hover:opacity-80 transition-opacity font-medium shadow-sm',
                                 statusColors[todo.status as keyof typeof statusColors] ||

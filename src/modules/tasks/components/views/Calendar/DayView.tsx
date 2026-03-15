@@ -55,8 +55,11 @@ export function DayView({
             return (
               <div
                 key={hour}
+                role="button"
+                tabIndex={0}
                 className="flex min-h-[80px] group hover:bg-secondary/5 transition-colors relative"
                 onClick={() => onCreateWithDate(dateWithTime)}
+                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onCreateWithDate(dateWithTime) } }}
               >
                 {/* Time Label */}
                 <div className="w-20 py-4 px-3 text-right text-xs text-muted-foreground font-mono border-r border-border/40 shrink-0">
@@ -81,10 +84,13 @@ export function DayView({
                   {hourTodos.map((todo) => (
                     <div
                       key={todo.id}
+                      role="button"
+                      tabIndex={0}
                       onClick={(e) => {
                         e.stopPropagation()
                         onEdit(todo)
                       }}
+                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onEdit(todo) } }}
                       className={cn(
                         'px-3 py-2 text-sm rounded-md border shadow-sm cursor-pointer hover:shadow-md transition-all font-medium flex justify-between items-center',
                         statusColors[todo.status as keyof typeof statusColors] ||

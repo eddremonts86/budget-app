@@ -1,8 +1,7 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { Mail, Phone, MapPin } from 'lucide-react'
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui'
 import { ContactForm } from './ContactForm'
@@ -11,8 +10,6 @@ import { WorkingHoursCard } from './WorkingHoursCard'
 
 export function ContactBlock() {
   const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
-
   const contactInfo = [
     {
       icon: Mail,
@@ -34,19 +31,12 @@ export function ContactBlock() {
     },
   ]
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
   return (
     <section className="relative w-full overflow-hidden bg-background px-4 py-12 sm:py-16 md:py-20 lg:py-24">
       <div className="absolute inset-0 -z-10 h-full w-full bg-white dark:bg-black bg-[linear-gradient(to_right,#8080800a_1px,transparent_1px),linear-gradient(to_bottom,#8080800a_1px,transparent_1px)] bg-[size:14px_24px]"></div>
 
       <div className="mx-auto w-full max-w-6xl">
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
@@ -59,10 +49,10 @@ export function ContactBlock() {
           <p className="mx-auto max-w-2xl px-4 text-base text-muted-foreground sm:text-lg">
             {t('home.contact.description')}
           </p>
-        </motion.div>
+        </m.div>
 
         <div className="grid gap-8 lg:grid-cols-2 lg:gap-12">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, x: -20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
@@ -72,12 +62,12 @@ export function ContactBlock() {
               <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-transparent opacity-50" />
               <ContactForm />
             </Card>
-          </motion.div>
+          </m.div>
 
           <div className="space-y-6 lg:space-y-8">
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
               {contactInfo.map((info, index) => (
-                <ContactInfoCard key={index} {...info} index={index} />
+                <ContactInfoCard key={info.label} {...info} index={index} />
               ))}
             </div>
 

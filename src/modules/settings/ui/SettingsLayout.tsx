@@ -1,6 +1,6 @@
 import { IconAdjustmentsHorizontal, IconRobot } from '@tabler/icons-react'
 import { Link, Outlet } from '@tanstack/react-router'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 
 export function SettingsLayout() {
@@ -11,7 +11,7 @@ export function SettingsLayout() {
   const activeClass = 'bg-muted text-primary dark:bg-muted/50 shadow-sm'
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
@@ -46,6 +46,6 @@ export function SettingsLayout() {
           <Outlet />
         </div>
       </div>
-    </motion.div>
+    </m.div>
   )
 }

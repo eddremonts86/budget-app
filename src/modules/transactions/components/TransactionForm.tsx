@@ -85,9 +85,8 @@ export function TransactionForm({
       }}
       className="space-y-4"
     >
-      <form.Field
-        name="customer.name"
-        children={(field) => (
+      <form.Field name="customer.name">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('transactions.form.customerNameLabel')}</FieldLabel>
             <Input
@@ -102,11 +101,10 @@ export function TransactionForm({
             />
           </Field>
         )}
-      />
+      </form.Field>
 
-      <form.Field
-        name="customer.email"
-        children={(field) => (
+      <form.Field name="customer.email">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>
               {t('transactions.form.customerEmailLabel')}
@@ -124,11 +122,10 @@ export function TransactionForm({
             />
           </Field>
         )}
-      />
+      </form.Field>
 
-      <form.Field
-        name="userId"
-        children={(field) => (
+      <form.Field name="userId">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('transactions.form.userLabel')}</FieldLabel>
             <Select value={field.state.value} onValueChange={field.handleChange}>
@@ -148,11 +145,10 @@ export function TransactionForm({
             />
           </Field>
         )}
-      />
+      </form.Field>
 
-      <form.Field
-        name="projectId"
-        children={(field) => (
+      <form.Field name="projectId">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('transactions.form.projectLabel')}</FieldLabel>
             <Select value={field.state.value} onValueChange={field.handleChange}>
@@ -172,12 +168,11 @@ export function TransactionForm({
             />
           </Field>
         )}
-      />
+      </form.Field>
 
       <div className="grid grid-cols-2 gap-4">
-        <form.Field
-          name="amount"
-          children={(field) => (
+        <form.Field name="amount">
+          {(field) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('transactions.form.amountLabel')}</FieldLabel>
               <Input
@@ -194,11 +189,10 @@ export function TransactionForm({
               />
             </Field>
           )}
-        />
+        </form.Field>
 
-        <form.Field
-          name="date"
-          children={(field) => (
+        <form.Field name="date">
+          {(field) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('transactions.form.dateLabel')}</FieldLabel>
               <Input
@@ -213,12 +207,11 @@ export function TransactionForm({
               />
             </Field>
           )}
-        />
+        </form.Field>
       </div>
 
-      <form.Field
-        name="status"
-        children={(field) => (
+      <form.Field name="status">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('transactions.form.statusLabel')}</FieldLabel>
             <Select
@@ -241,11 +234,10 @@ export function TransactionForm({
             />
           </Field>
         )}
-      />
+      </form.Field>
 
-      <form.Field
-        name="assignedAdminId"
-        children={(field) => (
+      <form.Field name="assignedAdminId">
+        {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>Assigned Admin</FieldLabel>
             <Select value={field.state.value} onValueChange={field.handleChange}>
@@ -265,7 +257,7 @@ export function TransactionForm({
             />
           </Field>
         )}
-      />
+      </form.Field>
 
       <div className="grid grid-cols-2 gap-2 pt-4 border-t border-border/40">
         <Button type="button" variant="outline" onClick={onCancel}>

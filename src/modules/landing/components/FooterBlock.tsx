@@ -1,7 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { useState, useEffect } from 'react'
+import { m } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Badge, Card, Input, Button } from '@/components/ui'
 import { FooterColumn } from './FooterColumn'
@@ -9,8 +8,6 @@ import { SocialLinks } from './SocialLinks'
 
 export function FooterBlock() {
   const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
-
   const footerLinks = [
     {
       title: t('home.footer.links.essence.title'),
@@ -30,18 +27,11 @@ export function FooterBlock() {
     },
   ]
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
   return (
     <footer className="relative w-full overflow-hidden border-t border-border bg-card/90 backdrop-blur-xl">
       <div className="container mx-auto px-4 py-16 sm:px-6 lg:px-8">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-6">
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -73,10 +63,10 @@ export function FooterBlock() {
                 <Button size="sm">{t('home.footer.subscribe.button')}</Button>
               </div>
             </div>
-          </motion.div>
+          </m.div>
 
-          {footerLinks.map((section, index) => (
-            <FooterColumn key={index} title={section.title} links={section.links} />
+          {footerLinks.map((section) => (
+            <FooterColumn key={section.title} title={section.title} links={section.links} />
           ))}
         </div>
 

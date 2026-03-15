@@ -356,14 +356,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                           <ReactMarkdown
                             remarkPlugins={[remarkGfm]}
                             components={{
-                              h1: ({ node: _node, ...props }) => (
-                                <h1 className="text-xl font-bold mt-4 mb-2" {...props} />
+                              h1: ({ node: _node, children, ...props }) => (
+                                <h1 className="text-xl font-bold mt-4 mb-2" {...props}>{children}</h1>
                               ),
-                              h2: ({ node: _node, ...props }) => (
-                                <h2 className="text-lg font-semibold mt-3 mb-2" {...props} />
+                              h2: ({ node: _node, children, ...props }) => (
+                                <h2 className="text-lg font-semibold mt-3 mb-2" {...props}>{children}</h2>
                               ),
-                              h3: ({ node: _node, ...props }) => (
-                                <h3 className="text-base font-medium mt-2 mb-1" {...props} />
+                              h3: ({ node: _node, children, ...props }) => (
+                                <h3 className="text-base font-medium mt-2 mb-1" {...props}>{children}</h3>
                               ),
                               ul: ({ node: _node, ...props }) => (
                                 <ul className="list-disc pl-5 my-2 space-y-1" {...props} />

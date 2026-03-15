@@ -1,14 +1,11 @@
 'use client'
 
 import { Zap, Shield, Sparkles } from 'lucide-react'
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { FeatureCard } from './FeatureCard'
 
 export function FeatureCardsBlock() {
   const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
-
   const features = [
     {
       icon: Zap,
@@ -27,13 +24,6 @@ export function FeatureCardsBlock() {
     },
   ]
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setMounted(true)
-  }, [])
-
-  if (!mounted) return null
-
   return (
     <section className="px-6 py-32">
       <div className="mx-auto max-w-7xl">
@@ -47,9 +37,9 @@ export function FeatureCardsBlock() {
         </div>
 
         <div className="grid gap-8 md:grid-cols-3">
-          {features.map((feature, index) => (
+          {features.map((feature) => (
             <FeatureCard
-              key={index}
+              key={feature.title}
               icon={feature.icon}
               title={feature.title}
               description={feature.description}

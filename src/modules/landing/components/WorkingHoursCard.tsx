@@ -1,6 +1,6 @@
 'use client'
 
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import { useTranslation } from 'react-i18next'
 import { Card } from '@/components/ui'
 
@@ -8,7 +8,7 @@ export function WorkingHoursCard() {
   const { t } = useTranslation()
 
   return (
-    <motion.div
+    <m.div
       initial={{ opacity: 0, y: 20 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true }}
@@ -35,6 +35,6 @@ export function WorkingHoursCard() {
           </div>
         </div>
       </Card>
-    </motion.div>
+    </m.div>
   )
 }

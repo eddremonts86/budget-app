@@ -1,6 +1,6 @@
 'use client'
 
-import { motion, type Variants } from 'framer-motion'
+import { m, type Variants } from 'framer-motion'
 import { ArrowRight, Sparkles } from 'lucide-react'
 import { useRef } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -64,21 +64,21 @@ export function GlowyWavesHero() {
       </div>
 
       <div className="relative z-10 mx-auto flex w-full max-w-6xl flex-col items-center px-6 py-24 text-center md:px-8 lg:px-12">
-        <motion.div
+        <m.div
           variants={containerVariants}
           initial="hidden"
           animate="visible"
           className="w-full"
         >
-          <motion.div
+          <m.div
             variants={itemVariants}
             className="mb-6 inline-flex items-center gap-2 rounded-full border border-border/40 bg-background/60 px-4 py-2 text-xs font-semibold uppercase tracking-[0.25em] text-foreground/70 dark:border-border/60 dark:bg-background/70 dark:text-foreground/80"
           >
             <Sparkles className="h-4 w-4 text-primary" aria-hidden="true" />
             {t('home.hero.badge')}
-          </motion.div>
+          </m.div>
 
-          <motion.h1
+          <m.h1
             variants={itemVariants}
             className="mb-6 text-4xl font-bold tracking-tight text-foreground sm:text-6xl lg:text-7xl"
           >
@@ -87,16 +87,16 @@ export function GlowyWavesHero() {
             <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
               {t('home.hero.titleHighlight')}
             </span>
-          </motion.h1>
+          </m.h1>
 
-          <motion.p
+          <m.p
             variants={itemVariants}
             className="mx-auto mb-10 max-w-2xl text-lg leading-relaxed text-muted-foreground sm:text-xl"
           >
             {t('home.hero.description')}
-          </motion.p>
+          </m.p>
 
-          <motion.div
+          <m.div
             variants={itemVariants}
             className="mb-12 flex flex-col items-center justify-center gap-4 sm:flex-row"
           >
@@ -114,9 +114,9 @@ export function GlowyWavesHero() {
             >
               {t('home.hero.ctaSecondary')}
             </Button>
-          </motion.div>
+          </m.div>
 
-          <motion.ul
+          <m.ul
             variants={itemVariants}
             className="mb-12 flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.2em] text-foreground/70 dark:text-foreground/80"
           >
@@ -128,9 +128,9 @@ export function GlowyWavesHero() {
                 {t(`home.hero.pills.${pill}`)}
               </li>
             ))}
-          </motion.ul>
+          </m.ul>
 
-          <motion.div
+          <m.div
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: '-50px' }}
@@ -138,17 +138,17 @@ export function GlowyWavesHero() {
             className="grid gap-4 rounded-2xl border border-border/30 bg-background/60 p-6 backdrop-blur-sm dark:border-border/60 dark:bg-background/70 sm:grid-cols-3"
           >
             {heroStats.map((stat) => (
-              <motion.div key={stat.id} variants={itemVariants} className="space-y-1">
+              <m.div key={stat.id} variants={itemVariants} className="space-y-1">
                 <div className="text-xs uppercase tracking-[0.3em] text-foreground/50 dark:text-foreground/60">
                   {t(`home.hero.stats.${stat.id}.label`)}
                 </div>
                 <div className="text-3xl font-semibold text-foreground">
                   {t(`home.hero.stats.${stat.id}.value`)}
                 </div>
-              </motion.div>
+              </m.div>
             ))}
-          </motion.div>
-        </motion.div>
+          </m.div>
+        </m.div>
       </div>
     </section>
   )

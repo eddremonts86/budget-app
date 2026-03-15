@@ -1,7 +1,7 @@
 import { useForm, useStore } from '@tanstack/react-form'
 import { format } from 'date-fns'
 import { da, enUS, es } from 'date-fns/locale'
-import { motion } from 'framer-motion'
+import { m } from 'framer-motion'
 import {
   Calendar,
   ChevronDown,
@@ -87,13 +87,15 @@ type TodoFormProps = {
   availableTodos?: Todo[]
 }
 
+const EMPTY_TODOS: Todo[] = []
+
 export function TodoForm({
   defaultValues,
   currentUserId,
   onSubmit,
   onCancel,
   isLoading,
-  availableTodos = [],
+  availableTodos = EMPTY_TODOS,
 }: TodoFormProps) {
   const { t, i18n } = useTranslation()
   const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
@@ -183,7 +185,7 @@ export function TodoForm({
   }
 
   return (
-    <motion.form
+    <m.form
       initial="hidden"
       animate="visible"
       variants={containerVariants}
@@ -202,8 +204,9 @@ export function TodoForm({
             validators={{
               onChange: todoSchema.shape.title,
             }}
-            children={(field) => (
-              <motion.div variants={itemVariants}>
+          >
+            {(field) => (
+              <m.div variants={itemVariants}>
                 <Field className="space-y-2">
                   <FieldLabel
                     htmlFor={field.name}
@@ -235,15 +238,14 @@ export function TodoForm({
                     className="text-xs font-medium"
                   />
                 </Field>
-              </motion.div>
+              </m.div>
             )}
-          />
+          </form.Field>
 
           {/* 2. Description */}
-          <form.Field
-            name="description"
-            children={(field) => (
-              <motion.div variants={itemVariants}>
+          <form.Field name="description">
+            {(field) => (
+              <m.div variants={itemVariants}>
                 <Field className="space-y-2">
                   <FieldLabel
                     htmlFor={field.name}
@@ -270,15 +272,14 @@ export function TodoForm({
                     })}
                   />
                 </Field>
-              </motion.div>
+              </m.div>
             )}
-          />
+          </form.Field>
 
           {/* 3. Acceptance Criteria */}
-          <form.Field
-            name="acceptanceCriteria"
-            children={(field) => (
-              <motion.div variants={itemVariants}>
+          <form.Field name="acceptanceCriteria">
+            {(field) => (
+              <m.div variants={itemVariants}>
                 <Field className="space-y-2">
                   <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                     <Target className="w-3.5 h-3.5" /> {t('todos.form.acceptanceCriteriaLabel')}
@@ -298,15 +299,14 @@ export function TodoForm({
                     })}
                   />
                 </Field>
-              </motion.div>
+              </m.div>
             )}
-          />
+          </form.Field>
 
           {/* 4. Due Date */}
-          <form.Field
-            name="dueDate"
-            children={(field) => (
-              <motion.div variants={itemVariants}>
+          <form.Field name="dueDate">
+            {(field) => (
+              <m.div variants={itemVariants}>
                 <Field className="space-y-2">
                   <FieldLabel
                     htmlFor={field.name}
@@ -413,15 +413,14 @@ export function TodoForm({
                     })}
                   />
                 </Field>
-              </motion.div>
+              </m.div>
             )}
-          />
+          </form.Field>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <form.Field
-              name="projectId"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
+            <form.Field name="projectId">
+              {(field) => (
+                <m.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
@@ -475,14 +474,13 @@ export function TodoForm({
                       })}
                     />
                   </Field>
-                </motion.div>
+                </m.div>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="assignedTo"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
+            <form.Field name="assignedTo">
+              {(field) => (
+                <m.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <UserCircle className="w-3.5 h-3.5" /> {t('todos.form.assignedToLabel')}
@@ -555,17 +553,16 @@ export function TodoForm({
                       })}
                     />
                   </Field>
-                </motion.div>
+                </m.div>
               )}
-            />
+            </form.Field>
           </div>
 
           {/* 6. Status, Priority */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <form.Field
-              name="status"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
+            <form.Field name="status">
+              {(field) => (
+                <m.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <MoreHorizontal className="w-3.5 h-3.5" /> {t('todos.form.statusLabel')}
@@ -612,14 +609,13 @@ export function TodoForm({
                       })}
                     />
                   </Field>
-                </motion.div>
+                </m.div>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="priority"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
+            <form.Field name="priority">
+              {(field) => (
+                <m.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <Flag className="w-3.5 h-3.5" /> {t('todos.form.priorityLabel')}
@@ -662,17 +658,16 @@ export function TodoForm({
                       })}
                     />
                   </Field>
-                </motion.div>
+                </m.div>
               )}
-            />
+            </form.Field>
           </div>
 
           {/* 7. Complexity, Estimated Time, Actual Time */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <form.Field
-              name="complexity"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
+            <form.Field name="complexity">
+              {(field) => (
+                <m.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <Layers className="w-3.5 h-3.5" /> {t('todos.form.complexityLabel')}
@@ -695,14 +690,13 @@ export function TodoForm({
                       })}
                     />
                   </Field>
-                </motion.div>
+                </m.div>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="estimatedTime"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
+            <form.Field name="estimatedTime">
+              {(field) => (
+                <m.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5" /> {t('todos.form.estimatedTimeLabel')}
@@ -724,14 +718,13 @@ export function TodoForm({
                       })}
                     />
                   </Field>
-                </motion.div>
+                </m.div>
               )}
-            />
+            </form.Field>
 
-            <form.Field
-              name="actualTime"
-              children={(field) => (
-                <motion.div variants={itemVariants}>
+            <form.Field name="actualTime">
+              {(field) => (
+                <m.div variants={itemVariants}>
                   <Field className="space-y-2">
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <Clock className="w-3.5 h-3.5" /> {t('todos.form.actualTimeLabel')}
@@ -753,16 +746,15 @@ export function TodoForm({
                       })}
                     />
                   </Field>
-                </motion.div>
+                </m.div>
               )}
-            />
+            </form.Field>
           </div>
 
           {/* 8. Dependencies */}
-          <form.Field
-            name="dependencies"
-            children={(field) => (
-              <motion.div variants={itemVariants}>
+          <form.Field name="dependencies">
+            {(field) => (
+              <m.div variants={itemVariants}>
                 <Field className="space-y-2">
                   <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                     <LayoutList className="w-3.5 h-3.5" /> {t('todos.form.dependenciesLabel')}
@@ -841,13 +833,13 @@ export function TodoForm({
                     })}
                   />
                 </Field>
-              </motion.div>
+              </m.div>
             )}
-          />
+          </form.Field>
         </FieldGroup>
       </div>
 
-      <motion.div
+      <m.div
         variants={itemVariants}
         className="pt-6 border-t border-border/50 mt-auto sticky bottom-0 bg-secondary/30 backdrop-blur-md pb-4 z-10"
       >
@@ -879,7 +871,7 @@ export function TodoForm({
             )}
           </Button>
         </Field>
-      </motion.div>
-    </motion.form>
+      </m.div>
+    </m.form>
   )
 }
