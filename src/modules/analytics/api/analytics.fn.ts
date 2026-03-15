@@ -1,8 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, and, gte, count, sum, sql } from 'drizzle-orm'
 import { z } from 'zod'
-import { getDb } from '@/shared/lib/db'
 import { todos, users, transactions, projects } from '@/shared/lib/db/schema'
+
+async function loadDb() {
+  const { getDb } = await import('@/shared/lib/db')
+  return getDb()
+}
 
 export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
@@ -10,7 +14,7 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const [
         [totalIncome],
@@ -94,7 +98,7 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' })
     const days = data.days
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const now = new Date()
       const startDate = new Date(now)
@@ -184,7 +188,7 @@ export const getTaskCompletionTrendFn = createServerFn({ method: 'GET' })
     const days = data.days
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const now = new Date()
       const startDate = new Date(now)
@@ -251,7 +255,7 @@ export const getProjectPerformanceFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const allProjects = await db.select().from(projects)
 
@@ -387,7 +391,7 @@ export const getTaskDistributionFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const [byStatusRaw, byPriorityRaw] = await Promise.all([
         db

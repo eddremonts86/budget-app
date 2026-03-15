@@ -53,7 +53,8 @@
     "pointTwo": "Skift metode uden at skifte destination.",
     "pointThree": "Log ind og fortsæt direkte med dit arbejde.",
     "backHome": "Tilbage til forsiden",
-    "goDashboard": "Gå til dashboard"
+    "goDashboard": "Gå til dashboard",
+    "sessionVerificationError": "Serveren har endnu ikke bekræftet din session. Prøv igen om et øjeblik."
   },
   "common": {
     "loading": "Indlæser...",

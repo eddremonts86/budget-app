@@ -1,9 +1,10 @@
-import { exec } from 'node:child_process'
-import dns from 'node:dns/promises'
+import { exec as childProcessExec } from 'node:child_process'
+import { lookup } from 'node:dns'
 import os from 'node:os'
-import util from 'node:util'
+import { promisify } from 'node:util'
 
-const execAsync = util.promisify(exec)
+const execAsync = promisify(childProcessExec)
+const lookupAsync = promisify(lookup)
 
 export interface PreFlightStatus {
   gpu: {
@@ -72,14 +73,14 @@ async function checkNetwork(): Promise<PreFlightStatus['network']> {
   let local_dns = false
 
   try {
-    await dns.lookup('google.com')
+    await lookupAsync('google.com')
     internet = true
   } catch {
     // Ignore transient internet lookup failures.
   }
 
   try {
-    await dns.lookup('localhost')
+    await lookupAsync('localhost')
     local_dns = true
   } catch {
     // Ignore transient local DNS lookup failures.

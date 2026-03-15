@@ -1,8 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, count, and } from 'drizzle-orm'
 import { z } from 'zod'
-import { getDb } from '@/shared/lib/db'
 import { todos } from '@/shared/lib/db/schema'
+
+async function loadDb() {
+  const { getDb } = await import('@/shared/lib/db')
+  return getDb()
+}
 // import { requireAuth } from '@/shared/lib/auth/server'
 
 export const todoSchema = z.object({
@@ -41,7 +45,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const { pageParam, limit, status, assignedTo } = data
       const page = pageParam
       const offset = (page - 1) * limit
@@ -147,7 +151,7 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
 
     try {
       if (!id) throw new Error('ID is required')
-      const db = getDb()
+      const db = await loadDb()
       const result = await db.select().from(todos).where(eq(todos.id, id))
       if (!result.length) {
         if (isE2E) {
@@ -217,7 +221,7 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
 
     try {
       if (!projectId) throw new Error('Project ID is required')
-      const db = getDb()
+      const db = await loadDb()
       const result = await db.select().from(todos).where(eq(todos.projectId, projectId))
 
       if (isE2E && result.length === 0) {
@@ -280,7 +284,7 @@ export const createTodoFn = createServerFn({ method: 'POST' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const { syncRagDocument } = await import('@/modules/ai/rag/sync')
 
       const userId = 'user_1' // await requireAuth()
@@ -338,7 +342,7 @@ export const updateTodoFn = createServerFn({ method: 'POST' })
     const { id, data: updateData } = data
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const { syncRagDocument } = await import('@/modules/ai/rag/sync')
 
       const [updatedItem] = await db
@@ -390,7 +394,7 @@ export const deleteTodoFn = createServerFn({ method: 'POST' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const { deleteRagDocument } = await import('@/modules/ai/rag/sync')
       await db.delete(todos).where(eq(todos.id, id))
       await deleteRagDocument('todo', id)

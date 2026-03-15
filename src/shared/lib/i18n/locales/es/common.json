@@ -53,7 +53,8 @@
     "pointTwo": "Cambia de método sin cambiar de destino.",
     "pointThree": "Entra y sigue justo donde tienes que trabajar.",
     "backHome": "Volver al inicio",
-    "goDashboard": "Ir al dashboard"
+    "goDashboard": "Ir al dashboard",
+    "sessionVerificationError": "El servidor aún no confirmó tu sesión. Inténtalo de nuevo en un momento."
   },
   "common": {
     "loading": "Cargando...",

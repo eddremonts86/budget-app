@@ -1,5 +1,5 @@
 import fs from 'node:fs/promises'
-import { resolveAiDataFilePath } from '@/modules/ai/server'
+import { resolveAiDataFilePath } from '@/modules/ai/server/data-paths'
 import { resolveAiConfig } from './resolver'
 import type { AiConfigStore } from './schema'
 

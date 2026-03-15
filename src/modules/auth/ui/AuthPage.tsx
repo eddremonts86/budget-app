@@ -29,6 +29,7 @@ import {
   TabsTrigger,
 } from '@/components/ui'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
+import { ensureAppAuthSession } from '@/shared/lib/auth/app-auth.functions'
 import { authClient } from '@/shared/lib/auth/better-auth-client'
 import {
   getClerkPublishableKey,
@@ -55,11 +56,46 @@ export function AuthPage(): React.JSX.Element {
   })
   const [isPending, startTransition] = React.useTransition()
 
-  React.useEffect(() => {
-    if (auth.isLoaded && auth.isAuthenticated) {
-      void navigate({ to: '/dashboard' })
+  const verifyServerSession = React.useCallback(async () => {
+    for (let attempt = 0; attempt < 4; attempt += 1) {
+      try {
+        await ensureAppAuthSession()
+        return
+      } catch (error) {
+        if (attempt === 3) {
+          throw error
+        }
+
+        await new Promise((resolve) => window.setTimeout(resolve, 150 * (attempt + 1)))
+      }
     }
-  }, [auth.isAuthenticated, auth.isLoaded, navigate])
+  }, [])
+
+  React.useEffect(() => {
+    if (!auth.isLoaded || !auth.isAuthenticated) {
+      return
+    }
+
+    let cancelled = false
+
+    void (async () => {
+      try {
+        await verifyServerSession()
+
+        if (!cancelled) {
+          void navigate({ to: '/dashboard' })
+        }
+      } catch {
+        if (!cancelled) {
+          setFormError(t('auth.sessionVerificationError'))
+        }
+      }
+    })()
+
+    return () => {
+      cancelled = true
+    }
+  }, [auth.isAuthenticated, auth.isLoaded, navigate, t, verifyServerSession])
 
   const localAuthEnabled = isBetterAuthEnabled()
   const clerkAuthEnabled = isClerkEnabled() && !!getClerkPublishableKey()
@@ -89,6 +125,13 @@ export function AuthPage(): React.JSX.Element {
           return
         }
 
+        try {
+          await verifyServerSession()
+        } catch {
+          setFormError(t('auth.sessionVerificationError'))
+          return
+        }
+
         void navigate({ to: '/dashboard' })
       })()
     })
@@ -108,6 +151,13 @@ export function AuthPage(): React.JSX.Element {
 
         if (error) {
           setFormError(error.message ?? t('common.unknownError'))
+          return
+        }
+
+        try {
+          await verifyServerSession()
+        } catch {
+          setFormError(t('auth.sessionVerificationError'))
           return
         }
 

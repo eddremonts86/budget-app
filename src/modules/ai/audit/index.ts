@@ -11,7 +11,7 @@ export async function logAudit(entry: AuditEntry) {
   try {
     const fsModule = 'node:fs/promises'
     const { default: fs } = await import(/* @vite-ignore */ fsModule)
-    const { resolveAiDataFilePath } = await import('@/modules/ai/server')
+    const { resolveAiDataFilePath } = await import('@/modules/ai/server/data-paths')
     const logPath = resolveAiDataFilePath('audit-logs.json')
 
     // Ensure directory exists

@@ -168,14 +168,16 @@ export const Topbar = memo(function Topbar() {
                     <span className="hidden sm:inline max-w-32 truncate">{auth.user.name}</span>
                   </Link>
                 </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="gap-2"
-                  onClick={() => void auth.signOut()}
-                >
-                  {t('nav.signOut', 'Sign out')}
-                </Button>
+                {auth.canSignOut ? (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="gap-2"
+                    onClick={() => void auth.signOut()}
+                  >
+                    {t('nav.signOut', 'Sign out')}
+                  </Button>
+                ) : null}
               </div>
             )}
           </div>

@@ -6,7 +6,7 @@ import { detectBestProvider, probeProvider } from '@/modules/ai/providers'
 import { Route } from '@/routes/api/ai/chat/route'
 
 // Mock dependencies
-vi.mock('@/modules/ai/config', () => ({
+vi.mock('@/modules/ai/config/store', () => ({
   getActiveAiConfig: vi.fn(),
   getAllAiConfigs: vi.fn(),
   validateAiConfig: vi.fn(),
@@ -31,7 +31,9 @@ vi.mock('@/modules/ai/providers', () => ({
   }),
 }))
 vi.mock('@/modules/ai/rag/context', async () => {
-  const actual = await vi.importActual<typeof import('@/modules/ai/rag/context')>('@/modules/ai/rag/context')
+  const actual = await vi.importActual<typeof import('@/modules/ai/rag/context')>(
+    '@/modules/ai/rag/context',
+  )
   return {
     ...actual,
     detectIntent: vi.fn(() => []),

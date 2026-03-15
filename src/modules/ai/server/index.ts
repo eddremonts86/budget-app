@@ -1,4 +1,3 @@
-export { runPreFlightChecks, type PreFlightStatus } from './ai-preflight'
 export { resolveAiDataDir, resolveAiDataFilePath, type AiDataFileName } from './data-paths'
 export { getActiveAiConfig, getAllAiConfigs, validateAiConfig } from '@/modules/ai/config/store'
 export {

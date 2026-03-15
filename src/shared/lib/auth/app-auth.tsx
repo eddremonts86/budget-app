@@ -25,6 +25,7 @@ interface AppAuthContextValue {
   isAuthenticated: boolean
   userId: string | null
   user: AppAuthUser | null
+  canSignOut: boolean
   signOut: () => Promise<void>
 }
 
@@ -88,14 +89,29 @@ function getBypassUser(): AppAuthUser {
 }
 
 function buildAppAuthValue({
+  isHydrated,
   betterAuth,
   clerk,
 }: {
+  isHydrated: boolean
   betterAuth: BetterAuthHookResult
   clerk: ClerkAuthSnapshot | null
 }): AppAuthContextValue {
   const authMode = getAuthMode()
   const isBypassEnabled = isClientAuthBypassEnabled()
+
+  if (!isHydrated && !isBypassEnabled) {
+    return {
+      authMode,
+      provider: null,
+      isLoaded: false,
+      isAuthenticated: false,
+      userId: null,
+      user: null,
+      canSignOut: false,
+      signOut: defaultAsyncNoop,
+    }
+  }
 
   if (isBypassEnabled) {
     const user = getBypassUser()
@@ -107,6 +123,7 @@ function buildAppAuthValue({
       isAuthenticated: true,
       userId: user.id,
       user,
+      canSignOut: false,
       signOut: defaultAsyncNoop,
     }
   }
@@ -121,6 +138,7 @@ function buildAppAuthValue({
       isAuthenticated: true,
       userId: betterAuthUser.id,
       user: betterAuthUser,
+      canSignOut: true,
       signOut: async () => {
         await authClient.signOut()
       },
@@ -135,6 +153,7 @@ function buildAppAuthValue({
       isAuthenticated: true,
       userId: clerk.userId,
       user: clerk.user,
+      canSignOut: true,
       signOut: clerk.signOut,
     }
   }
@@ -149,6 +168,7 @@ function buildAppAuthValue({
     isAuthenticated: false,
     userId: null,
     user: null,
+    canSignOut: false,
     signOut: defaultAsyncNoop,
   }
 }
@@ -162,7 +182,16 @@ function AppAuthContextProvider({
   betterAuth: BetterAuthHookResult
   clerk: ClerkAuthSnapshot | null
 }) {
-  const value = React.useMemo(() => buildAppAuthValue({ betterAuth, clerk }), [betterAuth, clerk])
+  const [isHydrated, setIsHydrated] = React.useState(false)
+
+  React.useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  const value = React.useMemo(
+    () => buildAppAuthValue({ isHydrated, betterAuth, clerk }),
+    [betterAuth, clerk, isHydrated],
+  )
 
   return <AppAuthContext.Provider value={value}>{children}</AppAuthContext.Provider>
 }

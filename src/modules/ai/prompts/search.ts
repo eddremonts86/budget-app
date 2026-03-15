@@ -1,4 +1,4 @@
-import { formatKnowledgeBase } from '@/modules/ai'
+import { formatKnowledgeBase } from '@/modules/ai/api/search.fn'
 import appKnowledge from '@/modules/ai/data/app-knowledge.json'
 
 export function buildSearchSystemPrompt(ragContext = ''): string {

@@ -2,7 +2,7 @@ async function loadNodeModules() {
   const fsModule = 'node:fs/promises'
   const [{ default: fs }, { resolveAiDataFilePath }] = await Promise.all([
     import(/* @vite-ignore */ fsModule),
-    import('@/modules/ai/server'),
+    import('@/modules/ai/server/data-paths'),
   ])
 
   return { fs, resolveAiDataFilePath }

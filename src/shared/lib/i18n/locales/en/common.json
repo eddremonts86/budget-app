@@ -53,7 +53,8 @@
     "pointTwo": "Switch methods without changing your destination.",
     "pointThree": "Sign in and continue right where you need to work.",
     "backHome": "Back to home",
-    "goDashboard": "Go to dashboard"
+    "goDashboard": "Go to dashboard",
+    "sessionVerificationError": "Your sign-in was not confirmed by the server yet. Try again in a moment."
   },
   "common": {
     "loading": "Loading...",

@@ -1,8 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, and, gte, lte, count, sql } from 'drizzle-orm'
 import { z } from 'zod'
-import { getDb } from '@/shared/lib/db'
 import { todos, users, transactions, projects, categories } from '@/shared/lib/db/schema'
+
+async function loadDb() {
+  const { getDb } = await import('@/shared/lib/db')
+  return getDb()
+}
 
 export const getDashboardStatsFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
@@ -10,7 +14,7 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const [[activeProjectsRow], [completedTasksRow], [pendingTasksRow]] = await Promise.all([
         db.select({ count: count() }).from(projects).where(eq(projects.status, 'active')),
@@ -244,7 +248,7 @@ export const getExpenseDistributionFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const results = await db
         .select({
@@ -291,7 +295,7 @@ export const getRecentTransactionsFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const items = await db.select().from(transactions).limit(5).orderBy(desc(transactions.date))
 
       if (isE2E && items.length === 0) {
@@ -335,7 +339,7 @@ export const getUpcomingTodosFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const now = new Date()
       const nextWeek = new Date()
       nextWeek.setDate(now.getDate() + 7)
@@ -395,7 +399,7 @@ export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const allUsers = await db.select().from(users)
       const allTodos = await db.select().from(todos)
 

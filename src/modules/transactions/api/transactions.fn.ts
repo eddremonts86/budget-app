@@ -1,8 +1,12 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { getDb } from '@/shared/lib/db'
 import { transactions } from '@/shared/lib/db/schema'
+
+async function loadDb() {
+  const { getDb } = await import('@/shared/lib/db')
+  return getDb()
+}
 
 export const transactionSchema = z.object({
   customerName: z.string().min(1),
@@ -24,12 +28,17 @@ export const transactionSchema = z.object({
 export type TransactionInput = z.infer<typeof transactionSchema>
 
 export const getTransactionsFn = createServerFn({ method: 'GET' })
-  .inputValidator(z.object({ pageParam: z.number().optional().default(1), limit: z.number().optional().default(10) }))
+  .inputValidator(
+    z.object({
+      pageParam: z.number().optional().default(1),
+      limit: z.number().optional().default(10),
+    }),
+  )
   .handler(async ({ data }) => {
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       const { pageParam, limit } = data
       const page = pageParam
       const offset = (page - 1) * limit
@@ -121,7 +130,7 @@ export const getTransactionByIdFn = createServerFn({ method: 'GET' })
 
     try {
       if (!id) throw new Error('ID is required')
-      const db = getDb()
+      const db = await loadDb()
       const result = await db.select().from(transactions).where(eq(transactions.id, id))
       if (!result.length) {
         if (isE2E) {
@@ -188,7 +197,7 @@ export const createTransactionFn = createServerFn({ method: 'POST' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       const [newItem] = await db
         .insert(transactions)
@@ -241,7 +250,7 @@ export const updateTransactionFn = createServerFn({ method: 'POST' })
     const { id, data: updateData } = data
 
     try {
-      const db = getDb()
+      const db = await loadDb()
 
       // Handle specific fields if needed
       const updatePayload: Record<string, unknown> = { ...updateData }
@@ -286,7 +295,7 @@ export const deleteTransactionFn = createServerFn({ method: 'POST' })
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
-      const db = getDb()
+      const db = await loadDb()
       await db.delete(transactions).where(eq(transactions.id, id))
       return { success: true }
     } catch (error) {

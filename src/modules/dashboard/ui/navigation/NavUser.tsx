@@ -95,11 +95,15 @@ export function NavUser() {
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={() => void auth.signOut()}>
-              <IconLogout />
-              Log out
-            </DropdownMenuItem>
+            {auth.canSignOut ? (
+              <>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => void auth.signOut()}>
+                  <IconLogout />
+                  Log out
+                </DropdownMenuItem>
+              </>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
       </SidebarMenuItem>

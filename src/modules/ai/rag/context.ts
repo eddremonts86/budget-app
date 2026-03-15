@@ -328,7 +328,7 @@ interface AppKnowledge {
 let cachedKnowledge: AppKnowledge | null = null
 
 async function resolveKnowledgePath() {
-  const { resolveAiDataFilePath } = await import('@/modules/ai/server')
+  const { resolveAiDataFilePath } = await import('@/modules/ai/server/data-paths')
   return resolveAiDataFilePath('app-knowledge.json')
 }
 
