@@ -13,6 +13,8 @@ import { Route as AuthRouteRouteImport } from './routes/auth/route'
 import { Route as LandingRouteRouteImport } from './routes/_landing/route'
 import { Route as DashboardRouteRouteImport } from './routes/_dashboard/route'
 import { Route as LandingIndexRouteImport } from './routes/_landing/index'
+import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
+import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as DashboardDashboardRouteRouteImport } from './routes/_dashboard/dashboard/route'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
@@ -54,6 +56,16 @@ const LandingIndexRoute = LandingIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LandingRouteRoute,
+} as any)
+const AuthSignUpRoute = AuthSignUpRouteImport.update({
+  id: '/sign-up',
+  path: '/sign-up',
+  getParentRoute: () => AuthRouteRoute,
+} as any)
+const AuthSignInRoute = AuthSignInRouteImport.update({
+  id: '/sign-in',
+  path: '/sign-in',
+  getParentRoute: () => AuthRouteRoute,
 } as any)
 const DashboardDashboardRouteRoute = DashboardDashboardRouteRouteImport.update({
   id: '/dashboard',
@@ -181,8 +193,10 @@ const DashboardDashboardSettingsIa_configRoute =
 
 export interface FileRoutesByFullPath {
   '/': typeof LandingIndexRoute
-  '/auth': typeof AuthRouteRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/dashboard': typeof DashboardDashboardRouteRouteWithChildren
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/dashboard/settings': typeof DashboardDashboardSettingsRouteRouteWithChildren
   '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
   '/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
@@ -208,7 +222,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof LandingIndexRoute
-  '/auth': typeof AuthRouteRoute
+  '/auth': typeof AuthRouteRouteWithChildren
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
   '/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
   '/dashboard/categories': typeof DashboardDashboardCategoriesRoute
@@ -235,8 +251,10 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/_dashboard': typeof DashboardRouteRouteWithChildren
   '/_landing': typeof LandingRouteRouteWithChildren
-  '/auth': typeof AuthRouteRoute
+  '/auth': typeof AuthRouteRouteWithChildren
   '/_dashboard/dashboard': typeof DashboardDashboardRouteRouteWithChildren
+  '/auth/sign-in': typeof AuthSignInRoute
+  '/auth/sign-up': typeof AuthSignUpRoute
   '/_landing/': typeof LandingIndexRoute
   '/_dashboard/dashboard/settings': typeof DashboardDashboardSettingsRouteRouteWithChildren
   '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
@@ -267,6 +285,8 @@ export interface FileRouteTypes {
     | '/'
     | '/auth'
     | '/dashboard'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/dashboard/settings'
     | '/api/ai/chat'
     | '/dashboard/analytics'
@@ -293,6 +313,8 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/auth'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/api/ai/chat'
     | '/dashboard/analytics'
     | '/dashboard/categories'
@@ -320,6 +342,8 @@ export interface FileRouteTypes {
     | '/_landing'
     | '/auth'
     | '/_dashboard/dashboard'
+    | '/auth/sign-in'
+    | '/auth/sign-up'
     | '/_landing/'
     | '/_dashboard/dashboard/settings'
     | '/api/ai/chat'
@@ -348,7 +372,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   LandingRouteRoute: typeof LandingRouteRouteWithChildren
-  AuthRouteRoute: typeof AuthRouteRoute
+  AuthRouteRoute: typeof AuthRouteRouteWithChildren
   ApiAiChatRouteRoute: typeof ApiAiChatRouteRouteWithChildren
   ApiAiAuditRoute: typeof ApiAiAuditRoute
   ApiAiConfigStoreRoute: typeof ApiAiConfigStoreRoute
@@ -388,6 +412,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof LandingIndexRouteImport
       parentRoute: typeof LandingRouteRoute
+    }
+    '/auth/sign-up': {
+      id: '/auth/sign-up'
+      path: '/sign-up'
+      fullPath: '/auth/sign-up'
+      preLoaderRoute: typeof AuthSignUpRouteImport
+      parentRoute: typeof AuthRouteRoute
+    }
+    '/auth/sign-in': {
+      id: '/auth/sign-in'
+      path: '/sign-in'
+      fullPath: '/auth/sign-in'
+      preLoaderRoute: typeof AuthSignInRouteImport
+      parentRoute: typeof AuthRouteRoute
     }
     '/_dashboard/dashboard': {
       id: '/_dashboard/dashboard'
@@ -630,6 +668,20 @@ const LandingRouteRouteWithChildren = LandingRouteRoute._addFileChildren(
   LandingRouteRouteChildren,
 )
 
+interface AuthRouteRouteChildren {
+  AuthSignInRoute: typeof AuthSignInRoute
+  AuthSignUpRoute: typeof AuthSignUpRoute
+}
+
+const AuthRouteRouteChildren: AuthRouteRouteChildren = {
+  AuthSignInRoute: AuthSignInRoute,
+  AuthSignUpRoute: AuthSignUpRoute,
+}
+
+const AuthRouteRouteWithChildren = AuthRouteRoute._addFileChildren(
+  AuthRouteRouteChildren,
+)
+
 interface ApiAiChatRouteRouteChildren {
   ApiAiChatCompletionsRoute: typeof ApiAiChatCompletionsRoute
 }
@@ -645,7 +697,7 @@ const ApiAiChatRouteRouteWithChildren = ApiAiChatRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   LandingRouteRoute: LandingRouteRouteWithChildren,
-  AuthRouteRoute: AuthRouteRoute,
+  AuthRouteRoute: AuthRouteRouteWithChildren,
   ApiAiChatRouteRoute: ApiAiChatRouteRouteWithChildren,
   ApiAiAuditRoute: ApiAiAuditRoute,
   ApiAiConfigStoreRoute: ApiAiConfigStoreRoute,

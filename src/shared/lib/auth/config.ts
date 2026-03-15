@@ -47,7 +47,11 @@ export function isClerkEnabled() {
 }
 
 export function getBetterAuthUrl() {
-  return readEnvValue('BETTER_AUTH_URL') ?? DEFAULT_BETTER_AUTH_URL
+  return (
+    readEnvValue('BETTER_AUTH_URL') ??
+    readEnvValue('VITE_BETTER_AUTH_URL') ??
+    DEFAULT_BETTER_AUTH_URL
+  )
 }
 
 export function getBetterAuthSecret() {

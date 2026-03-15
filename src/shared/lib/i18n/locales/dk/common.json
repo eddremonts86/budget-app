@@ -31,6 +31,7 @@
     "nameLabel": "Fuldt navn",
     "emailPlaceholder": "dig@firma.dk",
     "passwordPlaceholder": "Din adgangskode",
+    "passwordRequirementHint": "Brug mindst {{min}} tegn med bogstaver, tal og et symbol.",
     "namePlaceholder": "Ada Lovelace",
     "signInAction": "Gå til workspace",
     "signUpAction": "Opret konto",
@@ -54,7 +55,9 @@
     "pointThree": "Log ind og fortsæt direkte med dit arbejde.",
     "backHome": "Tilbage til forsiden",
     "goDashboard": "Gå til dashboard",
-    "sessionVerificationError": "Serveren har endnu ikke bekræftet din session. Prøv igen om et øjeblik."
+    "sessionVerificationError": "Serveren har endnu ikke bekræftet din session. Prøv igen om et øjeblik.",
+    "nameRequiredError": "Indtast dit fulde navn for at oprette en konto.",
+    "passwordWeakError": "Brug mindst {{min}} tegn med bogstaver, tal og et symbol."
   },
   "common": {
     "loading": "Indlæser...",

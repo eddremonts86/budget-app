@@ -1,5 +1,5 @@
 import { SignInButton } from '@clerk/tanstack-react-start'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link, useLocation, useNavigate } from '@tanstack/react-router'
 import { LazyMotion, domAnimation, m } from 'framer-motion'
 import {
   ArrowLeft,
@@ -23,10 +23,6 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
 } from '@/components/ui'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { ensureAppAuthSession } from '@/shared/lib/auth/app-auth.functions'
@@ -36,15 +32,85 @@ import {
   isBetterAuthEnabled,
   isClerkEnabled,
 } from '@/shared/lib/auth/config'
+import {
+  AUTH_SIGN_UP_NAME_HTML_PATTERN,
+  AUTH_SIGN_UP_PASSWORD_HTML_PATTERN,
+  AUTH_SIGN_UP_MIN_PASSWORD_LENGTH,
+  type SignUpValidationErrorCode,
+} from '@/shared/lib/auth/sign-up-validation'
 import { AuthField } from './components/AuthField'
 import { InsightCard } from './components/InsightCard'
+
+type AuthTab = 'sign-in' | 'sign-up'
+
+function readSearchParams(searchStr: string) {
+  const normalizedSearch = searchStr.startsWith('?') ? searchStr.slice(1) : searchStr
+  return new URLSearchParams(normalizedSearch)
+}
+
+function getRequestedAuthTab(searchStr: string): AuthTab | null {
+  const requestedTab = readSearchParams(searchStr).get('tab')
+
+  if (requestedTab === 'sign-in' || requestedTab === 'sign-up') {
+    return requestedTab
+  }
+
+  return null
+}
+
+function getRequestedAuthError(searchStr: string, translate: (key: string) => string): string | null {
+  const searchParams = readSearchParams(searchStr)
+  const errorCode = searchParams.get('errorCode')
+  const errorMessage = searchParams.get('errorMessage')
+
+  if (errorCode === 'AUTH_NAME_REQUIRED' || errorCode === 'AUTH_PASSWORD_TOO_WEAK') {
+    return getLocalizedSignUpValidationMessage(errorCode, translate)
+  }
+
+  if (typeof errorMessage === 'string' && errorMessage.length > 0) {
+    return errorMessage
+  }
+
+  return null
+}
+
+function getLocalizedSignUpValidationMessage(
+  code: SignUpValidationErrorCode,
+  translate: (key: string) => string,
+): string {
+  switch (code) {
+    case 'AUTH_NAME_REQUIRED':
+      return translate('auth.nameRequiredError')
+    case 'AUTH_PASSWORD_TOO_WEAK':
+      return translate('auth.passwordWeakError').replace(
+        '{{min}}',
+        String(AUTH_SIGN_UP_MIN_PASSWORD_LENGTH),
+      )
+  }
+}
+
+function getAuthErrorMessage(error: unknown, translate: (key: string) => string): string {
+  if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'string') {
+    if (error.code === 'AUTH_NAME_REQUIRED' || error.code === 'AUTH_PASSWORD_TOO_WEAK') {
+      return getLocalizedSignUpValidationMessage(error.code, translate)
+    }
+  }
+
+  if (error && typeof error === 'object' && 'message' in error && typeof error.message === 'string') {
+    return error.message
+  }
+
+  return translate('common.unknownError')
+}
 
 export function AuthPage(): React.JSX.Element {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const searchStr = useLocation({ select: (location) => location.searchStr })
   const auth = useAppAuth()
-  const [activeTab, setActiveTab] = React.useState<'sign-in' | 'sign-up'>('sign-in')
-  const [formError, setFormError] = React.useState<string | null>(null)
+  const activeTab = getRequestedAuthTab(searchStr) ?? 'sign-in'
+  const requestedFormError = getRequestedAuthError(searchStr, t)
+  const [runtimeFormError, setRuntimeFormError] = React.useState<string | null>(null)
   const [signInValues, setSignInValues] = React.useState({
     email: '',
     password: '',
@@ -54,7 +120,7 @@ export function AuthPage(): React.JSX.Element {
     email: '',
     password: '',
   })
-  const [isPending, startTransition] = React.useTransition()
+  const formError = runtimeFormError ?? requestedFormError
 
   const verifyServerSession = React.useCallback(async () => {
     for (let attempt = 0; attempt < 4; attempt += 1) {
@@ -72,6 +138,10 @@ export function AuthPage(): React.JSX.Element {
   }, [])
 
   React.useEffect(() => {
+    setRuntimeFormError(null)
+  }, [searchStr])
+
+  React.useEffect(() => {
     if (!auth.isLoaded || !auth.isAuthenticated) {
       return
     }
@@ -87,7 +157,7 @@ export function AuthPage(): React.JSX.Element {
         }
       } catch {
         if (!cancelled) {
-          setFormError(t('auth.sessionVerificationError'))
+          setRuntimeFormError(t('auth.sessionVerificationError'))
         }
       }
     })()
@@ -107,63 +177,6 @@ export function AuthPage(): React.JSX.Element {
     backgroundImage:
       'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
     backgroundSize: '32px 32px',
-  }
-
-  const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setFormError(null)
-
-    startTransition(() => {
-      void (async () => {
-        const { error } = await authClient.signIn.email({
-          email: signInValues.email,
-          password: signInValues.password,
-        })
-
-        if (error) {
-          setFormError(error.message ?? t('common.unknownError'))
-          return
-        }
-
-        try {
-          await verifyServerSession()
-        } catch {
-          setFormError(t('auth.sessionVerificationError'))
-          return
-        }
-
-        void navigate({ to: '/dashboard' })
-      })()
-    })
-  }
-
-  const handleSignUp = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setFormError(null)
-
-    startTransition(() => {
-      void (async () => {
-        const { error } = await authClient.signUp.email({
-          name: signUpValues.name,
-          email: signUpValues.email,
-          password: signUpValues.password,
-        })
-
-        if (error) {
-          setFormError(error.message ?? t('common.unknownError'))
-          return
-        }
-
-        try {
-          await verifyServerSession()
-        } catch {
-          setFormError(t('auth.sessionVerificationError'))
-          return
-        }
-
-        void navigate({ to: '/dashboard' })
-      })()
-    })
   }
 
   return (
@@ -267,40 +280,59 @@ export function AuthPage(): React.JSX.Element {
                           <span className="text-muted-foreground">{t('auth.signInHint')}</span>
                         </div>
 
-                        <Tabs
-                          value={activeTab}
-                          onValueChange={(value) => setActiveTab(value as 'sign-in' | 'sign-up')}
-                          className="space-y-6"
-                        >
-                          <TabsList className="grid w-full grid-cols-2 rounded-2xl border border-border/50 bg-muted/40 p-1">
-                            <TabsTrigger
-                              value="sign-in"
-                              className="rounded-xl data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_10px_30px_rgba(255,255,255,0.08)]"
+                        <div className="space-y-6">
+                          <div
+                            role="tablist"
+                            aria-label={t('auth.localPanelTitle')}
+                            className="grid w-full grid-cols-2 rounded-2xl border border-border/50 bg-muted/40 p-1"
+                          >
+                            <a
+                              href="/auth"
+                              role="tab"
+                              id="auth-tab-sign-in"
+                              aria-controls="auth-panel-sign-in"
+                              aria-selected={activeTab === 'sign-in'}
+                              data-state={activeTab === 'sign-in' ? 'active' : 'inactive'}
+                              data-testid="auth-tab-sign-in"
+                              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-transparent px-2 py-1 text-sm font-medium text-foreground/60 transition-all hover:text-foreground data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-[0_10px_30px_rgba(255,255,255,0.08)]"
                             >
                               <LogIn className="h-4 w-4" />
                               {t('auth.signInTab')}
-                            </TabsTrigger>
-                            <TabsTrigger
-                              value="sign-up"
-                              className="rounded-xl text-muted-foreground data-[state=active]:bg-background/80 data-[state=active]:text-foreground"
+                            </a>
+                            <a
+                              href="/auth?tab=sign-up"
+                              role="tab"
+                              id="auth-tab-sign-up"
+                              aria-controls="auth-panel-sign-up"
+                              aria-selected={activeTab === 'sign-up'}
+                              data-state={activeTab === 'sign-up' ? 'active' : 'inactive'}
+                              data-testid="auth-tab-sign-up"
+                              className="inline-flex items-center justify-center gap-1.5 rounded-xl border border-transparent px-2 py-1 text-sm font-medium text-muted-foreground transition-all hover:text-foreground data-[state=active]:bg-background/80 data-[state=active]:text-foreground"
                             >
                               <UserPlus className="h-4 w-4" />
                               {t('auth.signUpTab')}
-                            </TabsTrigger>
-                          </TabsList>
+                            </a>
+                          </div>
 
                           {formError && (
-                            <div className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3 text-sm text-destructive">
+                            <div
+                              data-testid="auth-form-error"
+                              className="rounded-2xl border border-destructive/20 bg-destructive/8 px-4 py-3 text-sm text-destructive"
+                            >
                               {formError}
                             </div>
                           )}
 
-                          <TabsContent value="sign-in" className="mt-0">
-                            <form className="space-y-4" onSubmit={handleSignIn}>
+                          {activeTab === 'sign-in' ? (
+                            <div role="tabpanel" id="auth-panel-sign-in" aria-labelledby="auth-tab-sign-in">
+                            <form className="space-y-4" action="/auth/sign-in" method="post">
                               <AuthField
+                                autoComplete="email"
                                 id="sign-in-email"
                                 label={t('auth.emailLabel')}
+                                name="email"
                                 placeholder={t('auth.emailPlaceholder')}
+                                testId="auth-input-sign-in-email"
                                 type="email"
                                 value={signInValues.email}
                                 onChange={(value) =>
@@ -308,9 +340,12 @@ export function AuthPage(): React.JSX.Element {
                                 }
                               />
                               <AuthField
+                                autoComplete="current-password"
                                 id="sign-in-password"
                                 label={t('auth.passwordLabel')}
+                                name="password"
                                 placeholder={t('auth.passwordPlaceholder')}
+                                testId="auth-input-sign-in-password"
                                 type="password"
                                 value={signInValues.password}
                                 onChange={(value) =>
@@ -320,30 +355,39 @@ export function AuthPage(): React.JSX.Element {
 
                               <Button
                                 type="submit"
+                                data-testid="auth-submit-sign-in"
                                 className="h-12 w-full rounded-xl bg-primary text-primary-foreground shadow-[0_18px_40px_rgba(255,255,255,0.14)] transition-all duration-300 hover:-translate-y-0.5 hover:bg-primary/95 hover:shadow-[0_22px_50px_rgba(255,255,255,0.18)]"
-                                disabled={isPending}
                               >
                                 <LogIn className="h-4 w-4" />
-                                {isPending ? t('auth.submitting') : t('auth.signInAction')}
+                                {t('auth.signInAction')}
                               </Button>
                             </form>
-                          </TabsContent>
+                            </div>
+                          ) : null}
 
-                          <TabsContent value="sign-up" className="mt-0">
-                            <form className="space-y-4" onSubmit={handleSignUp}>
+                          {activeTab === 'sign-up' ? (
+                            <div role="tabpanel" id="auth-panel-sign-up" aria-labelledby="auth-tab-sign-up">
+                            <form className="space-y-4" action="/auth/sign-up" method="post">
                               <AuthField
+                                autoComplete="name"
                                 id="sign-up-name"
                                 label={t('auth.nameLabel')}
+                                name="name"
+                                pattern={AUTH_SIGN_UP_NAME_HTML_PATTERN}
                                 placeholder={t('auth.namePlaceholder')}
+                                testId="auth-input-sign-up-name"
                                 value={signUpValues.name}
                                 onChange={(value) =>
                                   setSignUpValues((current) => ({ ...current, name: value }))
                                 }
                               />
                               <AuthField
+                                autoComplete="email"
                                 id="sign-up-email"
                                 label={t('auth.emailLabel')}
+                                name="email"
                                 placeholder={t('auth.emailPlaceholder')}
+                                testId="auth-input-sign-up-email"
                                 type="email"
                                 value={signUpValues.email}
                                 onChange={(value) =>
@@ -351,28 +395,40 @@ export function AuthPage(): React.JSX.Element {
                                 }
                               />
                               <AuthField
+                                autoComplete="new-password"
                                 id="sign-up-password"
                                 label={t('auth.passwordLabel')}
+                                minLength={AUTH_SIGN_UP_MIN_PASSWORD_LENGTH}
+                                name="password"
+                                pattern={AUTH_SIGN_UP_PASSWORD_HTML_PATTERN}
                                 placeholder={t('auth.passwordPlaceholder')}
+                                testId="auth-input-sign-up-password"
                                 type="password"
                                 value={signUpValues.password}
                                 onChange={(value) =>
                                   setSignUpValues((current) => ({ ...current, password: value }))
                                 }
                               />
+                              <p className="text-sm text-muted-foreground">
+                                {t('auth.passwordRequirementHint').replace(
+                                  '{{min}}',
+                                  String(AUTH_SIGN_UP_MIN_PASSWORD_LENGTH),
+                                )}
+                              </p>
 
                               <Button
                                 type="submit"
                                 variant="secondary"
+                                data-testid="auth-submit-sign-up"
                                 className="h-11 w-full rounded-xl border border-border/60 bg-secondary/70 text-secondary-foreground transition-colors hover:bg-secondary"
-                                disabled={isPending}
                               >
                                 <UserPlus className="h-4 w-4" />
-                                {isPending ? t('auth.submitting') : t('auth.signUpAction')}
+                                {t('auth.signUpAction')}
                               </Button>
                             </form>
-                          </TabsContent>
-                        </Tabs>
+                            </div>
+                          ) : null}
+                        </div>
                       </>
                     )}
                   </CardContent>

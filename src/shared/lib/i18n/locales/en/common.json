@@ -31,6 +31,7 @@
     "nameLabel": "Full name",
     "emailPlaceholder": "you@company.com",
     "passwordPlaceholder": "Your password",
+    "passwordRequirementHint": "Use at least {{min}} characters with letters, numbers, and a symbol.",
     "namePlaceholder": "Ada Lovelace",
     "signInAction": "Enter workspace",
     "signUpAction": "Create account",
@@ -54,7 +55,9 @@
     "pointThree": "Sign in and continue right where you need to work.",
     "backHome": "Back to home",
     "goDashboard": "Go to dashboard",
-    "sessionVerificationError": "Your sign-in was not confirmed by the server yet. Try again in a moment."
+    "sessionVerificationError": "Your sign-in was not confirmed by the server yet. Try again in a moment.",
+    "nameRequiredError": "Enter your full name to create an account.",
+    "passwordWeakError": "Use at least {{min}} characters with letters, numbers, and a symbol."
   },
   "common": {
     "loading": "Loading...",

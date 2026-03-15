@@ -8,6 +8,7 @@ import { defineConfig } from 'vite'
 import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST
+const isViteDevtoolsDisabled = process.env.DISABLE_TANSTACK_VITE_DEVTOOLS === 'true'
 
 const config = defineConfig((configEnv) => {
   const shouldStubDbForClientBuild = configEnv.command === 'build' && !configEnv.isSsrBuild
@@ -92,7 +93,7 @@ const config = defineConfig((configEnv) => {
       ],
     },
     plugins: [
-      devtools(),
+      !isViteDevtoolsDisabled && devtools(),
       tailwindcss(),
       viteTsConfigPaths({
         projects: ['./tsconfig.json'],

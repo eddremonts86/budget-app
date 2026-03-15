@@ -150,7 +150,7 @@ export const Topbar = memo(function Topbar() {
 
             {!auth.isAuthenticated && hasUnifiedAuthEntry && (
               <Button variant="ghost" size="sm" className="gap-2" asChild>
-                <Link to="/auth">
+                <Link to="/auth" data-testid="topbar-auth-link">
                   <LogIn className="h-4 w-4" />
                   {t('auth.topbarCta', 'Access workspace')}
                 </Link>

@@ -31,6 +31,7 @@
     "nameLabel": "Nombre completo",
     "emailPlaceholder": "tu@empresa.com",
     "passwordPlaceholder": "Tu contraseña",
+    "passwordRequirementHint": "Usa al menos {{min}} caracteres con letras, números y un símbolo.",
     "namePlaceholder": "Ada Lovelace",
     "signInAction": "Entrar al espacio",
     "signUpAction": "Crear cuenta",
@@ -54,7 +55,9 @@
     "pointThree": "Entra y sigue justo donde tienes que trabajar.",
     "backHome": "Volver al inicio",
     "goDashboard": "Ir al dashboard",
-    "sessionVerificationError": "El servidor aún no confirmó tu sesión. Inténtalo de nuevo en un momento."
+    "sessionVerificationError": "El servidor aún no confirmó tu sesión. Inténtalo de nuevo en un momento.",
+    "nameRequiredError": "Escribe tu nombre completo para crear una cuenta.",
+    "passwordWeakError": "Usa al menos {{min}} caracteres con letras, números y un símbolo."
   },
   "common": {
     "loading": "Cargando...",

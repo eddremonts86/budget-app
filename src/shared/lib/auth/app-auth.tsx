@@ -60,6 +60,14 @@ const AppAuthContext = React.createContext<AppAuthContextValue | undefined>(unde
 
 const defaultAsyncNoop = async () => {}
 
+function redirectToHomeAfterSignOut() {
+  if (typeof window === 'undefined') {
+    return
+  }
+
+  window.location.replace('/')
+}
+
 function getBetterAuthUser(session: BetterAuthSessionShape | null | undefined): AppAuthUser | null {
   const user = session?.user
 
@@ -141,6 +149,7 @@ function buildAppAuthValue({
       canSignOut: true,
       signOut: async () => {
         await authClient.signOut()
+        redirectToHomeAfterSignOut()
       },
     }
   }
@@ -154,7 +163,10 @@ function buildAppAuthValue({
       userId: clerk.userId,
       user: clerk.user,
       canSignOut: true,
-      signOut: clerk.signOut,
+      signOut: async () => {
+        await clerk.signOut()
+        redirectToHomeAfterSignOut()
+      },
     }
   }
 
@@ -225,6 +237,7 @@ function ClerkAwareAppAuthProvider({
         : null,
       signOut: async () => {
         await clerk.signOut()
+        redirectToHomeAfterSignOut()
       },
     }),
     [clerk, clerkAuth.isLoaded, clerkAuth.userId, clerkUser.isLoaded, clerkUser.user],

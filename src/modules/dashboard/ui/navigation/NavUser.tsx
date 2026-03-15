@@ -38,6 +38,7 @@ export function NavUser() {
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <SidebarMenuButton
+              data-testid="dashboard-user-menu-trigger"
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
@@ -98,7 +99,10 @@ export function NavUser() {
             {auth.canSignOut ? (
               <>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => void auth.signOut()}>
+                <DropdownMenuItem
+                  data-testid="dashboard-sign-out"
+                  onSelect={() => void auth.signOut()}
+                >
                   <IconLogout />
                   Log out
                 </DropdownMenuItem>
