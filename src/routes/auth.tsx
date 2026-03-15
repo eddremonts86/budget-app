@@ -23,13 +23,13 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
-  Input,
-  Label,
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from '@/components/ui'
+import { AuthField } from '@/routes/-auth-components/auth-field'
+import { InsightCard } from '@/routes/-auth-components/insight-card'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { authClient } from '@/shared/lib/auth/better-auth-client'
 import {
@@ -67,6 +67,15 @@ function AuthPage(): React.JSX.Element {
 
   const localAuthEnabled = isBetterAuthEnabled()
   const clerkAuthEnabled = isClerkEnabled() && !!getClerkPublishableKey()
+  const heroGlowStyle: React.CSSProperties = {
+    backgroundImage:
+      'radial-gradient(circle at top left, rgba(14,165,233,0.18), transparent 24%), radial-gradient(circle at 80% 20%, rgba(16,185,129,0.16), transparent 28%), radial-gradient(circle at bottom right, rgba(245,158,11,0.12), transparent 30%)',
+  }
+  const heroGridStyle: React.CSSProperties = {
+    backgroundImage:
+      'linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px)',
+    backgroundSize: '32px 32px',
+  }
 
   const handleSignIn = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
@@ -113,8 +122,8 @@ function AuthPage(): React.JSX.Element {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-background text-foreground">
-      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(14,165,233,0.18),_transparent_24%),radial-gradient(circle_at_80%_20%,_rgba(16,185,129,0.16),_transparent_28%),radial-gradient(circle_at_bottom_right,_rgba(245,158,11,0.12),_transparent_30%)]" />
-      <div className="absolute inset-0 opacity-40 [background-image:linear-gradient(rgba(255,255,255,0.06)_1px,transparent_1px),linear-gradient(90deg,rgba(255,255,255,0.06)_1px,transparent_1px)] [background-size:32px_32px]" />
+      <div className="absolute inset-0" style={heroGlowStyle} />
+      <div className="absolute inset-0 opacity-40" style={heroGridStyle} />
       <div className="absolute left-[8%] top-24 h-52 w-52 rounded-full bg-primary/10 blur-3xl" />
       <div className="absolute right-[12%] top-40 h-72 w-72 rounded-full bg-emerald-500/10 blur-3xl" />
 
@@ -369,53 +378,5 @@ function AuthPage(): React.JSX.Element {
         </div>
       </div>
     </main>
-  )
-}
-
-function AuthField({
-  id,
-  label,
-  onChange,
-  placeholder,
-  type = 'text',
-  value,
-}: {
-  id: string
-  label: string
-  onChange: (value: string) => void
-  placeholder: string
-  type?: string
-  value: string
-}): React.JSX.Element {
-  return (
-    <div className="space-y-2">
-      <Label htmlFor={id}>{label}</Label>
-      <Input
-        id={id}
-        type={type}
-        value={value}
-        placeholder={placeholder}
-        onChange={(event) => onChange(event.target.value)}
-        className="h-11 rounded-xl"
-        required
-      />
-    </div>
-  )
-}
-
-function InsightCard({
-  icon: Icon,
-  text,
-}: {
-  icon: React.ComponentType<{ className?: string }>
-  text: string
-}): React.JSX.Element {
-  return (
-    <div className="rounded-[1.5rem] border border-border/50 bg-background/70 p-5 transition-transform duration-300 hover:-translate-y-1">
-      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-        <Icon className="h-5 w-5" />
-      </div>
-      <p className="text-sm leading-6 text-muted-foreground">{text}</p>
-    </div>
   )
 }

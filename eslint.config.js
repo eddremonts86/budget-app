@@ -111,6 +111,12 @@ export default tseslint.config(
     },
   },
   {
+    files: ['src/routes/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
     files: ['src/**/*.fn.ts', 'src/ai/**/*.ts', 'src/server/**/*.ts', 'src/shared/lib/db/index.ts'],
     rules: {
       'no-console': 'off',
