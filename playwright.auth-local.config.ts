@@ -5,7 +5,7 @@ const AUTH_E2E_BASE_URL = 'http://127.0.0.1:3100'
 
 export default defineConfig({
   testDir: './tests/e2e',
-  testMatch: /auth(\.(logout|signup))?\.local\.spec\.ts/,
+  testMatch: /auth(\.(approval|logout|signup))?\.local\.spec\.ts/,
   fullyParallel: false,
   forbidOnly: Boolean(process.env.CI),
   retries: process.env.CI ? 2 : 0,

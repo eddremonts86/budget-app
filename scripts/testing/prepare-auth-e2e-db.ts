@@ -62,6 +62,7 @@ async function seedAuthRoles() {
       INSERT INTO roles (id, name, description)
       VALUES
         ('role_admin', 'admin', 'Administrator'),
+        ('role_project_manager', 'project_manager', 'Project manager'),
         ('role_user', 'user', 'Standard user')
       ON CONFLICT (id) DO UPDATE
       SET

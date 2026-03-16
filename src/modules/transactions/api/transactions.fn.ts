@@ -2,10 +2,16 @@ import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { transactions } from '@/shared/lib/db/schema'
+import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
+import { canApproveTransaction } from '@/modules/users/model/permissions'
 
 async function loadDb() {
   const { getDb } = await import('@/shared/lib/db')
   return getDb()
+}
+
+function isApprovalStatus(status: string | undefined): status is 'Approved' | 'Rejected' {
+  return status === 'Approved' || status === 'Rejected'
 }
 
 export const transactionSchema = z.object({
@@ -198,6 +204,29 @@ export const createTransactionFn = createServerFn({ method: 'POST' })
 
     try {
       const db = await loadDb()
+      const requestedStatus = input.status ?? 'Pending'
+      let approvedBy: string | null = null
+      let approvedAt: Date | null = null
+
+      if (isApprovalStatus(requestedStatus)) {
+        const currentAppUser = await requireCurrentAppUser()
+
+        if (
+          !canApproveTransaction(
+            {
+              status: 'Pending',
+              assignedAdminId: input.assignedAdminId ?? null,
+            },
+            currentAppUser.id,
+            currentAppUser.roleKey,
+          )
+        ) {
+          throw new Error('Forbidden')
+        }
+
+        approvedBy = currentAppUser.id
+        approvedAt = new Date()
+      }
 
       const [newItem] = await db
         .insert(transactions)
@@ -205,14 +234,14 @@ export const createTransactionFn = createServerFn({ method: 'POST' })
           id: crypto.randomUUID(),
           customerName: input.customerName,
           customerEmail: input.customerEmail,
-          status: input.status,
+          status: requestedStatus,
           date: new Date(input.date),
           amount: input.amount,
           userId: input.userId,
           projectId: input.projectId,
           assignedAdminId: input.assignedAdminId,
-          approvedBy: input.approvedBy,
-          approvedAt: input.approvedAt ? new Date(input.approvedAt) : null,
+          approvedBy,
+          approvedAt,
           rejectionReason: input.rejectionReason,
         })
         .returning()
@@ -251,11 +280,34 @@ export const updateTransactionFn = createServerFn({ method: 'POST' })
 
     try {
       const db = await loadDb()
+      const [existingTransaction] = await db
+        .select()
+        .from(transactions)
+        .where(eq(transactions.id, id))
+        .limit(1)
+
+      if (!existingTransaction) {
+        throw new Error('Transaction not found')
+      }
 
       // Handle specific fields if needed
       const updatePayload: Record<string, unknown> = { ...updateData }
       if (updateData.date) updatePayload.date = new Date(updateData.date)
-      if (updateData.approvedAt) updatePayload.approvedAt = new Date(updateData.approvedAt)
+      delete updatePayload.approvedBy
+      delete updatePayload.approvedAt
+
+      if (isApprovalStatus(updateData.status)) {
+        const currentAppUser = await requireCurrentAppUser()
+
+        if (
+          !canApproveTransaction(existingTransaction, currentAppUser.id, currentAppUser.roleKey)
+        ) {
+          throw new Error('Forbidden')
+        }
+
+        updatePayload.approvedBy = currentAppUser.id
+        updatePayload.approvedAt = new Date()
+      }
 
       const [updatedItem] = await db
         .update(transactions)

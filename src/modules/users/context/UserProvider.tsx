@@ -2,6 +2,7 @@ import * as React from 'react'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { getClientTestUserId, isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
 import { syncAuthenticatedUserFn } from '../api/users.fn'
+import { canApproveTransactions, getAppRoleKey, getTodoPermissionRole } from '../model/permissions'
 import type { User } from '../model/types'
 import { UserContext } from './UserContext'
 
@@ -82,9 +83,13 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
 
   const value = React.useMemo(() => {
     const isReady = (isAuthBypassEnabled && !!syncedUser) || (auth.isLoaded && !!syncedUser)
+    const roleKey = getAppRoleKey(syncedUser)
+
     return {
       syncedUserId: syncedUser?.id ?? null,
-      userRole: (syncedUser?.roleName === 'admin' ? 'admin' : 'user') as 'admin' | 'user',
+      userRole: getTodoPermissionRole(roleKey),
+      roleKey,
+      canApproveTransactions: canApproveTransactions(roleKey),
       user: syncedUser,
       isLoading: !isReady || isLoading,
       isReady,

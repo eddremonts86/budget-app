@@ -42,6 +42,7 @@ import {
 import { useAiSearch } from '@/modules/ai'
 import { useTransactions } from '@/modules/transactions'
 import { useCurrentUser } from '@/modules/users'
+import { getTransactionsPendingApprovalForUser } from '@/modules/users/model/permissions'
 import { getSidebarNavigation } from '@/modules'
 import { cn } from '@/shared/utils'
 import { NavMain } from './NavMain'
@@ -69,14 +70,13 @@ const extractSearchText = (result: unknown) => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
   const { data: allTransactions = [] } = useTransactions()
-  const { syncedUserId: currentUserId } = useCurrentUser()
+  const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
 
   const pendingCount = React.useMemo(() => {
-    if (!currentUserId) return 0
-    return allTransactions.filter(
-      (t) => t.status === 'Pending' && t.assignedAdminId === currentUserId,
-    ).length
-  }, [allTransactions, currentUserId])
+    if (!canApproveTransactions) return 0
+
+    return getTransactionsPendingApprovalForUser(allTransactions, currentUserId, roleKey).length
+  }, [allTransactions, canApproveTransactions, currentUserId, roleKey])
 
   const { isOpen: isSearchOpen, setIsOpen: setIsSearchOpen, isPinned, setIsPinned } = useAiSearch()
   const [searchQuery, setSearchQuery] = React.useState('')
@@ -357,13 +357,19 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                             remarkPlugins={[remarkGfm]}
                             components={{
                               h1: ({ node: _node, children, ...props }) => (
-                                <h1 className="text-xl font-bold mt-4 mb-2" {...props}>{children}</h1>
+                                <h1 className="text-xl font-bold mt-4 mb-2" {...props}>
+                                  {children}
+                                </h1>
                               ),
                               h2: ({ node: _node, children, ...props }) => (
-                                <h2 className="text-lg font-semibold mt-3 mb-2" {...props}>{children}</h2>
+                                <h2 className="text-lg font-semibold mt-3 mb-2" {...props}>
+                                  {children}
+                                </h2>
                               ),
                               h3: ({ node: _node, children, ...props }) => (
-                                <h3 className="text-base font-medium mt-2 mb-1" {...props}>{children}</h3>
+                                <h3 className="text-base font-medium mt-2 mb-1" {...props}>
+                                  {children}
+                                </h3>
                               ),
                               ul: ({ node: _node, ...props }) => (
                                 <ul className="list-disc pl-5 my-2 space-y-1" {...props} />

@@ -12,34 +12,36 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { useTransactions } from '@/modules/transactions'
-import { useUsers } from '@/modules/users'
+import { useCurrentUser } from '@/modules/users'
+import { getTransactionsPendingApprovalForUser } from '@/modules/users/model/permissions'
 
 export function NotificationBell() {
   const { data: allTransactions = [] } = useTransactions()
-  const { data: users = [] } = useUsers()
-
-  // MOCK AUTH: Assume the logged in user is one of the admins for demonstration
-  const currentUserId = React.useMemo(() => {
-    const admin = users.find((u) => u.roleName?.toLowerCase() === 'admin')
-    return admin ? admin.id : ''
-  }, [users])
+  const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
 
   const pendingTransactions = React.useMemo(() => {
-    if (!currentUserId) return []
-    return allTransactions.filter(
-      (t) => t.status === 'Pending' && t.assignedAdminId === currentUserId,
-    )
-  }, [allTransactions, currentUserId])
+    return getTransactionsPendingApprovalForUser(allTransactions, currentUserId, roleKey)
+  }, [allTransactions, currentUserId, roleKey])
+
+  if (!canApproveTransactions) {
+    return null
+  }
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" className="relative">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="relative"
+          data-testid="dashboard-notification-trigger"
+        >
           <Bell className="h-5 w-5" />
           {pendingTransactions.length > 0 && (
             <Badge
               variant="destructive"
               className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center rounded-full p-0 text-[10px]"
+              data-testid="dashboard-notification-badge"
             >
               {pendingTransactions.length}
             </Badge>
@@ -54,7 +56,7 @@ export function NotificationBell() {
           <div className="p-4 text-center text-sm text-muted-foreground">No pending approvals</div>
         ) : (
           <>
-            <div className="max-h-[300px] overflow-y-auto">
+            <div className="max-h-75 overflow-y-auto">
               {pendingTransactions.map((transaction) => (
                 <DropdownMenuItem key={transaction.id} asChild>
                   <Link

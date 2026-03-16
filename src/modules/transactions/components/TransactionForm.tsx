@@ -13,7 +13,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useProjects } from '@/modules/projects'
-import { useUsers } from '@/modules/users'
+import { useCurrentUser, useUsers } from '@/modules/users'
+import {
+  canApproveTransaction,
+  getAssignableApprovers,
+  isAdminRole,
+} from '@/modules/users/model/permissions'
 import type { Transaction } from '../model/types'
 
 const createTransactionSchema = (t: (key: string) => string) =>
@@ -48,11 +53,23 @@ export function TransactionForm({
   const { t } = useTranslation()
   const { data: users = [] } = useUsers()
   const { data: projects = [] } = useProjects()
+  const { roleKey, syncedUserId: currentUserId } = useCurrentUser()
+  const canEditApprovalStatus = React.useMemo(() => {
+    if (defaultValues) {
+      return canApproveTransaction(
+        {
+          status: defaultValues.status,
+          assignedAdminId: defaultValues.assignedAdminId ?? null,
+        },
+        currentUserId,
+        roleKey,
+      )
+    }
 
-  const admins = React.useMemo(
-    () => users.filter((u) => (u.roleName || '').toLowerCase().includes('admin')),
-    [users],
-  )
+    return isAdminRole(roleKey)
+  }, [currentUserId, defaultValues, roleKey])
+
+  const approvers = React.useMemo(() => getAssignableApprovers(users), [users])
 
   const transactionSchema = React.useMemo(() => createTransactionSchema(t), [t])
   const form = useForm({
@@ -92,7 +109,7 @@ export function TransactionForm({
             <Input
               id={field.name}
               value={field.state.value}
-              onBlur={field.handleBlur}
+              disabled={!canEditApprovalStatus}
               onChange={(e) => field.handleChange(e.target.value)}
               placeholder={t('transactions.form.customerNamePlaceholder')}
             />
@@ -219,14 +236,19 @@ export function TransactionForm({
               onValueChange={(value) =>
                 field.handleChange(value as TransactionFormValues['status'])
               }
+              disabled={!canEditApprovalStatus}
             >
               <SelectTrigger id={field.name}>
                 <SelectValue placeholder={t('transactions.form.statusPlaceholder')} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="Pending">{t('transactions.form.statusPending')}</SelectItem>
-                <SelectItem value="Approved">{t('transactions.form.statusApproved')}</SelectItem>
-                <SelectItem value="Rejected">{t('transactions.form.statusRejected')}</SelectItem>
+                {canEditApprovalStatus ? (
+                  <SelectItem value="Approved">{t('transactions.form.statusApproved')}</SelectItem>
+                ) : null}
+                {canEditApprovalStatus ? (
+                  <SelectItem value="Rejected">{t('transactions.form.statusRejected')}</SelectItem>
+                ) : null}
               </SelectContent>
             </Select>
             <FieldError
@@ -239,15 +261,15 @@ export function TransactionForm({
       <form.Field name="assignedAdminId">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Assigned Admin</FieldLabel>
+            <FieldLabel htmlFor={field.name}>Assigned Approver</FieldLabel>
             <Select value={field.state.value} onValueChange={field.handleChange}>
               <SelectTrigger id={field.name}>
-                <SelectValue placeholder="Select Admin" />
+                <SelectValue placeholder="Select Approver" />
               </SelectTrigger>
               <SelectContent>
-                {admins.map((admin) => (
-                  <SelectItem key={admin.id} value={admin.id}>
-                    {admin.name}
+                {approvers.map((approver) => (
+                  <SelectItem key={approver.id} value={approver.id}>
+                    {approver.name}
                   </SelectItem>
                 ))}
               </SelectContent>

@@ -16,9 +16,15 @@ import {
 import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Textarea } from '@/components/ui/textarea'
 import { useProjects } from '@/modules/projects'
 import { useUsers } from '@/modules/users'
 import { useCurrentUser } from '@/modules/users'
+import {
+  canEditTransactionInHistory,
+  getTransactionsPendingApprovalForUser,
+  isAdminRole,
+} from '@/modules/users/model/permissions'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
 import { DataTable, UnifiedDataTable, type DataTableBulkAction } from '@/shared/ui/DataTable'
@@ -34,67 +40,75 @@ import { TransactionForm } from './TransactionForm'
 interface PendingTransactionsTableProps {
   transactions: Transaction[]
   currentUserId: string | null
+  roleKey: 'admin' | 'project_manager' | 'user'
 }
 
-function PendingTransactionsTable({ transactions, currentUserId }: PendingTransactionsTableProps) {
+type PendingDecision =
+  | {
+      action: 'approve'
+      transaction: Transaction
+    }
+  | {
+      action: 'reject'
+      transaction: Transaction
+    }
+
+function PendingTransactionsTable({
+  transactions,
+  currentUserId,
+  roleKey,
+}: PendingTransactionsTableProps) {
   const { t } = useTranslation()
   const updateMutation = useUpdateTransaction()
   const { data: users = [] } = useUsers()
+  const [pendingDecision, setPendingDecision] = React.useState<PendingDecision | null>(null)
+  const [rejectionReason, setRejectionReason] = React.useState('')
 
   const pendingTransactions = React.useMemo(() => {
-    // Show all pending transactions for demo purposes
-    // if (!currentUserId) return []
-    // return transactions.filter((t) => t.status === 'Pending' && t.assignedAdminId === currentUserId)
-    return transactions.filter((t) => t.status === 'Pending')
-  }, [transactions])
+    return getTransactionsPendingApprovalForUser(transactions, currentUserId, roleKey)
+  }, [transactions, currentUserId, roleKey])
 
   const handleApprove = (transaction: Transaction) => {
     if (!currentUserId) return
-    toast.warning(t('transactions.pending.approveConfirm'), {
-      action: {
-        label: t('transactions.pending.approve'),
-        onClick: () => {
-          updateMutation.mutate(
-            {
-              id: transaction.id,
-              data: {
-                status: 'Approved',
-                approvedBy: currentUserId,
-                approvedAt: new Date().toISOString(),
-              },
-            },
-            {
-              onSuccess: () => toast.success(t('transactions.pending.approveSuccess')),
-            },
-          )
-        },
-      },
-    })
+    setRejectionReason('')
+    setPendingDecision({ action: 'approve', transaction })
   }
 
   const handleReject = (transaction: Transaction) => {
     if (!currentUserId) return
-    toast.warning(t('transactions.pending.rejectPrompt'), {
-      action: {
-        label: t('transactions.pending.reject'),
-        onClick: () => {
-          updateMutation.mutate(
-            {
-              id: transaction.id,
-              data: {
-                status: 'Rejected',
-                rejectionReason: t('transactions.pending.reject'),
-                approvedBy: currentUserId,
-                approvedAt: new Date().toISOString(),
-              },
-            },
-            {
-              onSuccess: () => toast.success(t('transactions.pending.rejectSuccess')),
-            },
-          )
+    setRejectionReason('')
+    setPendingDecision({ action: 'reject', transaction })
+  }
+
+  const handleConfirmDecision = () => {
+    if (!pendingDecision) {
+      return
+    }
+
+    const isApprove = pendingDecision.action === 'approve'
+
+    updateMutation.mutate(
+      {
+        id: pendingDecision.transaction.id,
+        data: {
+          status: isApprove ? 'Approved' : 'Rejected',
+          rejectionReason: isApprove
+            ? undefined
+            : rejectionReason.trim() || t('transactions.pending.reject'),
         },
       },
-    })
+      {
+        onSuccess: () => {
+          toast.success(
+            isApprove
+              ? t('transactions.pending.approveSuccess')
+              : t('transactions.pending.rejectSuccess'),
+          )
+          setPendingDecision(null)
+          setRejectionReason('')
+        },
+      },
+    )
   }
 
   const columns: ColumnDef<Transaction>[] = [
@@ -164,6 +178,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
               variant="outline"
               className="h-8 w-8 p-0 text-green-600 hover:text-green-700 hover:bg-green-50 border-green-200"
               onClick={() => handleApprove(transaction)}
+              data-testid={`transactions-approve-${transaction.id}`}
             >
               <Check className="h-4 w-4" />
               <span className="sr-only">{t('transactions.pending.approve')}</span>
@@ -173,6 +188,7 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
               variant="outline"
               className="h-8 w-8 p-0 text-red-600 hover:text-red-700 hover:bg-red-50 border-red-200"
               onClick={() => handleReject(transaction)}
+              data-testid={`transactions-reject-${transaction.id}`}
             >
               <X className="h-4 w-4" />
               <span className="sr-only">{t('transactions.pending.reject')}</span>
@@ -188,7 +204,63 @@ function PendingTransactionsTable({ transactions, currentUserId }: PendingTransa
   }
 
   return (
-    <div className="h-full min-h-0 flex flex-col gap-4 border rounded-xl p-4 bg-muted/30">
+    <div
+      className="h-full min-h-0 flex flex-col gap-4 border rounded-xl p-4 bg-muted/30"
+      data-testid="transactions-pending-panel"
+    >
+      {pendingDecision ? (
+        <div
+          className="rounded-lg border bg-background p-4 shadow-sm"
+          data-testid="transactions-confirm-panel"
+        >
+          <div className="flex flex-col gap-3">
+            <div>
+              <h4 className="font-semibold text-sm">
+                {pendingDecision.action === 'approve'
+                  ? t('transactions.pending.approveConfirm')
+                  : t('transactions.pending.rejectPrompt')}
+              </h4>
+              <p className="text-sm text-muted-foreground">
+                {pendingDecision.transaction.customer.name}
+              </p>
+            </div>
+            {pendingDecision.action === 'reject' ? (
+              <Textarea
+                value={rejectionReason}
+                onChange={(event) => setRejectionReason(event.target.value)}
+                placeholder={t('transactions.pending.rejectPrompt')}
+                data-testid="transactions-reject-reason-input"
+              />
+            ) : null}
+            <div className="flex items-center justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setPendingDecision(null)
+                  setRejectionReason('')
+                }}
+                data-testid="transactions-confirm-cancel"
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                variant={pendingDecision.action === 'approve' ? 'default' : 'destructive'}
+                onClick={handleConfirmDecision}
+                disabled={updateMutation.isPending}
+                data-testid={
+                  pendingDecision.action === 'approve'
+                    ? 'transactions-confirm-approve'
+                    : 'transactions-confirm-reject'
+                }
+              >
+                {pendingDecision.action === 'approve'
+                  ? t('transactions.pending.approve')
+                  : t('transactions.pending.reject')}
+              </Button>
+            </div>
+          </div>
+        </div>
+      ) : null}
       <div className="flex items-start justify-between gap-3 shrink-0">
         <h3 className="text-lg font-semibold text-orange-600">{t('transactions.pending.title')}</h3>
         <Badge variant="destructive" className="rounded-full px-2.5 py-0.5 text-xs">
@@ -216,13 +288,9 @@ export function TransactionsPage() {
   const { data: users = [] } = useUsers()
   const { data: projects = [] } = useProjects()
 
-  const { syncedUserId: currentUserId } = useCurrentUser()
+  const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
 
   const displayedTransactions = React.useMemo(() => {
-    // Show all transactions for demo purposes
-    // if (!currentUserId) return []
-    // if (userRole === 'admin') return allTransactions
-    // return allTransactions.filter((t) => t.userId === currentUserId)
     return allTransactions
   }, [allTransactions])
 
@@ -258,8 +326,12 @@ export function TransactionsPage() {
     [projects, t, users],
   )
 
-  const historyBulkActions = React.useMemo<DataTableBulkAction<Transaction>[]>(
-    () => [
+  const historyBulkActions = React.useMemo<DataTableBulkAction<Transaction>[] | undefined>(() => {
+    if (!isAdminRole(roleKey)) {
+      return undefined
+    }
+
+    return [
       {
         label: t('transactions.form.statusApproved'),
         onClick: (rows) => {
@@ -268,8 +340,6 @@ export function TransactionsPage() {
               id: row.id,
               data: {
                 status: 'Approved',
-                approvedBy: currentUserId ?? undefined,
-                approvedAt: new Date().toISOString(),
               },
             })
           })
@@ -285,8 +355,6 @@ export function TransactionsPage() {
               id: row.id,
               data: {
                 status: 'Rejected',
-                approvedBy: currentUserId ?? undefined,
-                approvedAt: new Date().toISOString(),
                 rejectionReason: t('transactions.form.statusRejected'),
               },
             })
@@ -294,9 +362,8 @@ export function TransactionsPage() {
           toast.success(t('transactions.pending.rejectSuccess'))
         },
       },
-    ],
-    [currentUserId, t, updateMutation],
-  )
+    ]
+  }, [roleKey, t, updateMutation])
 
   const columns: ColumnDef<Transaction>[] = [
     {
@@ -387,6 +454,15 @@ export function TransactionsPage() {
       id: 'actions',
       cell: ({ row }) => {
         const transaction = row.original
+        const canManageTransaction = canEditTransactionInHistory(
+          transaction,
+          currentUserId,
+          roleKey,
+        )
+
+        if (!canManageTransaction) {
+          return null
+        }
 
         return (
           <DropdownMenu>
@@ -442,26 +518,43 @@ export function TransactionsPage() {
         </Button>
       </div>
 
-      <Tabs defaultValue="approval" className="flex-1 min-h-0 flex flex-col">
-        <TabsList className="w-full grid grid-cols-2 shrink-0">
-          <TabsTrigger value="approval">Request your approval</TabsTrigger>
-          <TabsTrigger value="history">{t('transactions.history')}</TabsTrigger>
+      <Tabs
+        defaultValue={canApproveTransactions ? 'approval' : 'history'}
+        className="flex-1 min-h-0 flex flex-col"
+      >
+        <TabsList
+          className={cn(
+            'w-full grid shrink-0',
+            canApproveTransactions ? 'grid-cols-2' : 'grid-cols-1',
+          )}
+        >
+          {canApproveTransactions ? (
+            <TabsTrigger value="approval" data-testid="transactions-tab-approval">
+              Request your approval
+            </TabsTrigger>
+          ) : null}
+          <TabsTrigger value="history" data-testid="transactions-tab-history">
+            {t('transactions.history')}
+          </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="approval" className="pt-4 flex-1 min-h-0 overflow-hidden">
-          <div className="h-full min-h-0 overflow-hidden">
-            {currentUserId ? (
-              <PendingTransactionsTable
-                transactions={allTransactions}
-                currentUserId={currentUserId}
-              />
-            ) : (
-              <div className="h-full border rounded-xl p-4 bg-muted/30 text-sm text-muted-foreground">
-                {t('transactions.pending.title')}
-              </div>
-            )}
-          </div>
-        </TabsContent>
+        {canApproveTransactions ? (
+          <TabsContent value="approval" className="pt-4 flex-1 min-h-0 overflow-hidden">
+            <div className="h-full min-h-0 overflow-hidden">
+              {currentUserId ? (
+                <PendingTransactionsTable
+                  transactions={allTransactions}
+                  currentUserId={currentUserId}
+                  roleKey={roleKey}
+                />
+              ) : (
+                <div className="h-full border rounded-xl p-4 bg-muted/30 text-sm text-muted-foreground">
+                  {t('transactions.pending.title')}
+                </div>
+              )}
+            </div>
+          </TabsContent>
+        ) : null}
 
         <TabsContent value="history" className="pt-4 flex-1 min-h-0 flex flex-col gap-4">
           <div className="flex-1 min-h-0 flex flex-col gap-4">
@@ -481,7 +574,7 @@ export function TransactionsPage() {
                 filterColumn="customer_name"
                 filters={historyFilters}
                 bulkActions={historyBulkActions}
-                enableSelection
+                enableSelection={isAdminRole(roleKey)}
                 enableGrouping
                 groupableColumns={['status', 'userId', 'projectId']}
                 enablePagination

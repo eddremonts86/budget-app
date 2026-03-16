@@ -14,6 +14,8 @@
     "test:unit": "vitest run",
     "test:e2e": "playwright test",
     "test:e2e:auth-local": "playwright test -c playwright.auth-local.config.ts",
+    "test:e2e:auth-local:approval": "playwright test -c playwright.auth-local.config.ts tests/e2e/auth.approval.local.spec.ts",
+    "test:e2e:auth-local:approval-smoke": "sh scripts/testing/auth-local-approval-smoke.sh",
     "test:e2e:auth-local:signup": "playwright test -c playwright.auth-local.config.ts tests/e2e/auth.signup.local.spec.ts",
     "test:e2e:auth-local:logout": "playwright test -c playwright.auth-local.config.ts tests/e2e/auth.logout.local.spec.ts",
     "test:e2e:ci-local": "sh scripts/testing/e2e-ci-local.sh",
