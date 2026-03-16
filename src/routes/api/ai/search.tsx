@@ -12,7 +12,6 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
       createAiChatResponse,
       createJsonErrorResponse,
       createJsonResponse,
-      getErrorMessage,
       resolveProviderRuntime,
     } = await import('@/modules/ai/server')
 

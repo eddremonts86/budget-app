@@ -17,7 +17,7 @@ import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useUsers } from '@/modules/users'
+import { useUserDirectory, useUsersByIds } from '@/modules/users'
 import { cn } from '@/shared/lib/utils'
 import {
   useCreateTeam,
@@ -41,7 +41,6 @@ const initialFormState: TeamFormState = {
 
 export function TeamPage() {
   const { t } = useTranslation()
-  const { data: users = [] } = useUsers()
   const { data: teams, isLoading } = useTeamsWithMembers()
   const createTeam = useCreateTeam()
   const updateTeam = useUpdateTeam()
@@ -57,13 +56,28 @@ export function TeamPage() {
     [teams, editingTeamId],
   )
 
+  const normalizedMemberSearch = memberSearch.trim() || undefined
+  const { data: directoryUsers = [], isLoading: isDirectoryLoading } = useUserDirectory(
+    normalizedMemberSearch,
+    normalizedMemberSearch ? 50 : 25,
+  )
+  const { data: selectedUsers = [], isLoading: isSelectedUsersLoading } = useUsersByIds(
+    formData.members,
+  )
+
   const filteredUsers = React.useMemo(() => {
-    if (!memberSearch.trim()) return users
-    const term = memberSearch.toLowerCase()
-    return users.filter(
-      (user) => user.name.toLowerCase().includes(term) || user.email.toLowerCase().includes(term),
-    )
-  }, [users, memberSearch])
+    const usersById = new Map<string, (typeof directoryUsers)[number]>()
+
+    for (const user of selectedUsers) {
+      usersById.set(user.id, user)
+    }
+
+    for (const user of directoryUsers) {
+      usersById.set(user.id, user)
+    }
+
+    return [...usersById.values()]
+  }, [directoryUsers, selectedUsers])
 
   const resetForm = React.useCallback(() => {
     setFormData(initialFormState)
@@ -337,8 +351,12 @@ export function TeamPage() {
                   />
                 </div>
 
-                <div className="space-y-2 rounded-lg border p-3 max-h-[320px] overflow-y-auto">
-                  {filteredUsers.length === 0 ? (
+                <div className="space-y-2 rounded-lg border p-3 max-h-80 overflow-y-auto">
+                  {isDirectoryLoading || isSelectedUsersLoading ? (
+                    <div className="text-sm text-muted-foreground py-4 text-center">
+                      {t('common.loading', { defaultValue: 'Loading...' })}
+                    </div>
+                  ) : filteredUsers.length === 0 ? (
                     <div className="text-sm text-muted-foreground py-4 text-center">
                       {t('team.emptyUsers', { defaultValue: 'No users available.' })}
                     </div>

@@ -18,8 +18,8 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjects } from '@/modules/projects'
-import { useUsers } from '@/modules/users'
-import { useCurrentUser } from '@/modules/users'
+import { useCurrentUser, useUsersByIds } from '@/modules/users'
+import type { User } from '@/modules/users'
 import {
   canEditTransactionInHistory,
   getTransactionsPendingApprovalForUser,
@@ -41,6 +41,7 @@ interface PendingTransactionsTableProps {
   transactions: Transaction[]
   currentUserId: string | null
   roleKey: 'admin' | 'project_manager' | 'user'
+  usersById: Map<string, User>
 }
 
 type PendingDecision =
@@ -57,10 +58,10 @@ function PendingTransactionsTable({
   transactions,
   currentUserId,
   roleKey,
+  usersById,
 }: PendingTransactionsTableProps) {
   const { t } = useTranslation()
   const updateMutation = useUpdateTransaction()
-  const { data: users = [] } = useUsers()
   const [pendingDecision, setPendingDecision] = React.useState<PendingDecision | null>(null)
   const [rejectionReason, setRejectionReason] = React.useState('')
 
@@ -151,7 +152,7 @@ function PendingTransactionsTable({
       accessorKey: 'userId',
       header: t('transactions.form.userLabel'),
       cell: ({ row }) => {
-        const user = users.find((u) => u.id === row.original.userId)
+        const user = row.original.userId ? usersById.get(row.original.userId) : undefined
         return user ? (
           <div className="flex items-center gap-2">
             <span className="text-sm">{user.name}</span>
@@ -285,8 +286,22 @@ export function TransactionsPage() {
   // const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
   //   useInfiniteTransactions(10)
 
-  const { data: users = [] } = useUsers()
   const { data: projects = [] } = useProjects()
+  const transactionUserIds = React.useMemo(
+    () =>
+      Array.from(
+        new Set(
+          allTransactions.flatMap((transaction) =>
+            [transaction.userId, transaction.assignedAdminId, transaction.approvedBy].filter(
+              (value): value is string => Boolean(value),
+            ),
+          ),
+        ),
+      ),
+    [allTransactions],
+  )
+  const { data: users = [] } = useUsersByIds(transactionUserIds)
+  const usersById = React.useMemo(() => new Map(users.map((user) => [user.id, user])), [users])
 
   const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
 
@@ -381,7 +396,7 @@ export function TransactionsPage() {
       accessorKey: 'userId',
       header: t('transactions.form.userLabel'),
       cell: ({ row }) => {
-        const user = users.find((u) => u.id === row.original.userId)
+        const user = row.original.userId ? usersById.get(row.original.userId) : undefined
         return user ? (
           <div className="flex items-center gap-2">
             <span className="text-sm">{user.name}</span>
@@ -546,6 +561,7 @@ export function TransactionsPage() {
                   transactions={allTransactions}
                   currentUserId={currentUserId}
                   roleKey={roleKey}
+                  usersById={usersById}
                 />
               ) : (
                 <div className="h-full border rounded-xl p-4 bg-muted/30 text-sm text-muted-foreground">
@@ -591,7 +607,7 @@ export function TransactionsPage() {
       </Tabs>
 
       <Sheet open={isCreateOpen} onOpenChange={setIsCreateOpen}>
-        <CrudSheetContent className="sm:max-w-[560px]">
+        <CrudSheetContent className="sm:max-w-140">
           <CrudSheetHeader
             title={t('transactions.actions.create')}
             description={t('transactions.form.createDescription')}
@@ -626,7 +642,7 @@ export function TransactionsPage() {
         open={!!editingTransaction}
         onOpenChange={(open) => !open && setEditingTransaction(null)}
       >
-        <CrudSheetContent className="sm:max-w-[560px]">
+        <CrudSheetContent className="sm:max-w-140">
           <CrudSheetHeader
             title={t('transactions.actions.edit')}
             description={t('transactions.form.editDescription')}

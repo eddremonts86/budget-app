@@ -1,5 +1,6 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
+import type { Transaction } from '../model/types'
 import {
   type TransactionInput,
   createTransactionFn,
@@ -29,7 +30,7 @@ export const useInfiniteTransactions = (limit = 10) => {
 }
 
 export const useTransactions = () => {
-  return useTQuery(transactionKeys.lists(), () =>
+  return useTQuery<Transaction[]>(transactionKeys.lists(), () =>
     getTransactionsFn({ data: { limit: 1000 } }).then((res) => res.data),
   )
 }

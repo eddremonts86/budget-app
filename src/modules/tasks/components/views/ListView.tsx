@@ -28,8 +28,7 @@ import { Field, FieldGroup } from '@/components/ui/field'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableCell, TableRow } from '@/components/ui/table'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useUsers } from '@/modules/users'
-import { useCurrentUser } from '@/modules/users'
+import { useCurrentUser, useUsersByIds } from '@/modules/users'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
 import { DataTable } from '@/shared/ui/DataTable'
@@ -45,21 +44,33 @@ interface ListViewProps {
 export function ListView({ onEdit, assignedTo }: ListViewProps) {
   const { t } = useTranslation()
   const { syncedUserId, userRole } = useCurrentUser()
-  const { data: users } = useUsers()
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useInfiniteTodos(10, undefined, assignedTo)
+
+  const visibleTodos = React.useMemo(() => {
+    return (data?.pages.flatMap((page) => page.data) ?? []) as Todo[]
+  }, [data])
+
+  const assigneeIds = React.useMemo(() => {
+    return Array.from(
+      new Set(
+        visibleTodos
+          .map((todo) => todo.assignedTo)
+          .filter((assignedUserId): assignedUserId is string => Boolean(assignedUserId)),
+      ),
+    )
+  }, [visibleTodos])
+
+  const { data: users = [] } = useUsersByIds(assigneeIds)
 
   // Build a lookup map of userId → user for the assignee column
   const userMap = React.useMemo(() => {
     const map = new Map<string, { name: string; avatar: string }>()
-    if (users) {
-      for (const u of users) {
-        map.set(u.id, { name: u.name, avatar: u.avatar || '' })
-      }
+    for (const user of users) {
+      map.set(user.id, { name: user.name, avatar: user.avatar || '' })
     }
     return map
   }, [users])
-
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteTodos(10, undefined, assignedTo)
 
   const { ref, inView } = useInView()
 

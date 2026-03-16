@@ -1,4 +1,5 @@
 import { expect, test } from '@playwright/test'
+import type { APIRequestContext } from '@playwright/test'
 import { expectDashboard, provisionAccount, signInInBrowser } from './utils/auth-local'
 import {
   getTransactionById,
@@ -7,8 +8,14 @@ import {
   seedTransaction,
 } from './utils/auth-local-db'
 
+type PlaywrightRequestFactory = {
+  request: {
+    newContext: (options?: { baseURL?: string }) => Promise<APIRequestContext>
+  }
+}
+
 async function provisionSeededUser(
-  playwright: Parameters<typeof test>[0]['playwright'],
+  playwright: PlaywrightRequestFactory,
   baseURL: string | undefined,
   prefix: string,
   roleId: 'role_admin' | 'role_project_manager' | 'role_user',

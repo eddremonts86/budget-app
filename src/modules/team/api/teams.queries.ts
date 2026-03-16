@@ -1,4 +1,4 @@
-import { useUsers } from '@/modules/users'
+import { useUsersByIds } from '@/modules/users'
 import type { User } from '@/modules/users'
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQMutation } from '@/shared/lib/query'
@@ -21,13 +21,16 @@ export const useTeams = () => {
 
 export const useTeamsWithMembers = () => {
   const { data: teams = [], isLoading: isTeamsLoading } = useTeams()
-  const { data: users = [], isLoading: isUsersLoading } = useUsers()
+  const memberIds = Array.from(new Set(teams.flatMap((team) => team.members || [])))
+  const { data: users = [], isLoading: isUsersLoading } = useUsersByIds(memberIds)
+
+  const usersById = new Map(users.map((user) => [user.id, user]))
 
   const teamsWithMembers = teams.map(
     (team: Team): TeamWithUsers => ({
       ...team,
       members: (team.members || [])
-        .map((memberId) => users.find((u: User) => u.id === memberId))
+        .map((memberId) => usersById.get(memberId as User['id']))
         .filter((u): u is User => !!u),
     }),
   )

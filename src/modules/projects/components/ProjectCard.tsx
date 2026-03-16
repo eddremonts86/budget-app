@@ -9,12 +9,12 @@ import type { Project } from '../model/types'
 
 interface ProjectCardProps {
   project: Project
-  users: User[]
+  usersById: Map<string, User>
   onEdit: (project: Project) => void
   onDelete: (id: string, name: string) => void
 }
 
-export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardProps) {
+export function ProjectCard({ project, usersById, onEdit, onDelete }: ProjectCardProps) {
   const { t } = useTranslation()
 
   return (
@@ -57,7 +57,7 @@ export function ProjectCard({ project, users, onEdit, onDelete }: ProjectCardPro
           <div className="flex -space-x-2 overflow-hidden">
             <TooltipProvider>
               {(project.team || []).slice(0, 5).map((member) => {
-                const user = users.find((u) => u.id === member.userId)
+                const user = usersById.get(member.userId)
                 if (!user) return null
                 return (
                   <Tooltip key={member.userId}>

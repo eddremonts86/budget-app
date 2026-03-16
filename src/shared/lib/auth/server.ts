@@ -99,5 +99,5 @@ export const requireAuthUser = async () => {
     throw new Error('Unauthorized')
   }
 
-  return user
+  return user as ServerAuthUser & { userId: string }
 }

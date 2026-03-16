@@ -1,23 +1,24 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
-import {
-  getRolesFn,
-  getSkillsFn,
-  getJobTitlesFn,
-  getExperienceLevelsFn,
-} from './master-data.fn'
+import { getRolesFn, getSkillsFn, getJobTitlesFn, getExperienceLevelsFn } from './master-data.fn'
 import {
   type UserInput,
   createUserFn,
   deleteUserFn,
   getUserByIdFn,
+  getUsersByIdsFn,
   getUsersFn,
   updateUserFn,
 } from './users.fn'
+import type { User } from '../model/types'
 
 export const userKeys = {
   all: ['users'] as const,
   lists: () => [...userKeys.all, 'list'] as const,
+  directory: (limit: number, search?: string) =>
+    [...userKeys.lists(), 'directory', { limit, search }] as const,
+  lookup: (limit: number) => [...userKeys.lists(), { limit }] as const,
+  byIds: (ids: string[]) => [...userKeys.lists(), 'by-ids', ids] as const,
   infinite: () => [...userKeys.lists(), 'infinite'] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
@@ -55,9 +56,27 @@ export const useInfiniteUsers = (limit = 10, search?: string) => {
   )
 }
 
-export const useUsers = () => {
-  return useTQuery(userKeys.lists(), () =>
-    getUsersFn({ data: { limit: 1000 } }).then((res) => res?.data || []),
+export const useUsers = (limit = 1000) => {
+  return useTQuery(userKeys.lookup(limit), () =>
+    getUsersFn({ data: { limit } }).then((res) => res?.data || []),
+  )
+}
+
+export const useUserDirectory = (search?: string, limit = 50) => {
+  return useTQuery(userKeys.directory(limit, search), () =>
+    getUsersFn({ data: { limit, search } }).then((res) => res?.data || []),
+  )
+}
+
+export const useUsersByIds = (ids: string[]) => {
+  const normalizedIds = Array.from(new Set(ids)).sort()
+
+  return useTQuery<User[]>(
+    userKeys.byIds(normalizedIds),
+    () => getUsersByIdsFn({ data: normalizedIds }),
+    {
+      enabled: normalizedIds.length > 0,
+    },
   )
 }
 

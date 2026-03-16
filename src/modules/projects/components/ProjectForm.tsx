@@ -32,7 +32,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { useDepartments, useSkills } from '@/modules/projects'
-import { useCreateUser, useUsers } from '@/modules/users'
+import { useCreateUser, useUserDirectory, useUsersByIds } from '@/modules/users'
 import { UserForm } from '@/modules/users'
 import { cn } from '@/shared/lib/utils'
 import type { Project, ProjectMemberRole } from '../model/types'
@@ -76,10 +76,10 @@ type ProjectFormProps = {
 export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: ProjectFormProps) {
   const { t, i18n } = useTranslation()
   const { data: departments = [] } = useDepartments()
-  const { data: users = [] } = useUsers()
   const { data: availableSkills = [] } = useSkills()
   const createUser = useCreateUser()
   const [isUserSheetOpen, setIsUserSheetOpen] = React.useState(false)
+  const [teamSearch, setTeamSearch] = React.useState('')
 
   const locale = React.useMemo(() => {
     const language = i18n.language?.toLowerCase() ?? 'en'
@@ -122,6 +122,33 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
       await onSubmit(value)
     },
   })
+
+  const [selectedTeamUserIds, setSelectedTeamUserIds] = React.useState<string[]>(
+    initialValues.team.map((member) => member.userId),
+  )
+  const normalizedTeamSearch = teamSearch.trim() || undefined
+  const { data: directoryUsers = [] } = useUserDirectory(
+    normalizedTeamSearch,
+    normalizedTeamSearch ? 50 : 25,
+  )
+  const { data: selectedUsers = [] } = useUsersByIds(selectedTeamUserIds)
+  const teamUsers = React.useMemo(() => {
+    const usersById = new Map<string, (typeof directoryUsers)[number]>()
+
+    for (const user of selectedUsers) {
+      usersById.set(user.id, user)
+    }
+
+    for (const user of directoryUsers) {
+      usersById.set(user.id, user)
+    }
+
+    return [...usersById.values()]
+  }, [directoryUsers, selectedUsers])
+  const selectedUsersById = React.useMemo(
+    () => new Map(selectedUsers.map((user) => [user.id, user])),
+    [selectedUsers],
+  )
 
   return (
     <form
@@ -346,6 +373,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                   multiple
                   value={selectedUserIds}
                   onValueChange={(newIds: string[]) => {
+                    setSelectedTeamUserIds(newIds)
                     const currentTeam = [...field.state.value]
                     const updatedTeam = newIds.map((id: string) => {
                       const existing = currentTeam.find((m: TeamMember) => m.userId === id)
@@ -356,7 +384,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                 >
                   <ComboboxChips>
                     {field.state.value.map((member: TeamMember) => {
-                      const user = users.find((u: { id: string }) => u.id === member.userId)
+                      const user = selectedUsersById.get(member.userId)
                       return (
                         <ComboboxChip key={member.userId}>
                           <div className="flex items-center gap-2">
@@ -368,7 +396,11 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                         </ComboboxChip>
                       )
                     })}
-                    <ComboboxChipsInput placeholder={t('projects.form.teamPlaceholder')} />
+                    <ComboboxChipsInput
+                      placeholder={t('projects.form.teamPlaceholder')}
+                      value={teamSearch}
+                      onChange={(event) => setTeamSearch(event.target.value)}
+                    />
                   </ComboboxChips>
                   <ComboboxContent>
                     <ComboboxEmpty className="p-4 text-center">
@@ -382,7 +414,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                             {t('projects.form.addNewUser')}
                           </Button>
                         </SheetTrigger>
-                        <SheetContent side="right" className="sm:max-w-[540px]">
+                        <SheetContent side="right" className="sm:max-w-135">
                           <SheetHeader className="mb-6">
                             <SheetTitle>{t('users.create')}</SheetTitle>
                           </SheetHeader>
@@ -398,7 +430,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                       </Sheet>
                     </ComboboxEmpty>
                     <ComboboxList>
-                      {users.map((user: { id: string; name: string; email: string }) => (
+                      {teamUsers.map((user: { id: string; name: string; email: string }) => (
                         <ComboboxItem key={user.id} value={user.id}>
                           <div className="flex flex-col">
                             <span className="font-medium">{user.name}</span>
@@ -412,7 +444,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
 
                 <div className="mt-4 space-y-2">
                   {field.state.value.map((member: TeamMember, index: number) => {
-                    const user = users.find((u: { id: string }) => u.id === member.userId)
+                    const user = selectedUsersById.get(member.userId)
                     if (!user) return null
 
                     return (
@@ -435,7 +467,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                             field.handleChange(updatedTeam)
                           }}
                         >
-                          <SelectTrigger className="w-[140px] h-8 text-xs">
+                          <SelectTrigger className="w-35 h-8 text-xs">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>

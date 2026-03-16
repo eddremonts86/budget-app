@@ -5,7 +5,7 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui'
 import { getTodosByProjectIdFn } from '@/modules/tasks'
-import { useUsers } from '@/modules/users'
+import { useUsersByIds } from '@/modules/users'
 import { toast } from '@/shared/lib/toast'
 import { deleteProjectFn } from '../api/projects.fn'
 import { useProjects, projectsKeys } from '../api/projects.queries'
@@ -17,7 +17,15 @@ import { ProjectCard } from './ProjectCard'
 export function ProjectsPage() {
   const { t } = useTranslation()
   const { data: projects, isLoading, error } = useProjects()
-  const { data: users = [] } = useUsers()
+  const projectMemberIds = React.useMemo(() => {
+    return Array.from(
+      new Set(
+        (projects || []).flatMap((project) => project.team?.map((member) => member.userId) || []),
+      ),
+    )
+  }, [projects])
+  const { data: users = [] } = useUsersByIds(projectMemberIds)
+  const usersById = React.useMemo(() => new Map(users.map((user) => [user.id, user])), [users])
   const queryClient = useQueryClient()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingProject, setEditingProject] = React.useState<Project | null>(null)
@@ -104,7 +112,7 @@ export function ProjectsPage() {
             <ProjectCard
               key={project.id}
               project={project}
-              users={users}
+              usersById={usersById}
               onEdit={setEditingProject}
               onDelete={handleDelete}
             />

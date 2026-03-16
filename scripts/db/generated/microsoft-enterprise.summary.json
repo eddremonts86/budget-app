@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "companyName": "Microsoft Demo Enterprise",
+    "generatedAt": "2026-03-16T12:00:00.000Z",
+    "seed": 20260316,
+    "employeeCount": 10000
+  },
+  "counts": {
+    "roles": 3,
+    "skills": 49,
+    "jobTitles": 173,
+    "experienceLevels": 6,
+    "aiTechnologies": 10,
+    "clients": 30,
+    "campaigns": 61,
+    "authUsers": 10000,
+    "users": 10000,
+    "externalIdentities": 2721,
+    "userSkills": 45875,
+    "departments": 15,
+    "teams": 137,
+    "teamMembers": 10094,
+    "projects": 109,
+    "projectSkills": 302,
+    "projectMembers": 2294,
+    "categories": 32,
+    "todos": 6325,
+    "todoDependencies": 1456,
+    "transactions": 920
+  }
+}

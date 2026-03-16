@@ -35,6 +35,8 @@ export interface UserListResponse {
   totalCount: number
 }
 
+const userIdsSchema = z.array(z.string().min(1)).max(5000)
+
 export const getUsersFn = createServerFn({ method: 'GET' })
   .inputValidator(
     z
@@ -205,6 +207,92 @@ export const getUserByIdFn = createServerFn({ method: 'GET' })
       createdAt: item.createdAt.toISOString(),
       updatedAt: item.updatedAt.toISOString(),
     }
+  })
+
+export const getUsersByIdsFn = createServerFn({ method: 'POST' })
+  .inputValidator(userIdsSchema)
+  .handler(async ({ data: ids }): Promise<UserType[]> => {
+    const uniqueIds = Array.from(new Set(ids))
+
+    if (process.env.VITE_E2E === 'true') {
+      return uniqueIds.map((id, index) => ({
+        id,
+        name: `User ${index + 1}`,
+        email: `user${index + 1}@example.com`,
+        roleId: 'role_user',
+        roleName: 'User',
+        avatar: null,
+        jobTitleId: null,
+        jobTitleName: 'Developer',
+        experienceLevelId: null,
+        experienceLevelName: null,
+        departmentId: null,
+        departmentName: 'Engineering',
+        reportsTo: null,
+        reportsToName: null,
+        salary: null,
+        skills: [] as string[],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      }))
+    }
+
+    if (uniqueIds.length === 0) {
+      return []
+    }
+
+    const { getDb } = await import('@/shared/lib/db')
+    const db = getDb()
+
+    const result = await db
+      .select({
+        id: users.id,
+        name: users.name,
+        email: users.email,
+        roleId: users.roleId,
+        roleName: roles.name,
+        avatar: users.avatar,
+        jobTitleId: users.jobTitleId,
+        jobTitleName: jobTitles.name,
+        experienceLevelId: users.experienceLevelId,
+        experienceLevelName: experienceLevels.name,
+        departmentId: users.departmentId,
+        departmentName: departments.name,
+        reportsTo: users.reportsTo,
+        reportsToName: sql<string>`(SELECT name FROM ${users} as u2 WHERE u2.id = ${users.reportsTo})`,
+        salary: users.salary,
+        createdAt: users.createdAt,
+        updatedAt: users.updatedAt,
+      })
+      .from(users)
+      .leftJoin(roles, eq(users.roleId, roles.id))
+      .leftJoin(jobTitles, eq(users.jobTitleId, jobTitles.id))
+      .leftJoin(experienceLevels, eq(users.experienceLevelId, experienceLevels.id))
+      .leftJoin(departments, eq(users.departmentId, departments.id))
+      .where(inArray(users.id, uniqueIds))
+
+    const usersById = new Map(
+      result.map((item) => [
+        item.id,
+        {
+          ...item,
+          skills: [] as string[],
+          createdAt: item.createdAt.toISOString(),
+          updatedAt: item.updatedAt.toISOString(),
+        },
+      ]),
+    )
+
+    const hydratedUsers: UserType[] = []
+
+    for (const id of uniqueIds) {
+      const user = usersById.get(id)
+      if (user) {
+        hydratedUsers.push(user)
+      }
+    }
+
+    return hydratedUsers
   })
 
 export const getUserByEmailFn = createServerFn({ method: 'GET' })

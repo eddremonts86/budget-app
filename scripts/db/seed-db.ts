@@ -3,7 +3,11 @@ import { eq } from 'drizzle-orm'
 import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 import * as schema from '../../src/shared/lib/db/schema'
-import * as seedData from './seed-data'
+import {
+  CORPORATE_SNAPSHOT_PATH,
+  readCorporateSnapshot,
+  writeCorporateSnapshot,
+} from './utils/corporate-dataset'
 
 dotenv.config()
 
@@ -12,124 +16,312 @@ if (!connectionString) {
   throw new Error('DATABASE_URL is not defined')
 }
 
-const client = postgres(connectionString)
+const resolvedConnectionString =
+  connectionString.includes('@db:5432') && !process.env.DOCKER_CONTAINER
+    ? connectionString.replace('@db:5432', '@127.0.0.1:5433')
+    : connectionString
+
+const client = postgres(resolvedConnectionString)
 const db = drizzle(client, { schema })
 
+async function insertInChunks(
+  table: unknown,
+  rows: Array<Record<string, unknown>>,
+  chunkSize = 500,
+) {
+  for (let index = 0; index < rows.length; index += chunkSize) {
+    const chunk = rows.slice(index, index + chunkSize)
+    if (chunk.length > 0) {
+      await db.insert(table as never).values(chunk as never)
+    }
+  }
+}
+
+async function safeDelete(table: unknown) {
+  try {
+    await db.delete(table as never)
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      'cause' in error &&
+      typeof error.cause === 'object' &&
+      error.cause !== null &&
+      'code' in error.cause &&
+      (error.cause as { code?: string }).code === '42P01'
+    ) {
+      return
+    }
+    throw error
+  }
+}
+
+function parseDate(value: unknown) {
+  return typeof value === 'string' ? new Date(value) : value
+}
+
+async function loadSnapshot() {
+  try {
+    return await readCorporateSnapshot()
+  } catch {
+    console.log(`Snapshot not found at ${CORPORATE_SNAPSHOT_PATH}. Generating it now...`)
+    await writeCorporateSnapshot()
+    return readCorporateSnapshot()
+  }
+}
+
 async function seed() {
-  console.log('🌱 Seeding database...')
+  console.log('🌱 Importing corporate snapshot into database...')
 
   try {
+    const snapshot = await loadSnapshot()
+
     console.log('Cleaning existing data...')
-    await db.delete(schema.projectMembers).catch(() => {})
-    await db.delete(schema.transactions).catch(() => {})
-    await db.delete(schema.todos).catch(() => {})
-    await db.delete(schema.projects).catch(() => {})
-    await db.delete(schema.teams).catch(() => {})
-    await db.delete(schema.users).catch(() => {})
-    await db.delete(schema.departments).catch(() => {})
-    await db.delete(schema.categories).catch(() => {})
+    await safeDelete(schema.todoDependencies)
+    await safeDelete(schema.projectMembers)
+    await safeDelete(schema.teamMembers)
+    await safeDelete(schema.projectSkills)
+    await safeDelete(schema.userSkills)
+    await safeDelete(schema.externalIdentities)
+    await safeDelete(schema.transactions)
+    await safeDelete(schema.todos)
+    await safeDelete(schema.projects)
+    await safeDelete(schema.teams)
+    await safeDelete(schema.users)
+    await safeDelete(schema.campaigns)
+    await safeDelete(schema.clients)
+    await safeDelete(schema.departments)
+    await safeDelete(schema.categories)
+    await safeDelete(schema.authAccounts)
+    await safeDelete(schema.authSessions)
+    await safeDelete(schema.authVerifications)
+    await safeDelete(schema.authUsers)
+    await safeDelete(schema.aiTechnologies)
+    await safeDelete(schema.jobTitles)
+    await safeDelete(schema.experienceLevels)
+    await safeDelete(schema.skills)
+    await safeDelete(schema.roles)
 
-    if (seedData.categories.length > 0) {
-      console.log(`Inserting ${seedData.categories.length} categories...`)
-      await db.insert(schema.categories).values(seedData.categories)
+    console.log(`Inserting ${snapshot.roles.length} roles...`)
+    await insertInChunks(
+      schema.roles,
+      snapshot.roles.map((roleRow) => ({
+        ...roleRow,
+        createdAt: parseDate(roleRow.createdAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.experienceLevels.length} experience levels...`)
+    await insertInChunks(
+      schema.experienceLevels,
+      snapshot.experienceLevels.map((experienceLevelRow) => ({
+        ...experienceLevelRow,
+        createdAt: parseDate(experienceLevelRow.createdAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.jobTitles.length} job titles...`)
+    await insertInChunks(
+      schema.jobTitles,
+      snapshot.jobTitles.map((jobTitleRow) => ({
+        ...jobTitleRow,
+        createdAt: parseDate(jobTitleRow.createdAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.skills.length} skills...`)
+    await insertInChunks(
+      schema.skills,
+      snapshot.skills.map((skillRow) => ({
+        ...skillRow,
+        createdAt: parseDate(skillRow.createdAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.aiTechnologies.length} AI technologies...`)
+    await insertInChunks(
+      schema.aiTechnologies,
+      snapshot.aiTechnologies.map((technologyRow) => ({
+        ...technologyRow,
+        createdAt: parseDate(technologyRow.createdAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.clients.length} clients...`)
+    await insertInChunks(
+      schema.clients,
+      snapshot.clients.map((clientRow) => ({
+        ...clientRow,
+        createdAt: parseDate(clientRow.createdAt),
+        updatedAt: parseDate(clientRow.updatedAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.campaigns.length} campaigns...`)
+    await insertInChunks(
+      schema.campaigns,
+      snapshot.campaigns.map((campaignRow) => ({
+        ...campaignRow,
+        startDate: parseDate(campaignRow.startDate),
+        endDate: parseDate(campaignRow.endDate),
+        createdAt: parseDate(campaignRow.createdAt),
+        updatedAt: parseDate(campaignRow.updatedAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.categories.length} categories...`)
+    await insertInChunks(schema.categories, snapshot.categories)
+
+    console.log(`Inserting ${snapshot.authUsers.length} auth users...`)
+    await insertInChunks(
+      schema.authUsers,
+      snapshot.authUsers.map((authUserRow) => ({
+        ...authUserRow,
+        createdAt: parseDate(authUserRow.createdAt),
+        updatedAt: parseDate(authUserRow.updatedAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.departments.length} departments...`)
+    await insertInChunks(
+      schema.departments,
+      snapshot.departments.map((departmentRow) => ({
+        ...departmentRow,
+        managerId: null,
+        createdAt: parseDate(departmentRow.createdAt),
+        updatedAt: parseDate(departmentRow.updatedAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.users.length} users...`)
+    await insertInChunks(
+      schema.users,
+      snapshot.users.map((userRow) => ({
+        ...userRow,
+        hireDate: parseDate(userRow.hireDate),
+        createdAt: parseDate(userRow.createdAt),
+        updatedAt: parseDate(userRow.updatedAt),
+      })),
+      400,
+    )
+
+    console.log(`Inserting ${snapshot.externalIdentities.length} external identities...`)
+    await insertInChunks(
+      schema.externalIdentities,
+      snapshot.externalIdentities.map((identityRow) => ({
+        ...identityRow,
+        createdAt: parseDate(identityRow.createdAt),
+        updatedAt: parseDate(identityRow.updatedAt),
+        lastLoginAt: parseDate(identityRow.lastLoginAt),
+      })),
+    )
+
+    console.log(`Inserting ${snapshot.userSkills.length} user skill assignments...`)
+    await insertInChunks(
+      schema.userSkills,
+      snapshot.userSkills.map((skillRow) => ({
+        ...skillRow,
+        assignedAt: parseDate(skillRow.assignedAt),
+      })),
+      1000,
+    )
+
+    console.log('Updating department managers...')
+    for (const departmentRow of snapshot.departments) {
+      await db
+        .update(schema.departments)
+        .set({ managerId: departmentRow.managerId as string | null })
+        .where(eq(schema.departments.id, departmentRow.id as string))
     }
 
-    if ((seedData as any).departments?.length > 0) {
-      console.log(`Inserting ${(seedData as any).departments.length} departments...`)
-      await db.insert(schema.departments).values(
-        (seedData as any).departments.map((d: any) => ({
-          ...d,
-          managerId: null,
-          createdAt: d.createdAt ? new Date(d.createdAt) : new Date(),
-          updatedAt: d.updatedAt ? new Date(d.updatedAt) : new Date(),
-        })),
-      )
-    }
+    console.log(`Inserting ${snapshot.teams.length} teams...`)
+    await insertInChunks(
+      schema.teams,
+      snapshot.teams.map((teamRow) => ({
+        ...teamRow,
+        createdAt: parseDate(teamRow.createdAt),
+        updatedAt: parseDate(teamRow.updatedAt),
+      })),
+    )
 
-    if (seedData.users.length > 0) {
-      console.log(`Inserting ${seedData.users.length} users...`)
-      await db.insert(schema.users).values(
-        seedData.users.map((u: any) => ({
-          ...u,
-          createdAt: u.createdAt ? new Date(u.createdAt) : new Date(),
-        })),
-      )
-    }
+    console.log(`Inserting ${snapshot.teamMembers.length} team memberships...`)
+    await insertInChunks(
+      schema.teamMembers,
+      snapshot.teamMembers.map((teamMemberRow) => ({
+        ...teamMemberRow,
+        joinedAt: parseDate(teamMemberRow.joinedAt),
+      })),
+      1000,
+    )
 
-    if ((seedData as any).departments?.length > 0) {
-      console.log('Updating departments with managers...')
-      for (const d of (seedData as any).departments) {
-        if (d.managerId) {
-          await db
-            .update(schema.departments)
-            .set({ managerId: d.managerId })
-            .where(eq(schema.departments.id, d.id))
-        }
-      }
-    }
+    console.log(`Inserting ${snapshot.projects.length} projects...`)
+    await insertInChunks(
+      schema.projects,
+      snapshot.projects.map((projectRow) => ({
+        ...projectRow,
+        startDate: parseDate(projectRow.startDate),
+        endDate: parseDate(projectRow.endDate),
+        createdAt: parseDate(projectRow.createdAt),
+        updatedAt: parseDate(projectRow.updatedAt),
+      })),
+    )
 
-    if (seedData.teams.length > 0) {
-      console.log(`Inserting ${seedData.teams.length} teams...`)
-      await db.insert(schema.teams).values(
-        seedData.teams.map((t: any) => ({
-          ...t,
-          createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
-          updatedAt: t.updatedAt ? new Date(t.updatedAt) : new Date(),
-        })),
-      )
-    }
+    console.log(`Inserting ${snapshot.projectSkills.length} project skills...`)
+    await insertInChunks(schema.projectSkills, snapshot.projectSkills, 1000)
 
-    if (seedData.projects.length > 0) {
-      console.log(`Inserting ${seedData.projects.length} projects...`)
-      await db.insert(schema.projects).values(
-        seedData.projects.map((p: any) => ({
-          ...p,
-          startDate: p.startDate ? new Date(p.startDate) : null,
-          endDate: p.endDate ? new Date(p.endDate) : null,
-          createdAt: p.createdAt ? new Date(p.createdAt) : new Date(),
-          updatedAt: p.updatedAt ? new Date(p.updatedAt) : new Date(),
-        })),
-      )
-    }
+    console.log(`Inserting ${snapshot.projectMembers.length} project memberships...`)
+    await insertInChunks(
+      schema.projectMembers,
+      snapshot.projectMembers.map((projectMemberRow) => ({
+        ...projectMemberRow,
+        joinedAt: parseDate(projectMemberRow.joinedAt),
+        updatedAt: parseDate(projectMemberRow.updatedAt),
+      })),
+      750,
+    )
 
-    if ((seedData as any).projectMembers?.length > 0) {
-      console.log(`Inserting ${(seedData as any).projectMembers.length} project members...`)
-      await db.insert(schema.projectMembers).values(
-        (seedData as any).projectMembers.map((pm: any) => ({
-          ...pm,
-          joinedAt: pm.joinedAt ? new Date(pm.joinedAt) : new Date(),
-          updatedAt: pm.updatedAt ? new Date(pm.updatedAt) : new Date(),
-        })),
-      )
-    }
+    console.log(`Inserting ${snapshot.todos.length} todos...`)
+    await insertInChunks(
+      schema.todos,
+      snapshot.todos.map((todoRow) => ({
+        ...todoRow,
+        dueDate: parseDate(todoRow.dueDate),
+        completedAt: parseDate(todoRow.completedAt),
+        createdAt: parseDate(todoRow.createdAt),
+        updatedAt: parseDate(todoRow.updatedAt),
+      })),
+      500,
+    )
 
-    if (seedData.todos.length > 0) {
-      console.log(`Inserting ${seedData.todos.length} todos...`)
-      await db.insert(schema.todos).values(
-        seedData.todos.map((t: any) => ({
-          ...t,
-          dueDate: t.dueDate ? new Date(t.dueDate) : null,
-          completedAt: t.completedAt ? new Date(t.completedAt) : null,
-          createdAt: t.createdAt ? new Date(t.createdAt) : new Date(),
-          updatedAt: t.updatedAt ? new Date(t.updatedAt) : new Date(),
-        })),
-      )
-    }
+    console.log(`Inserting ${snapshot.todoDependencies.length} todo dependencies...`)
+    await insertInChunks(schema.todoDependencies, snapshot.todoDependencies, 1000)
 
-    if (seedData.transactions.length > 0) {
-      console.log(`Inserting ${seedData.transactions.length} transactions...`)
-      await db.insert(schema.transactions).values(
-        seedData.transactions.map((t: any) => ({
-          ...t,
-          date: t.date ? new Date(t.date) : new Date(),
-          approvedAt: t.approvedAt ? new Date(t.approvedAt) : null,
-        })),
-      )
-    }
+    console.log(`Inserting ${snapshot.transactions.length} transactions...`)
+    await insertInChunks(
+      schema.transactions,
+      snapshot.transactions.map((transactionRow) => ({
+        ...transactionRow,
+        date: parseDate(transactionRow.date),
+        approvedAt: parseDate(transactionRow.approvedAt),
+      })),
+      500,
+    )
 
-    console.log('✅ Database seeded successfully!')
+    console.log('✅ Database imported successfully!')
+    console.log(
+      JSON.stringify(
+        {
+          users: snapshot.users.length,
+          projects: snapshot.projects.length,
+          todos: snapshot.todos.length,
+          transactions: snapshot.transactions.length,
+          teams: snapshot.teams.length,
+        },
+        null,
+        2,
+      ),
+    )
   } catch (error) {
-    console.error('❌ Error seeding database:', error)
+    console.error('❌ Error importing database snapshot:', error)
     process.exit(1)
   } finally {
     await client.end()

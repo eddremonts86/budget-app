@@ -26,7 +26,6 @@ import {
 } from '@/components/ui'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { ensureAppAuthSession } from '@/shared/lib/auth/app-auth.functions'
-import { authClient } from '@/shared/lib/auth/better-auth-client'
 import {
   getClerkPublishableKey,
   isBetterAuthEnabled,
@@ -90,25 +89,6 @@ function getLocalizedSignUpValidationMessage(
         String(AUTH_SIGN_UP_MIN_PASSWORD_LENGTH),
       )
   }
-}
-
-function getAuthErrorMessage(error: unknown, translate: (key: string) => string): string {
-  if (error && typeof error === 'object' && 'code' in error && typeof error.code === 'string') {
-    if (error.code === 'AUTH_NAME_REQUIRED' || error.code === 'AUTH_PASSWORD_TOO_WEAK') {
-      return getLocalizedSignUpValidationMessage(error.code, translate)
-    }
-  }
-
-  if (
-    error &&
-    typeof error === 'object' &&
-    'message' in error &&
-    typeof error.message === 'string'
-  ) {
-    return error.message
-  }
-
-  return translate('common.unknownError')
 }
 
 export function AuthPage(): React.JSX.Element {

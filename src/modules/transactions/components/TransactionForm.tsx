@@ -3,6 +3,14 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from '@/components/ui/combobox'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
@@ -13,7 +21,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useProjects } from '@/modules/projects'
-import { useCurrentUser, useUsers } from '@/modules/users'
+import { useCurrentUser, useUserDirectory, useUsersByIds } from '@/modules/users'
+import type { User } from '@/modules/users'
 import {
   canApproveTransaction,
   getAssignableApprovers,
@@ -51,14 +60,29 @@ export function TransactionForm({
   isLoading,
 }: TransactionFormProps) {
   const { t } = useTranslation()
-  const { data: users = [] } = useUsers()
   const { data: projects = [] } = useProjects()
   const { roleKey, syncedUserId: currentUserId } = useCurrentUser()
+  const [userSearch, setUserSearch] = React.useState('')
+  const [approverSearch, setApproverSearch] = React.useState('')
+  const [lookupUserIds, setLookupUserIds] = React.useState<string[]>(() =>
+    [defaultValues?.userId, defaultValues?.assignedAdminId].filter((value): value is string =>
+      Boolean(value),
+    ),
+  )
+  const { data: selectedUsers = [] } = useUsersByIds(lookupUserIds)
+  const { data: userDirectory = [] } = useUserDirectory(
+    userSearch.trim() || undefined,
+    userSearch.trim() ? 50 : 25,
+  )
+  const { data: approverDirectory = [] } = useUserDirectory(
+    approverSearch.trim() || undefined,
+    approverSearch.trim() ? 50 : 25,
+  )
   const canEditApprovalStatus = React.useMemo(() => {
     if (defaultValues) {
       return canApproveTransaction(
         {
-          status: defaultValues.status,
+          status: defaultValues.status ?? 'Pending',
           assignedAdminId: defaultValues.assignedAdminId ?? null,
         },
         currentUserId,
@@ -69,7 +93,30 @@ export function TransactionForm({
     return isAdminRole(roleKey)
   }, [currentUserId, defaultValues, roleKey])
 
-  const approvers = React.useMemo(() => getAssignableApprovers(users), [users])
+  const selectableUsers = React.useMemo(() => {
+    const usersById = new Map<string, User>()
+
+    for (const user of selectedUsers) {
+      usersById.set(user.id, user)
+    }
+
+    for (const user of userDirectory) {
+      usersById.set(user.id, user)
+    }
+
+    return [...usersById.values()]
+  }, [selectedUsers, userDirectory])
+
+  const approvers = React.useMemo(() => {
+    const usersById = new Map<string, User>()
+    const mergedUsers = [...selectedUsers, ...approverDirectory]
+
+    for (const user of getAssignableApprovers(mergedUsers)) {
+      usersById.set(user.id, user)
+    }
+
+    return [...usersById.values()]
+  }, [approverDirectory, selectedUsers])
 
   const transactionSchema = React.useMemo(() => createTransactionSchema(t), [t])
   const form = useForm({
@@ -145,18 +192,40 @@ export function TransactionForm({
         {(field) => (
           <Field>
             <FieldLabel htmlFor={field.name}>{t('transactions.form.userLabel')}</FieldLabel>
-            <Select value={field.state.value} onValueChange={field.handleChange}>
-              <SelectTrigger id={field.name}>
-                <SelectValue placeholder={t('transactions.form.userPlaceholder')} />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <Combobox
+              value={field.state.value}
+              onValueChange={(value) => {
+                const nextValue = String(value)
+                field.handleChange(nextValue)
+                setLookupUserIds((prev) =>
+                  Array.from(
+                    new Set([...prev.filter((id) => id !== field.state.value), nextValue]),
+                  ),
+                )
+              }}
+            >
+              <ComboboxInput
+                placeholder={t('transactions.form.userPlaceholder')}
+                value={userSearch}
+                onChange={(event) => setUserSearch(event.target.value)}
+                showClear
+              />
+              <ComboboxContent>
+                <ComboboxEmpty>
+                  {t('team.emptyUsers', { defaultValue: 'No users available.' })}
+                </ComboboxEmpty>
+                <ComboboxList>
+                  {selectableUsers.map((user) => (
+                    <ComboboxItem key={user.id} value={user.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{user.name}</span>
+                        <span className="text-xs text-muted-foreground">{user.email}</span>
+                      </div>
+                    </ComboboxItem>
+                  ))}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
             <FieldError
               errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
             />
@@ -261,19 +330,45 @@ export function TransactionForm({
       <form.Field name="assignedAdminId">
         {(field) => (
           <Field>
-            <FieldLabel htmlFor={field.name}>Assigned Approver</FieldLabel>
-            <Select value={field.state.value} onValueChange={field.handleChange}>
-              <SelectTrigger id={field.name}>
-                <SelectValue placeholder="Select Approver" />
-              </SelectTrigger>
-              <SelectContent>
-                {approvers.map((approver) => (
-                  <SelectItem key={approver.id} value={approver.id}>
-                    {approver.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            <FieldLabel htmlFor={field.name}>
+              {t('transactions.form.assignedAdminLabel', { defaultValue: 'Assigned Approver' })}
+            </FieldLabel>
+            <Combobox
+              value={field.state.value}
+              onValueChange={(value) => {
+                const nextValue = String(value)
+                field.handleChange(nextValue)
+                setLookupUserIds((prev) =>
+                  Array.from(
+                    new Set([...prev.filter((id) => id !== field.state.value), nextValue]),
+                  ),
+                )
+              }}
+            >
+              <ComboboxInput
+                placeholder={t('transactions.form.assignedAdminPlaceholder', {
+                  defaultValue: 'Select approver',
+                })}
+                value={approverSearch}
+                onChange={(event) => setApproverSearch(event.target.value)}
+                showClear
+              />
+              <ComboboxContent>
+                <ComboboxEmpty>
+                  {t('transactions.form.noApprovers', { defaultValue: 'No approvers available.' })}
+                </ComboboxEmpty>
+                <ComboboxList>
+                  {approvers.map((approver) => (
+                    <ComboboxItem key={approver.id} value={approver.id}>
+                      <div className="flex flex-col">
+                        <span className="font-medium">{approver.name}</span>
+                        <span className="text-xs text-muted-foreground">{approver.email}</span>
+                      </div>
+                    </ComboboxItem>
+                  ))}
+                </ComboboxList>
+              </ComboboxContent>
+            </Combobox>
             <FieldError
               errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
             />

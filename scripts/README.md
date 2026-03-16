@@ -16,7 +16,11 @@ This directory only keeps real operational entrypoints grouped by responsibility
 - `pnpm ai:switch`
 - `pnpm rag:ingest`
 - `pnpm test:ai-integration`
+- `pnpm test:seeded:smoke`
 - `pnpm db:seed`
+- `pnpm db:seed:generate`
+- `pnpm db:seed:import`
+- `pnpm db:seed:realistic`
 - `pnpm db:seed:complex`
 - `pnpm db:seed:tx232`
 - `pnpm docker:up`

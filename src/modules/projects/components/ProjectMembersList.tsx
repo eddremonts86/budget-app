@@ -26,7 +26,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
-import { useUsers, useCreateUser } from '@/modules/users'
+import { useCreateUser, useUserDirectory } from '@/modules/users'
 import { UserForm, type UserFormValues } from '@/modules/users'
 import type { User } from '@/modules/users'
 import {
@@ -50,7 +50,10 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
   const [isRegisteringUser, setIsRegisteringUser] = useState(false)
 
   const { data: members, isLoading: isLoadingMembers } = useProjectMembers(projectId)
-  const { data: allUsers, isLoading: isLoadingUsers } = useUsers()
+  const { data: directoryUsers = [], isLoading: isLoadingUsers } = useUserDirectory(
+    userSearchTerm.trim() || undefined,
+    userSearchTerm.trim() ? 50 : 25,
+  )
 
   const addMember = useAddProjectMember()
   const updateMember = useUpdateProjectMember()
@@ -67,16 +70,10 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
   }, [members, searchTerm])
 
   const availableUsers = useMemo(() => {
-    if (!allUsers || !members) return []
+    if (!members) return []
     const memberUserIds = new Set((members as ProjectMember[]).map((m) => m.userId))
-    return (allUsers as User[])
-      .filter((user) => !memberUserIds.has(user.id))
-      .filter(
-        (user) =>
-          user.name.toLowerCase().includes(userSearchTerm.toLowerCase()) ||
-          user.email.toLowerCase().includes(userSearchTerm.toLowerCase()),
-      )
-  }, [allUsers, members, userSearchTerm])
+    return (directoryUsers as User[]).filter((user) => !memberUserIds.has(user.id))
+  }, [directoryUsers, members])
 
   const handleAddMember = (userId: string) => {
     addMember.mutate({
@@ -112,7 +109,7 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
     }
   }
 
-  if (isLoadingMembers || isLoadingUsers) {
+  if (isLoadingMembers) {
     return (
       <div className="space-y-4">
         <Skeleton className="h-10 w-full" />
@@ -142,7 +139,7 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
                   {t('projects.members.add')}
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-[240px]">
+              <DropdownMenuContent align="end" className="w-60">
                 <div className="p-2">
                   <div className="relative">
                     <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -157,8 +154,12 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
                     />
                   </div>
                 </div>
-                <div className="max-h-[300px] overflow-y-auto">
-                  {availableUsers.length === 0 ? (
+                <div className="max-h-75 overflow-y-auto">
+                  {isLoadingUsers ? (
+                    <div className="p-4 text-center text-sm text-muted-foreground">
+                      {t('common.loading')}
+                    </div>
+                  ) : availableUsers.length === 0 ? (
                     <div className="p-4 text-center text-sm text-muted-foreground">
                       {t('projects.members.noAvailableUsers')}
                     </div>
@@ -175,7 +176,7 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
                         </Avatar>
                         <div className="flex flex-col">
                           <span className="text-sm font-medium">{user.name}</span>
-                          <span className="text-xs text-muted-foreground truncate max-w-[150px]">
+                          <span className="text-xs text-muted-foreground truncate max-w-37.5">
                             {user.email}
                           </span>
                         </div>
@@ -223,7 +224,7 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
                           handleUpdateRole(member.userId, value as ProjectMemberRole)
                         }
                       >
-                        <SelectTrigger className="h-8 w-[120px]">
+                        <SelectTrigger className="h-8 w-30">
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
@@ -251,7 +252,7 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
         </CardContent>
       </Card>
       <Sheet open={isRegisteringUser} onOpenChange={setIsRegisteringUser}>
-        <SheetContent className="sm:max-w-[500px]">
+        <SheetContent className="sm:max-w-125">
           <SheetHeader>
             <SheetTitle>{t('projects.members.register')}</SheetTitle>
             <SheetDescription>{t('projects.members.registerDescription')}</SheetDescription>

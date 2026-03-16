@@ -26,7 +26,6 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
       createJsonErrorResponse,
       createJsonResponse,
       findLastUserQuery,
-      getErrorDetails,
       injectReferenceContext,
       isDashboardDomainQuery,
       normalizeIncomingChatMessages,

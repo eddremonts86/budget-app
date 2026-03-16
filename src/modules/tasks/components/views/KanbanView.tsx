@@ -1,8 +1,7 @@
 import { type DragEndEvent, type DragStartEvent } from '@dnd-kit/core'
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { useUsers } from '@/modules/users'
-import { useCurrentUser } from '@/modules/users'
+import { useCurrentUser, useUsersByIds } from '@/modules/users'
 import {
   todoKeys,
   useDeleteTodo,
@@ -21,7 +20,6 @@ interface KanbanViewProps {
 
 export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
   const queryClient = useQueryClient()
-  const { data: users } = useUsers()
   const { syncedUserId, userRole } = useCurrentUser()
   const updateMutation = useUpdateTodo({ invalidateKeys: [todoKeys.all] })
   const deleteMutation = useDeleteTodo()
@@ -33,16 +31,6 @@ export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
   const completedQuery = useInfiniteTodos(10, 'completed', assignedTo)
 
   const [activeTodo, setActiveTodo] = React.useState<Todo | null>(null)
-
-  const userMap = React.useMemo(() => {
-    const map = new Map<string, { name: string; avatar: string }>()
-    if (users) {
-      for (const u of users) {
-        map.set(u.id, { name: u.name, avatar: u.avatar || '' })
-      }
-    }
-    return map
-  }, [users])
 
   const columns = React.useMemo(() => {
     return {
@@ -59,6 +47,27 @@ export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
     onHoldQuery.data,
     completedQuery.data,
   ])
+
+  const assigneeIds = React.useMemo(() => {
+    return Array.from(
+      new Set(
+        Object.values(columns)
+          .flat()
+          .map((todo) => todo.assignedTo)
+          .filter((assignedUserId): assignedUserId is string => Boolean(assignedUserId)),
+      ),
+    )
+  }, [columns])
+
+  const { data: users = [] } = useUsersByIds(assigneeIds)
+
+  const userMap = React.useMemo(() => {
+    const map = new Map<string, { name: string; avatar: string }>()
+    for (const user of users) {
+      map.set(user.id, { name: user.name, avatar: user.avatar || '' })
+    }
+    return map
+  }, [users])
 
   const totalCounts = React.useMemo(() => {
     return {

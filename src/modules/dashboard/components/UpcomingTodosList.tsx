@@ -26,8 +26,8 @@ import {
   AvatarFallback,
   Separator,
 } from '@/components/ui'
+import { useUsersByIds } from '@/modules/users'
 import { cn } from '@/shared/utils'
-import { useUsers } from '@/modules/users'
 import { useUpcomingTodos } from '../api/dashboard.queries'
 
 interface UserFilterProps {
@@ -121,7 +121,12 @@ function UserFilter({ users, selectedUsers, onSelectionChange }: UserFilterProps
                 tabIndex={0}
                 className="flex items-center space-x-2 rounded-sm px-2 py-1.5 hover:bg-accent hover:text-accent-foreground cursor-pointer"
                 onClick={() => toggleUser(user.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleUser(user.id) } }}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    toggleUser(user.id)
+                  }
+                }}
               >
                 <Checkbox
                   checked={selectedUsers.has(user.id)}
@@ -161,8 +166,20 @@ function UserFilter({ users, selectedUsers, onSelectionChange }: UserFilterProps
 export function UpcomingTodosList() {
   const { t } = useTranslation()
   const { data: todos, isLoading: isLoadingTodos } = useUpcomingTodos()
-  const { data: users, isLoading: isLoadingUsers } = useUsers()
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
+
+  const assigneeIds = useMemo(() => {
+    const list = Array.isArray(todos) ? todos : []
+    return Array.from(
+      new Set(
+        list
+          .map((todo) => todo.assignedTo)
+          .filter((assignedUserId): assignedUserId is string => Boolean(assignedUserId)),
+      ),
+    )
+  }, [todos])
+
+  const { data: users = [], isLoading: isLoadingUsers } = useUsersByIds(assigneeIds)
 
   const isLoading = isLoadingTodos || isLoadingUsers
 
@@ -173,7 +190,6 @@ export function UpcomingTodosList() {
   }, [todos, selectedUserIds])
 
   const userMap = useMemo(() => {
-    if (!users) return new Map()
     return new Map(users.map((u) => [u.id, u]))
   }, [users])
 
@@ -223,7 +239,7 @@ export function UpcomingTodosList() {
             {t('dashboard.upcomingTasks.description', 'Tasks due this week.')}
           </CardDescription>
         </div>
-        {users && (
+        {users.length > 0 && (
           <UserFilter
             users={users}
             selectedUsers={selectedUserIds}
@@ -257,7 +273,7 @@ export function UpcomingTodosList() {
                 </TableRow>
               ) : (
                 todoList.map((todo) => {
-                  const assignedUser = userMap.get(todo.assignedTo)
+                  const assignedUser = todo.assignedTo ? userMap.get(todo.assignedTo) : undefined
                   return (
                     <TableRow key={todo.id}>
                       <TableCell className="font-medium">{todo.title}</TableCell>
