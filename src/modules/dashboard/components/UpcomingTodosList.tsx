@@ -29,6 +29,7 @@ import {
 import { useUsersByIds } from '@/modules/users'
 import { cn } from '@/shared/utils'
 import { useUpcomingTodos } from '../api/dashboard.queries'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
 
 interface UserFilterProps {
   users: Array<{ id: string; name: string; avatar?: string | null }>
@@ -165,7 +166,12 @@ function UserFilter({ users, selectedUsers, onSelectionChange }: UserFilterProps
 
 export function UpcomingTodosList() {
   const { t } = useTranslation()
-  const { data: todos, isLoading: isLoadingTodos } = useUpcomingTodos()
+  const {
+    data: todos,
+    isLoading: isLoadingTodos,
+    isFetching: isFetchingTodos,
+    refetch,
+  } = useUpcomingTodos()
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
 
   const assigneeIds = useMemo(() => {
@@ -238,14 +244,30 @@ export function UpcomingTodosList() {
           <CardDescription>
             {t('dashboard.upcomingTasks.description', 'Tasks due this week.')}
           </CardDescription>
+          {isFetchingTodos ? (
+            <div className="mt-1">
+              <WidgetRefreshingIndicator />
+            </div>
+          ) : null}
         </div>
-        {users.length > 0 && (
-          <UserFilter
-            users={users}
-            selectedUsers={selectedUserIds}
-            onSelectionChange={setSelectedUserIds}
+        <div className="flex items-center gap-2">
+          {users.length > 0 && (
+            <UserFilter
+              users={users}
+              selectedUsers={selectedUserIds}
+              onSelectionChange={setSelectedUserIds}
+            />
+          )}
+          <WidgetRefreshButton
+            isRefreshing={isFetchingTodos}
+            onRefresh={() => {
+              void refetch()
+            }}
+            label={t('dashboard.actions.refreshUpcomingTasks', {
+              defaultValue: 'Refresh upcoming tasks',
+            })}
           />
-        )}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="relative max-h-100 overflow-y-auto">

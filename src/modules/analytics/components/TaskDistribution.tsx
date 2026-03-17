@@ -1,11 +1,17 @@
+import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Bar, BarChart, XAxis, YAxis } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { ChartContainer, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart'
+import type { ChartConfig } from '@/components/ui/chart'
 import { Skeleton } from '@/components/ui/skeleton'
 import { taskDistributionQueryOptions } from '../api/analytics.queries'
+
+const LazyTaskDistributionContent = React.lazy(() =>
+  import('./TaskDistributionContent').then((module) => ({
+    default: module.TaskDistributionContent,
+  })),
+)
 
 export function TaskDistribution() {
   const { t } = useTranslation()
@@ -46,7 +52,7 @@ export function TaskDistribution() {
         },
       ]),
     ),
-  }
+  } satisfies ChartConfig
 
   const priorityConfig = {
     count: {
@@ -61,7 +67,7 @@ export function TaskDistribution() {
         },
       ]),
     ),
-  }
+  } satisfies ChartConfig
 
   if (isLoading) {
     return (
@@ -114,73 +120,30 @@ export function TaskDistribution() {
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {t('analytics.taskDistribution.byStatus', { defaultValue: 'Tasks by Status' })}
-          </CardTitle>
-          <CardDescription>
-            {t('analytics.taskDistribution.byStatusDesc', {
-              defaultValue: 'Current distribution of tasks',
-            })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={statusConfig} className="min-h-[200px] w-full">
-            <BarChart data={translatedData?.byStatus}>
-              <XAxis
-                dataKey="name"
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}`}
-              />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              <Bar dataKey="value" fill="var(--color-count)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-      <Card>
-        <CardHeader>
-          <CardTitle>
-            {t('analytics.taskDistribution.byPriority', { defaultValue: 'Tasks by Priority' })}
-          </CardTitle>
-          <CardDescription>
-            {t('analytics.taskDistribution.byPriorityDesc', { defaultValue: 'Priority breakdown' })}
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <ChartContainer config={priorityConfig} className="min-h-[200px] w-full">
-            <BarChart data={translatedData?.byPriority}>
-              <XAxis
-                dataKey="name"
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-              />
-              <YAxis
-                stroke="#888888"
-                fontSize={12}
-                tickLine={false}
-                axisLine={false}
-                tickFormatter={(value) => `${value}`}
-              />
-              <ChartTooltip cursor={false} content={<ChartTooltipContent />} />
-              <Bar dataKey="value" fill="var(--color-count)" radius={[4, 4, 0, 0]} />
-            </BarChart>
-          </ChartContainer>
-        </CardContent>
-      </Card>
-    </div>
+    <React.Suspense
+      fallback={
+        <div className="grid gap-4 md:grid-cols-2">
+          <Skeleton className="h-[300px]" />
+          <Skeleton className="h-[300px]" />
+        </div>
+      }
+    >
+      <LazyTaskDistributionContent
+        byStatus={translatedData?.byStatus ?? []}
+        byPriority={translatedData?.byPriority ?? []}
+        statusConfig={statusConfig}
+        priorityConfig={priorityConfig}
+        statusTitle={t('analytics.taskDistribution.byStatus', { defaultValue: 'Tasks by Status' })}
+        statusDescription={t('analytics.taskDistribution.byStatusDesc', {
+          defaultValue: 'Current distribution of tasks',
+        })}
+        priorityTitle={t('analytics.taskDistribution.byPriority', {
+          defaultValue: 'Tasks by Priority',
+        })}
+        priorityDescription={t('analytics.taskDistribution.byPriorityDesc', {
+          defaultValue: 'Priority breakdown',
+        })}
+      />
+    </React.Suspense>
   )
 }

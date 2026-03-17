@@ -1,12 +1,243 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, desc, and, gte, lte, count, sql } from 'drizzle-orm'
+import { eq, desc, and, gte, lte, count, sql, inArray } from 'drizzle-orm'
 import { z } from 'zod'
-import { todos, users, transactions, projects, categories } from '@/shared/lib/db/schema'
+import {
+  todos,
+  users,
+  transactions,
+  projects,
+  categories,
+  projectMembers,
+  teamMembers,
+} from '@/shared/lib/db/schema'
 
 async function loadDb() {
   const { getDb } = await import('@/shared/lib/db')
   return getDb()
 }
+
+const DASHBOARD_METRIC_KEYS = ['netBalance', 'revenue', 'expenses', 'activeProjects'] as const
+
+const dashboardMetricSchema = z.enum(DASHBOARD_METRIC_KEYS)
+
+const MOCK_DASHBOARD_STATS = {
+  revenue: {
+    value: 125000,
+    change: 12.5,
+    trend: 'up' as const,
+    periodTotal: 45000,
+    pendingApprovalTotal: 5000,
+    periodDays: 30,
+  },
+  expenses: {
+    value: 45000,
+    change: 5.2,
+    trend: 'up' as const,
+    periodTotal: 15000,
+    periodDays: 30,
+  },
+  netBalance: {
+    value: 80000,
+    change: 15.8,
+    trend: 'up' as const,
+    periodTotal: 30000,
+    periodDays: 30,
+  },
+  activeProjects: {
+    value: 12,
+    change: 0,
+    trend: 'up' as const,
+    context: 'Active Projects',
+  },
+  completedTasks: {
+    value: 450,
+    change: 0,
+    trend: 'up' as const,
+    context: 'Completed Tasks',
+  },
+  pendingTasks: {
+    value: 25,
+    change: 0,
+    trend: 'down' as const,
+    context: 'Pending Tasks',
+  },
+}
+
+function getDashboardPeriodStart() {
+  const periodStart = new Date()
+  periodStart.setDate(periodStart.getDate() - 30)
+  return periodStart
+}
+
+async function getRevenueSnapshot(db: Awaited<ReturnType<typeof loadDb>>, periodStart: Date) {
+  const [historicalIncomeRow, periodIncomeRow, pendingSumRow] = await Promise.all([
+    db
+      .select({
+        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+      })
+      .from(transactions)
+      .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} > 0`)),
+    db
+      .select({
+        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.status, 'Approved'),
+          gte(transactions.date, periodStart),
+          sql`${transactions.amount} > 0`,
+        ),
+      ),
+    db
+      .select({
+        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+      })
+      .from(transactions)
+      .where(eq(transactions.status, 'Pending')),
+  ])
+
+  const totalIncome = Number(historicalIncomeRow[0]?.total ?? 0)
+  const periodIncome = Number(periodIncomeRow[0]?.total ?? 0)
+  const pendingApprovalTotal = Number(pendingSumRow[0]?.total ?? 0)
+
+  const change =
+    totalIncome > 0
+      ? Math.round(((periodIncome / Math.max(1, totalIncome)) * 100 + Number.EPSILON) * 10) / 10
+      : 0
+
+  return {
+    value: totalIncome,
+    change,
+    trend: change >= 0 ? 'up' : 'down',
+    periodTotal: periodIncome,
+    pendingApprovalTotal,
+    periodDays: 30,
+  }
+}
+
+async function getExpensesSnapshot(db: Awaited<ReturnType<typeof loadDb>>, periodStart: Date) {
+  const [historicalExpenseRow, periodExpenseRow] = await Promise.all([
+    db
+      .select({
+        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+      })
+      .from(transactions)
+      .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`)),
+    db
+      .select({
+        total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
+      })
+      .from(transactions)
+      .where(
+        and(
+          eq(transactions.status, 'Approved'),
+          gte(transactions.date, periodStart),
+          sql`${transactions.amount} < 0`,
+        ),
+      ),
+  ])
+
+  const totalExpenses = Math.abs(Number(historicalExpenseRow[0]?.total ?? 0))
+  const periodExpenses = Math.abs(Number(periodExpenseRow[0]?.total ?? 0))
+
+  const change =
+    totalExpenses > 0
+      ? Math.round(((periodExpenses / Math.max(1, totalExpenses)) * 100 + Number.EPSILON) * 10) / 10
+      : 0
+
+  return {
+    value: totalExpenses,
+    change,
+    trend: change >= 0 ? 'up' : 'down',
+    periodTotal: periodExpenses,
+    periodDays: 30,
+  }
+}
+
+async function getNetBalanceSnapshot(db: Awaited<ReturnType<typeof loadDb>>, periodStart: Date) {
+  const [revenue, expenses] = await Promise.all([
+    getRevenueSnapshot(db, periodStart),
+    getExpensesSnapshot(db, periodStart),
+  ])
+
+  const value = revenue.value - expenses.value
+  const periodTotal = revenue.periodTotal - expenses.periodTotal
+  const change =
+    Math.abs(value) > 0
+      ? Math.round(((periodTotal / Math.max(1, Math.abs(value))) * 100 + Number.EPSILON) * 10) / 10
+      : 0
+
+  return {
+    value,
+    change,
+    trend: change >= 0 ? 'up' : 'down',
+    periodTotal,
+    periodDays: 30,
+  }
+}
+
+async function getActiveProjectsSnapshot(db: Awaited<ReturnType<typeof loadDb>>) {
+  const [activeProjectsRow] = await db
+    .select({ count: count() })
+    .from(projects)
+    .where(eq(projects.status, 'active'))
+
+  return {
+    value: activeProjectsRow?.count ?? 0,
+    change: 0,
+    trend: 'up' as const,
+    context: 'Active Projects',
+  }
+}
+
+export const getDashboardMetricFn = createServerFn({ method: 'GET' })
+  .inputValidator(dashboardMetricSchema)
+  .handler(async ({ data: metric }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
+
+    try {
+      const db = await loadDb()
+      const periodStart = getDashboardPeriodStart()
+
+      switch (metric) {
+        case 'revenue': {
+          const revenue = await getRevenueSnapshot(db, periodStart)
+          if (isE2E && revenue.value === 0) {
+            return MOCK_DASHBOARD_STATS.revenue
+          }
+          return revenue
+        }
+        case 'expenses': {
+          const expenses = await getExpensesSnapshot(db, periodStart)
+          if (isE2E && expenses.value === 0) {
+            return MOCK_DASHBOARD_STATS.expenses
+          }
+          return expenses
+        }
+        case 'netBalance': {
+          const netBalance = await getNetBalanceSnapshot(db, periodStart)
+          if (isE2E && netBalance.value === 0) {
+            return MOCK_DASHBOARD_STATS.netBalance
+          }
+          return netBalance
+        }
+        case 'activeProjects': {
+          const activeProjects = await getActiveProjectsSnapshot(db)
+          if (isE2E && activeProjects.value === 0) {
+            return MOCK_DASHBOARD_STATS.activeProjects
+          }
+          return activeProjects
+        }
+      }
+    } catch (error) {
+      console.error('Error in getDashboardMetricFn:', error)
+      if (isE2E) {
+        return MOCK_DASHBOARD_STATS[metric]
+      }
+      throw error
+    }
+  })
 
 export const getDashboardStatsFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
@@ -15,6 +246,7 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' })
 
     try {
       const db = await loadDb()
+      const periodStart = getDashboardPeriodStart()
 
       const [[activeProjectsRow], [completedTasksRow], [pendingTasksRow]] = await Promise.all([
         db.select({ count: count() }).from(projects).where(eq(projects.status, 'active')),
@@ -22,157 +254,21 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' })
         db.select({ count: count() }).from(todos).where(eq(todos.status, 'pending')),
       ])
 
-      const now = new Date()
-      const periodStart = new Date(now)
-      periodStart.setDate(periodStart.getDate() - 30)
-
-      const [historicalIncomeRow, historicalExpenseRow] = await Promise.all([
-        db
-          .select({
-            total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
-          })
-          .from(transactions)
-          .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} > 0`)),
-        db
-          .select({
-            total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
-          })
-          .from(transactions)
-          .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`)),
+      const [revenue, expenses, netBalance] = await Promise.all([
+        getRevenueSnapshot(db, periodStart),
+        getExpensesSnapshot(db, periodStart),
+        getNetBalanceSnapshot(db, periodStart),
       ])
-
-      const [periodIncomeRow, periodExpenseRow] = await Promise.all([
-        db
-          .select({
-            total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
-          })
-          .from(transactions)
-          .where(
-            and(
-              eq(transactions.status, 'Approved'),
-              gte(transactions.date, periodStart),
-              sql`${transactions.amount} > 0`,
-            ),
-          ),
-        db
-          .select({
-            total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
-          })
-          .from(transactions)
-          .where(
-            and(
-              eq(transactions.status, 'Approved'),
-              gte(transactions.date, periodStart),
-              sql`${transactions.amount} < 0`,
-            ),
-          ),
-      ])
-
-      const [pendingSumRow] = await db
-        .select({
-          total: sql<number>`COALESCE(SUM(${transactions.amount}), 0)`,
-        })
-        .from(transactions)
-        .where(eq(transactions.status, 'Pending'))
-
-      const totalIncome = Number(historicalIncomeRow[0]?.total ?? 0)
-      const totalExpenses = Math.abs(Number(historicalExpenseRow[0]?.total ?? 0))
-      const netBalance = totalIncome - totalExpenses
-
-      const periodIncome = Number(periodIncomeRow[0]?.total ?? 0)
-      const periodExpenses = Math.abs(Number(periodExpenseRow[0]?.total ?? 0))
-      const periodNetBalance = periodIncome - periodExpenses
-
-      const totalRevenuePending = Number(pendingSumRow?.total ?? 0)
 
       // Check if we should return mock data in E2E mode
-      if (isE2E && totalIncome === 0 && totalExpenses === 0 && activeProjectsRow.count === 0) {
-        return {
-          revenue: {
-            value: 125000,
-            change: 12.5,
-            trend: 'up',
-            periodTotal: 45000,
-            pendingApprovalTotal: 5000,
-            periodDays: 30,
-          },
-          expenses: {
-            value: 45000,
-            change: 5.2,
-            trend: 'up',
-            periodTotal: 15000,
-            periodDays: 30,
-          },
-          netBalance: {
-            value: 80000,
-            change: 15.8,
-            trend: 'up',
-            periodTotal: 30000,
-            periodDays: 30,
-          },
-          activeProjects: {
-            value: 12,
-            change: 0,
-            trend: 'up',
-            context: 'Active Projects',
-          },
-          completedTasks: {
-            value: 450,
-            change: 0,
-            trend: 'up',
-            context: 'Completed Tasks',
-          },
-          pendingTasks: {
-            value: 25,
-            change: 0,
-            trend: 'down',
-            context: 'Pending Tasks',
-          },
-        }
+      if (isE2E && revenue.value === 0 && expenses.value === 0 && activeProjectsRow.count === 0) {
+        return MOCK_DASHBOARD_STATS
       }
 
-      const revenueChange =
-        totalIncome > 0
-          ? Math.round(((periodIncome / Math.max(1, totalIncome)) * 100 + Number.EPSILON) * 10) / 10
-          : 0
-
-      const expenseChange =
-        totalExpenses > 0
-          ? Math.round(
-              ((periodExpenses / Math.max(1, totalExpenses)) * 100 + Number.EPSILON) * 10,
-            ) / 10
-          : 0
-
-      const balanceChange =
-        Math.abs(netBalance) > 0
-          ? Math.round(
-              ((periodNetBalance / Math.max(1, Math.abs(netBalance))) * 100 + Number.EPSILON) * 10,
-            ) / 10
-          : 0
-
       return {
-        revenue: {
-          value: totalIncome,
-          change: revenueChange,
-          trend: revenueChange >= 0 ? 'up' : 'down',
-          periodTotal: periodIncome,
-          pendingApprovalTotal: totalRevenuePending,
-          periodDays: 30,
-        },
-        expenses: {
-          value: totalExpenses,
-          change: expenseChange,
-          trend: expenseChange >= 0 ? 'up' : 'down',
-          periodTotal: periodExpenses,
-          periodDays: 30,
-        },
-        netBalance: {
-          value: netBalance,
-          change: balanceChange,
-          trend: balanceChange >= 0 ? 'up' : 'down',
-          periodTotal: periodNetBalance,
-          periodDays: 30,
-        },
+        revenue,
+        expenses,
+        netBalance,
         activeProjects: {
           value: activeProjectsRow.count,
           change: 0,
@@ -195,48 +291,7 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' })
     } catch (error) {
       console.error('Error in getDashboardStatsFn:', error)
       if (isE2E) {
-        return {
-          revenue: {
-            value: 125000,
-            change: 12.5,
-            trend: 'up',
-            periodTotal: 45000,
-            pendingApprovalTotal: 5000,
-            periodDays: 30,
-          },
-          expenses: {
-            value: 45000,
-            change: 5.2,
-            trend: 'up',
-            periodTotal: 15000,
-            periodDays: 30,
-          },
-          netBalance: {
-            value: 80000,
-            change: 15.8,
-            trend: 'up',
-            periodTotal: 30000,
-            periodDays: 30,
-          },
-          activeProjects: {
-            value: 12,
-            change: 0,
-            trend: 'up',
-            context: 'Active Projects',
-          },
-          completedTasks: {
-            value: 450,
-            change: 0,
-            trend: 'up',
-            context: 'Completed Tasks',
-          },
-          pendingTasks: {
-            value: 25,
-            change: 0,
-            trend: 'down',
-            context: 'Pending Tasks',
-          },
-        }
+        return MOCK_DASHBOARD_STATS
       }
       throw error
     }
@@ -393,15 +448,76 @@ export const getUpcomingTodosFn = createServerFn({ method: 'GET' })
     }
   })
 
+const usersWorkloadFiltersSchema = z
+  .object({
+    projectId: z.string().optional(),
+    teamId: z.string().optional(),
+  })
+  .optional()
+
 export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
-  .inputValidator(z.void().optional())
-  .handler(async ({ data: _data }) => {
+  .inputValidator(usersWorkloadFiltersSchema)
+  .handler(async ({ data }) => {
     const isE2E = process.env.VITE_E2E === 'true'
 
     try {
       const db = await loadDb()
-      const allUsers = await db.select().from(users)
-      const allTodos = await db.select().from(todos)
+      const projectId = data?.projectId
+      const teamId = data?.teamId
+
+      let filteredUserIds: string[] | undefined
+
+      if (projectId) {
+        const projectMemberRows = await db
+          .select({ userId: projectMembers.userId })
+          .from(projectMembers)
+          .where(eq(projectMembers.projectId, projectId))
+
+        filteredUserIds = projectMemberRows.map((row) => row.userId)
+      }
+
+      if (teamId) {
+        const teamMemberRows = await db
+          .select({ userId: teamMembers.userId })
+          .from(teamMembers)
+          .where(eq(teamMembers.teamId, teamId))
+
+        const teamUserIds = teamMemberRows.map((row) => row.userId)
+        filteredUserIds = filteredUserIds
+          ? filteredUserIds.filter((userId) => teamUserIds.includes(userId))
+          : teamUserIds
+      }
+
+      if (filteredUserIds && filteredUserIds.length === 0) {
+        return []
+      }
+
+      const userWhereClause =
+        filteredUserIds && filteredUserIds.length > 0
+          ? inArray(users.id, filteredUserIds)
+          : undefined
+
+      const todoWhereClauses = []
+
+      if (projectId) {
+        todoWhereClauses.push(eq(todos.projectId, projectId))
+      }
+
+      if (filteredUserIds && filteredUserIds.length > 0) {
+        todoWhereClauses.push(inArray(todos.assignedTo, filteredUserIds))
+      }
+
+      const todoWhereClause =
+        todoWhereClauses.length === 0
+          ? undefined
+          : todoWhereClauses.length === 1
+            ? todoWhereClauses[0]
+            : and(...todoWhereClauses)
+
+      const [allUsers, allTodos] = await Promise.all([
+        db.select().from(users).where(userWhereClause),
+        db.select().from(todos).where(todoWhereClause),
+      ])
 
       if (isE2E && allUsers.length === 0) {
         return Array.from({ length: 5 }).map((_, i) => ({

@@ -1,13 +1,17 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, count, like, or, inArray, sql } from 'drizzle-orm'
+import { and, desc, eq, count, like, or, inArray, sql, type SQL } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   departments,
   experienceLevels,
   externalIdentities,
   jobTitles,
+  projectMembers,
   roles,
   skills,
+  teamMembers,
+  todos,
+  transactions,
   userSkills,
   users,
 } from '@/shared/lib/db/schema'
@@ -44,6 +48,9 @@ export const getUsersFn = createServerFn({ method: 'GET' })
         pageParam: z.number().optional(),
         limit: z.number().optional(),
         search: z.string().optional(),
+        projectId: z.string().optional(),
+        teamId: z.string().optional(),
+        categoryId: z.string().optional(),
       })
       .optional(),
   )
@@ -72,14 +79,62 @@ export const getUsersFn = createServerFn({ method: 'GET' })
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const { pageParam, limit: limitParam, search } = data || {}
+      const { pageParam, limit: limitParam, search, projectId, teamId, categoryId } = data || {}
       const page = pageParam || 1
       const limit = limitParam || 10
       const offset = (page - 1) * limit
 
-      const whereClause = search
-        ? or(like(users.name, `%${search}%`), like(users.email, `%${search}%`))
-        : undefined
+      const whereClauses: SQL[] = []
+
+      if (search) {
+        whereClauses.push(or(like(users.name, `%${search}%`), like(users.email, `%${search}%`))!)
+      }
+
+      if (projectId) {
+        whereClauses.push(
+          sql`${users.id} in (
+            select ${projectMembers.userId}
+            from ${projectMembers}
+            where ${projectMembers.projectId} = ${projectId}
+          )`,
+        )
+      }
+
+      if (teamId) {
+        whereClauses.push(
+          sql`${users.id} in (
+            select ${teamMembers.userId}
+            from ${teamMembers}
+            where ${teamMembers.teamId} = ${teamId}
+          )`,
+        )
+      }
+
+      if (categoryId) {
+        whereClauses.push(
+          sql`(
+            exists (
+              select 1
+              from ${todos}
+              where ${todos.categoryId} = ${categoryId}
+                and (${todos.assignedTo} = ${users.id} or ${todos.createdBy} = ${users.id})
+            )
+            or exists (
+              select 1
+              from ${transactions}
+              where ${transactions.categoryId} = ${categoryId}
+                and ${transactions.userId} = ${users.id}
+            )
+          )`,
+        )
+      }
+
+      const whereClause =
+        whereClauses.length === 0
+          ? undefined
+          : whereClauses.length === 1
+            ? whereClauses[0]
+            : and(...whereClauses)
 
       const [items, totalResult] = await Promise.all([
         db

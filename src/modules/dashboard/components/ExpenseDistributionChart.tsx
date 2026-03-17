@@ -1,17 +1,19 @@
+import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { BarChart, Bar, XAxis, YAxis, Cell, CartesianGrid } from 'recharts'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
-import {
-  ChartContainer,
-  ChartTooltip,
-  ChartTooltipContent,
-  type ChartConfig,
-} from '@/components/ui/chart'
+import type { ChartConfig } from '@/components/ui/chart'
 import { useExpenseDistribution } from '../api/dashboard.queries'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
+
+const LazyExpenseDistributionChartContent = React.lazy(() =>
+  import('./ExpenseDistributionChartContent').then((module) => ({
+    default: module.ExpenseDistributionChartContent,
+  })),
+)
 
 export function ExpenseDistributionChart() {
   const { t } = useTranslation()
-  const { data: distribution, isLoading } = useExpenseDistribution()
+  const { data: distribution, isLoading, isFetching, refetch } = useExpenseDistribution()
 
   if (isLoading) {
     return (
@@ -79,58 +81,36 @@ export function ExpenseDistributionChart() {
               'Distribution of project expenses by category.',
             )}
           </CardDescription>
+          {isFetching ? (
+            <div className="mt-1">
+              <WidgetRefreshingIndicator />
+            </div>
+          ) : null}
         </div>
-        <div className="text-right">
-          <div className="text-2xl font-bold">${total.toLocaleString()}</div>
-          <div className="text-xs text-muted-foreground">
-            {t('dashboard.stats.totalExpenses', 'Total Expenses')}
+        <div className="flex items-start gap-2">
+          <div className="text-right">
+            <div className="text-2xl font-bold">${total.toLocaleString()}</div>
+            <div className="text-xs text-muted-foreground">
+              {t('dashboard.stats.totalExpenses', 'Total Expenses')}
+            </div>
           </div>
+          <WidgetRefreshButton
+            isRefreshing={isFetching}
+            onRefresh={() => {
+              void refetch()
+            }}
+            label={t('dashboard.actions.refreshExpenseDistribution', {
+              defaultValue: 'Refresh expense distribution',
+            })}
+          />
         </div>
       </CardHeader>
       <CardContent>
-        <ChartContainer config={chartConfig} className="h-[350px] w-full">
-          <BarChart
-            data={chartData}
-            layout="vertical"
-            margin={{
-              left: 40,
-              right: 20,
-            }}
-          >
-            <CartesianGrid horizontal={false} strokeDasharray="3 3" />
-            <XAxis type="number" hide />
-            <YAxis
-              dataKey="category"
-              type="category"
-              tickLine={false}
-              axisLine={false}
-              width={100}
-              tick={{ fontSize: 12 }}
-            />
-            <ChartTooltip
-              cursor={{ fill: 'transparent' }}
-              content={
-                <ChartTooltipContent
-                  labelFormatter={(value) => value}
-                  formatter={(value, name, item) => [
-                    <div key={name} className="flex flex-col">
-                      <span className="font-bold">${Number(value).toLocaleString()}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {item.payload.percentage}% of total
-                      </span>
-                    </div>,
-                    null,
-                  ]}
-                />
-              }
-            />
-            <Bar dataKey="amount" radius={[0, 4, 4, 0]} barSize={20}>
-              {chartData.map((entry) => (
-                <Cell key={`cell-${entry.category}`} fill={entry.color} />
-              ))}
-            </Bar>
-          </BarChart>
-        </ChartContainer>
+        <React.Suspense
+          fallback={<div className="h-[350px] w-full rounded-lg bg-muted/50 animate-pulse" />}
+        >
+          <LazyExpenseDistributionChartContent chartData={chartData} chartConfig={chartConfig} />
+        </React.Suspense>
       </CardContent>
     </Card>
   )

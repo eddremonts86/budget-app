@@ -12,14 +12,31 @@ import {
 } from './users.fn'
 import type { User } from '../model/types'
 
+export interface UserDirectoryFilters {
+  projectId?: string
+  teamId?: string
+  categoryId?: string
+}
+
+function normalizeDirectoryFilters(limit: number, search?: string, filters?: UserDirectoryFilters) {
+  return {
+    limit,
+    search: search?.trim() || undefined,
+    projectId: filters?.projectId || undefined,
+    teamId: filters?.teamId || undefined,
+    categoryId: filters?.categoryId || undefined,
+  }
+}
+
 export const userKeys = {
   all: ['users'] as const,
   lists: () => [...userKeys.all, 'list'] as const,
-  directory: (limit: number, search?: string) =>
-    [...userKeys.lists(), 'directory', { limit, search }] as const,
-  lookup: (limit: number) => [...userKeys.lists(), { limit }] as const,
+  directory: (params: ReturnType<typeof normalizeDirectoryFilters>) =>
+    [...userKeys.lists(), 'directory', params] as const,
+  lookup: (params: { limit: number }) => [...userKeys.lists(), 'lookup', params] as const,
   byIds: (ids: string[]) => [...userKeys.lists(), 'by-ids', ids] as const,
-  infinite: () => [...userKeys.lists(), 'infinite'] as const,
+  infinite: (params: ReturnType<typeof normalizeDirectoryFilters>) =>
+    [...userKeys.lists(), 'infinite', params] as const,
   details: () => [...userKeys.all, 'detail'] as const,
   detail: (id: string) => [...userKeys.details(), id] as const,
   master: () => [...userKeys.all, 'master'] as const,
@@ -45,10 +62,12 @@ export const useExperienceLevels = () => {
   return useTQuery(userKeys.experienceLevels(), () => getExperienceLevelsFn())
 }
 
-export const useInfiniteUsers = (limit = 10, search?: string) => {
+export const useInfiniteUsers = (limit = 10, search?: string, filters?: UserDirectoryFilters) => {
+  const params = normalizeDirectoryFilters(limit, search, filters)
+
   return useTQInfinite(
-    [...userKeys.infinite(), { limit, search }],
-    ({ pageParam }) => getUsersFn({ data: { pageParam, limit, search } }),
+    userKeys.infinite(params),
+    ({ pageParam }) => getUsersFn({ data: { pageParam, ...params } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,
@@ -57,14 +76,16 @@ export const useInfiniteUsers = (limit = 10, search?: string) => {
 }
 
 export const useUsers = (limit = 1000) => {
-  return useTQuery(userKeys.lookup(limit), () =>
+  return useTQuery(userKeys.lookup({ limit }), () =>
     getUsersFn({ data: { limit } }).then((res) => res?.data || []),
   )
 }
 
-export const useUserDirectory = (search?: string, limit = 50) => {
-  return useTQuery(userKeys.directory(limit, search), () =>
-    getUsersFn({ data: { limit, search } }).then((res) => res?.data || []),
+export const useUserDirectory = (search?: string, limit = 50, filters?: UserDirectoryFilters) => {
+  const params = normalizeDirectoryFilters(limit, search, filters)
+
+  return useTQuery(userKeys.directory(params), () =>
+    getUsersFn({ data: params }).then((res) => res?.data || []),
   )
 }
 

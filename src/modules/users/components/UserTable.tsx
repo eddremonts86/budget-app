@@ -149,7 +149,7 @@ export function UserTable({
   )
 
   return (
-    <DataTable columns={columns} data={users} filterColumn="name" fullHeight>
+    <DataTable columns={columns} data={users} fullHeight>
       {hasNextPage && (
         <TableRow className="hover:bg-transparent border-none">
           <TableCell colSpan={columns.length} className="py-8">
