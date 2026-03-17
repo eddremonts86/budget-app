@@ -1,4 +1,4 @@
-import { Outlet, redirect, useLocation } from '@tanstack/react-router'
+import { Outlet, useLocation } from '@tanstack/react-router'
 import { Home } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 import {
@@ -13,10 +13,9 @@ import { Button } from '@/components/ui/button'
 import { Separator } from '@/components/ui/separator'
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { AiSearchProvider } from '@/modules/ai'
-import { useAiSearch } from '@/modules/ai'
-import { UserProvider } from '@/modules/users'
 import { getDashboardPageTitle } from '@/modules'
+import { AiSearchProvider, useAiSearch } from '@/modules/ai'
+import { UserProvider } from '@/modules/users'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
 import { cn } from '@/shared/utils'
@@ -32,12 +31,6 @@ export function DashboardLayout() {
   // Get current page title from pathname
   const segments = pathname.split('/').filter(Boolean)
   const pageTitle = getDashboardPageTitle(pathname, t)
-
-  if (!isAuthBypassEnabled && auth.isLoaded && !auth.isAuthenticated) {
-    throw redirect({
-      to: '/',
-    })
-  }
 
   if (!isAuthBypassEnabled && !auth.isLoaded) {
     return (

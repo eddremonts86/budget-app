@@ -1,3 +1,4 @@
+import * as Sentry from '@sentry/react'
 import * as React from 'react'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { getClientTestUserId, isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
@@ -17,17 +18,18 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
     // If we're in E2E mode, we use a mock local user
     if (isAuthBypassEnabled) {
       const testUserId = getClientTestUserId()
-      if (!syncedUser) {
-        setSyncedUser({
-          id: testUserId,
-          name: 'Local Test User',
-          email: 'local-test@example.com',
-          avatar: null,
-          roleId: 'role_admin',
-          roleName: 'admin',
-          createdAt: new Date().toISOString(),
-        })
-      }
+      setSyncedUser(
+        (currentUser) =>
+          currentUser ?? {
+            id: testUserId,
+            name: 'Local Test User',
+            email: 'local-test@example.com',
+            avatar: null,
+            roleId: 'role_admin',
+            roleName: 'admin',
+            createdAt: new Date().toISOString(),
+          },
+      )
       return
     }
 
@@ -70,9 +72,10 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
         }
 
         setSyncedUser(synced)
-      } catch {
+      } catch (error) {
         lastSyncedIdentity.current = null
-        // Ignore sync failures; auth state can still render unauthenticated UI.
+        setSyncedUser(null)
+        Sentry.captureException(error)
       } finally {
         setIsLoading(false)
       }

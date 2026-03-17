@@ -1,8 +1,7 @@
-import { auth as clerkAuth } from '@clerk/tanstack-react-start/server'
 import { getRequestHeaders } from '@tanstack/react-start/server'
 import { auth as betterAuth } from './better-auth'
 import { getServerTestUserId, isServerAuthBypassEnabled } from './bypass.server'
-import { getAuthMode, isBetterAuthEnabled, isClerkEnabled, type AuthMode } from './config'
+import { getAuthMode, isBetterAuthEnabled, isClerkServerEnabled, type AuthMode } from './config'
 
 export type ServerAuthProvider = 'bypass' | 'better-auth' | 'clerk' | null
 
@@ -50,7 +49,8 @@ export const getAuthUser = async (): Promise<ServerAuthUser> => {
     }
   }
 
-  if (isClerkEnabled()) {
+  if (isClerkServerEnabled()) {
+    const { auth: clerkAuth } = await import('@clerk/tanstack-react-start/server')
     const user = await clerkAuth()
     const publicMetadata =
       user.sessionClaims?.publicMetadata && typeof user.sessionClaims.publicMetadata === 'object'

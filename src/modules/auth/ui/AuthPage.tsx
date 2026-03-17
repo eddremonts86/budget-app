@@ -1,5 +1,5 @@
 import { SignInButton } from '@clerk/tanstack-react-start'
-import { Link, useLocation, useNavigate } from '@tanstack/react-router'
+import { Link, useLocation } from '@tanstack/react-router'
 import { LazyMotion, domAnimation, m } from 'framer-motion'
 import {
   ArrowLeft,
@@ -25,7 +25,6 @@ import {
   CardTitle,
 } from '@/components/ui'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
-import { ensureAppAuthSession } from '@/shared/lib/auth/app-auth.functions'
 import {
   getClerkPublishableKey,
   isBetterAuthEnabled,
@@ -93,12 +92,10 @@ function getLocalizedSignUpValidationMessage(
 
 export function AuthPage(): React.JSX.Element {
   const { t } = useTranslation()
-  const navigate = useNavigate()
   const searchStr = useLocation({ select: (location) => location.searchStr })
   const auth = useAppAuth()
   const activeTab = getRequestedAuthTab(searchStr) ?? 'sign-in'
   const requestedFormError = getRequestedAuthError(searchStr, t)
-  const [runtimeFormError, setRuntimeFormError] = React.useState<string | null>(null)
   const [signInValues, setSignInValues] = React.useState({
     email: '',
     password: '',
@@ -108,52 +105,7 @@ export function AuthPage(): React.JSX.Element {
     email: '',
     password: '',
   })
-  const formError = runtimeFormError ?? requestedFormError
-
-  const verifyServerSession = React.useCallback(async () => {
-    for (let attempt = 0; attempt < 4; attempt += 1) {
-      try {
-        await ensureAppAuthSession()
-        return
-      } catch (error) {
-        if (attempt === 3) {
-          throw error
-        }
-
-        await new Promise((resolve) => window.setTimeout(resolve, 150 * (attempt + 1)))
-      }
-    }
-  }, [])
-
-  React.useEffect(() => {
-    setRuntimeFormError(null)
-  }, [searchStr])
-
-  React.useEffect(() => {
-    if (!auth.isLoaded || !auth.isAuthenticated) {
-      return
-    }
-
-    let cancelled = false
-
-    void (async () => {
-      try {
-        await verifyServerSession()
-
-        if (!cancelled) {
-          void navigate({ to: '/dashboard' })
-        }
-      } catch {
-        if (!cancelled) {
-          setRuntimeFormError(t('auth.sessionVerificationError'))
-        }
-      }
-    })()
-
-    return () => {
-      cancelled = true
-    }
-  }, [auth.isAuthenticated, auth.isLoaded, navigate, t, verifyServerSession])
+  const formError = requestedFormError
 
   const localAuthEnabled = isBetterAuthEnabled()
   const clerkAuthEnabled = isClerkEnabled() && !!getClerkPublishableKey()
@@ -456,7 +408,7 @@ export function AuthPage(): React.JSX.Element {
                     </div>
 
                     {clerkAuthEnabled ? (
-                      <SignInButton mode="modal">
+                      <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                         <Button
                           variant="outline"
                           className="h-11 rounded-xl border-border/60 bg-background/60 px-5 backdrop-blur hover:bg-background/80"

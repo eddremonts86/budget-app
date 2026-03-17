@@ -1,6 +1,6 @@
 export type AuthMode = 'local' | 'clerk' | 'hybrid'
 
-const DEFAULT_AUTH_MODE: AuthMode = 'clerk'
+const DEFAULT_AUTH_MODE: AuthMode = 'hybrid'
 const DEFAULT_BETTER_AUTH_URL = 'http://localhost:3000'
 const DEFAULT_DEV_BETTER_AUTH_SECRET = 'dev-only-better-auth-secret-change-me-1234567890'
 
@@ -60,4 +60,12 @@ export function getBetterAuthSecret() {
 
 export function getClerkPublishableKey() {
   return readEnvValue('VITE_CLERK_PUBLISHABLE_KEY')
+}
+
+export function getClerkSecretKey() {
+  return readServerEnv().CLERK_SECRET_KEY
+}
+
+export function isClerkServerEnabled() {
+  return isClerkEnabled() && !!getClerkSecretKey()
 }

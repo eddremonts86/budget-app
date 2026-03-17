@@ -16,12 +16,6 @@ interface AppProvidersProps {
 const PUBLISHABLE_KEY = getClerkPublishableKey()
 const SHOULD_USE_CLERK_PROVIDER = isClerkEnabled() && !!PUBLISHABLE_KEY
 
-if (isClerkEnabled() && !PUBLISHABLE_KEY) {
-  console.warn(
-    'Clerk is enabled but VITE_CLERK_PUBLISHABLE_KEY is missing. Falling back to non-Clerk runtime.',
-  )
-}
-
 function ProvidersContent({ children }: AppProvidersProps) {
   return (
     <LazyMotion features={domAnimation}>

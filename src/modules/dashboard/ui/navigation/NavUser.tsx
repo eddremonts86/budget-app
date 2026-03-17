@@ -1,4 +1,3 @@
-import { Link } from '@tanstack/react-router'
 import {
   IconCreditCard,
   IconDotsVertical,
@@ -6,6 +5,8 @@ import {
   IconNotification,
   IconUserCircle,
 } from '@tabler/icons-react'
+import { Link } from '@tanstack/react-router'
+import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import {
   DropdownMenu,
@@ -23,6 +24,7 @@ import { useAppAuth } from '@/shared/lib/auth/app-auth'
 export function NavUser() {
   const { isMobile } = useSidebar()
   const auth = useAppAuth()
+  const { t } = useTranslation()
 
   if (!auth.isLoaded || !auth.user) {
     return null
@@ -80,19 +82,19 @@ export function NavUser() {
               <DropdownMenuItem asChild>
                 <Link to="/dashboard/users">
                   <IconUserCircle />
-                  Account
+                  {t('sidebar.main.users')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/dashboard/transactions">
                   <IconCreditCard />
-                  Billing
+                  {t('sidebar.main.transactions')}
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuItem asChild>
                 <Link to="/dashboard/help">
                   <IconNotification />
-                  Notifications
+                  {t('sidebar.secondary.help')}
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuGroup>
@@ -104,7 +106,7 @@ export function NavUser() {
                   onSelect={() => void auth.signOut()}
                 >
                   <IconLogout />
-                  Log out
+                  {t('nav.signOut')}
                 </DropdownMenuItem>
               </>
             ) : null}

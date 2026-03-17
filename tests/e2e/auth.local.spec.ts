@@ -1,5 +1,10 @@
 import { expect, test } from '@playwright/test'
-import { createAuthCredentials, expectDashboard, provisionAccount } from './utils/auth-local'
+import {
+  createAuthCredentials,
+  expectDashboard,
+  provisionAccount,
+  signInInBrowser,
+} from './utils/auth-local'
 
 const credentials = createAuthCredentials('login')
 
@@ -39,5 +44,19 @@ test.describe.serial('local auth journey', () => {
     await page.getByTestId('auth-input-sign-in-password').fill(credentials.password)
     await page.getByTestId('auth-submit-sign-in').click()
     await expectDashboard(page)
+  })
+
+  test('redirects authenticated users away from /auth', async ({ page, request }) => {
+    const redirectCredentials = createAuthCredentials('redirect')
+
+    await provisionAccount(request, redirectCredentials)
+
+    await page.goto('/auth')
+    await signInInBrowser(page, redirectCredentials)
+    await expectDashboard(page)
+
+    await page.goto('/auth')
+
+    await expect(page).toHaveURL(/\/dashboard$/)
   })
 })
