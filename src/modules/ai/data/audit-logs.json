@@ -2486,5 +2486,29 @@
     "providerId": "ollama",
     "model": "qwen3.5:2b",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-17T09:33:19.077Z",
+    "locale": "en",
+    "query": "cual llm estas usando?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-17T09:33:57.205Z",
+    "locale": "en",
+    "query": "ok, me puedes decir cuantas tareas tenemos activas...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-17T09:37:15.888Z",
+    "locale": "en",
+    "query": "ok perfecto, dame un resumen de las tareas para la...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
   }
 ]

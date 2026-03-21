@@ -1,15 +1,15 @@
-import { createServerFn } from '@tanstack/react-start'
-import { eq, desc, and, gte, lte, count, sql, inArray } from 'drizzle-orm'
-import { z } from 'zod'
 import {
-  todos,
-  users,
-  transactions,
-  projects,
   categories,
   projectMembers,
+  projects,
   teamMembers,
+  todos,
+  transactions,
+  users,
 } from '@/shared/lib/db/schema'
+import { createServerFn } from '@tanstack/react-start'
+import { and, count, desc, eq, gte, inArray, lt, sql } from 'drizzle-orm'
+import { z } from 'zod'
 
 async function loadDb() {
   const { getDb } = await import('@/shared/lib/db')
@@ -396,53 +396,96 @@ export const getUpcomingTodosFn = createServerFn({ method: 'GET' })
     try {
       const db = await loadDb()
       const now = new Date()
-      const nextWeek = new Date()
-      nextWeek.setDate(now.getDate() + 7)
+      const startOfToday = new Date(now)
+      startOfToday.setHours(0, 0, 0, 0)
+      const nextWeek = new Date(startOfToday)
+      nextWeek.setDate(nextWeek.getDate() + 8)
+      const openTodoStatuses = ['pending', 'in_progress', 'testing', 'on_hold', 'blocked'] as const
+      const upcomingWindowClause = and(
+        gte(todos.dueDate, startOfToday),
+        lt(todos.dueDate, nextWeek),
+        inArray(todos.status, [...openTodoStatuses]),
+      )
 
-      const items = await db
-        .select()
-        .from(todos)
-        .where(and(gte(todos.dueDate, now), lte(todos.dueDate, nextWeek)))
-        .orderBy(todos.dueDate)
+      const [upcomingItems, [{ value: nextWeekCount }]] = await Promise.all([
+        db
+          .select()
+          .from(todos)
+          .where(upcomingWindowClause)
+          .orderBy(todos.dueDate)
+          .limit(50),
+        db
+          .select({ value: count() })
+          .from(todos)
+          .where(upcomingWindowClause),
+      ])
+
+      const items =
+        upcomingItems.length > 0
+          ? upcomingItems
+          : await db
+              .select()
+              .from(todos)
+              .where(
+                and(lt(todos.dueDate, startOfToday), inArray(todos.status, [...openTodoStatuses])),
+              )
+              .orderBy(desc(todos.dueDate))
+              .limit(50)
+      const displayMode = upcomingItems.length > 0 ? 'upcoming' : 'overdue_fallback'
 
       if (isE2E && items.length === 0) {
-        return Array.from({ length: 3 }).map((_, i) => ({
-          id: i.toString(),
-          title: `Task ${i}`,
-          description: `Description ${i}`,
-          status: 'pending' as const,
-          priority: ['high', 'medium', 'low'][i % 3] as 'high' | 'medium' | 'low',
-          assignedTo: '1',
-          dueDate: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          completedAt: null,
-          projectId: null,
-        }))
+        return {
+          items: Array.from({ length: 3 }).map((_, i) => ({
+            id: i.toString(),
+            title: `Task ${i}`,
+            description: `Description ${i}`,
+            status: 'pending' as const,
+            priority: ['high', 'medium', 'low'][i % 3] as 'high' | 'medium' | 'low',
+            assignedTo: '1',
+            dueDate: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedAt: null,
+            projectId: null,
+          })),
+          nextWeekCount: 3,
+          displayCount: 3,
+          displayMode: 'upcoming' as const,
+        }
       }
 
-      return items.map((item) => ({
-        ...item,
-        dueDate: item.dueDate ? item.dueDate.toISOString() : '',
-        createdAt: item.createdAt.toISOString(),
-        updatedAt: item.updatedAt.toISOString(),
-      }))
+      return {
+        items: items.map((item) => ({
+          ...item,
+          dueDate: item.dueDate ? item.dueDate.toISOString() : '',
+          createdAt: item.createdAt.toISOString(),
+          updatedAt: item.updatedAt.toISOString(),
+        })),
+        nextWeekCount: Number(nextWeekCount ?? 0),
+        displayCount: items.length,
+        displayMode,
+      }
     } catch (error) {
       console.error('Error in getUpcomingTodosFn:', error)
       if (isE2E) {
-        return Array.from({ length: 3 }).map((_, i) => ({
-          id: i.toString(),
-          title: `Task ${i}`,
-          description: `Description ${i}`,
-          status: 'pending' as const,
-          priority: ['high', 'medium', 'low'][i % 3] as 'high' | 'medium' | 'low',
-          assignedTo: '1',
-          dueDate: new Date().toISOString(),
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          completedAt: null,
-          projectId: null,
-        }))
+        return {
+          items: Array.from({ length: 3 }).map((_, i) => ({
+            id: i.toString(),
+            title: `Task ${i}`,
+            description: `Description ${i}`,
+            status: 'pending' as const,
+            priority: ['high', 'medium', 'low'][i % 3] as 'high' | 'medium' | 'low',
+            assignedTo: '1',
+            dueDate: new Date().toISOString(),
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+            completedAt: null,
+            projectId: null,
+          })),
+          nextWeekCount: 3,
+          displayCount: 3,
+          displayMode: 'upcoming' as const,
+        }
       }
       throw error
     }

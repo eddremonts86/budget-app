@@ -1,33 +1,27 @@
-import { format } from 'date-fns'
-import { Filter, Search } from 'lucide-react'
-import { useState, useMemo } from 'react'
-import { useTranslation } from 'react-i18next'
 import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Avatar,
+  AvatarFallback,
+  AvatarImage,
   Badge,
   Button,
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Checkbox,
+  Input,
   Popover,
   PopoverContent,
   PopoverTrigger,
-  Checkbox,
-  Input,
-  Avatar,
-  AvatarImage,
-  AvatarFallback,
   Separator,
 } from '@/components/ui'
 import { useUsersByIds } from '@/modules/users'
 import { cn } from '@/shared/utils'
+import { format } from 'date-fns'
+import { Filter, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useUpcomingTodos } from '../api/dashboard.queries'
 import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
 
@@ -167,33 +161,33 @@ function UserFilter({ users, selectedUsers, onSelectionChange }: UserFilterProps
 export function UpcomingTodosList() {
   const { t } = useTranslation()
   const {
-    data: todos,
+    data: upcomingPayload,
     isLoading: isLoadingTodos,
     isFetching: isFetchingTodos,
     refetch,
   } = useUpcomingTodos()
   const [selectedUserIds, setSelectedUserIds] = useState<Set<string>>(new Set())
+  const todos = upcomingPayload?.items ?? []
+  const nextWeekCount = upcomingPayload?.nextWeekCount ?? 0
+  const displayMode = upcomingPayload?.displayMode ?? 'upcoming'
+  const displayCount = upcomingPayload?.displayCount ?? todos.length
 
-  const assigneeIds = useMemo(() => {
-    const list = Array.isArray(todos) ? todos : []
-    return Array.from(
-      new Set(
-        list
-          .map((todo) => todo.assignedTo)
-          .filter((assignedUserId): assignedUserId is string => Boolean(assignedUserId)),
-      ),
-    )
-  }, [todos])
+  const assigneeIds = Array.from(
+    new Set(
+      todos
+        .map((todo) => todo.assignedTo)
+        .filter((assignedUserId): assignedUserId is string => Boolean(assignedUserId)),
+    ),
+  )
 
   const { data: users = [], isLoading: isLoadingUsers } = useUsersByIds(assigneeIds)
 
   const isLoading = isLoadingTodos || isLoadingUsers
 
-  const todoList = useMemo(() => {
-    const list = Array.isArray(todos) ? todos : []
-    if (selectedUserIds.size === 0) return list
-    return list.filter((todo) => todo.assignedTo && selectedUserIds.has(todo.assignedTo))
-  }, [todos, selectedUserIds])
+  const todoList =
+    selectedUserIds.size === 0
+      ? todos
+      : todos.filter((todo) => todo.assignedTo && selectedUserIds.has(todo.assignedTo))
 
   const userMap = useMemo(() => {
     return new Map(users.map((u) => [u.id, u]))
@@ -214,6 +208,52 @@ export function UpcomingTodosList() {
       .toUpperCase()
       .slice(0, 2)
   }
+
+  const groupedTodos = (() => {
+    const byUser = new Map<
+      string,
+      {
+        userId: string
+        userName: string
+        avatar?: string | null
+        tasks: typeof todoList
+      }
+    >()
+
+    const sortedTodos = [...todoList].sort((a, b) => {
+      const aUser = a.assignedTo ? userMap.get(a.assignedTo) : undefined
+      const bUser = b.assignedTo ? userMap.get(b.assignedTo) : undefined
+      const aName = aUser?.name ?? t('todos.unassigned', 'Unassigned')
+      const bName = bUser?.name ?? t('todos.unassigned', 'Unassigned')
+      const byUserName = aName.localeCompare(bName)
+      if (byUserName !== 0) return byUserName
+      const aDue = a.dueDate ? new Date(a.dueDate).getTime() : Number.MAX_SAFE_INTEGER
+      const bDue = b.dueDate ? new Date(b.dueDate).getTime() : Number.MAX_SAFE_INTEGER
+      return aDue - bDue
+    })
+
+    for (const todo of sortedTodos) {
+      const assignedUser = todo.assignedTo ? userMap.get(todo.assignedTo) : undefined
+      const userId = assignedUser?.id ?? '__unassigned__'
+      const userName = assignedUser?.name ?? t('todos.unassigned', 'Unassigned')
+      const avatar = assignedUser?.avatar
+      const existing = byUser.get(userId)
+
+      if (existing) {
+        existing.tasks.push(todo)
+        continue
+      }
+
+      byUser.set(userId, {
+        userId,
+        userName,
+        avatar,
+        tasks: [todo],
+      })
+    }
+
+    return Array.from(byUser.values())
+  })()
 
   if (isLoading) {
     // Basic Skeleton loading
@@ -244,6 +284,29 @@ export function UpcomingTodosList() {
           <CardDescription>
             {t('dashboard.upcomingTasks.description', 'Tasks due this week.')}
           </CardDescription>
+          <div className="mt-1 flex items-center gap-2">
+            <Badge variant="secondary" className="rounded-full">
+              {displayMode === 'upcoming'
+                ? t('dashboard.upcomingTasks.nextWeekCount', {
+                    defaultValue: '{{count}} tasks next 7 days',
+                    count: nextWeekCount,
+                  })
+                : t('dashboard.upcomingTasks.fallbackCount', {
+                    defaultValue:
+                      '{{nextWeekCount}} next 7 days • showing {{displayCount}} overdue',
+                    nextWeekCount,
+                    displayCount,
+                  })}
+            </Badge>
+            {selectedUserIds.size > 0 ? (
+              <Badge variant="outline" className="rounded-full">
+                {t('dashboard.upcomingTasks.filteredCount', {
+                  defaultValue: '{{count}} visible',
+                  count: todoList.length,
+                })}
+              </Badge>
+            ) : null}
+          </div>
           {isFetchingTodos ? (
             <div className="mt-1">
               <WidgetRefreshingIndicator />
@@ -271,76 +334,70 @@ export function UpcomingTodosList() {
       </CardHeader>
       <CardContent>
         <div className="relative max-h-100 overflow-y-auto">
-          <Table>
-            <TableHeader className="sticky top-0 bg-background z-10">
-              <TableRow>
-                <TableHead>{t('todos.table.title', 'Task')}</TableHead>
-                <TableHead>{t('todos.table.assignedTo', 'Assigned To')}</TableHead>
-                <TableHead>{t('todos.table.status', 'Status')}</TableHead>
-                <TableHead>{t('todos.table.priority', 'Priority')}</TableHead>
-                <TableHead className="text-right">{t('todos.table.dueDate', 'Due Date')}</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {todoList.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center text-muted-foreground h-24">
-                    {selectedUserIds.size > 0
-                      ? t(
-                          'dashboard.upcomingTasks.noFilteredResults',
-                          'No tasks found for selected filters.',
-                        )
-                      : t('dashboard.upcomingTasks.noTasks', 'No upcoming tasks for this week.')}
-                  </TableCell>
-                </TableRow>
-              ) : (
-                todoList.map((todo) => {
-                  const assignedUser = todo.assignedTo ? userMap.get(todo.assignedTo) : undefined
-                  return (
-                    <TableRow key={todo.id}>
-                      <TableCell className="font-medium">{todo.title}</TableCell>
-                      <TableCell>
-                        <div className="flex items-center gap-2">
-                          <Avatar className="h-6 w-6">
-                            <AvatarImage
-                              src={assignedUser?.avatar || undefined}
-                              alt={assignedUser?.name}
-                            />
-                            <AvatarFallback className="text-[10px]">
-                              {assignedUser ? getInitials(assignedUser.name) : '?'}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm text-muted-foreground">
-                            {assignedUser?.name || 'Unassigned'}
+          {todoList.length === 0 ? (
+            <div className="flex h-24 items-center justify-center text-center text-sm text-muted-foreground">
+              {selectedUserIds.size > 0
+                ? t(
+                    'dashboard.upcomingTasks.noFilteredResults',
+                    'No tasks found for selected filters.',
+                  )
+                : t('dashboard.upcomingTasks.noTasks', 'No upcoming tasks for this week.')}
+            </div>
+          ) : (
+            <div className="space-y-3 pr-1">
+              {groupedTodos.map((group) => (
+                <div key={group.userId} className="rounded-xl border bg-muted/20 p-3">
+                  <div className="mb-2 flex items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-2">
+                      <Avatar className="h-7 w-7">
+                        <AvatarImage src={group.avatar || undefined} alt={group.userName} />
+                        <AvatarFallback className="text-[10px]">
+                          {getInitials(group.userName)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <p className="truncate text-sm font-medium">{group.userName}</p>
+                    </div>
+                    <Badge variant="secondary" className="rounded-full">
+                      {t('dashboard.upcomingTasks.taskCount', {
+                        defaultValue: '{{count}} tasks',
+                        count: group.tasks.length,
+                      })}
+                    </Badge>
+                  </div>
+
+                  <div className="space-y-2">
+                    {group.tasks.map((todo) => (
+                      <div
+                        key={todo.id}
+                        className="flex flex-col gap-2 rounded-lg border bg-background/80 px-3 py-2"
+                      >
+                        <p className="text-sm font-medium leading-tight">{todo.title}</p>
+                        <div className="flex flex-wrap items-center gap-2 text-xs">
+                          <Badge variant={todo.status === 'completed' ? 'default' : 'secondary'}>
+                            {statusLabels[todo.status] || todo.status}
+                          </Badge>
+                          <Badge
+                            variant="outline"
+                            className={cn(
+                              todo.priority === 'high' && 'text-red-500 border-red-200',
+                              todo.priority === 'medium' && 'text-yellow-500 border-yellow-200',
+                              todo.priority === 'low' && 'text-green-500 border-green-200',
+                            )}
+                          >
+                            {t(`todos.priority.${todo.priority}`, todo.priority)}
+                          </Badge>
+                          <span className="text-muted-foreground">
+                            {t('todos.table.dueDate', 'Due Date')}:{' '}
+                            {todo.dueDate ? format(new Date(todo.dueDate), 'MMM d') : '-'}
                           </span>
                         </div>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={todo.status === 'completed' ? 'default' : 'secondary'}>
-                          {statusLabels[todo.status] || todo.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={cn(
-                            todo.priority === 'high' && 'text-red-500 border-red-200',
-                            todo.priority === 'medium' && 'text-yellow-500 border-yellow-200',
-                            todo.priority === 'low' && 'text-green-500 border-green-200',
-                          )}
-                        >
-                          {t(`todos.priority.${todo.priority}`, todo.priority)}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {todo.dueDate ? format(new Date(todo.dueDate), 'MMM d') : '-'}
-                      </TableCell>
-                    </TableRow>
-                  )
-                })
-              )}
-            </TableBody>
-          </Table>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
       </CardContent>
     </Card>

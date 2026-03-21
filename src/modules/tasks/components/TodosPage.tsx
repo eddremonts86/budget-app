@@ -1,15 +1,14 @@
-import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
-import { Plus, Pin, PinOff } from 'lucide-react'
-import * as React from 'react'
-import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { CrudSheetHeader } from '@/components/ui/crud-sheet'
 import { Label } from '@/components/ui/label'
 import { Sheet, SheetContent } from '@/components/ui/sheet'
 import { Switch } from '@/components/ui/switch'
 import { useCurrentUser } from '@/modules/users'
-import { cn } from '@/shared/utils/index'
-import { useCreateTodo, useUpdateTodo, useInfiniteTodos } from '../api/todos.queries'
+import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
+import { Plus } from 'lucide-react'
+import * as React from 'react'
+import { useTranslation } from 'react-i18next'
+import { useCreateTodo, useInfiniteTodos, useUpdateTodo } from '../api/todos.queries'
 import type { Todo } from '../model/types'
 import { TodoForm } from './TodoForm'
 import { CalendarView } from './views/CalendarView'
@@ -32,20 +31,6 @@ export function TodosPage() {
   })
 
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
-  const [isPinned, setIsPinned] = React.useState(false)
-  const [isEditPinned, setIsEditPinned] = React.useState(false)
-
-  // Reset pin when window is resized to mobile
-  React.useEffect(() => {
-    const handleResize = () => {
-      if (window.innerWidth < 640) {
-        setIsPinned(false)
-        setIsEditPinned(false)
-      }
-    }
-    window.addEventListener('resize', handleResize)
-    return () => window.removeEventListener('resize', handleResize)
-  }, [])
   const [createDefaultValues, setCreateDefaultValues] = React.useState<Partial<Todo>>({})
   const [editingTodo, setEditingTodo] = React.useState<Todo | null>(null)
 
@@ -92,7 +77,7 @@ export function TodosPage() {
               </Label>
             </div>
             <ViewSwitcher view={view} onViewChange={handleViewChange} />
-            <Button onClick={() => handleCreate()} className="gap-2">
+            <Button type="button" onClick={() => handleCreate()} className="gap-2">
               <Plus className="h-4 w-4" />
               {t('todos.actions.new', 'New Task')}
             </Button>
@@ -138,25 +123,13 @@ export function TodosPage() {
         <Sheet
           open={isCreateOpen}
           onOpenChange={(open) => {
-            if (isPinned && !open) return
             setIsCreateOpen(open)
             if (!open) setCreateDefaultValues({})
           }}
-          modal={!isPinned}
         >
           <SheetContent
-            overlay={!isPinned}
             showCloseButton={false}
-            className={cn(
-              'sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0',
-              isPinned && 'shadow-none border-l-2',
-            )}
-            onPointerDownOutside={(e) => {
-              if (isPinned) e.preventDefault()
-            }}
-            onEscapeKeyDown={(e) => {
-              if (isPinned) e.preventDefault()
-            }}
+            className="sm:max-w-[540px] border-l border-border/40 bg-background flex flex-col p-0"
           >
             <CrudSheetHeader
               title={t('todos.sheet.createTitle', 'Create Task')}
@@ -165,20 +138,6 @@ export function TodosPage() {
                 setIsCreateOpen(false)
                 setCreateDefaultValues({})
               }}
-              actionsSlot={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    'h-8 w-8 text-muted-foreground hover:text-foreground hidden sm:inline-flex',
-                    isPinned && 'text-primary',
-                  )}
-                  onClick={() => setIsPinned(!isPinned)}
-                  title={isPinned ? t('common.unpin') : t('common.pinVisible')}
-                >
-                  {isPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
-                </Button>
-              }
             />
             <div className="flex-1 overflow-y-auto p-6">
               <TodoForm
@@ -189,15 +148,12 @@ export function TodosPage() {
                     ...values,
                     assignedTo: values.assignedTo || syncedUserId || '',
                   })
-                  if (!isPinned) {
-                    setIsCreateOpen(false)
-                    setCreateDefaultValues({})
-                  }
+                  setIsCreateOpen(false)
+                  setCreateDefaultValues({})
                 }}
                 onCancel={() => {
                   setIsCreateOpen(false)
                   setCreateDefaultValues({})
-                  setIsPinned(false)
                 }}
                 isLoading={createMutation.isPending}
               />
@@ -209,49 +165,21 @@ export function TodosPage() {
         <Sheet
           open={!!editingTodo}
           onOpenChange={(open) => {
-            if (isEditPinned && !open) return
             if (!open) {
               setEditingTodo(null)
-              setIsEditPinned(false)
             }
           }}
-          modal={!isEditPinned}
         >
           <SheetContent
-            overlay={!isEditPinned}
             showCloseButton={false}
-            className={cn(
-              'sm:max-w-[540px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0',
-              isEditPinned && 'shadow-none border-l-2',
-            )}
-            onPointerDownOutside={(e) => {
-              if (isEditPinned) e.preventDefault()
-            }}
-            onEscapeKeyDown={(e) => {
-              if (isEditPinned) e.preventDefault()
-            }}
+            className="sm:max-w-[540px] border-l border-border/40 bg-background flex flex-col p-0"
           >
             <CrudSheetHeader
               title={t('todos.sheet.editTitle', 'Edit Task')}
               description={t('todos.sheet.editDescription', 'Update task details.')}
               onClose={() => {
                 setEditingTodo(null)
-                setIsEditPinned(false)
               }}
-              actionsSlot={
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className={cn(
-                    'h-8 w-8 text-muted-foreground hover:text-foreground hidden sm:inline-flex',
-                    isEditPinned && 'text-primary',
-                  )}
-                  onClick={() => setIsEditPinned(!isEditPinned)}
-                  title={isEditPinned ? t('common.unpin') : t('common.pinVisible')}
-                >
-                  {isEditPinned ? <PinOff className="size-4" /> : <Pin className="size-4" />}
-                </Button>
-              }
             />
             <div className="flex-1 overflow-y-auto p-6">
               {editingTodo && (
@@ -260,13 +188,10 @@ export function TodosPage() {
                   currentUserId={syncedUserId || ''}
                   onSubmit={async (values) => {
                     await updateMutation.mutateAsync({ id: editingTodo.id, data: values })
-                    if (!isEditPinned) {
-                      setEditingTodo(null)
-                    }
+                    setEditingTodo(null)
                   }}
                   onCancel={() => {
                     setEditingTodo(null)
-                    setIsEditPinned(false)
                   }}
                   isLoading={updateMutation.isPending}
                 />

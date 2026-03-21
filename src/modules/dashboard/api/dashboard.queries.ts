@@ -98,16 +98,18 @@ export const useUpcomingTodos = () => {
     refetchInterval: DASHBOARD_ACTIVITY_REFRESH_INTERVAL,
     refetchOnWindowFocus: true,
     select: (data) => {
-      return data.sort((a, b) => {
-        // Sort by priority first (high > medium > low)
+      const sortedItems = [...data.items].sort((a, b) => {
         const priorityWeight = { high: 3, medium: 2, low: 1 }
         const pA = priorityWeight[a.priority as keyof typeof priorityWeight] || 0
         const pB = priorityWeight[b.priority as keyof typeof priorityWeight] || 0
         if (pA !== pB) return pB - pA
-
-        // Then by date
         return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
       })
+
+      return {
+        ...data,
+        items: sortedItems,
+      }
     },
   })
 }
