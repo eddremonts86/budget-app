@@ -14,15 +14,19 @@ interface CalendarViewProps {
 export function CalendarView({ onEdit, onCreateWithDate, assignedTo }: CalendarViewProps) {
   const [currentDate, setCurrentDate] = React.useState(new Date())
   const [mode, setMode] = React.useState<CalendarMode>('month')
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } =
-    useInfiniteTodos(100, undefined, assignedTo)
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading } = useInfiniteTodos(
+    100,
+    undefined,
+    assignedTo,
+  )
 
-  // Load more automatically to fill calendar
+  // Load more automatically to fill calendar (capped to avoid fetching all pages)
+  const loadedPages = data?.pages.length ?? 0
   React.useEffect(() => {
-    if (hasNextPage && !isFetchingNextPage) {
+    if (hasNextPage && !isFetchingNextPage && loadedPages < 5) {
       fetchNextPage()
     }
-  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, loadedPages])
 
   const allTodos = React.useMemo(() => data?.pages.flatMap((p) => p.data) ?? [], [data])
 

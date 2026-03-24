@@ -16,8 +16,8 @@ import { useCurrentUser } from '@/modules/users'
 import { getTransactionsPendingApprovalForUser } from '@/modules/users/model/permissions'
 
 export function NotificationBell() {
-  const { data: allTransactions = [] } = useTransactions()
   const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
+  const { data: allTransactions = [] } = useTransactions({ enabled: canApproveTransactions })
 
   const pendingTransactions = React.useMemo(() => {
     return getTransactionsPendingApprovalForUser(allTransactions, currentUserId, roleKey)

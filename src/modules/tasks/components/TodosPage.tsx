@@ -8,7 +8,7 @@ import { AnimatePresence, LazyMotion, domAnimation, m } from 'framer-motion'
 import { Plus } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useCreateTodo, useInfiniteTodos, useUpdateTodo } from '../api/todos.queries'
+import { useCreateTodo, useUpdateTodo } from '../api/todos.queries'
 import type { Todo } from '../model/types'
 import { TodoForm } from './TodoForm'
 import { CalendarView } from './views/CalendarView'
@@ -20,8 +20,7 @@ export function TodosPage() {
   const { t } = useTranslation()
   const { syncedUserId } = useCurrentUser()
   const [onlyMyTasks, setOnlyMyTasks] = React.useState(false)
-  const { data } = useInfiniteTodos(1, undefined, onlyMyTasks ? syncedUserId || '' : undefined)
-  const totalCount = data?.pages[0]?.totalCount ?? 0
+  const [totalCount, setTotalCount] = React.useState(0)
 
   const [view, setView] = React.useState<TodoViewType>(() => {
     if (typeof window !== 'undefined') {
@@ -98,6 +97,7 @@ export function TodosPage() {
                 <ListView
                   onEdit={setEditingTodo}
                   assignedTo={onlyMyTasks ? syncedUserId || '' : undefined}
+                  onTotalCountChange={setTotalCount}
                 />
               )}
               {view === 'kanban' && (
@@ -140,23 +140,25 @@ export function TodosPage() {
               }}
             />
             <div className="flex-1 overflow-y-auto p-6">
-              <TodoForm
-                defaultValues={createDefaultValues}
-                currentUserId={syncedUserId || ''}
-                onSubmit={async (values) => {
-                  await createMutation.mutateAsync({
-                    ...values,
-                    assignedTo: values.assignedTo || syncedUserId || '',
-                  })
-                  setIsCreateOpen(false)
-                  setCreateDefaultValues({})
-                }}
-                onCancel={() => {
-                  setIsCreateOpen(false)
-                  setCreateDefaultValues({})
-                }}
-                isLoading={createMutation.isPending}
-              />
+              {isCreateOpen && (
+                <TodoForm
+                  defaultValues={createDefaultValues}
+                  currentUserId={syncedUserId || ''}
+                  onSubmit={async (values) => {
+                    await createMutation.mutateAsync({
+                      ...values,
+                      assignedTo: values.assignedTo || syncedUserId || '',
+                    })
+                    setIsCreateOpen(false)
+                    setCreateDefaultValues({})
+                  }}
+                  onCancel={() => {
+                    setIsCreateOpen(false)
+                    setCreateDefaultValues({})
+                  }}
+                  isLoading={createMutation.isPending}
+                />
+              )}
             </div>
           </SheetContent>
         </Sheet>

@@ -29,9 +29,11 @@ export const useInfiniteTransactions = (limit = 10) => {
   )
 }
 
-export const useTransactions = () => {
-  return useTQuery<Transaction[]>(transactionKeys.lists(), () =>
-    getTransactionsFn({ data: { limit: 1000 } }).then((res) => res.data),
+export const useTransactions = (options?: { enabled?: boolean }) => {
+  return useTQuery<Transaction[]>(
+    transactionKeys.lists(),
+    () => getTransactionsFn({ data: { limit: 50 } }).then((res) => res.data),
+    options,
   )
 }
 

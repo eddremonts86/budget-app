@@ -19,7 +19,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { useDebounce } from '@uidotdev/usehooks'
-import { m, AnimatePresence } from 'framer-motion'
 import {
   ChevronDown,
   ChevronLeft,
@@ -141,7 +140,8 @@ function downloadCsv(fileName: string, csvContent: string) {
 const EMPTY_FILTERS: DataTableFilterConfig[] = []
 const EMPTY_BULK_ACTIONS: never[] = []
 
-function RowCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- React.memo loses generic type parameter
+const RowCell = React.memo(function RowCell({ cell }: { cell: Cell<any, unknown> }) {
   if (cell.getIsGrouped()) {
     return (
       <Button
@@ -167,7 +167,7 @@ function RowCell<TData>({ cell }: { cell: Cell<TData, unknown> }) {
   }
   if (cell.getIsPlaceholder()) return null
   return flexRender(cell.column.columnDef.cell, cell.getContext())
-}
+})
 
 export function UnifiedDataTable<TData, TValue>({
   columns,
@@ -327,7 +327,6 @@ export function UnifiedDataTable<TData, TValue>({
 
     downloadCsv(exportFileName, [headers.join(','), ...body].join('\n'))
   }, [exportFileName, onExport, selectedRows, table])
-
 
   const rowModel = enablePagination ? table.getRowModel() : table.getPrePaginationRowModel()
   const canPaginate =
@@ -538,7 +537,9 @@ export function UnifiedDataTable<TData, TValue>({
                       <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {toHeaderLabel(cell.column.columnDef.header, cell.column.id)}
                       </span>
-                      <div className="text-right text-sm"><RowCell cell={cell} /></div>
+                      <div className="text-right text-sm">
+                        <RowCell cell={cell} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -595,27 +596,21 @@ export function UnifiedDataTable<TData, TValue>({
               ))}
             </TableHeader>
             <TableBody>
-              <AnimatePresence mode="popLayout" initial={false}>
-                {rowModel.rows.map((row, index) => (
-                  <m.tr
-                    key={row.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2, delay: index * 0.02 }}
-                    className="group hover:bg-secondary/10 transition-colors cursor-default"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className="py-4 px-6 text-sm border-b border-border/40 align-top"
-                      >
-                        <RowCell cell={cell} />
-                      </TableCell>
-                    ))}
-                  </m.tr>
-                ))}
-              </AnimatePresence>
+              {rowModel.rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="group hover:bg-secondary/10 transition-colors duration-200 cursor-default"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="py-4 px-6 text-sm border-b border-border/40 align-top"
+                    >
+                      <RowCell cell={cell} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
               {children}
               {!rowModel.rows.length && (
                 <TableRow>

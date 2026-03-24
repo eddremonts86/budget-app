@@ -69,8 +69,8 @@ const extractSearchText = (result: unknown) => {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
-  const { data: allTransactions = [] } = useTransactions()
   const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
+  const { data: allTransactions = [] } = useTransactions({ enabled: canApproveTransactions })
 
   const pendingCount = React.useMemo(() => {
     if (!canApproveTransactions) return 0
