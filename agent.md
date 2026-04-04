@@ -88,23 +88,35 @@ Para cada nueva funcionalidad o refactorización, verificar:
 
 ## 6. Skills y Agentes de IA
 
-Este proyecto tiene skills especializadas y agentes de IA configurados en `.agents/skills/`.
-Cada skill encapsula conocimiento profundo de un dominio específico del proyecto.
+Las skills viven en `.github/skills/vendor/` y están divididas en dos categorías:
 
-### Skills del Proyecto (cargar ANTES de trabajar en el dominio)
+- **`app/`** — Skills propias del proyecto. Contienen código real, rutas reales, patrones de producción de este repo.
+- **`vendor/` (raíz)** — Skills de terceros instaladas vía `skills-lock.json`. Conocimiento genérico del ecosistema.
 
-| Skill                 | Archivo                                       | Cuándo usarla                                               |
-| --------------------- | --------------------------------------------- | ----------------------------------------------------------- |
-| `module-architecture` | `.agents/skills/module-architecture/SKILL.md` | Crear/mover módulos, manifests, registry, barrels, routing  |
-| `feature-crud`        | `.agents/skills/feature-crud/SKILL.md`        | CRUDs nuevos/existentes, CrudSheet Protocol, TanStack Form  |
-| `ai-providers`        | `.agents/skills/ai-providers/SKILL.md`        | Módulo AI, proveedores, streaming, config-store, RAG, audit |
-| `auth-dual-provider`  | `.agents/skills/auth-dual-provider/SKILL.md`  | Auth (Clerk + Better Auth), rutas protegidas, bypass dev    |
-| `drizzle-db`          | `.agents/skills/drizzle-db/SKILL.md`          | Schema DB, migraciones, queries Drizzle, seed scripts       |
-| `i18n-deep`           | `.agents/skills/i18n-deep/SKILL.md`           | Traducciones (ES/EN/DK), namespaces, claves i18n            |
-| `e2e-testing-auth`    | `.agents/skills/e2e-testing-auth/SKILL.md`    | Tests Playwright, auth bypass E2E, fixtures, CI             |
-| `docker-ai-stack`     | `.agents/skills/docker-ai-stack/SKILL.md`     | Docker Compose, AI local (llama-cpp/Ollama), modelos GGUF   |
+---
 
-### Skills Generales Disponibles
+### App Skills — `.github/skills/app/` ★ CARGAR PRIMERO
+
+> Creadas para este proyecto. Tienen `references/` con código fuente real.
+> **Regla**: Si el dominio coincide, leer el SKILL.md ANTES de generar cualquier código.
+
+| Skill                 | Ruta                                              | Cuándo usarla                                               |
+| --------------------- | ------------------------------------------------- | ----------------------------------------------------------- |
+| `module-architecture` | `.github/skills/app/module-architecture/SKILL.md` | Crear/mover módulos, manifests, registry, barrels, routing  |
+| `feature-crud`        | `.github/skills/app/feature-crud/SKILL.md`        | CRUDs nuevos/existentes, CrudSheet Protocol, TanStack Form  |
+| `ai-providers`        | `.github/skills/app/ai-providers/SKILL.md`        | Módulo AI, proveedores, streaming, config-store, RAG, audit |
+| `auth-dual-provider`  | `.github/skills/app/auth-dual-provider/SKILL.md`  | Auth (Clerk + Better Auth), rutas protegidas, bypass dev    |
+| `drizzle-db`          | `.github/skills/app/drizzle-db/SKILL.md`          | Schema DB, migraciones, queries Drizzle, seed scripts       |
+| `i18n-deep`           | `.github/skills/app/i18n-deep/SKILL.md`           | Traducciones (ES/EN/DK), namespaces, claves i18n            |
+| `e2e-testing-auth`    | `.github/skills/app/e2e-testing-auth/SKILL.md`    | Tests Playwright, auth bypass E2E, fixtures, CI             |
+| `docker-ai-stack`     | `.github/skills/app/docker-ai-stack/SKILL.md`     | Docker Compose, AI local (llama-cpp/Ollama), modelos GGUF   |
+
+---
+
+### Third-Party Skills — `.github/skills/vendor/` (raíz)
+
+> Instaladas vía `skills-lock.json`. Conocimiento del ecosistema, no específico de este repo.
+> Combinar con las App Skills cuando aplica (ej: `e2e-testing-auth` + `playwright-skill`).
 
 | Skill                                 | Dominio                                                     |
 | ------------------------------------- | ----------------------------------------------------------- |
@@ -112,7 +124,7 @@ Cada skill encapsula conocimiento profundo de un dominio específico del proyect
 | `tanstack-query-best-practices`       | Server state, cache, mutations, keys                        |
 | `tanstack-start-best-practices`       | Server functions, SSR, middleware                           |
 | `tanstack-integration-best-practices` | Integración Router + Query + Start                          |
-| `shadcn-ui`                           | Componentes Shadcn/Radix, formularios, temas                |
+| `shadcn-ui` / `shadcn`                | Componentes Shadcn/Radix, formularios, temas                |
 | `typescript-advanced-types`           | Tipos genéricos, condicionales, mapped types                |
 | `react-doctor`                        | Diagnóstico post-cambio: score 0-100, security, performance |
 | `frontend-design`                     | UI de alta calidad, producción, sin estética genérica AI    |
@@ -120,10 +132,11 @@ Cada skill encapsula conocimiento profundo de un dominio específico del proyect
 | `clerk-setup` / `clerk-orgs`          | Configuración Clerk, multi-tenant, RBAC                     |
 | `vercel-react-best-practices`         | Performance React/Next.js desde Vercel Engineering          |
 | `web-design-guidelines`               | Revisión accesibilidad, UX, best practices                  |
+| `code-simplifier`                     | Refactorizar, limpiar, mejorar legibilidad                  |
 
 ### Agentes Configurados
 
-Agentes especializados en el proyecto (ver `.agents/` y `docs/ai/agents.md`):
+Agentes especializados en el proyecto (ver `.github/agents/` y `docs/ai/agents.md`):
 
 #### 1. Feature Creator Agent
 
@@ -137,9 +150,9 @@ Agentes especializados en el proyecto (ver `.agents/` y `docs/ai/agents.md`):
 ```
 You are an expert TypeScript/React developer on a TanStack Start project.
 When creating a feature module, load and follow:
-1. .agents/skills/module-architecture/SKILL.md — module structure and ownership rules
-2. .agents/skills/feature-crud/SKILL.md — CRUD + CrudSheet Protocol
-3. .agents/skills/i18n-deep/SKILL.md — add all text to EN/ES/DK locales
+1. .github/skills/app/module-architecture/SKILL.md — module structure and ownership rules
+2. .github/skills/app/feature-crud/SKILL.md — CRUD + CrudSheet Protocol
+3. .github/skills/app/i18n-deep/SKILL.md — add all text to EN/ES/DK locales
 
 Generate the complete structure: manifest.ts, model/types.ts, model/schema.ts,
 api/*.fn.ts, api/*.queries.ts, components/*, index.ts (barrel).
@@ -157,7 +170,7 @@ Never hardcode UI strings — use i18n keys.
 
 ```
 You are a React UI developer on a TanStack Start project.
-Load .agents/skills/feature-crud/SKILL.md for CrudSheet Protocol.
+Load .github/skills/app/feature-crud/SKILL.md for CrudSheet Protocol.
 Rules:
 - Functional components, named exports only
 - Props interface above component
@@ -177,7 +190,7 @@ Rules:
 
 ```
 You are a data fetching specialist on a TanStack Start project.
-Load .agents/skills/feature-crud/SKILL.md for query key patterns.
+Load .github/skills/app/feature-crud/SKILL.md for query key patterns.
 Always use:
 - useTQuery / useTQMutation / useTQSuspense from @/shared/lib/query
 - Cache profiles: 'realtime' | 'standard' | 'stable' | 'static'
@@ -196,7 +209,7 @@ Always use:
 
 ```
 You are an AI systems engineer on a TanStack Start project.
-Load .agents/skills/ai-providers/SKILL.md FIRST.
+Load .github/skills/app/ai-providers/SKILL.md FIRST.
 The project supports 5 providers: llama-cpp, ollama, lm-studio, openai, anthropic.
 Provider code lives in src/modules/ai/providers/<name>/.
 Config resolution order: ia-config → env vars → config-store session.
@@ -214,7 +227,7 @@ Never expose server-only code (file-store, audit) to the client bundle.
 
 ```
 You are a security-focused engineer on a TanStack Start project.
-Load .agents/skills/auth-dual-provider/SKILL.md FIRST.
+Load .github/skills/app/auth-dual-provider/SKILL.md FIRST.
 Auth modes: local (Better Auth only) | clerk (Clerk only) | hybrid (both).
 Always use useAppAuth() — never raw Clerk/Better Auth hooks.
 Gate signOut on auth.canSignOut (false in bypass mode).
@@ -232,7 +245,7 @@ Never enable SKIP_AUTH/VITE_SKIP_AUTH in production.
 
 ```
 You are a database engineer on a TanStack Start project with Drizzle ORM + PostgreSQL.
-Load .agents/skills/drizzle-db/SKILL.md FIRST.
+Load .github/skills/app/drizzle-db/SKILL.md FIRST.
 Schema source of truth: src/shared/lib/db/schema.ts (single file).
 Always use text('id').primaryKey() with crypto.randomUUID() — never serial.
 Generate migrations with: pnpm drizzle-kit generate && pnpm drizzle-kit migrate
@@ -250,7 +263,7 @@ Set explicit onDelete/onUpdate on all foreign keys.
 
 ```
 You are an E2E testing engineer on a TanStack Start project using Playwright.
-Load .agents/skills/e2e-testing-auth/SKILL.md FIRST.
+Load .github/skills/app/e2e-testing-auth/SKILL.md FIRST.
 Tests run across 3 locales (en/es/dk) × multiple browsers.
 For auth: use bypass (SKIP_AUTH=true) or provisionAccount() utility.
 All selectors must use data-testid attributes (not text or CSS).

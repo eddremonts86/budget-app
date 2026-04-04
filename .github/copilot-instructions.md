@@ -198,16 +198,40 @@ Required in `.env.development`:
 
 ## Project-Specific Skills (load before working in the domain)
 
-| Domain                               | Skill File                                    |
-| ------------------------------------ | --------------------------------------------- |
-| Module architecture & manifests      | `.agents/skills/module-architecture/SKILL.md` |
-| CRUD operations & CrudSheet Protocol | `.agents/skills/feature-crud/SKILL.md`        |
-| Multi-provider AI system             | `.agents/skills/ai-providers/SKILL.md`        |
-| Auth (Clerk + Better Auth)           | `.agents/skills/auth-dual-provider/SKILL.md`  |
-| Drizzle ORM + DB schema              | `.agents/skills/drizzle-db/SKILL.md`          |
-| i18n (EN/ES/DK translations)         | `.agents/skills/i18n-deep/SKILL.md`           |
-| Playwright E2E + auth bypass         | `.agents/skills/e2e-testing-auth/SKILL.md`    |
-| Docker + local AI stack              | `.agents/skills/docker-ai-stack/SKILL.md`     |
+> Skills are split into two tiers:
+> - **`app/`** — Built for this repo. Contain real source code, real paths, production patterns. **Load these first.**
+> - **`vendor/`** — Installed via `skills-lock.json`. Generic ecosystem knowledge. Combine with app skills.
+
+### App Skills — `.github/skills/app/`
+
+| Domain                               | Skill File                                            |
+| ------------------------------------ | ----------------------------------------------------- |
+| Module architecture & manifests      | `.github/skills/app/module-architecture/SKILL.md`     |
+| CRUD operations & CrudSheet Protocol | `.github/skills/app/feature-crud/SKILL.md`            |
+| Multi-provider AI system             | `.github/skills/app/ai-providers/SKILL.md`            |
+| Auth (Clerk + Better Auth)           | `.github/skills/app/auth-dual-provider/SKILL.md`      |
+| Drizzle ORM + DB schema              | `.github/skills/app/drizzle-db/SKILL.md`              |
+| i18n (EN/ES/DK translations)         | `.github/skills/app/i18n-deep/SKILL.md`               |
+| Playwright E2E + auth bypass         | `.github/skills/app/e2e-testing-auth/SKILL.md`        |
+| Docker + local AI stack              | `.github/skills/app/docker-ai-stack/SKILL.md`         |
+
+### Vendor Skills — `.github/skills/vendor/`
+
+| Skill                                 | Domain                                      |
+| ------------------------------------- | ------------------------------------------- |
+| `tanstack-router-best-practices`      | Type-safe routing, loaders, search params   |
+| `tanstack-query-best-practices`       | Server state, cache, mutations              |
+| `tanstack-start-best-practices`       | Server functions, SSR, middleware           |
+| `tanstack-integration-best-practices` | Router + Query + Start integration          |
+| `shadcn-ui` / `shadcn`               | Shadcn/Radix components, forms, themes      |
+| `typescript-advanced-types`           | Generics, conditionals, mapped types        |
+| `react-doctor`                        | Post-change React health check (0–100)      |
+| `frontend-design`                     | High-quality production UI patterns         |
+| `playwright-skill`                    | Full browser automation                     |
+| `clerk-setup` / `clerk-orgs`          | Clerk auth setup, multi-tenant, RBAC        |
+| `vercel-react-best-practices`         | React performance from Vercel Engineering   |
+| `web-design-guidelines`               | Accessibility, UX, best practices audit     |
+| `code-simplifier`                     | Refactor for clarity and maintainability    |
 
 ## Module System
 
@@ -226,3 +250,23 @@ Bypass available for dev/E2E via `VITE_SKIP_AUTH=true` (localhost only).
 `src/modules/ai/` owns the full AI runtime: 5 providers (llama-cpp, ollama, lm-studio, openai, anthropic).
 Active provider resolved from: `ia-config/` → env vars → `/api/ai/config-store`.
 See `docs/ai/architecture.md` and the `ai-providers` skill.
+
+## Skill Pairing Quick Reference
+
+When working in a domain, load ALL applicable skills before generating code:
+
+| Task                          | Load these skills                                         |
+| ----------------------------- | --------------------------------------------------------- |
+| New module                    | `module-architecture` + `feature-crud` + `i18n-deep`     |
+| Add CRUD to existing module   | `feature-crud` + `drizzle-db` + `i18n-deep`              |
+| AI providers / streaming      | `ai-providers` + `docker-ai-stack`                        |
+| Auth / protected routes       | `auth-dual-provider`                                      |
+| DB schema / migrations        | `drizzle-db`                                              |
+| Translations                  | `i18n-deep`                                               |
+| E2E tests                     | `e2e-testing-auth` + `playwright-skill`                   |
+| Docker / local LLM            | `docker-ai-stack`                                         |
+| UI component / accessibility  | `frontend-design` + `web-design-guidelines`               |
+| Post-change quality check     | `react-doctor`                                            |
+| Code cleanup / refactor       | `code-simplifier` + `vercel-react-best-practices`         |
+
+Agents live in `.github/agents/`. Skills live in `.github/skills/` (`app/` = this repo, `vendor/` = 3rd party).
