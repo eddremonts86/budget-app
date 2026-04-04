@@ -83,3 +83,202 @@ Para cada nueva funcionalidad o refactorización, verificar:
 2. **Estructura de Carpetas Estricta**: Prohibido mezclar lógica de diferentes módulos sin pasar por `shared` o por un módulo explícitamente compartido.
 3. **Documentación Proactiva**: Actualizar este archivo `agent.md` cuando se introduzcan nuevos patrones arquitectónicos.
 4. **Pruebas Continuas**: Validar flujos críticos con Playwright antes de cada despliegue.
+
+---
+
+## 6. Skills y Agentes de IA
+
+Este proyecto tiene skills especializadas y agentes de IA configurados en `.agents/skills/`.
+Cada skill encapsula conocimiento profundo de un dominio específico del proyecto.
+
+### Skills del Proyecto (cargar ANTES de trabajar en el dominio)
+
+| Skill                 | Archivo                                       | Cuándo usarla                                               |
+| --------------------- | --------------------------------------------- | ----------------------------------------------------------- |
+| `module-architecture` | `.agents/skills/module-architecture/SKILL.md` | Crear/mover módulos, manifests, registry, barrels, routing  |
+| `feature-crud`        | `.agents/skills/feature-crud/SKILL.md`        | CRUDs nuevos/existentes, CrudSheet Protocol, TanStack Form  |
+| `ai-providers`        | `.agents/skills/ai-providers/SKILL.md`        | Módulo AI, proveedores, streaming, config-store, RAG, audit |
+| `auth-dual-provider`  | `.agents/skills/auth-dual-provider/SKILL.md`  | Auth (Clerk + Better Auth), rutas protegidas, bypass dev    |
+| `drizzle-db`          | `.agents/skills/drizzle-db/SKILL.md`          | Schema DB, migraciones, queries Drizzle, seed scripts       |
+| `i18n-deep`           | `.agents/skills/i18n-deep/SKILL.md`           | Traducciones (ES/EN/DK), namespaces, claves i18n            |
+| `e2e-testing-auth`    | `.agents/skills/e2e-testing-auth/SKILL.md`    | Tests Playwright, auth bypass E2E, fixtures, CI             |
+| `docker-ai-stack`     | `.agents/skills/docker-ai-stack/SKILL.md`     | Docker Compose, AI local (llama-cpp/Ollama), modelos GGUF   |
+
+### Skills Generales Disponibles
+
+| Skill                                 | Dominio                                                     |
+| ------------------------------------- | ----------------------------------------------------------- |
+| `tanstack-router-best-practices`      | Routing type-safe, loaders, search params                   |
+| `tanstack-query-best-practices`       | Server state, cache, mutations, keys                        |
+| `tanstack-start-best-practices`       | Server functions, SSR, middleware                           |
+| `tanstack-integration-best-practices` | Integración Router + Query + Start                          |
+| `shadcn-ui`                           | Componentes Shadcn/Radix, formularios, temas                |
+| `typescript-advanced-types`           | Tipos genéricos, condicionales, mapped types                |
+| `react-doctor`                        | Diagnóstico post-cambio: score 0-100, security, performance |
+| `frontend-design`                     | UI de alta calidad, producción, sin estética genérica AI    |
+| `playwright-skill`                    | Automatización completa de browser, screenshots, forms      |
+| `clerk-setup` / `clerk-orgs`          | Configuración Clerk, multi-tenant, RBAC                     |
+| `vercel-react-best-practices`         | Performance React/Next.js desde Vercel Engineering          |
+| `web-design-guidelines`               | Revisión accesibilidad, UX, best practices                  |
+
+### Agentes Configurados
+
+Agentes especializados en el proyecto (ver `.agents/` y `docs/ai/agents.md`):
+
+#### 1. Feature Creator Agent
+
+**Propósito**: Generar estructura completa de módulos de feature.
+
+- Carga automáticamente: `module-architecture` + `feature-crud` + `i18n-deep`
+- Genera: manifest.ts, model/, api/, components/, index.ts, traducciones EN/ES/DK
+
+**Prompt de sistema**:
+
+```
+You are an expert TypeScript/React developer on a TanStack Start project.
+When creating a feature module, load and follow:
+1. .agents/skills/module-architecture/SKILL.md — module structure and ownership rules
+2. .agents/skills/feature-crud/SKILL.md — CRUD + CrudSheet Protocol
+3. .agents/skills/i18n-deep/SKILL.md — add all text to EN/ES/DK locales
+
+Generate the complete structure: manifest.ts, model/types.ts, model/schema.ts,
+api/*.fn.ts, api/*.queries.ts, components/*, index.ts (barrel).
+Register the manifest in src/modules/core/registry.ts.
+Never hardcode UI strings — use i18n keys.
+```
+
+#### 2. Component Generator Agent
+
+**Propósito**: Crear componentes UI siguiendo los patrones del proyecto.
+
+- Carga automáticamente: `feature-crud` + `shadcn-ui` + `i18n-deep`
+
+**Prompt de sistema**:
+
+```
+You are a React UI developer on a TanStack Start project.
+Load .agents/skills/feature-crud/SKILL.md for CrudSheet Protocol.
+Rules:
+- Functional components, named exports only
+- Props interface above component
+- cn() for conditional Tailwind classes
+- useTranslation() for ALL user-facing text (no hardcoded strings)
+- Follow CrudSheet Protocol for create/edit sheets
+- Use animate-in, fade-in for transitions
+```
+
+#### 3. Query Builder Agent
+
+**Propósito**: Crear TanStack Query hooks con los wrappers del proyecto.
+
+- Carga automáticamente: `tanstack-query-best-practices` + `feature-crud`
+
+**Prompt de sistema**:
+
+```
+You are a data fetching specialist on a TanStack Start project.
+Load .agents/skills/feature-crud/SKILL.md for query key patterns.
+Always use:
+- useTQuery / useTQMutation / useTQSuspense from @/shared/lib/query
+- Cache profiles: 'realtime' | 'standard' | 'stable' | 'static'
+- entityKeys factory for all query keys
+- invalidateKeys on every mutation
+- successMessage with i18n keys (not raw strings)
+```
+
+#### 4. AI Integration Agent
+
+**Propósito**: Integrar o modificar el sistema multi-proveedor de IA.
+
+- Carga automáticamente: `ai-providers` + `docker-ai-stack`
+
+**Prompt de sistema**:
+
+```
+You are an AI systems engineer on a TanStack Start project.
+Load .agents/skills/ai-providers/SKILL.md FIRST.
+The project supports 5 providers: llama-cpp, ollama, lm-studio, openai, anthropic.
+Provider code lives in src/modules/ai/providers/<name>/.
+Config resolution order: ia-config → env vars → config-store session.
+API routes are thin adapters consuming src/modules/ai/server/* helpers.
+Never expose server-only code (file-store, audit) to the client bundle.
+```
+
+#### 5. Auth & Security Agent
+
+**Propósito**: Implementar auth, proteger rutas, gestionar sesiones.
+
+- Carga automáticamente: `auth-dual-provider` + `drizzle-db`
+
+**Prompt de sistema**:
+
+```
+You are a security-focused engineer on a TanStack Start project.
+Load .agents/skills/auth-dual-provider/SKILL.md FIRST.
+Auth modes: local (Better Auth only) | clerk (Clerk only) | hybrid (both).
+Always use useAppAuth() — never raw Clerk/Better Auth hooks.
+Gate signOut on auth.canSignOut (false in bypass mode).
+Server-side: requireAuthUser() or ensureAppAuthSession() for protected endpoints.
+Never enable SKIP_AUTH/VITE_SKIP_AUTH in production.
+```
+
+#### 6. Database Agent
+
+**Propósito**: Diseñar schema, generar migraciones, escribir queries Drizzle.
+
+- Carga automáticamente: `drizzle-db`
+
+**Prompt de sistema**:
+
+```
+You are a database engineer on a TanStack Start project with Drizzle ORM + PostgreSQL.
+Load .agents/skills/drizzle-db/SKILL.md FIRST.
+Schema source of truth: src/shared/lib/db/schema.ts (single file).
+Always use text('id').primaryKey() with crypto.randomUUID() — never serial.
+Generate migrations with: pnpm drizzle-kit generate && pnpm drizzle-kit migrate
+Never write raw SQL migrations manually.
+Set explicit onDelete/onUpdate on all foreign keys.
+```
+
+#### 7. E2E Test Agent
+
+**Propósito**: Escribir y mantener tests Playwright con auth.
+
+- Carga automáticamente: `e2e-testing-auth` + `playwright-skill`
+
+**Prompt de sistema**:
+
+```
+You are an E2E testing engineer on a TanStack Start project using Playwright.
+Load .agents/skills/e2e-testing-auth/SKILL.md FIRST.
+Tests run across 3 locales (en/es/dk) × multiple browsers.
+For auth: use bypass (SKIP_AUTH=true) or provisionAccount() utility.
+All selectors must use data-testid attributes (not text or CSS).
+Assertions must be locale-independent (regex, role, testid).
+```
+
+#### 8. React Doctor Agent (Post-cambio)
+
+**Propósito**: Diagnóstico de calidad después de cualquier cambio React.
+
+- Ejecutar siempre después de terminar una feature o fix
+
+```bash
+npx -y react-doctor@latest . --verbose --diff
+```
+
+Fix errores primero, luego re-ejecutar hasta conseguir score aceptable.
+
+### Cuándo cargar qué skill
+
+```
+Crear nuevo módulo           → module-architecture + feature-crud + i18n-deep
+Agregar CRUD a módulo        → feature-crud + drizzle-db + i18n-deep
+Modificar AI providers       → ai-providers + docker-ai-stack
+Trabajo de auth/sesiones     → auth-dual-provider
+Cambiar DB schema            → drizzle-db
+Agregar traducciones         → i18n-deep
+Escribir tests E2E           → e2e-testing-auth + playwright-skill
+Levantar stack Docker        → docker-ai-stack
+Review de UI/accesibilidad   → web-design-guidelines + react-doctor
+```

@@ -195,3 +195,34 @@ Required in `.env.development`:
 4. **Translate everything** - No hardcoded strings in components
 5. **Test critical paths** - E2E tests for main user flows
 6. **Type everything** - Leverage TypeScript's strict mode
+
+## Project-Specific Skills (load before working in the domain)
+
+| Domain                               | Skill File                                    |
+| ------------------------------------ | --------------------------------------------- |
+| Module architecture & manifests      | `.agents/skills/module-architecture/SKILL.md` |
+| CRUD operations & CrudSheet Protocol | `.agents/skills/feature-crud/SKILL.md`        |
+| Multi-provider AI system             | `.agents/skills/ai-providers/SKILL.md`        |
+| Auth (Clerk + Better Auth)           | `.agents/skills/auth-dual-provider/SKILL.md`  |
+| Drizzle ORM + DB schema              | `.agents/skills/drizzle-db/SKILL.md`          |
+| i18n (EN/ES/DK translations)         | `.agents/skills/i18n-deep/SKILL.md`           |
+| Playwright E2E + auth bypass         | `.agents/skills/e2e-testing-auth/SKILL.md`    |
+| Docker + local AI stack              | `.agents/skills/docker-ai-stack/SKILL.md`     |
+
+## Module System
+
+Business logic lives in `src/modules/<name>/`. Routes in `src/routes/` are thin adapters.
+Each module requires a `manifest.ts` registered in `src/modules/core/registry.ts`.
+See `src/modules/README.md` and the `module-architecture` skill for full rules.
+
+## Auth System
+
+Three modes via `AUTH_MODE` env: `local` (Better Auth), `clerk` (Clerk), `hybrid` (both).
+Always use `useAppAuth()` hook — never raw Clerk/Better Auth hooks.
+Bypass available for dev/E2E via `VITE_SKIP_AUTH=true` (localhost only).
+
+## AI System
+
+`src/modules/ai/` owns the full AI runtime: 5 providers (llama-cpp, ollama, lm-studio, openai, anthropic).
+Active provider resolved from: `ia-config/` → env vars → `/api/ai/config-store`.
+See `docs/ai/architecture.md` and the `ai-providers` skill.
