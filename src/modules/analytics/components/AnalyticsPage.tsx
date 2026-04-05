@@ -57,10 +57,10 @@ export function AnalyticsPage() {
 
   return (
     <div className="flex flex-col h-full space-y-4 p-4 md:p-8 pt-6">
-      <div className="flex flex-col md:flex-row items-center justify-between space-y-2 md:space-y-0">
+      <div className="flex flex-col items-start gap-3 md:flex-row md:items-center md:justify-between">
         <h2 className="text-3xl font-bold tracking-tight">{t('analytics.title')}</h2>
-        <div className="flex items-center space-x-2">
-          <InputGroup className="w-50">
+        <div className="flex flex-wrap items-center gap-2">
+          <InputGroup className="w-48">
             <InputGroupAddon>
               <IconSearch />
             </InputGroupAddon>
@@ -69,7 +69,7 @@ export function AnalyticsPage() {
             />
           </InputGroup>
           <Select value={days.toString()} onValueChange={(val) => setDays(Number(val))}>
-            <SelectTrigger className="w-30">
+            <SelectTrigger className="w-40">
               <SelectValue placeholder="Select days" />
             </SelectTrigger>
             <SelectContent>
