@@ -1,6 +1,13 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Skeleton,
+} from '@/components/ui'
 import {
   Select,
   SelectContent,
@@ -61,11 +68,11 @@ export function WorkloadChart() {
     return (
       <Card className="col-span-4">
         <CardHeader>
-          <div className="h-6 w-1/3 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-1/4 bg-muted rounded animate-pulse mt-2" />
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/4 mt-2" />
         </CardHeader>
         <CardContent>
-          <div className="h-62.5 bg-muted rounded animate-pulse" />
+          <Skeleton className="h-62.5 w-full" />
         </CardContent>
       </Card>
     )

@@ -8,4 +8,20 @@ export type {
   AppModuleRouteDefinition,
   ModuleActionId,
   ModuleBadgeId,
+  WidgetDefinition,
+  WidgetSize,
 } from './core/types'
+export {
+  getRegisteredWidgets,
+  getWidgetById,
+  type ResolvedWidget,
+  useWidgetConfig,
+  type UseWidgetConfigReturn,
+  WidgetRenderer,
+  WidgetGrid,
+  WidgetConfigurator,
+  WidgetEditModeProvider,
+  useWidgetEditMode,
+  SortableWidgetItem,
+  type EnrichedWidget,
+} from './core/widget'

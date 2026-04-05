@@ -5,16 +5,21 @@ import {
   IconTrendingUp,
   IconTrendingDown,
   IconCreditCard,
+  IconPencil,
+  IconCheck,
 } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardHeader, CardTitle, Skeleton } from '@/components/ui'
+import {
+  WidgetConfigurator,
+  WidgetGrid,
+  WidgetEditModeProvider,
+  useWidgetEditMode,
+} from '@/modules/core/widget'
 import { cn } from '@/shared/lib/utils'
 import { useDashboardMetric } from '../api/dashboard.queries'
-import { ExpenseDistributionChart } from './ExpenseDistributionChart'
-import { UpcomingTodosList } from './UpcomingTodosList'
 import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
-import { WorkloadChart } from './WorkloadChart'
 
 function StatsCardSkeleton() {
   return (
@@ -221,27 +226,50 @@ function ActiveProjectsCard() {
   )
 }
 
+export function StatsCardsWidget() {
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <NetBalanceCard />
+      <RevenueCard />
+      <ExpensesCard />
+      <ActiveProjectsCard />
+    </div>
+  )
+}
+
+function DashboardToolbar() {
+  const { editing, toggleEditing } = useWidgetEditMode()
+
+  return (
+    <div className="flex items-center justify-end gap-2 shrink-0">
+      {editing ? <WidgetConfigurator moduleId="dashboard" /> : null}
+      <button
+        type="button"
+        onClick={toggleEditing}
+        className={cn(
+          'inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors',
+          editing
+            ? 'border-primary bg-primary text-primary-foreground hover:bg-primary/90'
+            : 'border-border bg-background text-muted-foreground hover:bg-muted hover:text-foreground',
+        )}
+      >
+        {editing ? <IconCheck className="h-4 w-4" /> : <IconPencil className="h-4 w-4" />}
+        {editing ? 'Done' : 'Customize'}
+      </button>
+    </div>
+  )
+}
+
 export function DashboardPage() {
   return (
-    <div className="flex flex-col h-full gap-8 overflow-y-auto">
-      {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4 shrink-0">
-        <NetBalanceCard />
-        <RevenueCard />
-        <ExpensesCard />
-        <ActiveProjectsCard />
-      </div>
+    <WidgetEditModeProvider>
+      <div className="flex flex-col h-full gap-8 overflow-y-auto">
+        {/* Toolbar: edit mode toggle + configurator */}
+        <DashboardToolbar />
 
-      {/* Main Content Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7 items-start">
-        <div className="lg:col-span-4 flex flex-col gap-4">
-          <WorkloadChart />
-          <ExpenseDistributionChart />
-        </div>
-        <div className="lg:col-span-3">
-          <UpcomingTodosList />
-        </div>
+        {/* All widgets — drag-and-drop sortable */}
+        <WidgetGrid moduleId="dashboard" />
       </div>
-    </div>
+    </WidgetEditModeProvider>
   )
 }

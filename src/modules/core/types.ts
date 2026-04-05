@@ -1,10 +1,33 @@
 import type { Icon } from '@tabler/icons-react'
-import type { ReactNode } from 'react'
+import type { ComponentType, ReactNode } from 'react'
 
 export type AppModuleRouteKind = 'page' | 'layout' | 'api'
 export type ModuleNavigationKind = 'main' | 'secondary'
 export type ModuleActionId = 'open-ai-search'
 export type ModuleBadgeId = 'pending-transactions'
+export type WidgetSize = 'sm' | 'md' | 'lg' | 'full'
+
+export interface WidgetDefinition {
+  /** Unique id scoped to the module, e.g. 'expense-distribution' */
+  id: string
+  /** Owning module id — filled automatically by the registry */
+  moduleId?: string
+  /** i18n key for the widget title */
+  titleKey: string
+  /** Fallback title when i18n key is missing */
+  fallbackTitle: string
+  /** Optional description for the configurator UI */
+  descriptionKey?: string
+  fallbackDescription?: string
+  /** Lazy component loader */
+  component: () => Promise<{ default: ComponentType }>
+  /** Whether the widget is visible by default (default: true) */
+  defaultVisible?: boolean
+  /** Default ordering hint — lower numbers appear first */
+  defaultOrder?: number
+  /** Layout size hint */
+  size?: WidgetSize
+}
 
 export interface AppModuleRouteDefinition {
   path: string
@@ -40,6 +63,7 @@ export interface AppModuleManifest {
   legacyFeatureKeys?: string[]
   routes: AppModuleRouteDefinition[]
   navigation?: AppModuleNavigationSection[]
+  widgets?: WidgetDefinition[]
 }
 
 export interface SidebarRuntimeItem {

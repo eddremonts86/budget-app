@@ -1,6 +1,13 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  Skeleton,
+} from '@/components/ui'
 import type { ChartConfig } from '@/components/ui/chart'
 import { useExpenseDistribution } from '../api/dashboard.queries'
 import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
@@ -19,11 +26,11 @@ export function ExpenseDistributionChart() {
     return (
       <Card className="w-full">
         <CardHeader>
-          <div className="h-6 w-1/3 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-1/4 bg-muted rounded animate-pulse mt-2" />
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/4 mt-2" />
         </CardHeader>
         <CardContent>
-          <div className="h-56 bg-muted rounded animate-pulse" />
+          <Skeleton className="h-56 w-full" />
         </CardContent>
       </Card>
     )
@@ -71,7 +78,7 @@ export function ExpenseDistributionChart() {
     return acc
   }, {} as ChartConfig)
 
-  const chartHeight = Math.max(280, chartData.length * 48)
+  const chartHeight = Math.max(200, chartData.length * 36)
 
   return (
     <Card className="w-full">
@@ -110,12 +117,7 @@ export function ExpenseDistributionChart() {
       </CardHeader>
       <CardContent>
         <React.Suspense
-          fallback={
-            <div
-              className="w-full rounded-lg bg-muted/50 animate-pulse"
-              style={{ height: `${chartHeight}px` }}
-            />
-          }
+          fallback={<Skeleton className="w-full" style={{ height: `${chartHeight}px` }} />}
         >
           <LazyExpenseDistributionChartContent
             chartData={chartData}

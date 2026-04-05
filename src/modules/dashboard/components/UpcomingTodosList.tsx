@@ -15,6 +15,7 @@ import {
   PopoverContent,
   PopoverTrigger,
   Separator,
+  Skeleton,
 } from '@/components/ui'
 import { useUsersByIds } from '@/modules/users'
 import { cn } from '@/shared/utils'
@@ -260,13 +261,13 @@ export function UpcomingTodosList() {
     return (
       <Card className="col-span-7">
         <CardHeader>
-          <div className="h-6 w-1/3 bg-muted rounded animate-pulse" />
-          <div className="h-4 w-1/4 bg-muted rounded animate-pulse mt-2" />
+          <Skeleton className="h-6 w-1/3" />
+          <Skeleton className="h-4 w-1/4 mt-2" />
         </CardHeader>
         <CardContent>
           <div className="space-y-2">
             {(['todo-1', 'todo-2', 'todo-3'] as const).map((id) => (
-              <div key={id} className="h-12 bg-muted rounded animate-pulse" />
+              <Skeleton key={id} className="h-12 w-full" />
             ))}
           </div>
         </CardContent>
