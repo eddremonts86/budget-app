@@ -222,6 +222,7 @@ Required in `.env.development`:
 | ------------------------------------ | ------------------------------------------------- |
 | Module architecture & manifests      | `.github/skills/app/module-architecture/SKILL.md` |
 | CRUD operations & CrudSheet Protocol | `.github/skills/app/feature-crud/SKILL.md`        |
+| Widget system (create / fix widgets) | `.github/skills/app/widget-system/SKILL.md`       |
 | Multi-provider AI system             | `.github/skills/app/ai-providers/SKILL.md`        |
 | Auth (Clerk + Better Auth)           | `.github/skills/app/auth-dual-provider/SKILL.md`  |
 | Drizzle ORM + DB schema              | `.github/skills/app/drizzle-db/SKILL.md`          |
@@ -273,6 +274,7 @@ When working in a domain, load ALL applicable skills before generating code:
 | ---------------------------- | ---------------------------------------------------- |
 | New module                   | `module-architecture` + `feature-crud` + `i18n-deep` |
 | Add CRUD to existing module  | `feature-crud` + `drizzle-db` + `i18n-deep`          |
+| New widget / fix widget      | `widget-system` + `i18n-deep`                        |
 | AI providers / streaming     | `ai-providers` + `docker-ai-stack`                   |
 | Auth / protected routes      | `auth-dual-provider`                                 |
 | DB schema / migrations       | `drizzle-db`                                         |
