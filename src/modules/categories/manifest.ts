@@ -24,4 +24,19 @@ export const categoriesModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'list',
+      titleKey: 'dashboard.widgets.categoriesList',
+      fallbackTitle: 'Categories',
+      fallbackDescription: 'All available categories at a glance.',
+      defaultVisible: true,
+      defaultOrder: 100,
+      size: 'sm',
+      component: () =>
+        import('./components/CategoriesListWidget').then((m) => ({
+          default: m.CategoriesListWidget,
+        })),
+    },
+  ],
 }

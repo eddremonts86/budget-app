@@ -25,4 +25,19 @@ export const teamModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'overview',
+      titleKey: 'dashboard.widgets.teamOverview',
+      fallbackTitle: 'Team Overview',
+      fallbackDescription: 'Workforce distribution across teams.',
+      defaultVisible: true,
+      defaultOrder: 70,
+      size: 'md',
+      component: () =>
+        import('./components/TeamOverviewWidget').then((m) => ({
+          default: m.TeamOverviewWidget,
+        })),
+    },
+  ],
 }

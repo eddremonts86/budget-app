@@ -24,4 +24,19 @@ export const helpModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'quick-links',
+      titleKey: 'dashboard.widgets.quickLinks',
+      fallbackTitle: 'Quick Links',
+      fallbackDescription: 'Fast access to key workspace sections.',
+      defaultVisible: true,
+      defaultOrder: 110,
+      size: 'sm',
+      component: () =>
+        import('./components/QuickLinksWidget').then((m) => ({
+          default: m.QuickLinksWidget,
+        })),
+    },
+  ],
 }

@@ -25,4 +25,19 @@ export const usersModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'directory-stats',
+      titleKey: 'dashboard.widgets.userStats',
+      fallbackTitle: 'User Directory',
+      fallbackDescription: 'Team headcount and top departments.',
+      defaultVisible: true,
+      defaultOrder: 80,
+      size: 'sm',
+      component: () =>
+        import('./components/UserDirectoryStatsWidget').then((m) => ({
+          default: m.UserDirectoryStatsWidget,
+        })),
+    },
+  ],
 }

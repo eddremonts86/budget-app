@@ -26,4 +26,19 @@ export const projectsModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'status-overview',
+      titleKey: 'dashboard.widgets.projectsStatus',
+      fallbackTitle: 'Project Status',
+      fallbackDescription: 'Overview of projects by current status.',
+      defaultVisible: true,
+      defaultOrder: 50,
+      size: 'md',
+      component: () =>
+        import('./components/ProjectsStatusWidget').then((m) => ({
+          default: m.ProjectsStatusWidget,
+        })),
+    },
+  ],
 }

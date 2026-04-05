@@ -29,4 +29,32 @@ export const settingsModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'quick-settings',
+      titleKey: 'dashboard.widgets.quickSettings',
+      fallbackTitle: 'Quick Settings',
+      fallbackDescription: 'Adjust appearance and language instantly.',
+      defaultVisible: true,
+      defaultOrder: 90,
+      size: 'sm',
+      component: () =>
+        import('./components/QuickSettingsWidget').then((m) => ({
+          default: m.QuickSettingsWidget,
+        })),
+    },
+    {
+      id: 'ai-status',
+      titleKey: 'dashboard.widgets.aiStatus',
+      fallbackTitle: 'AI Providers',
+      fallbackDescription: 'Connection status of configured AI providers.',
+      defaultVisible: true,
+      defaultOrder: 95,
+      size: 'sm',
+      component: () =>
+        import('./components/AiStatusWidget').then((m) => ({
+          default: m.AiStatusWidget,
+        })),
+    },
+  ],
 }

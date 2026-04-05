@@ -26,4 +26,32 @@ export const transactionsModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'pending-approvals',
+      titleKey: 'dashboard.widgets.pendingApprovals',
+      fallbackTitle: 'Pending Approvals',
+      fallbackDescription: 'Transactions awaiting review.',
+      defaultVisible: true,
+      defaultOrder: 55,
+      size: 'sm',
+      component: () =>
+        import('./components/PendingApprovalsWidget').then((m) => ({
+          default: m.PendingApprovalsWidget,
+        })),
+    },
+    {
+      id: 'recent',
+      titleKey: 'dashboard.widgets.recentTransactions',
+      fallbackTitle: 'Recent Transactions',
+      fallbackDescription: 'Latest financial activity.',
+      defaultVisible: true,
+      defaultOrder: 60,
+      size: 'lg',
+      component: () =>
+        import('./components/RecentTransactionsWidget').then((m) => ({
+          default: m.RecentTransactionsWidget,
+        })),
+    },
+  ],
 }

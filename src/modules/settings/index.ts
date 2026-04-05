@@ -1,5 +1,5 @@
 export { aiConfigApi } from './api/ai-config.api'
-export { useAiConfigStore } from './api/ai-config.queries'
+export { useAiConfigStore, useAiProviderStatuses } from './api/ai-config.queries'
 export { AiConfigForm } from './ui/AiConfigForm'
 export { SettingsLayout } from './ui/SettingsLayout'
 export { SystemSettings } from './ui/SystemSettings'
