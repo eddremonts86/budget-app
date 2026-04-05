@@ -109,8 +109,8 @@ export function WorkloadChart() {
   return (
     <Card className="col-span-4">
       <CardHeader>
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-          <div>
+        <div className="flex flex-col gap-4 @xl:flex-row @xl:items-start @xl:justify-between">
+          <div className="min-w-0">
             <CardTitle>{t('dashboard.workload.title', 'Team Workload')}</CardTitle>
             <CardDescription>
               {t('dashboard.workload.description', 'Task distribution across team members.')}
@@ -122,8 +122,8 @@ export function WorkloadChart() {
             ) : null}
           </div>
 
-          <div className="flex flex-col gap-2 lg:min-w-90">
-            <div className="grid gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
+          <div className="flex flex-col gap-2">
+            <div className="grid gap-2 @sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto]">
               <Select
                 value={projectId ?? emptyFilterValue}
                 onValueChange={(value) => {

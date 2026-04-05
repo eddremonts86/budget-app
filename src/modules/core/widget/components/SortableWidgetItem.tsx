@@ -126,7 +126,7 @@ export function SortableWidgetItem({
       ref={setNodeRef}
       style={style}
       className={cn(
-        'widget-grid-item group/widget relative masonry-item',
+        '@container widget-grid-item group/widget relative masonry-item',
         isDragging && 'z-50 opacity-40 scale-[0.97]',
         editing && !isDragging && 'rounded-xl ring-1 ring-dashed ring-border/40',
         isDropTarget && 'ring-2 ring-primary/50 bg-primary/5 rounded-xl',

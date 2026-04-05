@@ -228,7 +228,7 @@ function ActiveProjectsCard() {
 
 export function StatsCardsWidget() {
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+    <div className="grid gap-4 grid-cols-2 @[53rem]:grid-cols-4">
       <NetBalanceCard />
       <RevenueCard />
       <ExpensesCard />

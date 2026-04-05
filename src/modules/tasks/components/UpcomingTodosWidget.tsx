@@ -69,10 +69,10 @@ function UserFilter({ users, selectedUsers, onSelectionChange }: UserFilterProps
           {selectedUsers.size > 0 && (
             <>
               <Separator orientation="vertical" className="mx-2 h-4" />
-              <Badge variant="secondary" className="rounded-sm px-1 font-normal lg:hidden">
+              <Badge variant="secondary" className="rounded-sm px-1 font-normal @2xl:hidden">
                 {selectedUsers.size}
               </Badge>
-              <div className="hidden space-x-1 lg:flex">
+              <div className="hidden space-x-1 @2xl:flex">
                 {selectedUsers.size > 2 ? (
                   <Badge variant="secondary" className="rounded-sm px-1 font-normal">
                     {selectedUsers.size} {t('common.selected', 'selected')}
@@ -277,7 +277,7 @@ export function UpcomingTodosList() {
 
   return (
     <Card className="col-span-7">
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-col gap-3 @md:flex-row @md:items-start @md:justify-between space-y-0 pb-2">
         <div className="space-y-1">
           <CardTitle>
             {t('dashboard.upcomingTasks.title', 'Upcoming Tasks (Next 7 Days)')}

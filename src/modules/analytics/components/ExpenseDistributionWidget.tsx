@@ -82,7 +82,7 @@ export function ExpenseDistributionChart() {
 
   return (
     <Card className="w-full">
-      <CardHeader className="flex flex-row items-center justify-between">
+      <CardHeader className="flex flex-col gap-3 @md:flex-row @md:items-center @md:justify-between">
         <div>
           <CardTitle>{t('dashboard.expenseDistribution.title', 'Expense Distribution')}</CardTitle>
           <CardDescription>
