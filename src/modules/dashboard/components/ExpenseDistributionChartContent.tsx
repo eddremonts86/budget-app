@@ -16,21 +16,24 @@ interface ExpenseDistributionChartDatum {
 interface ExpenseDistributionChartContentProps {
   chartData: ExpenseDistributionChartDatum[]
   chartConfig: ChartConfig
+  height: number
+}
+
+function truncateLabel(value: string, maxLen = 22): string {
+  return value.length > maxLen ? value.slice(0, maxLen - 1) + '…' : value
 }
 
 export function ExpenseDistributionChartContent({
   chartData,
   chartConfig,
+  height,
 }: ExpenseDistributionChartContentProps) {
   return (
-    <ChartContainer config={chartConfig} className="h-[350px] w-full">
+    <ChartContainer config={chartConfig} className="w-full" style={{ height: `${height}px` }}>
       <BarChart
         data={chartData}
         layout="vertical"
-        margin={{
-          left: 40,
-          right: 20,
-        }}
+        margin={{ left: 4, right: 16, top: 4, bottom: 4 }}
       >
         <CartesianGrid horizontal={false} strokeDasharray="3 3" />
         <XAxis type="number" hide />
@@ -39,8 +42,9 @@ export function ExpenseDistributionChartContent({
           type="category"
           tickLine={false}
           axisLine={false}
-          width={100}
+          width={154}
           tick={{ fontSize: 12 }}
+          tickFormatter={(v: string) => truncateLabel(v)}
         />
         <ChartTooltip
           cursor={{ fill: 'transparent' }}

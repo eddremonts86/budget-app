@@ -313,7 +313,7 @@ export const getExpenseDistributionFn = createServerFn({ method: 'GET' })
         })
         .from(transactions)
         .innerJoin(categories, eq(transactions.categoryId, categories.id))
-        .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`))
+        .where(eq(transactions.status, 'Approved'))
         .groupBy(categories.name, categories.color)
 
       if (isE2E && results.length === 0) {
@@ -408,16 +408,8 @@ export const getUpcomingTodosFn = createServerFn({ method: 'GET' })
       )
 
       const [upcomingItems, [{ value: nextWeekCount }]] = await Promise.all([
-        db
-          .select()
-          .from(todos)
-          .where(upcomingWindowClause)
-          .orderBy(todos.dueDate)
-          .limit(50),
-        db
-          .select({ value: count() })
-          .from(todos)
-          .where(upcomingWindowClause),
+        db.select().from(todos).where(upcomingWindowClause).orderBy(todos.dueDate).limit(50),
+        db.select({ value: count() }).from(todos).where(upcomingWindowClause),
       ])
 
       const items =

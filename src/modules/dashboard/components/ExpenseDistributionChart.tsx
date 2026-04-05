@@ -23,7 +23,7 @@ export function ExpenseDistributionChart() {
           <div className="h-4 w-1/4 bg-muted rounded animate-pulse mt-2" />
         </CardHeader>
         <CardContent>
-          <div className="h-[300px] bg-muted rounded animate-pulse" />
+          <div className="h-56 bg-muted rounded animate-pulse" />
         </CardContent>
       </Card>
     )
@@ -31,8 +31,9 @@ export function ExpenseDistributionChart() {
 
   const data = Array.isArray(distribution) ? [...distribution] : []
 
-  // Sort data by amount descending
+  // Sort data by amount descending and limit to top 10
   data.sort((a, b) => b.amount - a.amount)
+  const topData = data.slice(0, 10)
 
   if (data.length === 0) {
     return (
@@ -46,16 +47,16 @@ export function ExpenseDistributionChart() {
             )}
           </CardDescription>
         </CardHeader>
-        <CardContent className="h-[300px] flex items-center justify-center text-muted-foreground">
+        <CardContent className="h-56 flex items-center justify-center text-muted-foreground">
           {t('common.noData', 'No data available')}
         </CardContent>
       </Card>
     )
   }
 
-  const total = data.reduce((acc, item) => acc + item.amount, 0)
+  const total = topData.reduce((acc, item) => acc + item.amount, 0)
 
-  const chartData = data.map((item) => ({
+  const chartData = topData.map((item) => ({
     category: item.category,
     amount: item.amount,
     percentage: ((item.amount / total) * 100).toFixed(1),
@@ -69,6 +70,8 @@ export function ExpenseDistributionChart() {
     }
     return acc
   }, {} as ChartConfig)
+
+  const chartHeight = Math.max(280, chartData.length * 48)
 
   return (
     <Card className="w-full">
@@ -107,9 +110,18 @@ export function ExpenseDistributionChart() {
       </CardHeader>
       <CardContent>
         <React.Suspense
-          fallback={<div className="h-[350px] w-full rounded-lg bg-muted/50 animate-pulse" />}
+          fallback={
+            <div
+              className="w-full rounded-lg bg-muted/50 animate-pulse"
+              style={{ height: `${chartHeight}px` }}
+            />
+          }
         >
-          <LazyExpenseDistributionChartContent chartData={chartData} chartConfig={chartConfig} />
+          <LazyExpenseDistributionChartContent
+            chartData={chartData}
+            chartConfig={chartConfig}
+            height={chartHeight}
+          />
         </React.Suspense>
       </CardContent>
     </Card>
