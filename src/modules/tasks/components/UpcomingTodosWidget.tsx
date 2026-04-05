@@ -23,8 +23,8 @@ import { format } from 'date-fns'
 import { Filter, Search } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useUpcomingTodos } from '../api/dashboard.queries'
-import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
+import { useUpcomingTodos } from '../api/todos.queries'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 
 interface UserFilterProps {
   users: Array<{ id: string; name: string; avatar?: string | null }>

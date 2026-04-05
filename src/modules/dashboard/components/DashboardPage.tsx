@@ -19,7 +19,7 @@ import {
 } from '@/modules/core/widget'
 import { cn } from '@/shared/lib/utils'
 import { useDashboardMetric } from '../api/dashboard.queries'
-import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 
 function StatsCardSkeleton() {
   return (
@@ -242,7 +242,7 @@ function DashboardToolbar() {
 
   return (
     <div className="flex items-center justify-end gap-2 shrink-0">
-      {editing ? <WidgetConfigurator moduleId="dashboard" /> : null}
+      {editing ? <WidgetConfigurator /> : null}
       <button
         type="button"
         onClick={toggleEditing}
@@ -268,7 +268,7 @@ export function DashboardPage() {
         <DashboardToolbar />
 
         {/* All widgets — drag-and-drop sortable */}
-        <WidgetGrid moduleId="dashboard" />
+        <WidgetGrid />
       </div>
     </WidgetEditModeProvider>
   )

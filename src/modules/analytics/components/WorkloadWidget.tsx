@@ -18,11 +18,11 @@ import {
 import type { ChartConfig } from '@/components/ui/chart'
 import { useProjects } from '@/modules/projects'
 import { useTeams } from '@/modules/team'
-import { useUsersWorkload } from '../api/dashboard.queries'
-import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
+import { useUsersWorkload } from '../api/analytics.queries'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 
 const LazyWorkloadChartContent = React.lazy(() =>
-  import('./WorkloadChartContent').then((module) => ({
+  import('./WorkloadWidgetContent').then((module) => ({
     default: module.WorkloadChartContent,
   })),
 )

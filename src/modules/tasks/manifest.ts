@@ -25,4 +25,19 @@ export const tasksModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'upcoming-todos',
+      titleKey: 'dashboard.widgets.upcomingTodos',
+      fallbackTitle: 'Upcoming To-Dos',
+      fallbackDescription: 'Priority tasks and upcoming deadlines',
+      defaultVisible: true,
+      defaultOrder: 40,
+      size: 'full',
+      component: () =>
+        import('./components/UpcomingTodosWidget').then((m) => ({
+          default: m.UpcomingTodosList,
+        })),
+    },
+  ],
 }

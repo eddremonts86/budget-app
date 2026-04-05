@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import * as dashboardQueries from '@/modules/dashboard/api/dashboard.queries'
-import { UpcomingTodosList } from '@/modules/dashboard/components/UpcomingTodosList'
+import * as todosQueries from '@/modules/tasks/api/todos.queries'
+import { UpcomingTodosList } from '@/modules/tasks/components/UpcomingTodosWidget'
 import * as userQueries from '@/modules/users'
 
 // Mock translations
@@ -46,7 +46,7 @@ describe('UpcomingTodosList', () => {
   ]
 
   beforeEach(() => {
-    vi.spyOn(dashboardQueries, 'useUpcomingTodos').mockReturnValue({
+    vi.spyOn(todosQueries, 'useUpcomingTodos').mockReturnValue({
       data: mockTodos,
       isLoading: false,
       isError: false,

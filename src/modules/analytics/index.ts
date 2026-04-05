@@ -1,3 +1,5 @@
 export { AnalyticsPage } from './components/AnalyticsPage'
+export { WorkloadChart } from './components/WorkloadWidget'
+export { ExpenseDistributionChart } from './components/ExpenseDistributionWidget'
 export * from './api/analytics.fn'
 export * from './api/analytics.queries'

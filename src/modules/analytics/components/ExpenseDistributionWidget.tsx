@@ -9,11 +9,11 @@ import {
   Skeleton,
 } from '@/components/ui'
 import type { ChartConfig } from '@/components/ui/chart'
-import { useExpenseDistribution } from '../api/dashboard.queries'
-import { WidgetRefreshButton, WidgetRefreshingIndicator } from './WidgetControls'
+import { useExpenseDistribution } from '../api/analytics.queries'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 
 const LazyExpenseDistributionChartContent = React.lazy(() =>
-  import('./ExpenseDistributionChartContent').then((module) => ({
+  import('./ExpenseDistributionWidgetContent').then((module) => ({
     default: module.ExpenseDistributionChartContent,
   })),
 )

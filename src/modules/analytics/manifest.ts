@@ -24,4 +24,30 @@ export const analyticsModule: AppModuleManifest = {
       ],
     },
   ],
+  widgets: [
+    {
+      id: 'workload',
+      titleKey: 'dashboard.widgets.workload',
+      fallbackTitle: 'Team Workload',
+      fallbackDescription: 'Workload distribution across team members',
+      defaultVisible: true,
+      defaultOrder: 20,
+      size: 'md',
+      component: () =>
+        import('./components/WorkloadWidget').then((m) => ({ default: m.WorkloadChart })),
+    },
+    {
+      id: 'expense-distribution',
+      titleKey: 'dashboard.widgets.expenseDistribution',
+      fallbackTitle: 'Expense Distribution',
+      fallbackDescription: 'Expenses broken down by category',
+      defaultVisible: true,
+      defaultOrder: 30,
+      size: 'md',
+      component: () =>
+        import('./components/ExpenseDistributionWidget').then((m) => ({
+          default: m.ExpenseDistributionChart,
+        })),
+    },
+  ],
 }

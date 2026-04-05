@@ -1,5 +1,6 @@
 export { TodosPage } from './components/TodosPage'
 export { TodoForm } from './components/TodoForm'
+export { UpcomingTodosList } from './components/UpcomingTodosWidget'
 export * from './api/todos.fn'
 export * from './api/todos.queries'
 export * from './model/permissions'

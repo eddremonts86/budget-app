@@ -1,7 +1,15 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, and, gte, count, sum, sql } from 'drizzle-orm'
+import { eq, and, gte, count, sum, sql, inArray } from 'drizzle-orm'
 import { z } from 'zod'
-import { todos, users, transactions, projects } from '@/shared/lib/db/schema'
+import {
+  todos,
+  users,
+  transactions,
+  projects,
+  categories,
+  projectMembers,
+  teamMembers,
+} from '@/shared/lib/db/schema'
 
 async function loadDb() {
   const { getDb } = await import('@/shared/lib/db')
@@ -446,6 +454,168 @@ export const getTaskDistributionFn = createServerFn({ method: 'GET' })
             { name: 'high', value: 25 },
           ],
         }
+      }
+      throw error
+    }
+  })
+
+// ---------------------------------------------------------------------------
+// Expense distribution
+// ---------------------------------------------------------------------------
+export const getExpenseDistributionFn = createServerFn({ method: 'GET' })
+  .inputValidator(z.void().optional())
+  .handler(async ({ data: _data }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
+
+    try {
+      const db = await loadDb()
+
+      const results = await db
+        .select({
+          categoryName: categories.name,
+          categoryColor: categories.color,
+          totalAmount: sql<number>`ABS(SUM(${transactions.amount}))`,
+        })
+        .from(transactions)
+        .innerJoin(categories, eq(transactions.categoryId, categories.id))
+        .where(eq(transactions.status, 'Approved'))
+        .groupBy(categories.name, categories.color)
+
+      if (isE2E && results.length === 0) {
+        return [
+          { category: 'Development', amount: 5000, color: '#3b82f6' },
+          { category: 'Design', amount: 3000, color: '#ec4899' },
+          { category: 'Marketing', amount: 2000, color: '#f59e0b' },
+          { category: 'Research', amount: 1500, color: '#10b981' },
+        ]
+      }
+
+      return results.map((r) => ({
+        category: r.categoryName,
+        amount: Number(r.totalAmount),
+        color: r.categoryColor,
+      }))
+    } catch (error) {
+      console.error('Error in getExpenseDistributionFn:', error)
+      if (isE2E) {
+        return [
+          { category: 'Development', amount: 5000, color: '#3b82f6' },
+          { category: 'Design', amount: 3000, color: '#ec4899' },
+          { category: 'Marketing', amount: 2000, color: '#f59e0b' },
+          { category: 'Research', amount: 1500, color: '#10b981' },
+        ]
+      }
+      throw error
+    }
+  })
+
+// ---------------------------------------------------------------------------
+// Users workload
+// ---------------------------------------------------------------------------
+const usersWorkloadFiltersSchema = z
+  .object({
+    projectId: z.string().optional(),
+    teamId: z.string().optional(),
+  })
+  .optional()
+
+export type UsersWorkloadFilters = z.infer<typeof usersWorkloadFiltersSchema>
+
+export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
+  .inputValidator(usersWorkloadFiltersSchema)
+  .handler(async ({ data }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
+
+    try {
+      const db = await loadDb()
+      const projectId = data?.projectId
+      const teamId = data?.teamId
+
+      let filteredUserIds: string[] | undefined
+
+      if (projectId) {
+        const rows = await db
+          .select({ userId: projectMembers.userId })
+          .from(projectMembers)
+          .where(eq(projectMembers.projectId, projectId))
+        filteredUserIds = rows.map((row) => row.userId)
+      }
+
+      if (teamId) {
+        const rows = await db
+          .select({ userId: teamMembers.userId })
+          .from(teamMembers)
+          .where(eq(teamMembers.teamId, teamId))
+        const teamUserIds = rows.map((row) => row.userId)
+        filteredUserIds = filteredUserIds
+          ? filteredUserIds.filter((id) => teamUserIds.includes(id))
+          : teamUserIds
+      }
+
+      if (filteredUserIds && filteredUserIds.length === 0) return []
+
+      const userWhere =
+        filteredUserIds && filteredUserIds.length > 0
+          ? inArray(users.id, filteredUserIds)
+          : undefined
+
+      const todoClauses = []
+      if (projectId) todoClauses.push(eq(todos.projectId, projectId))
+      if (filteredUserIds?.length) todoClauses.push(inArray(todos.assignedTo, filteredUserIds))
+      const todoWhere =
+        todoClauses.length === 0
+          ? undefined
+          : todoClauses.length === 1
+            ? todoClauses[0]
+            : and(...todoClauses)
+
+      const [allUsers, allTodos] = await Promise.all([
+        db.select().from(users).where(userWhere),
+        db.select().from(todos).where(todoWhere),
+      ])
+
+      if (isE2E && allUsers.length === 0) {
+        return Array.from({ length: 5 }).map((_, i) => ({
+          user: {
+            id: i.toString(),
+            name: `User ${i}`,
+            email: `user${i}@example.com`,
+            role: 'user' as const,
+            createdAt: new Date().toISOString(),
+          },
+          total: 10,
+          completed: 5,
+          pending: 3,
+          inProgress: 2,
+        }))
+      }
+
+      return allUsers.map((user) => {
+        const userTodos = allTodos.filter((t) => t.assignedTo === user.id)
+        return {
+          user: { ...user, createdAt: user.createdAt.toISOString() },
+          total: userTodos.length,
+          completed: userTodos.filter((t) => t.status === 'completed').length,
+          pending: userTodos.filter((t) => t.status === 'pending').length,
+          inProgress: userTodos.filter((t) => t.status === 'in_progress').length,
+        }
+      })
+    } catch (error) {
+      console.error('Error in getUsersWorkloadFn:', error)
+      if (isE2E) {
+        return Array.from({ length: 5 }).map((_, i) => ({
+          user: {
+            id: i.toString(),
+            name: `User ${i}`,
+            email: `user${i}@example.com`,
+            role: 'user' as const,
+            createdAt: new Date().toISOString(),
+          },
+          total: 10,
+          completed: 5,
+          pending: 3,
+          inProgress: 2,
+        }))
       }
       throw error
     }

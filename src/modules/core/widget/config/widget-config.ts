@@ -61,8 +61,10 @@ function getSnapshot() {
   return snapshot
 }
 
+const SERVER_SNAPSHOT: WidgetConfigMap = {}
+
 function getServerSnapshot(): WidgetConfigMap {
-  return {}
+  return SERVER_SNAPSHOT
 }
 
 // ---------------------------------------------------------------------------

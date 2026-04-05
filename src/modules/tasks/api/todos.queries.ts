@@ -6,6 +6,7 @@ import {
   createTodoFn,
   updateTodoFn,
   deleteTodoFn,
+  getUpcomingTodosFn,
   type CreateTodoInput,
   type UpdateTodoInput,
 } from './todos.fn'
@@ -85,5 +86,25 @@ export const useDeleteTodo = (options?: Parameters<typeof useTQMutation>[2]) => 
     invalidateKeys: [todoKeys.all],
     successMessage: i18n.t('todos.toast.deleted'),
     ...options,
+  })
+}
+
+const UPCOMING_TODOS_REFRESH_INTERVAL = 45 * 1000
+
+export const useUpcomingTodos = () => {
+  return useTQuery(['todos', 'upcoming'] as const, () => getUpcomingTodosFn({ data: undefined }), {
+    cache: 'realtime',
+    refetchInterval: UPCOMING_TODOS_REFRESH_INTERVAL,
+    refetchOnWindowFocus: true,
+    select: (data) => {
+      const sortedItems = [...data.items].sort((a, b) => {
+        const priorityWeight = { high: 3, medium: 2, low: 1 }
+        const pA = priorityWeight[a.priority as keyof typeof priorityWeight] || 0
+        const pB = priorityWeight[b.priority as keyof typeof priorityWeight] || 0
+        if (pA !== pB) return pB - pA
+        return new Date(a.dueDate).getTime() - new Date(b.dueDate).getTime()
+      })
+      return { ...data, items: sortedItems }
+    },
   })
 }

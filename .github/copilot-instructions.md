@@ -1,5 +1,18 @@
 # TanStack Template - Copilot Instructions
 
+## Mandatory Validation Rule
+
+**NEVER mark a task as complete without first validating it using MCP browser tools.**
+
+For any change that affects UI or routing:
+
+1. Navigate to the affected page using `mcp_io_github_chr_navigate_page`
+2. Take a screenshot with `mcp_io_github_chr_take_screenshot` and confirm the change works visually
+3. Check the console for errors with `mcp_io_github_chr_list_console_messages`
+4. Only then signal task completion
+
+Auth bypass for local validation: set `VITE_SKIP_AUTH=true` and `VITE_TEST_USER_ID=user_1` in `.env.development` (localhost only — revert before committing).
+
 ## Project Overview
 
 This is a modern full-stack web application template built with TanStack Start, React 19, and TypeScript. It serves as a foundation for creating web applications with a robust, type-safe architecture.
@@ -199,39 +212,40 @@ Required in `.env.development`:
 ## Project-Specific Skills (load before working in the domain)
 
 > Skills are split into two tiers:
+>
 > - **`app/`** — Built for this repo. Contain real source code, real paths, production patterns. **Load these first.**
 > - **`vendor/`** — Installed via `skills-lock.json`. Generic ecosystem knowledge. Combine with app skills.
 
 ### App Skills — `.github/skills/app/`
 
-| Domain                               | Skill File                                            |
-| ------------------------------------ | ----------------------------------------------------- |
-| Module architecture & manifests      | `.github/skills/app/module-architecture/SKILL.md`     |
-| CRUD operations & CrudSheet Protocol | `.github/skills/app/feature-crud/SKILL.md`            |
-| Multi-provider AI system             | `.github/skills/app/ai-providers/SKILL.md`            |
-| Auth (Clerk + Better Auth)           | `.github/skills/app/auth-dual-provider/SKILL.md`      |
-| Drizzle ORM + DB schema              | `.github/skills/app/drizzle-db/SKILL.md`              |
-| i18n (EN/ES/DK translations)         | `.github/skills/app/i18n-deep/SKILL.md`               |
-| Playwright E2E + auth bypass         | `.github/skills/app/e2e-testing-auth/SKILL.md`        |
-| Docker + local AI stack              | `.github/skills/app/docker-ai-stack/SKILL.md`         |
+| Domain                               | Skill File                                        |
+| ------------------------------------ | ------------------------------------------------- |
+| Module architecture & manifests      | `.github/skills/app/module-architecture/SKILL.md` |
+| CRUD operations & CrudSheet Protocol | `.github/skills/app/feature-crud/SKILL.md`        |
+| Multi-provider AI system             | `.github/skills/app/ai-providers/SKILL.md`        |
+| Auth (Clerk + Better Auth)           | `.github/skills/app/auth-dual-provider/SKILL.md`  |
+| Drizzle ORM + DB schema              | `.github/skills/app/drizzle-db/SKILL.md`          |
+| i18n (EN/ES/DK translations)         | `.github/skills/app/i18n-deep/SKILL.md`           |
+| Playwright E2E + auth bypass         | `.github/skills/app/e2e-testing-auth/SKILL.md`    |
+| Docker + local AI stack              | `.github/skills/app/docker-ai-stack/SKILL.md`     |
 
 ### Vendor Skills — `.github/skills/vendor/`
 
-| Skill                                 | Domain                                      |
-| ------------------------------------- | ------------------------------------------- |
-| `tanstack-router-best-practices`      | Type-safe routing, loaders, search params   |
-| `tanstack-query-best-practices`       | Server state, cache, mutations              |
-| `tanstack-start-best-practices`       | Server functions, SSR, middleware           |
-| `tanstack-integration-best-practices` | Router + Query + Start integration          |
-| `shadcn-ui` / `shadcn`               | Shadcn/Radix components, forms, themes      |
-| `typescript-advanced-types`           | Generics, conditionals, mapped types        |
-| `react-doctor`                        | Post-change React health check (0–100)      |
-| `frontend-design`                     | High-quality production UI patterns         |
-| `playwright-skill`                    | Full browser automation                     |
-| `clerk-setup` / `clerk-orgs`          | Clerk auth setup, multi-tenant, RBAC        |
-| `vercel-react-best-practices`         | React performance from Vercel Engineering   |
-| `web-design-guidelines`               | Accessibility, UX, best practices audit     |
-| `code-simplifier`                     | Refactor for clarity and maintainability    |
+| Skill                                 | Domain                                    |
+| ------------------------------------- | ----------------------------------------- |
+| `tanstack-router-best-practices`      | Type-safe routing, loaders, search params |
+| `tanstack-query-best-practices`       | Server state, cache, mutations            |
+| `tanstack-start-best-practices`       | Server functions, SSR, middleware         |
+| `tanstack-integration-best-practices` | Router + Query + Start integration        |
+| `shadcn-ui` / `shadcn`                | Shadcn/Radix components, forms, themes    |
+| `typescript-advanced-types`           | Generics, conditionals, mapped types      |
+| `react-doctor`                        | Post-change React health check (0–100)    |
+| `frontend-design`                     | High-quality production UI patterns       |
+| `playwright-skill`                    | Full browser automation                   |
+| `clerk-setup` / `clerk-orgs`          | Clerk auth setup, multi-tenant, RBAC      |
+| `vercel-react-best-practices`         | React performance from Vercel Engineering |
+| `web-design-guidelines`               | Accessibility, UX, best practices audit   |
+| `code-simplifier`                     | Refactor for clarity and maintainability  |
 
 ## Module System
 
@@ -255,18 +269,18 @@ See `docs/ai/architecture.md` and the `ai-providers` skill.
 
 When working in a domain, load ALL applicable skills before generating code:
 
-| Task                          | Load these skills                                         |
-| ----------------------------- | --------------------------------------------------------- |
-| New module                    | `module-architecture` + `feature-crud` + `i18n-deep`     |
-| Add CRUD to existing module   | `feature-crud` + `drizzle-db` + `i18n-deep`              |
-| AI providers / streaming      | `ai-providers` + `docker-ai-stack`                        |
-| Auth / protected routes       | `auth-dual-provider`                                      |
-| DB schema / migrations        | `drizzle-db`                                              |
-| Translations                  | `i18n-deep`                                               |
-| E2E tests                     | `e2e-testing-auth` + `playwright-skill`                   |
-| Docker / local LLM            | `docker-ai-stack`                                         |
-| UI component / accessibility  | `frontend-design` + `web-design-guidelines`               |
-| Post-change quality check     | `react-doctor`                                            |
-| Code cleanup / refactor       | `code-simplifier` + `vercel-react-best-practices`         |
+| Task                         | Load these skills                                    |
+| ---------------------------- | ---------------------------------------------------- |
+| New module                   | `module-architecture` + `feature-crud` + `i18n-deep` |
+| Add CRUD to existing module  | `feature-crud` + `drizzle-db` + `i18n-deep`          |
+| AI providers / streaming     | `ai-providers` + `docker-ai-stack`                   |
+| Auth / protected routes      | `auth-dual-provider`                                 |
+| DB schema / migrations       | `drizzle-db`                                         |
+| Translations                 | `i18n-deep`                                          |
+| E2E tests                    | `e2e-testing-auth` + `playwright-skill`              |
+| Docker / local LLM           | `docker-ai-stack`                                    |
+| UI component / accessibility | `frontend-design` + `web-design-guidelines`          |
+| Post-change quality check    | `react-doctor`                                       |
+| Code cleanup / refactor      | `code-simplifier` + `vercel-react-best-practices`    |
 
 Agents live in `.github/agents/`. Skills live in `.github/skills/` (`app/` = this repo, `vendor/` = 3rd party).
