@@ -2,6 +2,13 @@ import { Plus, Pencil, Trash2 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import {
+  CrudSheetActions,
+  CrudSheetBody,
+  CrudSheetContent,
+  CrudSheetHeader,
+  CrudSheetSection,
+} from '@/components/ui/crud-sheet'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Progress } from '@/components/ui/progress'
@@ -12,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCategories } from '@/modules/categories'
 import { cn } from '@/shared/lib/utils'
@@ -173,57 +180,64 @@ export function BudgetCategoryLimits({ budgetId, currency }: BudgetCategoryLimit
       )}
 
       <Sheet open={sheetOpen} onOpenChange={setSheetOpen}>
-        <SheetContent className="sm:max-w-sm">
-          <SheetHeader>
-            <SheetTitle>
-              {form.categoryId && existingCategoryIds.has(form.categoryId)
+        <CrudSheetContent>
+          <CrudSheetHeader
+            title={
+              form.categoryId && existingCategoryIds.has(form.categoryId)
                 ? t('budgets.limits.editTitle')
-                : t('budgets.limits.addTitle')}
-            </SheetTitle>
-          </SheetHeader>
-          <form onSubmit={handleSubmit} className="space-y-4 mt-6">
-            <div className="space-y-1">
-              <Label>{t('budgets.limits.category')}</Label>
-              <Select
-                value={form.categoryId}
-                onValueChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder={t('budgets.limits.selectCategory')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableCategories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+                : t('budgets.limits.addTitle')
+            }
+            onClose={() => setSheetOpen(false)}
+            showPing={false}
+          />
 
-            <div className="space-y-1">
-              <Label>
-                {t('budgets.limits.amount')} ({currency})
-              </Label>
-              <Input
-                type="number"
-                min={0.01}
-                step={0.01}
-                value={form.allocatedAmount}
-                onChange={(e) => setForm((f) => ({ ...f, allocatedAmount: e.target.value }))}
-              />
-            </div>
+          <form id="limit-form" onSubmit={handleSubmit}>
+            <CrudSheetBody>
+              <CrudSheetSection>
+                <div className="space-y-1">
+                  <Label>{t('budgets.limits.category')}</Label>
+                  <Select
+                    value={form.categoryId}
+                    onValueChange={(v) => setForm((f) => ({ ...f, categoryId: v }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('budgets.limits.selectCategory')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableCategories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.id}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
 
-            <div className="flex justify-end gap-2">
-              <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button type="submit" disabled={upsertMutation.isPending}>
-                {upsertMutation.isPending ? t('common.saving') : t('common.save')}
-              </Button>
-            </div>
+                <div className="space-y-1">
+                  <Label>
+                    {t('budgets.limits.amount')} ({currency})
+                  </Label>
+                  <Input
+                    type="number"
+                    min={0.01}
+                    step={0.01}
+                    value={form.allocatedAmount}
+                    onChange={(e) => setForm((f) => ({ ...f, allocatedAmount: e.target.value }))}
+                  />
+                </div>
+              </CrudSheetSection>
+            </CrudSheetBody>
           </form>
-        </SheetContent>
+
+          <CrudSheetActions>
+            <Button type="button" variant="outline" onClick={() => setSheetOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button form="limit-form" type="submit" disabled={upsertMutation.isPending}>
+              {upsertMutation.isPending ? t('common.saving') : t('common.save')}
+            </Button>
+          </CrudSheetActions>
+        </CrudSheetContent>
       </Sheet>
     </div>
   )

@@ -4,6 +4,13 @@ import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import {
+  CrudSheetActions,
+  CrudSheetBody,
+  CrudSheetContent,
+  CrudSheetHeader,
+  CrudSheetSection,
+} from '@/components/ui/crud-sheet'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import {
@@ -13,7 +20,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrentUser, useUserDirectory } from '@/modules/users'
 import {
@@ -37,7 +44,7 @@ const ROLE_COLORS: Record<BudgetMemberRole, string> = {
 
 export function BudgetMembersPanel({ budgetId, ownerId }: BudgetMembersPanelProps) {
   const { t } = useTranslation()
-  const { syncedUserId: currentUserId } = useCurrentUser()
+  const { syncedUserId: currentUserId, roleKey } = useCurrentUser()
   const { data: members, isLoading } = useBudgetMembers(budgetId)
   const addMutation = useAddBudgetMember(budgetId)
   const roleMutation = useUpdateBudgetMemberRole(budgetId)
@@ -49,7 +56,7 @@ export function BudgetMembersPanel({ budgetId, ownerId }: BudgetMembersPanelProp
   const [selectedRole, setSelectedRole] = React.useState<BudgetMemberRole>('contributor')
   const { data: userDirectory = [] } = useUserDirectory(search || undefined, 20)
 
-  const isOwner = currentUserId === ownerId
+  const isOwner = currentUserId === ownerId || roleKey === 'admin'
   const memberIds = React.useMemo(() => new Set((members ?? []).map((m) => m.userId)), [members])
   const availableUsers = userDirectory.filter((u) => !memberIds.has(u.id))
 
@@ -165,65 +172,70 @@ export function BudgetMembersPanel({ budgetId, ownerId }: BudgetMembersPanelProp
       )}
 
       <Sheet open={dialogOpen} onOpenChange={setDialogOpen}>
-        <SheetContent className="sm:max-w-sm">
-          <SheetHeader>
-            <SheetTitle>{t('budgets.members.addTitle')}</SheetTitle>
-          </SheetHeader>
-          <div className="space-y-4 mt-2">
-            <div className="space-y-1">
-              <Label>{t('budgets.members.searchUser')}</Label>
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder={t('budgets.members.searchPlaceholder')}
-              />
-            </div>
+        <CrudSheetContent>
+          <CrudSheetHeader
+            title={t('budgets.members.addTitle')}
+            onClose={() => setDialogOpen(false)}
+            showPing={false}
+          />
 
-            {availableUsers.length > 0 && (
+          <CrudSheetBody>
+            <CrudSheetSection>
               <div className="space-y-1">
-                <Label>{t('budgets.members.selectUser')}</Label>
-                <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                <Label>{t('budgets.members.searchUser')}</Label>
+                <Input
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
+                  placeholder={t('budgets.members.searchPlaceholder')}
+                />
+              </div>
+
+              {availableUsers.length > 0 && (
+                <div className="space-y-1">
+                  <Label>{t('budgets.members.selectUser')}</Label>
+                  <Select value={selectedUserId} onValueChange={setSelectedUserId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder={t('budgets.members.userPlaceholder')} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {availableUsers.map((u) => (
+                        <SelectItem key={u.id} value={u.id}>
+                          {u.name ?? u.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
+
+              <div className="space-y-1">
+                <Label>{t('budgets.members.role')}</Label>
+                <Select
+                  value={selectedRole}
+                  onValueChange={(v) => setSelectedRole(v as BudgetMemberRole)}
+                >
                   <SelectTrigger>
-                    <SelectValue placeholder={t('budgets.members.userPlaceholder')} />
+                    <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {availableUsers.map((u) => (
-                      <SelectItem key={u.id} value={u.id}>
-                        {u.name ?? u.email}
-                      </SelectItem>
-                    ))}
+                    <SelectItem value="admin">{t('budgets.roles.admin')}</SelectItem>
+                    <SelectItem value="contributor">{t('budgets.roles.contributor')}</SelectItem>
+                    <SelectItem value="viewer">{t('budgets.roles.viewer')}</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
-            )}
+            </CrudSheetSection>
+          </CrudSheetBody>
 
-            <div className="space-y-1">
-              <Label>{t('budgets.members.role')}</Label>
-              <Select
-                value={selectedRole}
-                onValueChange={(v) => setSelectedRole(v as BudgetMemberRole)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="admin">{t('budgets.roles.admin')}</SelectItem>
-                  <SelectItem value="contributor">{t('budgets.roles.contributor')}</SelectItem>
-                  <SelectItem value="viewer">{t('budgets.roles.viewer')}</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>
-                {t('common.cancel')}
-              </Button>
-              <Button disabled={!selectedUserId || addMutation.isPending} onClick={handleAdd}>
-                {addMutation.isPending ? t('common.saving') : t('budgets.members.addBtn')}
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
+          <CrudSheetActions>
+            <Button variant="outline" onClick={() => setDialogOpen(false)}>
+              {t('common.cancel')}
+            </Button>
+            <Button disabled={!selectedUserId || addMutation.isPending} onClick={handleAdd}>
+              {addMutation.isPending ? t('common.saving') : t('budgets.members.addBtn')}
+            </Button>
+          </CrudSheetActions>
+        </CrudSheetContent>
       </Sheet>
     </div>
   )

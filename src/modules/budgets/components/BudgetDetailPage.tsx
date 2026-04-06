@@ -26,7 +26,7 @@ const SCOPE_COLORS: Record<BudgetScope, string> = {
   company: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
 }
 
-const TAB_VALUES = ['transactions', 'categories', 'members', 'recurring', 'report'] as const
+const TAB_VALUES = ['report', 'recurring', 'transactions', 'members', 'categories'] as const
 type TabValue = (typeof TAB_VALUES)[number]
 
 export function BudgetDetailPage() {
@@ -38,7 +38,7 @@ export function BudgetDetailPage() {
   const [addTxOpen, setAddTxOpen] = React.useState(false)
   const [tab, setTab] = useQueryState<TabValue>(
     'tab',
-    parseAsStringLiteral(TAB_VALUES).withDefault('transactions'),
+    parseAsStringLiteral(TAB_VALUES).withDefault('report'),
   )
 
   if (isLoading) {
@@ -159,12 +159,24 @@ export function BudgetDetailPage() {
       {/* Tabs */}
       <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)} className="space-y-4">
         <TabsList className="w-full justify-start">
-          <TabsTrigger value="transactions">{t('budgets.detail.tabs.transactions')}</TabsTrigger>
-          <TabsTrigger value="categories">{t('budgets.detail.tabs.categories')}</TabsTrigger>
-          <TabsTrigger value="members">{t('budgets.detail.tabs.members')}</TabsTrigger>
-          <TabsTrigger value="recurring">{t('budgets.detail.tabs.recurring')}</TabsTrigger>
           <TabsTrigger value="report">{t('budgets.detail.tabs.report')}</TabsTrigger>
+          <TabsTrigger value="recurring">{t('budgets.detail.tabs.recurring')}</TabsTrigger>
+          <TabsTrigger value="transactions">{t('budgets.detail.tabs.transactions')}</TabsTrigger>
+          <TabsTrigger value="members">{t('budgets.detail.tabs.members')}</TabsTrigger>
+          <TabsTrigger value="categories">{t('budgets.detail.tabs.categories')}</TabsTrigger>
         </TabsList>
+
+        <TabsContent value="report">
+          <BudgetAnnualReport
+            budgetId={budget.id}
+            budgetName={budget.name}
+            currency={budget.currency}
+          />
+        </TabsContent>
+
+        <TabsContent value="recurring">
+          <BudgetRecurrencesPanel budgetId={budget.id} currency={budget.currency} />
+        </TabsContent>
 
         <TabsContent value="transactions">
           <BudgetTransactionsList
@@ -174,20 +186,12 @@ export function BudgetDetailPage() {
           />
         </TabsContent>
 
-        <TabsContent value="categories">
-          <BudgetCategoryLimits budgetId={budget.id} currency={budget.currency} />
-        </TabsContent>
-
         <TabsContent value="members">
           <BudgetMembersPanel budgetId={budget.id} ownerId={budget.ownerId} />
         </TabsContent>
 
-        <TabsContent value="recurring">
-          <BudgetRecurrencesPanel budgetId={budget.id} currency={budget.currency} />
-        </TabsContent>
-
-        <TabsContent value="report">
-          <BudgetAnnualReport budgetId={budget.id} currency={budget.currency} />
+        <TabsContent value="categories">
+          <BudgetCategoryLimits budgetId={budget.id} currency={budget.currency} />
         </TabsContent>
       </Tabs>
 

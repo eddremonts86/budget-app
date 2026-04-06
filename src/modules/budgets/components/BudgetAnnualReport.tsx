@@ -1,16 +1,20 @@
+import { pdf } from '@react-pdf/renderer'
 import { format } from 'date-fns'
-import { AlertTriangle, Pause } from 'lucide-react'
+import { AlertTriangle, Loader2, Pause, Download } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
 import { useBudgetAnnualReport } from '../api/budget-analytics.queries'
 import { useBudgetRecurrenceRules } from '../api/budget-recurrences.queries'
 import { formatAmount } from '../model/period-utils'
 import type { BudgetRecurrenceFrequency } from '../model/types'
+import { BudgetAnnualReportPdf } from './BudgetAnnualReportPdf'
 
 interface BudgetAnnualReportProps {
   budgetId: string
+  budgetName: string
   currency: string
 }
 
@@ -121,7 +125,7 @@ function SectionRow({
 // ---------------------------------------------------------------------------
 // Main component
 // ---------------------------------------------------------------------------
-export function BudgetAnnualReport({ budgetId, currency }: BudgetAnnualReportProps) {
+export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnnualReportProps) {
   const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
   const [year, setYear] = React.useState(currentYear)
@@ -130,6 +134,8 @@ export function BudgetAnnualReport({ budgetId, currency }: BudgetAnnualReportPro
   const { data: rules, isLoading: rulesLoading } = useBudgetRecurrenceRules(budgetId)
 
   const isLoading = reportLoading || rulesLoading
+
+  const [isExporting, setIsExporting] = React.useState(false)
 
   const years = [currentYear, currentYear - 1, currentYear - 2]
 
@@ -201,8 +207,65 @@ export function BudgetAnnualReport({ budgetId, currency }: BudgetAnnualReportPro
     (reportData?.summary.totalExpenses ?? 0) > 0 ||
     (reportData?.summary.totalIncome ?? 0) > 0
 
+  async function handleExportPdf() {
+    setIsExporting(true)
+    try {
+      const doc = (
+        <BudgetAnnualReportPdf
+          budgetName={budgetName}
+          year={year}
+          currency={currency}
+          months={months}
+          incomeRules={incomeRules.map((r) => ({
+            id: r.id,
+            description: r.description ?? null,
+            frequency: r.frequency,
+            interval: r.interval,
+            amount: r.amount,
+            status: r.status,
+            categoryName: r.categoryName ?? null,
+          }))}
+          expenseRules={expenseRules.map((r) => ({
+            id: r.id,
+            description: r.description ?? null,
+            frequency: r.frequency,
+            interval: r.interval,
+            amount: r.amount,
+            status: r.status,
+            categoryName: r.categoryName ?? null,
+          }))}
+          fireMonthsById={Object.fromEntries(
+            Object.entries(fireMonthsById).map(([id, set]) => [id, Array.from(set)]),
+          )}
+          projectedIncomePerMonth={projectedIncomePerMonth}
+          projectedExpensesPerMonth={projectedExpensesPerMonth}
+          projectedTotalIncome={projectedTotalIncome}
+          projectedTotalExpenses={projectedTotalExpenses}
+          directTransactions={reportData?.directTransactions ?? []}
+          summary={{
+            income: reportData?.summary.income ?? {},
+            expenses: reportData?.summary.expenses ?? {},
+            balance: reportData?.summary.balance ?? {},
+            totalIncome: reportData?.summary.totalIncome ?? 0,
+            totalExpenses: reportData?.summary.totalExpenses ?? 0,
+            totalBalance: reportData?.summary.totalBalance ?? 0,
+          }}
+        />
+      )
+      const blob = await pdf(doc).toBlob()
+      const url = URL.createObjectURL(blob)
+      const a = document.createElement('a')
+      a.href = url
+      a.download = `${budgetName.replace(/\s+/g, '-')}-${year}-report.pdf`
+      a.click()
+      setTimeout(() => URL.revokeObjectURL(url), 10_000)
+    } finally {
+      setIsExporting(false)
+    }
+  }
+
   return (
-    <div className="space-y-4">
+    <div id="budget-annual-report" className="space-y-4">
       {/* Header + year selector */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
@@ -214,21 +277,39 @@ export function BudgetAnnualReport({ budgetId, currency }: BudgetAnnualReportPro
             )}
           </p>
         </div>
-        <div className="flex rounded-lg border overflow-hidden">
-          {years.map((y) => (
-            <button
-              key={y}
-              onClick={() => setYear(y)}
-              className={cn(
-                'px-3 py-1.5 text-xs font-medium transition-colors',
-                year === y
-                  ? 'bg-primary text-primary-foreground'
-                  : 'text-muted-foreground hover:bg-muted',
-              )}
-            >
-              {y}
-            </button>
-          ))}
+        <div className="flex items-center gap-2 print:hidden">
+          <div className="flex rounded-lg border overflow-hidden">
+            {years.map((y) => (
+              <button
+                key={y}
+                onClick={() => setYear(y)}
+                className={cn(
+                  'px-3 py-1.5 text-xs font-medium transition-colors',
+                  year === y
+                    ? 'bg-primary text-primary-foreground'
+                    : 'text-muted-foreground hover:bg-muted',
+                )}
+              >
+                {y}
+              </button>
+            ))}
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={handleExportPdf}
+            disabled={isLoading || !hasAnyData || isExporting}
+            className="gap-1.5"
+          >
+            {isExporting ? (
+              <Loader2 className="size-3.5 animate-spin" />
+            ) : (
+              <Download className="size-3.5" />
+            )}
+            {isExporting
+              ? t('budgets.report.exporting', 'Generating...')
+              : t('budgets.report.exportPdf', 'Export PDF')}
+          </Button>
         </div>
       </div>
 

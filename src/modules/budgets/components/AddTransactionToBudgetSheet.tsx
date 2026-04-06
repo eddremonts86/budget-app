@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Sheet } from '@/components/ui/sheet'
+import { cn } from '@/shared/lib/utils'
 import { useCategories } from '@/modules/categories'
 import { useCreateTransaction } from '@/modules/transactions/api/transactions.queries'
 
@@ -82,20 +83,31 @@ export function AddTransactionToBudgetSheet({
             <CrudSheetSection>
               <form.Field name="type">
                 {(field) => (
-                  <div className="space-y-1">
-                    <Label>{t('budgets.transactions.type')}</Label>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(v) => field.handleChange(v as 'income' | 'expense')}
+                  <div className="flex rounded-lg border overflow-hidden">
+                    <button
+                      type="button"
+                      onClick={() => field.handleChange('expense')}
+                      className={cn(
+                        'flex-1 py-2 text-xs font-semibold transition-colors',
+                        field.state.value === 'expense'
+                          ? 'bg-red-500/10 text-red-600 dark:text-red-400 border-r border-red-200 dark:border-red-900'
+                          : 'text-muted-foreground hover:bg-muted border-r border-border',
+                      )}
                     >
-                      <SelectTrigger>
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="expense">{t('budgets.transactions.expense')}</SelectItem>
-                        <SelectItem value="income">{t('budgets.transactions.income')}</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      ↓ {t('budgets.transactions.expense')}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => field.handleChange('income')}
+                      className={cn(
+                        'flex-1 py-2 text-xs font-semibold transition-colors',
+                        field.state.value === 'income'
+                          ? 'bg-emerald-500/10 text-emerald-700 dark:text-emerald-400'
+                          : 'text-muted-foreground hover:bg-muted',
+                      )}
+                    >
+                      ↑ {t('budgets.transactions.income')}
+                    </button>
                   </div>
                 )}
               </form.Field>
