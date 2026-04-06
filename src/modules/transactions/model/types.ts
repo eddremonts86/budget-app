@@ -1,9 +1,11 @@
 export interface Transaction {
   id: string
   customer: {
-    name: string
-    email: string
+    name: string | null
+    email: string | null
   }
+  customerName?: string | null
+  customerEmail?: string | null
   status: 'Approved' | 'Pending' | 'Rejected'
   date: string
   amount: number
@@ -16,4 +18,8 @@ export interface Transaction {
   approvedBy?: string | null
   approvedAt?: string | null
   rejectionReason?: string | null
+  budgetId?: string | null
+  isPrivate?: boolean
+  createdAt?: string
+  updatedAt?: string
 }

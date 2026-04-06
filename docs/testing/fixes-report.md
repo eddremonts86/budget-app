@@ -21,7 +21,6 @@
 ### 3) Route inventory deliverables
 
 - Added inventory files:
-  - `docs/testing/routes-inventory.json`
   - `docs/testing/routes-inventory.yaml`
   - `tests/e2e/route-inventory.ts`
 

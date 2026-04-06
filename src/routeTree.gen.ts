@@ -17,6 +17,7 @@ import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as DashboardDashboardRouteRouteImport } from './routes/_dashboard/dashboard/route'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
+import { Route as ApiBudgetsProcessRecurrencesRouteImport } from './routes/api/budgets/process-recurrences'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiTestConnectionRouteImport } from './routes/api/ai/test-connection'
 import { Route as ApiAiStatusRouteImport } from './routes/api/ai/status'
@@ -31,13 +32,16 @@ import { Route as DashboardDashboardTeamRouteImport } from './routes/_dashboard/
 import { Route as DashboardDashboardProjectsRouteImport } from './routes/_dashboard/dashboard/projects'
 import { Route as DashboardDashboardHelpRouteImport } from './routes/_dashboard/dashboard/help'
 import { Route as DashboardDashboardCategoriesRouteImport } from './routes/_dashboard/dashboard/categories'
+import { Route as DashboardDashboardBudgetsRouteImport } from './routes/_dashboard/dashboard/budgets'
 import { Route as DashboardDashboardAnalyticsRouteImport } from './routes/_dashboard/dashboard/analytics'
 import { Route as ApiAiChatRouteRouteImport } from './routes/api/ai/chat/route'
 import { Route as DashboardDashboardSettingsRouteRouteImport } from './routes/_dashboard/dashboard/settings/route'
 import { Route as DashboardDashboardSettingsIndexRouteImport } from './routes/_dashboard/dashboard/settings/index'
+import { Route as DashboardDashboardBudgetsIndexRouteImport } from './routes/_dashboard/dashboard/budgets.index'
 import { Route as ApiAiChatCompletionsRouteImport } from './routes/api/ai/chat/completions'
 import { Route as DashboardDashboardSettingsSystemRouteImport } from './routes/_dashboard/dashboard/settings/system'
 import { Route as DashboardDashboardSettingsIa_configRouteImport } from './routes/_dashboard/dashboard/settings/ia_config'
+import { Route as DashboardDashboardBudgetsBudgetIdRouteImport } from './routes/_dashboard/dashboard/budgets.$budgetId'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -77,6 +81,12 @@ const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
   path: '/',
   getParentRoute: () => DashboardDashboardRouteRoute,
 } as any)
+const ApiBudgetsProcessRecurrencesRoute =
+  ApiBudgetsProcessRecurrencesRouteImport.update({
+    id: '/api/budgets/process-recurrences',
+    path: '/api/budgets/process-recurrences',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const ApiAuthSplatRoute = ApiAuthSplatRouteImport.update({
   id: '/api/auth/$',
   path: '/api/auth/$',
@@ -150,6 +160,12 @@ const DashboardDashboardCategoriesRoute =
     path: '/categories',
     getParentRoute: () => DashboardDashboardRouteRoute,
   } as any)
+const DashboardDashboardBudgetsRoute =
+  DashboardDashboardBudgetsRouteImport.update({
+    id: '/budgets',
+    path: '/budgets',
+    getParentRoute: () => DashboardDashboardRouteRoute,
+  } as any)
 const DashboardDashboardAnalyticsRoute =
   DashboardDashboardAnalyticsRouteImport.update({
     id: '/analytics',
@@ -173,6 +189,12 @@ const DashboardDashboardSettingsIndexRoute =
     path: '/',
     getParentRoute: () => DashboardDashboardSettingsRouteRoute,
   } as any)
+const DashboardDashboardBudgetsIndexRoute =
+  DashboardDashboardBudgetsIndexRouteImport.update({
+    id: '/',
+    path: '/',
+    getParentRoute: () => DashboardDashboardBudgetsRoute,
+  } as any)
 const ApiAiChatCompletionsRoute = ApiAiChatCompletionsRouteImport.update({
   id: '/completions',
   path: '/completions',
@@ -190,6 +212,12 @@ const DashboardDashboardSettingsIa_configRoute =
     path: '/ia_config',
     getParentRoute: () => DashboardDashboardSettingsRouteRoute,
   } as any)
+const DashboardDashboardBudgetsBudgetIdRoute =
+  DashboardDashboardBudgetsBudgetIdRouteImport.update({
+    id: '/$budgetId',
+    path: '/$budgetId',
+    getParentRoute: () => DashboardDashboardBudgetsRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LandingIndexRoute
@@ -200,6 +228,7 @@ export interface FileRoutesByFullPath {
   '/dashboard/settings': typeof DashboardDashboardSettingsRouteRouteWithChildren
   '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
   '/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
+  '/dashboard/budgets': typeof DashboardDashboardBudgetsRouteWithChildren
   '/dashboard/categories': typeof DashboardDashboardCategoriesRoute
   '/dashboard/help': typeof DashboardDashboardHelpRoute
   '/dashboard/projects': typeof DashboardDashboardProjectsRoute
@@ -214,10 +243,13 @@ export interface FileRoutesByFullPath {
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/budgets/process-recurrences': typeof ApiBudgetsProcessRecurrencesRoute
   '/dashboard/': typeof DashboardDashboardIndexRoute
+  '/dashboard/budgets/$budgetId': typeof DashboardDashboardBudgetsBudgetIdRoute
   '/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
   '/dashboard/settings/system': typeof DashboardDashboardSettingsSystemRoute
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
+  '/dashboard/budgets/': typeof DashboardDashboardBudgetsIndexRoute
   '/dashboard/settings/': typeof DashboardDashboardSettingsIndexRoute
 }
 export interface FileRoutesByTo {
@@ -241,10 +273,13 @@ export interface FileRoutesByTo {
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/budgets/process-recurrences': typeof ApiBudgetsProcessRecurrencesRoute
   '/dashboard': typeof DashboardDashboardIndexRoute
+  '/dashboard/budgets/$budgetId': typeof DashboardDashboardBudgetsBudgetIdRoute
   '/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
   '/dashboard/settings/system': typeof DashboardDashboardSettingsSystemRoute
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
+  '/dashboard/budgets': typeof DashboardDashboardBudgetsIndexRoute
   '/dashboard/settings': typeof DashboardDashboardSettingsIndexRoute
 }
 export interface FileRoutesById {
@@ -259,6 +294,7 @@ export interface FileRoutesById {
   '/_dashboard/dashboard/settings': typeof DashboardDashboardSettingsRouteRouteWithChildren
   '/api/ai/chat': typeof ApiAiChatRouteRouteWithChildren
   '/_dashboard/dashboard/analytics': typeof DashboardDashboardAnalyticsRoute
+  '/_dashboard/dashboard/budgets': typeof DashboardDashboardBudgetsRouteWithChildren
   '/_dashboard/dashboard/categories': typeof DashboardDashboardCategoriesRoute
   '/_dashboard/dashboard/help': typeof DashboardDashboardHelpRoute
   '/_dashboard/dashboard/projects': typeof DashboardDashboardProjectsRoute
@@ -273,10 +309,13 @@ export interface FileRoutesById {
   '/api/ai/status': typeof ApiAiStatusRoute
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
+  '/api/budgets/process-recurrences': typeof ApiBudgetsProcessRecurrencesRoute
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
+  '/_dashboard/dashboard/budgets/$budgetId': typeof DashboardDashboardBudgetsBudgetIdRoute
   '/_dashboard/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
   '/_dashboard/dashboard/settings/system': typeof DashboardDashboardSettingsSystemRoute
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
+  '/_dashboard/dashboard/budgets/': typeof DashboardDashboardBudgetsIndexRoute
   '/_dashboard/dashboard/settings/': typeof DashboardDashboardSettingsIndexRoute
 }
 export interface FileRouteTypes {
@@ -290,6 +329,7 @@ export interface FileRouteTypes {
     | '/dashboard/settings'
     | '/api/ai/chat'
     | '/dashboard/analytics'
+    | '/dashboard/budgets'
     | '/dashboard/categories'
     | '/dashboard/help'
     | '/dashboard/projects'
@@ -304,10 +344,13 @@ export interface FileRouteTypes {
     | '/api/ai/status'
     | '/api/ai/test-connection'
     | '/api/auth/$'
+    | '/api/budgets/process-recurrences'
     | '/dashboard/'
+    | '/dashboard/budgets/$budgetId'
     | '/dashboard/settings/ia_config'
     | '/dashboard/settings/system'
     | '/api/ai/chat/completions'
+    | '/dashboard/budgets/'
     | '/dashboard/settings/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -331,10 +374,13 @@ export interface FileRouteTypes {
     | '/api/ai/status'
     | '/api/ai/test-connection'
     | '/api/auth/$'
+    | '/api/budgets/process-recurrences'
     | '/dashboard'
+    | '/dashboard/budgets/$budgetId'
     | '/dashboard/settings/ia_config'
     | '/dashboard/settings/system'
     | '/api/ai/chat/completions'
+    | '/dashboard/budgets'
     | '/dashboard/settings'
   id:
     | '__root__'
@@ -348,6 +394,7 @@ export interface FileRouteTypes {
     | '/_dashboard/dashboard/settings'
     | '/api/ai/chat'
     | '/_dashboard/dashboard/analytics'
+    | '/_dashboard/dashboard/budgets'
     | '/_dashboard/dashboard/categories'
     | '/_dashboard/dashboard/help'
     | '/_dashboard/dashboard/projects'
@@ -362,10 +409,13 @@ export interface FileRouteTypes {
     | '/api/ai/status'
     | '/api/ai/test-connection'
     | '/api/auth/$'
+    | '/api/budgets/process-recurrences'
     | '/_dashboard/dashboard/'
+    | '/_dashboard/dashboard/budgets/$budgetId'
     | '/_dashboard/dashboard/settings/ia_config'
     | '/_dashboard/dashboard/settings/system'
     | '/api/ai/chat/completions'
+    | '/_dashboard/dashboard/budgets/'
     | '/_dashboard/dashboard/settings/'
   fileRoutesById: FileRoutesById
 }
@@ -381,6 +431,7 @@ export interface RootRouteChildren {
   ApiAiStatusRoute: typeof ApiAiStatusRoute
   ApiAiTestConnectionRoute: typeof ApiAiTestConnectionRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
+  ApiBudgetsProcessRecurrencesRoute: typeof ApiBudgetsProcessRecurrencesRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -440,6 +491,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardDashboardIndexRouteImport
       parentRoute: typeof DashboardDashboardRouteRoute
+    }
+    '/api/budgets/process-recurrences': {
+      id: '/api/budgets/process-recurrences'
+      path: '/api/budgets/process-recurrences'
+      fullPath: '/api/budgets/process-recurrences'
+      preLoaderRoute: typeof ApiBudgetsProcessRecurrencesRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/auth/$': {
       id: '/api/auth/$'
@@ -539,6 +597,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardCategoriesRouteImport
       parentRoute: typeof DashboardDashboardRouteRoute
     }
+    '/_dashboard/dashboard/budgets': {
+      id: '/_dashboard/dashboard/budgets'
+      path: '/budgets'
+      fullPath: '/dashboard/budgets'
+      preLoaderRoute: typeof DashboardDashboardBudgetsRouteImport
+      parentRoute: typeof DashboardDashboardRouteRoute
+    }
     '/_dashboard/dashboard/analytics': {
       id: '/_dashboard/dashboard/analytics'
       path: '/analytics'
@@ -567,6 +632,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardSettingsIndexRouteImport
       parentRoute: typeof DashboardDashboardSettingsRouteRoute
     }
+    '/_dashboard/dashboard/budgets/': {
+      id: '/_dashboard/dashboard/budgets/'
+      path: '/'
+      fullPath: '/dashboard/budgets/'
+      preLoaderRoute: typeof DashboardDashboardBudgetsIndexRouteImport
+      parentRoute: typeof DashboardDashboardBudgetsRoute
+    }
     '/api/ai/chat/completions': {
       id: '/api/ai/chat/completions'
       path: '/completions'
@@ -587,6 +659,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/settings/ia_config'
       preLoaderRoute: typeof DashboardDashboardSettingsIa_configRouteImport
       parentRoute: typeof DashboardDashboardSettingsRouteRoute
+    }
+    '/_dashboard/dashboard/budgets/$budgetId': {
+      id: '/_dashboard/dashboard/budgets/$budgetId'
+      path: '/$budgetId'
+      fullPath: '/dashboard/budgets/$budgetId'
+      preLoaderRoute: typeof DashboardDashboardBudgetsBudgetIdRouteImport
+      parentRoute: typeof DashboardDashboardBudgetsRoute
     }
   }
 }
@@ -611,9 +690,27 @@ const DashboardDashboardSettingsRouteRouteWithChildren =
     DashboardDashboardSettingsRouteRouteChildren,
   )
 
+interface DashboardDashboardBudgetsRouteChildren {
+  DashboardDashboardBudgetsBudgetIdRoute: typeof DashboardDashboardBudgetsBudgetIdRoute
+  DashboardDashboardBudgetsIndexRoute: typeof DashboardDashboardBudgetsIndexRoute
+}
+
+const DashboardDashboardBudgetsRouteChildren: DashboardDashboardBudgetsRouteChildren =
+  {
+    DashboardDashboardBudgetsBudgetIdRoute:
+      DashboardDashboardBudgetsBudgetIdRoute,
+    DashboardDashboardBudgetsIndexRoute: DashboardDashboardBudgetsIndexRoute,
+  }
+
+const DashboardDashboardBudgetsRouteWithChildren =
+  DashboardDashboardBudgetsRoute._addFileChildren(
+    DashboardDashboardBudgetsRouteChildren,
+  )
+
 interface DashboardDashboardRouteRouteChildren {
   DashboardDashboardSettingsRouteRoute: typeof DashboardDashboardSettingsRouteRouteWithChildren
   DashboardDashboardAnalyticsRoute: typeof DashboardDashboardAnalyticsRoute
+  DashboardDashboardBudgetsRoute: typeof DashboardDashboardBudgetsRouteWithChildren
   DashboardDashboardCategoriesRoute: typeof DashboardDashboardCategoriesRoute
   DashboardDashboardHelpRoute: typeof DashboardDashboardHelpRoute
   DashboardDashboardProjectsRoute: typeof DashboardDashboardProjectsRoute
@@ -629,6 +726,7 @@ const DashboardDashboardRouteRouteChildren: DashboardDashboardRouteRouteChildren
     DashboardDashboardSettingsRouteRoute:
       DashboardDashboardSettingsRouteRouteWithChildren,
     DashboardDashboardAnalyticsRoute: DashboardDashboardAnalyticsRoute,
+    DashboardDashboardBudgetsRoute: DashboardDashboardBudgetsRouteWithChildren,
     DashboardDashboardCategoriesRoute: DashboardDashboardCategoriesRoute,
     DashboardDashboardHelpRoute: DashboardDashboardHelpRoute,
     DashboardDashboardProjectsRoute: DashboardDashboardProjectsRoute,
@@ -706,6 +804,7 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiStatusRoute: ApiAiStatusRoute,
   ApiAiTestConnectionRoute: ApiAiTestConnectionRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
+  ApiBudgetsProcessRecurrencesRoute: ApiBudgetsProcessRecurrencesRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

@@ -1,5 +1,6 @@
 import { analyticsModule } from '@/modules/analytics/manifest'
 import { aiModule } from '@/modules/ai/manifest'
+import { budgetsModule } from '@/modules/budgets/manifest'
 import { authModule } from '@/modules/auth/manifest'
 import { categoriesModule } from '@/modules/categories/manifest'
 import { dashboardModule } from '@/modules/dashboard/manifest'
@@ -23,6 +24,7 @@ export const moduleRegistry: AppModuleManifest[] = [
   categoriesModule,
   projectsModule,
   transactionsModule,
+  budgetsModule,
   analyticsModule,
   usersModule,
   teamModule,

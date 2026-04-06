@@ -82,7 +82,7 @@ The sidebar search consumes `/api/ai/search`, which resolves the active provider
 ## Legacy References
 
 The runtime code now imports the AI domain directly from `src/ai`.
-Legacy root-level documentation such as `docs/AI-ARCHITECTURE.md` is kept only as a pointer to this canonical section.
+All AI documentation is consolidated in this `docs/ai/` folder.
 
 ## Error Handling
 

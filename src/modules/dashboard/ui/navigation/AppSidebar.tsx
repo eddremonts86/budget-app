@@ -40,6 +40,7 @@ import {
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
 import { useAiSearch } from '@/modules/ai'
+import { useMyBudgetsDashboard } from '@/modules/budgets/api/budgets.queries'
 import { useTransactions } from '@/modules/transactions'
 import { useCurrentUser } from '@/modules/users'
 import { getTransactionsPendingApprovalForUser } from '@/modules/users/model/permissions'
@@ -70,7 +71,10 @@ const extractSearchText = (result: unknown) => {
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
   const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
-  const { data: allTransactions = [] } = useTransactions({ enabled: canApproveTransactions })
+  const { data: rawTransactions } = useTransactions({ enabled: canApproveTransactions })
+  const allTransactions = (rawTransactions ??
+    []) as import('@/modules/transactions/model/types').Transaction[]
+  const { data: budgetDashboard } = useMyBudgetsDashboard()
 
   const pendingCount = React.useMemo(() => {
     if (!canApproveTransactions) return 0
@@ -192,6 +196,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </Badge>
     ) : undefined
 
+  const overBudgetCount = budgetDashboard?.overBudgetCount ?? 0
+  const overBudgetBadge =
+    overBudgetCount > 0 ? (
+      <Badge
+        variant="destructive"
+        className="rounded-full px-1.5 py-0.5 text-[10px] h-5 min-w-5 flex items-center justify-center"
+      >
+        {overBudgetCount}
+      </Badge>
+    ) : undefined
+
   const { main: navMain, secondary: navSecondary } = getSidebarNavigation({
     t,
     actions: {
@@ -199,6 +214,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
     },
     badges: {
       'pending-transactions': transactionBadge,
+      'over-budget': overBudgetBadge,
     },
   })
 

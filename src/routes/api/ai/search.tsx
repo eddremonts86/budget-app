@@ -13,6 +13,8 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
       createJsonErrorResponse,
       createJsonResponse,
       resolveProviderRuntime,
+      streamLmStudioChat,
+      streamOllamaChat,
     } = await import('@/modules/ai/server')
 
     const isE2E = process.env.VITE_E2E === 'true'
@@ -55,12 +57,32 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
     const systemPrompt = buildSearchSystemPrompt(ragContext)
     const messages = normalizeSearchMessages(query, systemPrompt)
 
+    if (providerId === 'ollama') {
+      return await streamOllamaChat({
+        config: finalConfig,
+        params: body.params,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        messages: messages as any,
+        resolvedModel,
+      })
+    }
+
+    if (providerId === 'lm-studio') {
+      return await streamLmStudioChat({
+        config: finalConfig,
+        params: body.params,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        messages: messages as any,
+        resolvedModel,
+      })
+    }
+
     return createAiChatResponse({
       provider,
       config: finalConfig,
       providerId,
       resolvedModel,
-      messages: messages as ChatMessages,
+      messages: messages as unknown as ChatMessages,
       params: body.params,
     })
   } catch (error) {

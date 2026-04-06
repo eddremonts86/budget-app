@@ -1,0 +1,2865 @@
+# Plan de Implementación: Módulo de Presupuestos (Budgets)
+
+> **Estado**: Pendiente de aprobación
+> **Versión**: 2.0
+> **Fecha**: 2026-04-06
+> **Módulo**: `src/modules/budgets/`
+> **ID de módulo**: `budgets`
+
+---
+
+## 1. Visión General
+
+Crear un módulo `budgets` que se **integra profundamente con el módulo `transactions` existente** en lugar de duplicarlo. Los budgets son contenedores financieros multi-scope (personal, proyecto, departamento, empresa) que agregan transacciones vinculadas. La tabla `transactions` existente evoluciona para soportar tanto uso empresarial como personal. Integración completa con el sistema de IA existente (RAG, chat, action cards) para análisis financiero inteligente.
+
+### Objetivos Principales
+
+- Centralizar ingresos y gastos manuales dentro de presupuestos con alcance definido
+- Permitir categorización flexible con límites de gasto por categoría
+- Gestionar transacciones recurrentes (mensual, trimestral, semestral, anual)
+- Detectar y alertar cuando un presupuesto ha sido excedido (over-budget)
+- Soporte multiusuario (familias, equipos, empresas)
+- Integración con IA para análisis, predicciones y creación por voz/chat
+
+### Objetivos Avanzados (post-MVP)
+
+- Soporte multi-divisa con conversión
+- Integración bancaria y CSV import
+- Predicciones ML avanzadas
+- Templates y clonación de presupuestos
+
+---
+
+## 2. Decisiones de Arquitectura
+
+### D1: Extender `transactions`, no duplicar
+
+La tabla `transactions` existente gana: `budgetId` (FK), `isPrivate` (boolean), y `customerName`/`customerEmail` se vuelven **nullable** (las transacciones personales no necesitan un cliente). Todos los flujos existentes siguen funcionando — las transacciones enterprise operan igual que antes.
+
+**Razonamiento**: La tabla `transactions` ya tiene la infraestructura de montos, fechas, categorías, aprobaciones. Duplicar sería crear una isla de datos sin relación con el sistema financiero existente. Al extender con un FK opcional, una transacción puede pertenecer a un budget sin romper nada.
+
+### D2: Budgets son contenedores con scope
+
+Un budget tiene un enum `scope` (`personal | project | department | company`) con FKs nullable explícitas (`projectId`, `departmentId`) — sin FK polimórfico (anti-pattern). La combinación `scope` + FK determina el contexto.
+
+**Razonamiento**: Permite vincular presupuestos directamente a entidades ya existentes (projects, departments) sin crear jerarquías complejas. Cada scope es independiente: un presupuesto de proyecto agrupa las transacciones del proyecto; uno personal, las del usuario.
+
+### D3: Reutilizar módulo `categories` existente
+
+Los **límites de gasto por categoría** referencian la tabla `categories` existente vía una junction table `budget_category_limits`. No se crea una tabla `budget_categories` separada.
+
+**Razonamiento**: Las categorías existentes (Food, Transport, Housing, etc.) son perfectamente reutilizables para presupuestos. Crear categorías nuevas sería duplicar datos y romper el principio plug&play. La junction table permite asignar montos máximos a cada categoría dentro de un presupuesto específico.
+
+### D4: Múltiples contribuidores vía `budget_members`
+
+Cualquier usuario puede ser añadido a un budget con un rol (`admin | contributor | viewer`). Admin = control total, contributor = agregar/editar transacciones propias, viewer = solo lectura. El owner del budget es siempre admin implícito.
+
+**Razonamiento**: Soporta el caso de uso de familias compartiendo un presupuesto doméstico, equipos con presupuesto de proyecto, o departamentos con presupuesto asignado. Los roles limitan quién puede hacer qué sin complejidad adicional.
+
+### D5: Integración con IA vía pipeline RAG existente
+
+Budget intents, action cards, y RAG indexing se conectan a los puntos de extensión del módulo AI existente — no se necesita infraestructura nueva de IA.
+
+**Razonamiento**: El sistema AI ya tiene: detección de intents por keywords (EN/ES), detección de acciones CRUD, action confirmation cards, y RAG via ChromaDB. Solo hay que añadir entries para `budget`/`presupuesto` en cada punto de extensión.
+
+### D6: Montos en centavos (integer)
+
+Consistente con los patrones existentes de `transactions.amount` y `projects.budget`.
+
+**Razonamiento**: Evita problemas de punto flotante. $45.50 se almacena como `4550`. El formateo a display se hace con `Intl.NumberFormat` en el cliente.
+
+---
+
+## 3. Modelo de Datos
+
+### 3.1 Enums Nuevos
+
+```sql
+-- Alcance del presupuesto
+CREATE TYPE budget_scope AS ENUM ('personal', 'project', 'department', 'company');
+
+-- Estado del presupuesto
+CREATE TYPE budget_status AS ENUM ('active', 'closed', 'archived');
+
+-- Tipo de período
+CREATE TYPE budget_period_type AS ENUM ('monthly', 'quarterly', 'semiannual', 'annual', 'one_time');
+
+-- Rol de miembro de presupuesto
+CREATE TYPE budget_member_role AS ENUM ('admin', 'contributor', 'viewer');
+
+-- Frecuencia de recurrencia
+CREATE TYPE budget_recurrence_frequency AS ENUM ('monthly', 'quarterly', 'semiannual', 'annual');
+
+-- Estado de regla de recurrencia
+CREATE TYPE budget_recurrence_status AS ENUM ('active', 'paused', 'completed');
+```
+
+### 3.2 Modificaciones a Tabla Existente: `transactions`
+
+| Cambio          | Antes           | Después                                   | Motivo                                          |
+| --------------- | --------------- | ----------------------------------------- | ----------------------------------------------- |
+| `customerName`  | `text NOT NULL` | `text` (nullable)                         | Transacciones personales no tienen cliente      |
+| `customerEmail` | `text NOT NULL` | `text` (nullable)                         | Idem                                            |
+| `budgetId`      | —               | `text FK → budgets.id ON DELETE SET NULL` | Vincular transacción a un presupuesto           |
+| `isPrivate`     | —               | `boolean DEFAULT false`                   | Transacciones privadas en grupo no son visibles |
+| `createdAt`     | —               | `timestamp DEFAULT NOW()`                 | Auditoría                                       |
+| `updatedAt`     | —               | `timestamp DEFAULT NOW()`                 | Auditoría                                       |
+
+**Impacto en código existente**: Las transacciones enterprise siguen funcionando porque `customerName`/`customerEmail` eran los únicos NOT NULL que cambian. El código de approval (`canApproveTransaction`, `approvedBy`, `approvedAt`) no se toca. Los nuevos campos (`budgetId`, `isPrivate`) son opcionales.
+
+### 3.3 Tablas Nuevas
+
+#### `budgets`
+
+| Columna         | Tipo                 | Constraints                                 | Notas                                          |
+| --------------- | -------------------- | ------------------------------------------- | ---------------------------------------------- |
+| `id`            | `text`               | PK                                          | UUID generado con `crypto.randomUUID()`        |
+| `name`          | `text`               | NOT NULL                                    | Nombre del presupuesto                         |
+| `description`   | `text`               | nullable                                    | Descripción opcional                           |
+| `scope`         | `budget_scope`       | NOT NULL                                    | `personal`, `project`, `department`, `company` |
+| `project_id`    | `text`               | FK → `projects.id` ON DELETE SET NULL       | Solo si scope = 'project'                      |
+| `department_id` | `text`               | FK → `departments.id` ON DELETE SET NULL    | Solo si scope = 'department'                   |
+| `owner_id`      | `text`               | FK → `users.id` ON DELETE CASCADE, NOT NULL | Creador del presupuesto                        |
+| `target_amount` | `integer`            | nullable                                    | Monto límite en centavos. NULL = sin límite    |
+| `currency`      | `text`               | DEFAULT 'USD'                               | Código ISO de moneda                           |
+| `period_type`   | `budget_period_type` | NOT NULL                                    | Tipo de período del presupuesto                |
+| `start_date`    | `timestamp`          | NOT NULL                                    | Inicio del presupuesto                         |
+| `end_date`      | `timestamp`          | nullable                                    | NULL = presupuesto continuo                    |
+| `status`        | `budget_status`      | DEFAULT 'active'                            | Estado actual                                  |
+| `created_at`    | `timestamp`          | DEFAULT NOW(), NOT NULL                     |                                                |
+| `updated_at`    | `timestamp`          | DEFAULT NOW(), NOT NULL                     |                                                |
+
+#### `budget_members`
+
+| Columna     | Tipo                 | Constraints                         | Notas                      |
+| ----------- | -------------------- | ----------------------------------- | -------------------------- |
+| `budget_id` | `text`               | FK → `budgets.id` ON DELETE CASCADE |                            |
+| `user_id`   | `text`               | FK → `users.id` ON DELETE CASCADE   |                            |
+| `role`      | `budget_member_role` | DEFAULT 'contributor'               | admin, contributor, viewer |
+| `joined_at` | `timestamp`          | DEFAULT NOW(), NOT NULL             |                            |
+|             |                      | **PK**: `(budget_id, user_id)`      | Composite primary key      |
+
+#### `budget_category_limits`
+
+| Columna            | Tipo      | Constraints                            | Notas                      |
+| ------------------ | --------- | -------------------------------------- | -------------------------- |
+| `budget_id`        | `text`    | FK → `budgets.id` ON DELETE CASCADE    |                            |
+| `category_id`      | `text`    | FK → `categories.id` ON DELETE CASCADE |                            |
+| `allocated_amount` | `integer` | NOT NULL                               | Monto asignado en centavos |
+|                    |           | **PK**: `(budget_id, category_id)`     | Composite primary key      |
+
+#### `budget_recurrence_rules`
+
+| Columna       | Tipo                          | Constraints                             | Notas                                                    |
+| ------------- | ----------------------------- | --------------------------------------- | -------------------------------------------------------- |
+| `id`          | `text`                        | PK                                      | UUID                                                     |
+| `budget_id`   | `text`                        | FK → `budgets.id` ON DELETE CASCADE     |                                                          |
+| `category_id` | `text`                        | FK → `categories.id` ON DELETE SET NULL | nullable                                                 |
+| `user_id`     | `text`                        | FK → `users.id` ON DELETE CASCADE       | Creador de la regla                                      |
+| `amount`      | `integer`                     | NOT NULL                                | Monto en centavos (negativo = gasto, positivo = ingreso) |
+| `frequency`   | `budget_recurrence_frequency` | NOT NULL                                | monthly, quarterly, semiannual, annual                   |
+| `description` | `text`                        | nullable                                | Descripción de la recurrencia                            |
+| `start_date`  | `timestamp`                   | NOT NULL                                | Fecha de inicio                                          |
+| `next_date`   | `timestamp`                   | NOT NULL                                | Próxima fecha de ejecución                               |
+| `status`      | `budget_recurrence_status`    | DEFAULT 'active'                        | active, paused, completed                                |
+| `created_at`  | `timestamp`                   | DEFAULT NOW(), NOT NULL                 |                                                          |
+| `updated_at`  | `timestamp`                   | DEFAULT NOW(), NOT NULL                 |                                                          |
+
+### 3.4 Diagrama Entidad-Relación
+
+```
+┌─────────┐      ┌──────────────┐      ┌────────────┐
+│  users  │──1:N─│   budgets    │──1:N─│ budget_    │
+│         │      │              │      │ members    │
+│         │◄─────│ ownerId      │      │ (userId,   │
+│         │      │ scope        │      │  role)     │
+│         │      │ targetAmount │      └────────────┘
+│         │      │ periodType   │
+│         │      │ status       │      ┌────────────┐
+│         │      │ projectId?───│──────│  projects  │
+│         │      │ departmentId?│──────│departments │
+│         │      └──────┬───────┘      └────────────┘
+│         │             │
+│         │             │1:N
+│         │             ▼
+│         │      ┌──────────────┐      ┌────────────┐
+│         │──1:N─│ transactions │──N:1─│ categories │
+│         │      │              │      │            │
+│         │      │ amount       │      └─────┬──────┘
+│         │      │ budgetId? ───│───┘        │
+│         │      │ categoryId?──│────────────┘
+│         │      │ isPrivate    │
+│         │      │ projectId?   │      ┌────────────────────┐
+│         │      └──────────────┘      │budget_category_    │
+│         │                            │limits              │
+│         │      ┌──────────────┐      │(budgetId,          │
+│         │──1:N─│ budget_      │      │ categoryId,        │
+│         │      │ recurrence_  │      │ allocatedAmount)   │
+│         │      │ rules        │      └────────────────────┘
+│         │      │ (frequency,  │
+│         │      │  nextDate)   │
+│         │      └──────────────┘
+└─────────┘
+```
+
+---
+
+## 4. Estructura del Módulo
+
+### 4.1 Árbol de Archivos
+
+```
+src/modules/budgets/
+├── manifest.ts                         ← source of truth: id, routes, navigation, widgets
+├── index.ts                            ← public barrel (only public API)
+├── model/
+│   ├── types.ts                        ← TypeScript interfaces
+│   ├── schema.ts                       ← Zod validation schemas
+│   ├── period-utils.ts                 ← Period calculation engine (shared server+client)
+│   └── index.ts                        ← barrel
+├── api/
+│   ├── budgets.fn.ts                   ← Budget CRUD server functions
+│   ├── budgets.queries.ts              ← TQ hooks + query keys
+│   ├── budget-members.fn.ts            ← Member management server functions
+│   ├── budget-members.queries.ts       ← TQ hooks
+│   ├── budget-limits.fn.ts             ← Category limit CRUD server functions
+│   ├── budget-limits.queries.ts        ← TQ hooks
+│   ├── budget-recurrences.fn.ts        ← Recurrence CRUD + processing engine
+│   ├── budget-recurrences.queries.ts   ← TQ hooks
+│   ├── budget-analytics.fn.ts          ← Aggregation queries (SUM, GROUP BY)
+│   └── budget-analytics.queries.ts     ← TQ hooks
+├── components/
+│   ├── BudgetsPage.tsx                 ← Main listing page (all budgets)
+│   ├── BudgetDetailPage.tsx            ← Single budget dashboard (tabs)
+│   ├── CreateBudgetSheet.tsx           ← CrudSheet for creation
+│   ├── EditBudgetSheet.tsx             ← CrudSheet for editing
+│   ├── BudgetForm.tsx                  ← TanStack Form + Zod (scope-dependent fields)
+│   ├── BudgetTransactionsList.tsx      ← Filtered transactions for a budget
+│   ├── AddTransactionToBudgetSheet.tsx ← Simplified TransactionForm (budgetId pre-filled)
+│   ├── BudgetCategoryLimits.tsx        ← Category limits management (allocated/spent bars)
+│   ├── BudgetMembersPanel.tsx          ← Member list with roles + add/remove
+│   ├── BudgetSummaryCards.tsx          ← Income/Expense/Balance/Remaining summary
+│   ├── BudgetRecurrencesPanel.tsx      ← Recurrence rules list + management
+│   ├── CreateRecurrenceSheet.tsx       ← CrudSheet for recurrence rules
+│   ├── MonthlyBalanceWidget.tsx        ← Dashboard widget (sm)
+│   ├── BudgetOverviewWidget.tsx        ← Dashboard widget (md)
+│   └── SpendingByCategoryWidget.tsx    ← Dashboard widget (md)
+└── config/
+    └── index.ts                        ← Module-specific defaults
+```
+
+### 4.2 Route Adapters
+
+```
+src/routes/_dashboard/budgets.tsx              → BudgetsPage
+src/routes/_dashboard/budgets.$budgetId.tsx    → BudgetDetailPage
+src/routes/api/budgets/process-recurrences.tsx → API route for external cron
+```
+
+### 4.3 Manifest
+
+```ts
+// src/modules/budgets/manifest.ts
+import { IconWallet } from '@tabler/icons-react'
+import type { AppModuleManifest } from '@/modules/core/types'
+
+export const budgetsModule: AppModuleManifest = {
+  id: 'budgets',
+  title: 'Budgets',
+  description:
+    'Budget management with multi-scope support, category limits, and spending tracking.',
+  dependencies: ['core', 'dashboard', 'auth', 'transactions', 'categories'],
+  routes: [
+    { path: '/dashboard/budgets', kind: 'page' },
+    { path: '/dashboard/budgets/$budgetId', kind: 'page' },
+    { path: '/api/budgets/process-recurrences', kind: 'api' },
+  ],
+  navigation: [
+    {
+      id: 'workspace',
+      title: 'Workspace',
+      kind: 'main',
+      order: 25,
+      items: [
+        {
+          id: 'budgets',
+          titleKey: 'sidebar.main.budgets',
+          fallbackTitle: 'Budgets',
+          to: '/dashboard/budgets',
+          icon: IconWallet,
+          badgeId: 'over-budget',
+          order: 25,
+        },
+      ],
+    },
+  ],
+  widgets: [
+    {
+      id: 'monthly-balance',
+      titleKey: 'dashboard.widgets.monthlyBalance',
+      fallbackTitle: 'Monthly Balance',
+      fallbackDescription: 'Net balance for the current month across all budgets.',
+      defaultVisible: true,
+      defaultOrder: 40,
+      size: 'sm',
+      component: () =>
+        import('./components/MonthlyBalanceWidget').then((m) => ({
+          default: m.MonthlyBalanceWidget,
+        })),
+    },
+    {
+      id: 'budget-overview',
+      titleKey: 'dashboard.widgets.budgetOverview',
+      fallbackTitle: 'Budget Overview',
+      fallbackDescription: 'Active budgets with progress bars and over-budget alerts.',
+      defaultVisible: true,
+      defaultOrder: 45,
+      size: 'md',
+      component: () =>
+        import('./components/BudgetOverviewWidget').then((m) => ({
+          default: m.BudgetOverviewWidget,
+        })),
+    },
+    {
+      id: 'spending-by-category',
+      titleKey: 'dashboard.widgets.spendingByCategory',
+      fallbackTitle: 'Spending by Category',
+      fallbackDescription: 'Top spending categories across all active budgets.',
+      defaultVisible: true,
+      defaultOrder: 47,
+      size: 'md',
+      component: () =>
+        import('./components/SpendingByCategoryWidget').then((m) => ({
+          default: m.SpendingByCategoryWidget,
+        })),
+    },
+  ],
+}
+```
+
+---
+
+## 5. Fases de Implementación
+
+### Fase 1: Schema Evolution
+
+**Bloqueante para todas las demás fases.**
+
+#### 1A. Modificar tabla `transactions` en `src/shared/lib/db/schema.ts`
+
+Cambios:
+
+- `customerName`: quitar `.notNull()`
+- `customerEmail`: quitar `.notNull()`
+- Añadir columna `budgetId`: `text('budget_id').references(() => budgets.id, { onDelete: 'set null' })`
+- Añadir columna `isPrivate`: `boolean('is_private').default(false)`
+- Añadir columna `createdAt`: `timestamp('created_at').defaultNow()`
+- Añadir columna `updatedAt`: `timestamp('updated_at').defaultNow()`
+
+#### 1B. Añadir 6 enums nuevos
+
+Todos definidos ANTES de las tablas que los usan:
+
+- `budgetScopeEnum`
+- `budgetStatusEnum`
+- `budgetPeriodTypeEnum`
+- `budgetMemberRoleEnum`
+- `budgetRecurrenceFrequencyEnum`
+- `budgetRecurrenceStatusEnum`
+
+#### 1C. Crear 4 tablas nuevas
+
+- `budgets`
+- `budgetMembers`
+- `budgetCategoryLimits`
+- `budgetRecurrenceRules`
+
+(Esquema detallado en sección 3.3)
+
+#### 1D. Generar y aplicar migración
+
+```bash
+pnpm drizzle-kit generate   # Genera SQL en drizzle/*.sql
+# Revisar SQL generado (nullable changes + nuevas tablas)
+pnpm drizzle-kit push        # Aplicar a BD (dev)
+```
+
+#### Archivos afectados
+
+- **Modificar**: `src/shared/lib/db/schema.ts`
+
+---
+
+### Fase 2: Actualizar Módulo Transactions
+
+**Depende de: Fase 1**
+
+#### 2A. Actualizar tipos
+
+**Archivo**: `src/modules/transactions/model/types.ts`
+
+Cambios a la interface `Transaction`:
+
+```ts
+export interface Transaction {
+  id: string
+  customer: {
+    name?: string // ← ahora opcional
+    email?: string // ← ahora opcional
+  }
+  status: 'Approved' | 'Pending' | 'Rejected'
+  date: string
+  amount: number
+  paymentMethod?: string | null
+  description?: string | null
+  userId: string | null
+  projectId: string | null
+  categoryId?: string | null
+  budgetId?: string | null // ← NUEVO
+  isPrivate?: boolean // ← NUEVO
+  assignedAdminId?: string | null
+  approvedBy?: string | null
+  approvedAt?: string | null
+  rejectionReason?: string | null
+}
+```
+
+#### 2B. Actualizar server functions
+
+**Archivo**: `src/modules/transactions/api/transactions.fn.ts`
+
+Cambios al schema Zod:
+
+```ts
+export const transactionSchema = z.object({
+  customerName: z.string().min(1).optional(), // ← ahora optional
+  customerEmail: z.string().email().optional(), // ← ahora optional
+  status: z.enum(['Approved', 'Pending', 'Rejected']).default('Pending'),
+  date: z.string(),
+  amount: z.number(),
+  paymentMethod: z.string().optional(),
+  description: z.string().optional(),
+  userId: z.string().optional(),
+  projectId: z.string().optional(),
+  categoryId: z.string().optional(),
+  budgetId: z.string().optional(), // ← NUEVO
+  isPrivate: z.boolean().optional(), // ← NUEVO
+  assignedAdminId: z.string().optional(),
+  approvedBy: z.string().optional(),
+  approvedAt: z.string().optional(),
+  rejectionReason: z.string().optional(),
+})
+```
+
+Cambios a `getTransactionsFn`:
+
+- Input validator: añadir `budgetId: z.string().optional()` al schema de filtros
+- Query: `if (data.budgetId) query = query.where(eq(transactions.budgetId, data.budgetId))`
+
+Cambios a `createTransactionFn` / `updateTransactionFn`:
+
+- Pasar `budgetId` e `isPrivate` en el INSERT/UPDATE
+- Post-insert: si `budgetId` presente, calcular budget health y devolver `budgetAlert` en response
+
+#### 2C. Actualizar TransactionForm
+
+**Archivo**: `src/modules/transactions/components/TransactionForm.tsx`
+
+Nuevos campos:
+
+- **Budget select**: Combobox opcional que usa `useBudgets()` del módulo budgets. Se importa de forma lazy para mantener plug&play (si budgets no está registrado, el campo no se muestra)
+- **isPrivate toggle**: Switch visible solo cuando el budget seleccionado tiene `scope !== 'personal'`
+- `customerName` / `customerEmail`: se marcan como opcionales en la UI (siempre visibles, sin asterisco de requerido)
+
+#### 2D. Actualizar TransactionsPage
+
+**Archivo**: `src/modules/transactions/components/TransactionsPage.tsx`
+
+Cambios:
+
+- Añadir filtro `budgetId` al panel de filtros del tab "History"
+- Añadir columna "Budget" al data table (badge con nombre del budget, clicable → navegar al budget detail)
+
+#### Archivos afectados
+
+- **Modificar**: `src/modules/transactions/model/types.ts`
+- **Modificar**: `src/modules/transactions/api/transactions.fn.ts`
+- **Modificar**: `src/modules/transactions/api/transactions.queries.ts`
+- **Modificar**: `src/modules/transactions/components/TransactionForm.tsx`
+- **Modificar**: `src/modules/transactions/components/TransactionsPage.tsx`
+
+---
+
+### Fase 3: Scaffold del Módulo Budgets
+
+**Paralela con Fase 2.**
+
+#### 3A. Crear manifest y registrar
+
+- Crear `src/modules/budgets/manifest.ts` (ver sección 4.3)
+- Registrar en `src/modules/core/registry.ts`: importar `budgetsModule` y añadir al array `moduleRegistry`
+- Añadir `'over-budget'` a `ModuleBadgeId` en `src/modules/core/types.ts`
+
+#### 3B. Crear model
+
+**`model/types.ts`** — interfaces TypeScript:
+
+```ts
+export type BudgetScope = 'personal' | 'project' | 'department' | 'company'
+export type BudgetStatus = 'active' | 'closed' | 'archived'
+export type BudgetPeriodType = 'monthly' | 'quarterly' | 'semiannual' | 'annual' | 'one_time'
+export type BudgetMemberRole = 'admin' | 'contributor' | 'viewer'
+export type BudgetRecurrenceFrequency = 'monthly' | 'quarterly' | 'semiannual' | 'annual'
+export type BudgetRecurrenceStatus = 'active' | 'paused' | 'completed'
+export type BudgetHealthStatus = 'healthy' | 'on_track' | 'warning' | 'approaching' | 'over_budget'
+
+export interface Budget {
+  id: string
+  name: string
+  description?: string | null
+  scope: BudgetScope
+  projectId?: string | null
+  departmentId?: string | null
+  ownerId: string
+  targetAmount?: number | null // cents
+  currency: string
+  periodType: BudgetPeriodType
+  startDate: string
+  endDate?: string | null
+  status: BudgetStatus
+  createdAt: string
+  updatedAt: string
+  // Computed (from queries)
+  memberCount?: number
+  totalSpent?: number
+  totalIncome?: number
+  health?: BudgetHealthSummary
+}
+
+export interface BudgetMember {
+  budgetId: string
+  userId: string
+  role: BudgetMemberRole
+  joinedAt: string
+  userName?: string
+  userEmail?: string
+}
+
+export interface BudgetCategoryLimit {
+  budgetId: string
+  categoryId: string
+  allocatedAmount: number // cents
+  categoryName?: string
+  categoryColor?: string
+  spent?: number // computed
+  remaining?: number // computed
+}
+
+export interface BudgetRecurrenceRule {
+  id: string
+  budgetId: string
+  categoryId?: string | null
+  userId: string
+  amount: number // cents
+  frequency: BudgetRecurrenceFrequency
+  description?: string | null
+  startDate: string
+  nextDate: string
+  status: BudgetRecurrenceStatus
+  createdAt: string
+  updatedAt: string
+}
+
+export interface BudgetHealthSummary {
+  spent: number // cents, period expenses
+  income: number // cents, period income
+  balance: number // income - expenses
+  target: number | null // cents
+  remaining: number | null // target - spent (null if no target)
+  usage: number | null // spent/target * 100 (null if no target)
+  status: BudgetHealthStatus
+}
+
+export interface BudgetAlert {
+  status: BudgetHealthStatus
+  spent: number
+  target: number
+  overBy: number
+}
+
+export interface PeriodBounds {
+  periodStart: Date
+  periodEnd: Date
+}
+```
+
+**`model/schema.ts`** — schemas Zod para validación:
+
+```ts
+export const createBudgetSchema = z.object({
+  name: z.string().min(1).max(100),
+  description: z.string().max(500).optional(),
+  scope: z.enum(['personal', 'project', 'department', 'company']),
+  projectId: z.string().optional(),
+  departmentId: z.string().optional(),
+  targetAmount: z.number().min(0).optional(),
+  currency: z.string().default('USD'),
+  periodType: z.enum(['monthly', 'quarterly', 'semiannual', 'annual', 'one_time']),
+  startDate: z.string(),
+  endDate: z.string().optional(),
+})
+
+export const createBudgetCategoryLimitSchema = z.object({
+  budgetId: z.string(),
+  categoryId: z.string(),
+  allocatedAmount: z.number().min(0),
+})
+
+export const createRecurrenceRuleSchema = z.object({
+  budgetId: z.string(),
+  categoryId: z.string().optional(),
+  amount: z.number(),
+  frequency: z.enum(['monthly', 'quarterly', 'semiannual', 'annual']),
+  description: z.string().optional(),
+  startDate: z.string(),
+})
+```
+
+#### 3C. Crear route adapters
+
+```tsx
+// src/routes/_dashboard/budgets.tsx
+import { createFileRoute } from '@tanstack/react-router'
+import { BudgetsPage } from '@/modules/budgets'
+
+export const Route = createFileRoute('/_dashboard/budgets')({
+  component: BudgetsPage,
+})
+
+// src/routes/_dashboard/budgets.$budgetId.tsx
+import { createFileRoute } from '@tanstack/react-router'
+import { BudgetDetailPage } from '@/modules/budgets'
+
+export const Route = createFileRoute('/_dashboard/budgets/$budgetId')({
+  component: BudgetDetailPage,
+})
+```
+
+#### Archivos afectados
+
+- **Crear**: `src/modules/budgets/manifest.ts`
+- **Crear**: `src/modules/budgets/index.ts`
+- **Crear**: `src/modules/budgets/model/types.ts`
+- **Crear**: `src/modules/budgets/model/schema.ts`
+- **Crear**: `src/modules/budgets/model/index.ts`
+- **Crear**: `src/routes/_dashboard/budgets.tsx`
+- **Crear**: `src/routes/_dashboard/budgets.$budgetId.tsx`
+- **Modificar**: `src/modules/core/registry.ts`
+- **Modificar**: `src/modules/core/types.ts`
+
+---
+
+### Fase 4: Budget CRUD
+
+**Depende de: Fase 3.**
+
+#### 4A. Server Functions (`budgets.fn.ts`)
+
+| Función           | Método | Input                 | Lógica                                                                                                           | Output                                |
+| ----------------- | ------ | --------------------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------- |
+| `getBudgetsFn`    | GET    | `{ scope?, status? }` | SELECT budgets WHERE (ownerId = me OR id IN budget_members.budgetId WHERE userId = me), filtrar por scope/status | `Budget[]` con spent/health computado |
+| `getBudgetByIdFn` | GET    | `budgetId: string`    | SELECT budget + LEFT JOIN members COUNT + process recurrence rules (lazy eval) + compute health                  | `Budget` con health summary           |
+| `createBudgetFn`  | POST   | `CreateBudgetInput`   | Validate con Zod, INSERT budget, INSERT budget_members (owner, role='admin'), syncRagDocument                    | `Budget`                              |
+| `updateBudgetFn`  | POST   | `{ id, data }`        | Check role ≥ admin, UPDATE budget                                                                                | `Budget`                              |
+| `deleteBudgetFn`  | POST   | `budgetId: string`    | Check ownerId = me, DELETE (cascades members+limits, transactions.budgetId → null)                               | `{ success: true }`                   |
+
+#### 4B. Member Functions (`budget-members.fn.ts`)
+
+| Función                    | Input                        | Auth   | Lógica                                             |
+| -------------------------- | ---------------------------- | ------ | -------------------------------------------------- |
+| `getBudgetMembersFn`       | `budgetId`                   | member | JOIN budget_members + users, return con name/email |
+| `addBudgetMemberFn`        | `{ budgetId, userId, role }` | admin  | INSERT budget_members                              |
+| `updateBudgetMemberRoleFn` | `{ budgetId, userId, role }` | admin  | UPDATE role                                        |
+| `removeBudgetMemberFn`     | `{ budgetId, userId }`       | admin  | DELETE (no puede eliminar al owner)                |
+
+#### 4C. Category Limit Functions (`budget-limits.fn.ts`)
+
+| Función                       | Input                                       | Lógica                                                               |
+| ----------------------------- | ------------------------------------------- | -------------------------------------------------------------------- |
+| `getBudgetCategoryLimitsFn`   | `budgetId`                                  | JOIN budget_category_limits + categories, compute spent per category |
+| `upsertBudgetCategoryLimitFn` | `{ budgetId, categoryId, allocatedAmount }` | INSERT ... ON CONFLICT UPDATE                                        |
+| `deleteBudgetCategoryLimitFn` | `{ budgetId, categoryId }`                  | DELETE                                                               |
+
+#### 4D. Analytics Functions (`budget-analytics.fn.ts`)
+
+| Función                         | Input                  | Query                                                                                 | Output                                            |
+| ------------------------------- | ---------------------- | ------------------------------------------------------------------------------------- | ------------------------------------------------- |
+| `getBudgetSummaryFn`            | `budgetId`             | SUM transactions WHERE budgetId, split by sign: amount>0 = income, amount<0 = expense | `BudgetHealthSummary`                             |
+| `getBudgetSpendingByCategoryFn` | `budgetId`             | GROUP BY categoryId, JOIN categories, JOIN budget_category_limits                     | `{ categoryId, name, color, spent, allocated }[]` |
+| `getBudgetMonthlyTrendFn`       | `{ budgetId, months }` | Income/expense grouped by month, last N months                                        | `{ month, income, expenses }[]`                   |
+| `getBudgetMemberSpendingFn`     | `budgetId`             | GROUP BY userId, JOIN users                                                           | `{ userId, name, spent }[]`                       |
+| `getMyBudgetsDashboardFn`       | —                      | Aggregate across user's active budgets                                                | `{ totalBalance, overBudgetCount, budgets[] }`    |
+
+#### 4E. Query Keys y TQ Hooks (`budgets.queries.ts`)
+
+```ts
+export const budgetKeys = {
+  all: ['budgets'] as const,
+  lists: () => [...budgetKeys.all, 'list'] as const,
+  detail: (id: string) => [...budgetKeys.all, 'detail', id] as const,
+  members: (id: string) => [...budgetKeys.all, 'members', id] as const,
+  limits: (id: string) => [...budgetKeys.all, 'limits', id] as const,
+  recurrences: (id: string) => [...budgetKeys.all, 'recurrences', id] as const,
+  summary: (id: string) => [...budgetKeys.all, 'summary', id] as const,
+  spendingByCategory: (id: string) => [...budgetKeys.all, 'spending-category', id] as const,
+  monthlyTrend: (id: string) => [...budgetKeys.all, 'monthly-trend', id] as const,
+  memberSpending: (id: string) => [...budgetKeys.all, 'member-spending', id] as const,
+  dashboard: () => [...budgetKeys.all, 'dashboard'] as const,
+}
+```
+
+Hooks: `useBudgets()`, `useBudget(id)`, `useCreateBudget()`, `useUpdateBudget()`, `useDeleteBudget()`, `useBudgetMembers(id)`, `useBudgetLimits(id)`, `useBudgetSummary(id)`, `useBudgetSpendingByCategory(id)`, `useMyBudgetsDashboard()`.
+
+#### Archivos afectados
+
+- **Crear**: `src/modules/budgets/api/budgets.fn.ts`
+- **Crear**: `src/modules/budgets/api/budgets.queries.ts`
+- **Crear**: `src/modules/budgets/api/budget-members.fn.ts`
+- **Crear**: `src/modules/budgets/api/budget-members.queries.ts`
+- **Crear**: `src/modules/budgets/api/budget-limits.fn.ts`
+- **Crear**: `src/modules/budgets/api/budget-limits.queries.ts`
+- **Crear**: `src/modules/budgets/api/budget-analytics.fn.ts`
+- **Crear**: `src/modules/budgets/api/budget-analytics.queries.ts`
+
+---
+
+### Fase 5: Budget UI
+
+**Depende de: Fase 4.**
+
+#### 5A. BudgetsPage (listing)
+
+Vista de cards/grid de todos los budgets del usuario.
+
+Cada card muestra:
+
+- **Nombre** del presupuesto
+- **Scope badge**: `personal` (blue), `project` (purple), `department` (amber), `company` (emerald)
+- **Progress bar**: gastado vs target, con color según health status
+- **Período**: monthly/quarterly/etc + fechas
+- **Member count**: icono + número
+- **Status**: active/closed/archived
+
+Filtros: scope (multi-select), status (multi-select).
+
+Botón "Create Budget" → `CreateBudgetSheet`.
+
+#### 5B. BudgetDetailPage (single budget)
+
+**Header**: nombre, scope badge, período, target amount, botones edit/delete.
+
+**Summary Cards** (`BudgetSummaryCards`):
+| Card | Valor | Color |
+|------|-------|-------|
+| Income | Total ingresos del período | emerald |
+| Expenses | Total gastos del período | red |
+| Balance | Income - Expenses | emerald si ≥ 0, red si < 0 |
+| Remaining | Target - Expenses (con progress ring) | color según health status |
+
+**Tabs**:
+
+1. **Transactions** — `BudgetTransactionsList`: tabla filtrada por budgetId, con botón "Add Transaction" → `AddTransactionToBudgetSheet` (budgetId pre-filled, omite customer fields)
+2. **Categories & Limits** — `BudgetCategoryLimits`: grid de categorías con barras allocated/spent/remaining por categoría. Botón para set/edit limit por categoría
+3. **Members** — `BudgetMembersPanel`: lista con role badges (admin/contributor/viewer). Add/remove solo si current user es admin
+4. **Recurring** — `BudgetRecurrencesPanel`: lista de reglas activas con: descripción, monto, frecuencia, nextDate. Create/edit/delete vía CrudSheet
+
+#### 5C. BudgetForm
+
+Campos:
+
+- `name` (text, required)
+- `description` (textarea, optional)
+- `scope` (select: personal/project/department/company)
+- `projectId` (select, **solo visible si scope = 'project'**, usa `useProjects()`)
+- `departmentId` (select, **solo visible si scope = 'department'**, usa departments de projects.fn)
+- `targetAmount` (number input, optional — sin límite si vacío)
+- `currency` (select, default USD)
+- `periodType` (select: monthly/quarterly/semiannual/annual/one_time)
+- `startDate` (date picker)
+- `endDate` (date picker, optional)
+
+Validación vía Zod schema `createBudgetSchema`.
+
+#### 5D. AddTransactionToBudgetSheet
+
+Form simplificado para crear transacción dentro de un budget:
+
+- **Amount** con toggle income/expense (determina signo: positivo/negativo)
+- **Date** (date picker, default today)
+- **Category** (select from categories, filtered by budget limits if available)
+- **Description** (text, optional)
+- **isPrivate** toggle (solo visible si budget scope ≠ personal)
+- `budgetId` pre-filled (no visible en form)
+- `userId` auto-set al current user
+- Omite completamente: `customerName`, `customerEmail`, `assignedAdminId`, approval fields
+
+#### 5E. Dashboard Widgets
+
+**`MonthlyBalanceWidget`** (sm):
+
+- Card compacta: net balance del mes actual
+- % de cambio vs mes anterior (verde ↑ o rojo ↓)
+- Texto secundario: "Income: $X | Expenses: $Y"
+- Empty state: "No budget data yet"
+
+**`BudgetOverviewWidget`** (md):
+
+- Top 3-5 budgets activos ordenados por urgencia (over-budget primero)
+- Cada item: nombre + scope badge + progress bar + "$ spent / $ target"
+- Over-budget items resaltados en rojo con icono ⚠
+- Link a budget detail page
+- Empty state: "No active budgets"
+
+**`SpendingByCategoryWidget`** (md):
+
+- Barras horizontales CSS, top 8 categorías por gasto
+- Cada barra: nombre + color de categoría + monto + % del total
+- Empty state: "No spending data"
+
+#### Archivos afectados
+
+- **Crear**: Todos los componentes listados en sección 4.1 `components/`
+
+---
+
+### Fase 6: AI Integration
+
+**Paralela con Fase 5.**
+
+#### 6A. RAG Intent Detection
+
+**Archivo**: `src/modules/ai/rag/context.ts`
+
+Añadir a `Intent` type: `'budgets'`
+
+Añadir a `INTENT_KEYWORDS`:
+
+```ts
+budgets: [
+  // EN
+  'budget', 'budgets', 'spending', 'saving', 'financial plan',
+  'income vs expenses', 'overspending', 'over budget', 'under budget',
+  'monthly expenses', 'category limit',
+  // ES
+  'presupuesto', 'presupuestos', 'gasto', 'gastos', 'ahorro',
+  'plan financiero', 'ingresos vs gastos', 'sobregasto',
+  'sobre presupuesto', 'límite de categoría',
+],
+```
+
+Añadir a `ENTITY_KEYWORDS`:
+
+```ts
+budget: ['budget', 'budgets', 'presupuesto', 'presupuestos'],
+```
+
+Añadir a `fetchDynamicContext`:
+
+```ts
+// Cuando intent incluye 'budgets':
+const budgets = await db.select().from(budgetsTable).where(eq(budgetsTable.ownerId, userId))
+// Formatear: nombre, scope, targetAmount, spent, status (over/under budget)
+// Incluir alertas over-budget:
+// "⚠ Budget 'Personal' is OVER BUDGET: $3,045/$3,000 (102%). Food: $540/$500."
+```
+
+Añadir a `ACTION_CREATE_SCHEMAS`:
+
+```json
+{"type":"create_budget","data":{"name":"...","scope":"personal|project|department|company","targetAmount":0,"periodType":"monthly","startDate":"YYYY-MM-DD"}}
+{"type":"create_budget_transaction","data":{"amount":-5000,"budgetId":"...","categoryId":"...","description":"...","date":"YYYY-MM-DD"}}
+```
+
+Añadir a `ACTION_UPDATE_SCHEMAS`:
+
+```json
+{
+  "type": "update_budget",
+  "id": "<budget id>",
+  "data": { "name": "...", "targetAmount": 0, "status": "active|closed" }
+}
+```
+
+#### 6B. Action Cards
+
+**Archivo**: `src/modules/ai/components/ActionConfirmationCard.utils.ts`
+
+Nuevos tipos:
+
+```ts
+interface CreateBudgetAction {
+  type: 'create_budget'
+  data: CreateBudgetInput
+}
+interface UpdateBudgetAction {
+  type: 'update_budget'
+  id: string
+  data: Partial<CreateBudgetInput>
+}
+interface DeleteBudgetAction {
+  type: 'delete_budget'
+  id: string
+}
+interface CreateBudgetTransactionAction {
+  type: 'create_budget_transaction'
+  data: TransactionInput
+}
+```
+
+Añadir a `ActionPayload` union.
+
+Añadir a `ENTITY_CONFIGS`:
+
+```ts
+budget: { create: { border: 'emerald-500', bg: 'emerald-50' }, update: { ... }, delete: { border: 'red-500', ... } }
+```
+
+**Archivo**: `src/modules/ai/components/ActionConfirmationCard.tsx`
+
+Añadir a `performAction()`:
+
+```ts
+case 'create_budget':
+  return createBudgetFn({ data: payload.data })
+case 'update_budget':
+  return updateBudgetFn({ data: { id: payload.id, data: payload.data } })
+case 'delete_budget':
+  return deleteBudgetFn({ data: payload.id })
+case 'create_budget_transaction':
+  return createTransactionFn({ data: payload.data })
+```
+
+#### 6C. Consultas AI habilitadas
+
+| Pregunta del usuario                    | Contexto inyectado                      | Respuesta esperada               |
+| --------------------------------------- | --------------------------------------- | -------------------------------- |
+| "¿Dónde estoy gastando más este mes?"   | Spending by category del período actual | Ranking de categorías con montos |
+| "¿Estoy dentro del presupuesto?"        | Budget summary + health status          | "Sí/No, llevas $X de $Y (Z%)"    |
+| "Predice mi gasto de fin de mes"        | Trend data últimos 3-6 meses            | Extrapolación lineal             |
+| "Compara mis gastos con el mes pasado"  | Dos meses de datos                      | Comparación con % de cambio      |
+| "Crea un gasto de $50 en comida"        | Detecta CRUD action                     | Action card para confirmar       |
+| "¿Cuáles presupuestos están excedidos?" | Over-budget alerts                      | Lista con detalles               |
+
+#### 6D. RAG Indexing
+
+**Archivo**: `src/modules/ai/rag/sync.ts`
+
+Añadir `'budget'` al entity type union:
+
+```ts
+type RagEntityType = 'todo' | 'user' | 'project' | 'transaction' | 'category' | 'team' | 'budget'
+```
+
+En budget CRUD server functions, después de create/update:
+
+```ts
+await syncRagDocument(
+  'budget',
+  budget.id,
+  `Budget: ${budget.name}. Scope: ${budget.scope}. Target: ${budget.targetAmount}. Status: ${health.status}.`,
+)
+```
+
+#### Archivos afectados
+
+- **Modificar**: `src/modules/ai/rag/context.ts`
+- **Modificar**: `src/modules/ai/components/ActionConfirmationCard.utils.ts`
+- **Modificar**: `src/modules/ai/components/ActionConfirmationCard.tsx`
+- **Modificar**: `src/modules/ai/rag/sync.ts`
+
+---
+
+### Fase 7: i18n
+
+**Paralela con todas las fases.**
+
+Añadir keys a los 3 archivos de locale:
+
+- `src/shared/lib/i18n/locales/en/common.json`
+- `src/shared/lib/i18n/locales/es/common.json`
+- `src/shared/lib/i18n/locales/dk/common.json`
+
+#### Estructura de keys
+
+```json
+{
+  "budgets": {
+    "title": "Budgets",
+    "description": "Manage your financial budgets",
+    "scopes": {
+      "personal": "Personal",
+      "project": "Project",
+      "department": "Department",
+      "company": "Company"
+    },
+    "periods": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannual": "Semiannual",
+      "annual": "Annual",
+      "oneTime": "One-time"
+    },
+    "status": {
+      "active": "Active",
+      "closed": "Closed",
+      "archived": "Archived"
+    },
+    "roles": {
+      "admin": "Admin",
+      "contributor": "Contributor",
+      "viewer": "Viewer"
+    },
+    "health": {
+      "healthy": "On Track",
+      "onTrack": "On Track",
+      "warning": "Warning",
+      "approaching": "Approaching Limit",
+      "overBudget": "Over Budget",
+      "overBy": "Over by {{amount}}"
+    },
+    "fields": {
+      "name": "Name",
+      "namePlaceholder": "Budget name...",
+      "description": "Description",
+      "scope": "Scope",
+      "targetAmount": "Target Amount",
+      "currency": "Currency",
+      "periodType": "Period",
+      "startDate": "Start Date",
+      "endDate": "End Date",
+      "allocatedAmount": "Allocated Amount",
+      "frequency": "Frequency",
+      "nextDate": "Next Date",
+      "amount": "Amount",
+      "isPrivate": "Private Transaction"
+    },
+    "actions": {
+      "create": "Create Budget",
+      "edit": "Edit Budget",
+      "delete": "Delete Budget",
+      "addTransaction": "Add Transaction",
+      "manageLimits": "Manage Limits",
+      "addMember": "Add Member",
+      "removeMember": "Remove Member",
+      "setLimit": "Set Limit",
+      "addRecurrence": "Add Recurring",
+      "income": "Income",
+      "expense": "Expense"
+    },
+    "messages": {
+      "created": "Budget created successfully",
+      "updated": "Budget updated",
+      "deleted": "Budget deleted",
+      "memberAdded": "Member added",
+      "memberRemoved": "Member removed",
+      "limitSet": "Category limit set",
+      "limitRemoved": "Category limit removed",
+      "recurrenceCreated": "Recurring rule created",
+      "recurrenceDeleted": "Recurring rule deleted",
+      "overBudgetWarning": "⚠ Budget '{{name}}' is now over by {{amount}}",
+      "approachingWarning": "Budget '{{name}}' is at {{percentage}}% of limit"
+    },
+    "detail": {
+      "tabs": {
+        "transactions": "Transactions",
+        "categories": "Categories & Limits",
+        "members": "Members",
+        "recurring": "Recurring"
+      },
+      "summary": {
+        "income": "Income",
+        "expenses": "Expenses",
+        "balance": "Balance",
+        "remaining": "Remaining"
+      },
+      "emptyTransactions": "No transactions yet. Add your first one!",
+      "emptyCategories": "No category limits set.",
+      "emptyMembers": "No additional members.",
+      "emptyRecurrences": "No recurring rules."
+    },
+    "delete": {
+      "confirmTitle": "Delete Budget?",
+      "confirmDescription": "This will remove the budget and all its limits and members. Linked transactions will be unlinked but not deleted."
+    }
+  },
+  "sidebar": {
+    "main": {
+      "budgets": "Budgets"
+    }
+  },
+  "dashboard": {
+    "widgets": {
+      "monthlyBalance": "Monthly Balance",
+      "budgetOverview": "Budget Overview",
+      "spendingByCategory": "Spending by Category"
+    }
+  }
+}
+```
+
+Las traducciones ES y DK siguen la misma estructura con textos traducidos.
+
+#### Archivos afectados
+
+- **Modificar**: `src/shared/lib/i18n/locales/en/common.json`
+- **Modificar**: `src/shared/lib/i18n/locales/es/common.json`
+- **Modificar**: `src/shared/lib/i18n/locales/dk/common.json`
+
+---
+
+### Fase 8: Seed Data
+
+**Paralela con Fase 5.**
+
+Extender `scripts/db/utils/corporate-dataset.ts`:
+
+| Entidad                   | Cantidad | Detalles                                                                 |
+| ------------------------- | -------- | ------------------------------------------------------------------------ |
+| Budgets                   | 4        | 1 personal, 1 project-scoped, 1 department-scoped, 1 company-wide        |
+| Budget Members            | 8-12     | 2-4 miembros por budget no-personal (mix de roles)                       |
+| Category Limits           | 20-30    | 5-8 límites por budget                                                   |
+| Transactions con budgetId | 60-100   | Repartidos en 3 meses, mix income/expense                                |
+| Recurrence Rules          | 4        | Rent (monthly), Salary (monthly), Insurance (quarterly), Domain (annual) |
+
+Los datos deben generar escenarios de:
+
+- Un budget healthy (< 50% usage)
+- Un budget on-track (60-70% usage)
+- Un budget over-budget (> 100% usage)
+- Un budget sin targetAmount (tracking only)
+
+#### Archivos afectados
+
+- **Modificar**: `scripts/db/utils/corporate-dataset.ts`
+
+---
+
+### Fase 9: Motor de Recurrencia
+
+**Depende de: Fase 4.**
+
+#### 9A. `processRecurrenceRules()` server function
+
+**Archivo**: `src/modules/budgets/api/budget-recurrences.fn.ts`
+
+```ts
+export async function processRecurrenceRules(budgetId?: string): Promise<number> {
+  const db = await loadDb()
+  const now = new Date()
+
+  // Query due rules
+  let query = db
+    .select()
+    .from(budgetRecurrenceRules)
+    .where(
+      and(eq(budgetRecurrenceRules.status, 'active'), lte(budgetRecurrenceRules.nextDate, now)),
+    )
+
+  if (budgetId) {
+    query = query.where(eq(budgetRecurrenceRules.budgetId, budgetId))
+  }
+
+  const dueRules = await query
+  let processedCount = 0
+
+  for (const rule of dueRules) {
+    let nextDate = new Date(rule.nextDate)
+
+    // Loop: handle missed periods
+    while (nextDate <= now) {
+      // 1. Create transaction
+      await db.insert(transactions).values({
+        id: crypto.randomUUID(),
+        amount: rule.amount,
+        date: nextDate,
+        categoryId: rule.categoryId,
+        budgetId: rule.budgetId,
+        userId: rule.userId,
+        description: `[Auto] ${rule.description || 'Recurring transaction'}`,
+        isPrivate: false,
+        createdAt: now,
+        updatedAt: now,
+      })
+
+      // 2. Advance nextDate
+      switch (rule.frequency) {
+        case 'monthly':
+          nextDate.setMonth(nextDate.getMonth() + 1)
+          break
+        case 'quarterly':
+          nextDate.setMonth(nextDate.getMonth() + 3)
+          break
+        case 'semiannual':
+          nextDate.setMonth(nextDate.getMonth() + 6)
+          break
+        case 'annual':
+          nextDate.setFullYear(nextDate.getFullYear() + 1)
+          break
+      }
+
+      processedCount++
+    }
+
+    // 3. Update rule with new nextDate
+    await db
+      .update(budgetRecurrenceRules)
+      .set({ nextDate, updatedAt: now })
+      .where(eq(budgetRecurrenceRules.id, rule.id))
+  }
+
+  return processedCount
+}
+```
+
+#### 9B. Lazy evaluation
+
+En `getBudgetByIdFn`, antes de devolver datos:
+
+```ts
+// Process any due recurrence rules for this budget
+await processRecurrenceRules(budgetId)
+// Then fetch and return budget data
+```
+
+Esto asegura que aunque no haya cron, el usuario siempre ve datos actualizados al abrir un budget.
+
+#### 9C. API route
+
+**Archivo**: `src/routes/api/budgets/process-recurrences.tsx`
+
+```tsx
+export const Route = createAPIFileRoute('/api/budgets/process-recurrences')({
+  POST: async () => {
+    const count = await processRecurrenceRules() // all budgets
+    return new Response(JSON.stringify({ processed: count }), {
+      headers: { 'Content-Type': 'application/json' },
+    })
+  },
+})
+```
+
+Puede ser llamado por:
+
+- Docker cron (`crontab: 0 0 * * * curl -X POST http://app:3000/api/budgets/process-recurrences`)
+- System crontab
+- Vercel Cron
+- Manual trigger desde UI
+
+#### 9D. Recurrence UI
+
+En `BudgetDetailPage`, tab "Recurring":
+
+- Lista de reglas activas: descripción, monto, frecuencia, nextDate
+- Botón "Add Recurring" → `CreateRecurrenceSheet` (CrudSheet)
+- Acciones por regla: edit, pause/resume, delete
+- Regla pausada se muestra con opacity reducida
+
+#### Archivos afectados
+
+- **Crear**: `src/modules/budgets/api/budget-recurrences.fn.ts`
+- **Crear**: `src/modules/budgets/api/budget-recurrences.queries.ts`
+- **Crear**: `src/modules/budgets/components/BudgetRecurrencesPanel.tsx`
+- **Crear**: `src/modules/budgets/components/CreateRecurrenceSheet.tsx`
+- **Crear**: `src/routes/api/budgets/process-recurrences.tsx`
+
+---
+
+### Fase 10: Sistema de Detección Over-Budget
+
+**Depende de: Fase 4.**
+
+#### 10A. Motor de cálculo de período
+
+**Archivo**: `src/modules/budgets/model/period-utils.ts`
+
+```ts
+export function getCurrentPeriodBounds(budget: Budget): PeriodBounds {
+  const now = new Date()
+  const start = new Date(budget.startDate)
+
+  switch (budget.periodType) {
+    case 'monthly': {
+      const periodStart = new Date(now.getFullYear(), now.getMonth(), 1)
+      const periodEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59)
+      return { periodStart, periodEnd }
+    }
+    case 'quarterly': {
+      // Align to budget start date
+      const monthsSinceStart =
+        (now.getFullYear() - start.getFullYear()) * 12 + now.getMonth() - start.getMonth()
+      const currentQuarter = Math.floor(monthsSinceStart / 3)
+      const periodStart = new Date(start)
+      periodStart.setMonth(start.getMonth() + currentQuarter * 3)
+      const periodEnd = new Date(periodStart)
+      periodEnd.setMonth(periodEnd.getMonth() + 3)
+      periodEnd.setDate(periodEnd.getDate() - 1)
+      return { periodStart, periodEnd }
+    }
+    case 'semiannual': {
+      // Same pattern, offset 6 months
+      const monthsSinceStart =
+        (now.getFullYear() - start.getFullYear()) * 12 + now.getMonth() - start.getMonth()
+      const currentHalf = Math.floor(monthsSinceStart / 6)
+      const periodStart = new Date(start)
+      periodStart.setMonth(start.getMonth() + currentHalf * 6)
+      const periodEnd = new Date(periodStart)
+      periodEnd.setMonth(periodEnd.getMonth() + 6)
+      periodEnd.setDate(periodEnd.getDate() - 1)
+      return { periodStart, periodEnd }
+    }
+    case 'annual': {
+      const yearsSinceStart = now.getFullYear() - start.getFullYear()
+      const periodStart = new Date(start)
+      periodStart.setFullYear(start.getFullYear() + yearsSinceStart)
+      if (periodStart > now) periodStart.setFullYear(periodStart.getFullYear() - 1)
+      const periodEnd = new Date(periodStart)
+      periodEnd.setFullYear(periodEnd.getFullYear() + 1)
+      periodEnd.setDate(periodEnd.getDate() - 1)
+      return { periodStart, periodEnd }
+    }
+    case 'one_time': {
+      return {
+        periodStart: start,
+        periodEnd: budget.endDate ? new Date(budget.endDate) : new Date('2099-12-31'),
+      }
+    }
+  }
+}
+```
+
+#### 10B. Cálculo de salud del budget
+
+**En**: `src/modules/budgets/api/budget-analytics.fn.ts`
+
+```ts
+export function getBudgetHealthStatus(usage: number): BudgetHealthStatus {
+  if (usage >= 100) return 'over_budget'
+  if (usage >= 90) return 'approaching'
+  if (usage >= 80) return 'warning'
+  if (usage >= 50) return 'on_track'
+  return 'healthy'
+}
+
+// getBudgetSummaryFn internals:
+// 1. getCurrentPeriodBounds(budget)
+// 2. SUM(ABS(amount)) WHERE budgetId AND amount < 0 AND date IN period → spent
+// 3. SUM(amount) WHERE budgetId AND amount > 0 AND date IN period → income
+// 4. balance = income - spent
+// 5. remaining = targetAmount ? targetAmount - spent : null
+// 6. usage = targetAmount ? (spent / targetAmount) * 100 : null
+// 7. status = getBudgetHealthStatus(usage)
+```
+
+#### 10C. Alerta post-transacción
+
+En `createTransactionFn` (modificación a transactions module):
+
+```ts
+// After INSERT, if transaction has budgetId:
+if (input.budgetId) {
+  const health = await computeBudgetHealth(input.budgetId)
+  return {
+    ...transaction,
+    budgetAlert:
+      health.status !== 'healthy' && health.status !== 'on_track'
+        ? {
+            status: health.status,
+            spent: health.spent,
+            target: health.target,
+            overBy: health.spent - health.target,
+          }
+        : null,
+  }
+}
+```
+
+En el cliente, después de crear transacción:
+
+```ts
+const result = await createTransactionFn({ data })
+if (result.budgetAlert?.status === 'over_budget') {
+  toast.warning(
+    t('budgets.messages.overBudgetWarning', {
+      name: budgetName,
+      amount: formatCurrency(result.budgetAlert.overBy),
+    }),
+  )
+} else if (
+  result.budgetAlert?.status === 'warning' ||
+  result.budgetAlert?.status === 'approaching'
+) {
+  toast.warning(
+    t('budgets.messages.approachingWarning', { name: budgetName, percentage: health.usage }),
+  )
+}
+```
+
+#### 10D. Sidebar badge: `'over-budget'`
+
+**Archivo**: `src/modules/core/types.ts`
+
+```ts
+export type ModuleBadgeId = 'pending-transactions' | 'over-budget'
+```
+
+**Archivo**: `src/modules/dashboard/ui/navigation/AppSidebar.tsx`
+
+Mismo patrón que `pending-transactions`:
+
+```tsx
+const { data: budgetsDashboard } = useMyBudgetsDashboard()
+
+const overBudgetCount = budgetsDashboard?.overBudgetCount ?? 0
+
+const overBudgetBadge = overBudgetCount > 0 ? (
+  <Badge variant="destructive" className="...">
+    {overBudgetCount}
+  </Badge>
+) : undefined
+
+// En getSidebarNavigation:
+badges: {
+  'pending-transactions': transactionBadge,
+  'over-budget': overBudgetBadge,
+}
+```
+
+#### 10E. Indicadores visuales
+
+Tabla de umbrales y colores:
+
+| Usage % | Status        | Color Tailwind   | Visual                                |
+| ------- | ------------- | ---------------- | ------------------------------------- |
+| 0-49%   | `healthy`     | `bg-emerald-500` | Barra verde                           |
+| 50-79%  | `on_track`    | `bg-amber-500`   | Barra ámbar                           |
+| 80-89%  | `warning`     | `bg-orange-500`  | Barra naranja + icono ⚠               |
+| 90-99%  | `approaching` | `bg-red-500`     | Barra roja + pulse animation          |
+| ≥ 100%  | `over_budget` | `bg-red-600`     | Barra desbordada + badge "Over by $X" |
+
+Aplicado en:
+
+- `BudgetsPage` cards (progress bar)
+- `BudgetDetailPage` summary cards (progress ring)
+- `BudgetCategoryLimits` (per-category bar)
+- `BudgetOverviewWidget` (per-budget bar)
+
+#### 10F. AI context over-budget
+
+En `fetchDynamicContext(['budgets'])`:
+
+```
+"⚠ Budget 'Personal' is OVER BUDGET: spent $3,045 of $3,000 target (102%).
+Categories over limit: Food $540/$500 (108%), Entertainment $320/$250 (128%).
+Budget 'Engineering Dept' is healthy: spent $45,000 of $200,000 (23%)."
+```
+
+#### Archivos afectados
+
+- **Crear**: `src/modules/budgets/model/period-utils.ts`
+- **Modificar**: `src/modules/core/types.ts`
+- **Modificar**: `src/modules/dashboard/ui/navigation/AppSidebar.tsx`
+
+---
+
+## 6. Diagramas de Flujo
+
+### 6.1 Creación de Budget
+
+```
+Usuario                    BudgetForm                    Server
+  │                            │                            │
+  ├─ Click "Create Budget" ───►│                            │
+  │                            │                            │
+  │                 ┌──────────┤                            │
+  │                 │ Select scope:                         │
+  │                 │ personal → no extra fields            │
+  │                 │ project  → show Project select        │
+  │                 │ department → show Dept select         │
+  │                 │ company  → no extra fields            │
+  │                 └──────────┤                            │
+  │                            │                            │
+  ├─ Fill name, target, ──────►│                            │
+  │  period, dates             │                            │
+  │                            ├─ createBudgetFn() ────────►│
+  │                            │                            ├─ Validate (Zod)
+  │                            │                            ├─ INSERT budgets
+  │                            │                            ├─ INSERT budget_members
+  │                            │                            │  (owner, role=admin)
+  │                            │                            ├─ syncRagDocument('budget')
+  │                            │◄─ { budget } ─────────────┤
+  │◄─ toast.success() ────────┤                            │
+  │◄─ Redirect to detail ─────┤                            │
+  │                            │                            │
+```
+
+### 6.2 Transacción → Budget Flow
+
+```
+                    ┌─────────────────────┐
+                    │ Transaction created  │
+                    │ (any entry point)    │
+                    └──────────┬──────────┘
+                               │
+                    ┌──────────▼──────────┐
+                    │ Has budgetId?        │
+                    └──┬──────────────┬───┘
+                       │ YES          │ NO
+                       ▼              ▼
+         ┌─────────────────┐    ┌──────────────────┐
+         │ Budget queries   │    │ Normal transaction│
+         │ include this txn │    │ (enterprise flow) │
+         │ in aggregations  │    │ unchanged         │
+         └────────┬────────┘    └──────────────────┘
+                  │
+        ┌─────────▼─────────┐
+        │ amount > 0?        │
+        ├─YES: income ───────┤
+        ├─NO:  expense ──────┤
+        └─────────┬──────────┘
+                  │
+    ┌─────────────▼──────────────┐
+    │ Budget Summary Recalculated│
+    │ income - expenses = balance│
+    │ target - expenses = remain │
+    └─────────────┬──────────────┘
+                  │
+    ┌─────────────▼──────────────┐
+    │ Over budget?               │
+    │ (expenses > targetAmount)  │
+    ├─YES: toast.warning ────────┤
+    │      sidebar badge update  │
+    │      widget highlights     │
+    ├─NO:  green progress ───────┤
+    └────────────────────────────┘
+```
+
+### 6.3 Motor de Recurrencia
+
+```
+┌───────────────────────────────────────────────────────────┐
+│               Trigger Points                               │
+├───────────────────────────────────────────────────────────┤
+│                                                           │
+│  1. Page load (lazy)        2. API endpoint (cron)        │
+│  getBudgetByIdFn()          POST /api/budgets/            │
+│  → processes rules for      process-recurrences           │
+│    THIS budget only         → processes ALL due rules     │
+│                                                           │
+└───────────────────────┬───────────────────────────────────┘
+                        │
+         ┌──────────────▼───────────────┐
+         │ SELECT budget_recurrence_rules│
+         │ WHERE status = 'active'       │
+         │ AND next_date <= NOW()        │
+         └──────────────┬───────────────┘
+                        │
+         ┌──────────────▼───────────────┐
+         │ For each rule:                │
+         │                               │
+         │ LOOP while nextDate <= today: │
+         │                               │
+         │  1. INSERT transaction {      │
+         │     amount: rule.amount,      │
+         │     budgetId: rule.budgetId,  │
+         │     categoryId: rule.catId,   │
+         │     userId: rule.userId,      │
+         │     date: nextDate,           │
+         │     description: "[Auto]..."  │
+         │  }                            │
+         │                               │
+         │  2. Advance nextDate:         │
+         │     monthly    → +1 month     │
+         │     quarterly  → +3 months    │
+         │     semiannual → +6 months    │
+         │     annual     → +1 year      │
+         │                               │
+         │ UPDATE rule SET               │
+         │   next_date = advancedDate    │
+         └──────────────────────────────┘
+
+  Handles missed periods:
+  If cron didn't run for 3 months on a monthly rule,
+  the loop creates 3 transactions (one per missed month).
+```
+
+### 6.4 Multi-Scope Budget Aggregation
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    COMPANY BUDGET                         │
+│  scope: company | targetAmount: $500,000                 │
+│  ┌─────────────────────────────────────────────────────┐ │
+│  │ All transactions WHERE budgetId = company_budget_id │ │
+│  └─────────────────────────────────────────────────────┘ │
+├──────────────────────────────────────────────────────────┤
+│                                                          │
+│  ┌─────────────────────┐  ┌─────────────────────┐       │
+│  │ DEPT BUDGET: Eng     │  │ DEPT BUDGET: Mkt    │       │
+│  │ scope: department    │  │ scope: department   │       │
+│  │ departmentId: eng_1  │  │ departmentId: mkt_1 │       │
+│  │ target: $200,000     │  │ target: $100,000    │       │
+│  └─────────────────────┘  └─────────────────────┘       │
+│                                                          │
+│  ┌─────────────────────┐  ┌─────────────────────┐       │
+│  │ PROJECT BUDGET       │  │ PROJECT BUDGET       │       │
+│  │ scope: project       │  │ scope: project       │       │
+│  │ projectId: p_1       │  │ projectId: p_5       │       │
+│  │ target: $50,000      │  │ target: $30,000      │       │
+│  └─────────────────────┘  └─────────────────────┘       │
+│                                                          │
+│  ┌──────────────────────────────────────┐                │
+│  │ PERSONAL BUDGETS (per user)          │                │
+│  │ scope: personal | ownerId: user_X    │                │
+│  │ isPrivate transactions NOT visible   │                │
+│  │ in company/dept/project views        │                │
+│  └──────────────────────────────────────┘                │
+└──────────────────────────────────────────────────────────┘
+
+Nota: Los budgets NO tienen jerarquía directa entre sí.
+Cada uno agrega independientemente sus transacciones vinculadas.
+Una transacción pertenece a UN solo budget (budgetId FK).
+```
+
+### 6.5 Integración AI
+
+```
+Usuario (Chat)                   AI Pipeline                        Budget Module
+     │                               │                                   │
+     ├─ "¿Cuánto llevo gastado   ───►│                                   │
+     │   este mes en comida?"        │                                   │
+     │                               ├─ detectIntent()                   │
+     │                               │  → ['budgets','transactions']     │
+     │                               │                                   │
+     │                               ├─ detectActionIntent()             │
+     │                               │  → null (query, not CRUD)        │
+     │                               │                                   │
+     │                               ├─ fetchDynamicContext('budgets')───►│
+     │                               │                                   ├─ getBudgetSummaryFn()
+     │                               │                                   ├─ getSpendingByCategoryFn()
+     │                               │◄── context: "Budget 'Personal':  │◄─┘
+     │                               │     Food: $340/$500, Transport:   │
+     │                               │     $120/$200"                    │
+     │                               │                                   │
+     │                               ├─ retrieveContext() (ChromaDB) ───►│
+     │                               │◄── related budget docs            │
+     │                               │                                   │
+     │                               ├─ Stream to LLM ──────────────────│
+     │                               │                                   │
+     │◄── "Este mes llevas $340  ────┤                                   │
+     │     en comida (68% de tu      │                                   │
+     │     límite de $500)..."       │                                   │
+     │                               │                                   │
+     │                               │                                   │
+     ├─ "Crea un gasto de $45    ───►│                                   │
+     │   en transporte"              ├─ detectActionIntent()             │
+     │                               │  → { verb: 'create',             │
+     │                               │     entity: 'budget_transaction'} │
+     │                               │                                   │
+     │                               ├─ buildActionInstructions() ──────│
+     │                               ├─ Stream to LLM ──────────────────│
+     │                               │                                   │
+     │◄── Action Card: ─────────────┤                                   │
+     │    ┌──────────────────────┐   │                                   │
+     │    │ 🟢 Create Transaction│   │                                   │
+     │    │ Amount: -$45.00      │   │                                   │
+     │    │ Category: Transport  │   │                                   │
+     │    │ Budget: Personal     │   │                                   │
+     │    │ [Confirm] [Cancel]   │   │                                   │
+     │    └──────────────────────┘   │                                   │
+     │                               │                                   │
+     ├─ Click [Confirm] ───────────►├─ performAction() ────────────────►│
+     │                               │                                   ├─ createTransactionFn()
+     │                               │                                   │  { amount: -4500,
+     │                               │                                   │    budgetId: personal_id,
+     │                               │                                   │    categoryId: transport_id }
+     │◄── "✅ Transaction created" ─┤◄──────────────────────────────────┤
+```
+
+### 6.6 Control de Acceso y Privacidad
+
+```
+┌──────────────────────────────────────────────────────┐
+│               Budget Access Control                   │
+├──────────────────────────────────────────────────────┤
+│                                                      │
+│  Request to view/edit budget                         │
+│       │                                              │
+│       ▼                                              │
+│  ┌─────────────────────┐                             │
+│  │ Is user the owner?  │──YES──► Full access         │
+│  └─────────┬───────────┘                             │
+│            │ NO                                      │
+│            ▼                                         │
+│  ┌─────────────────────┐                             │
+│  │ Is user a member?   │──NO──► 403 Forbidden        │
+│  └─────────┬───────────┘                             │
+│            │ YES                                     │
+│            ▼                                         │
+│  ┌─────────────────────────────────────────────┐     │
+│  │ Check role:                                  │     │
+│  │ admin ──────► CRUD budget + members + limits │     │
+│  │ contributor ─► Create/edit OWN transactions  │     │
+│  │                View summary & limits         │     │
+│  │ viewer ─────► Read-only everything           │     │
+│  └─────────────────────────────────────────────┘     │
+│                                                      │
+│  ┌─────────────────────────────────────────────┐     │
+│  │ Transaction Privacy Filter                   │     │
+│  │                                              │     │
+│  │ When listing transactions for a group budget:│     │
+│  │ WHERE budget_id = :id                        │     │
+│  │   AND (is_private = false                    │     │
+│  │        OR user_id = :currentUser)            │     │
+│  └─────────────────────────────────────────────┘     │
+└──────────────────────────────────────────────────────┘
+```
+
+---
+
+## 7. Inventario Completo de Archivos
+
+### 7.1 Archivos a Crear
+
+| Archivo                                                          | Tipo   | Descripción                           |
+| ---------------------------------------------------------------- | ------ | ------------------------------------- |
+| `src/modules/budgets/manifest.ts`                                | Module | Manifest con id, routes, nav, widgets |
+| `src/modules/budgets/index.ts`                                   | Module | Public barrel                         |
+| `src/modules/budgets/model/types.ts`                             | Model  | Interfaces TypeScript                 |
+| `src/modules/budgets/model/schema.ts`                            | Model  | Zod validation schemas                |
+| `src/modules/budgets/model/period-utils.ts`                      | Model  | Period calculation engine             |
+| `src/modules/budgets/model/index.ts`                             | Model  | Barrel                                |
+| `src/modules/budgets/api/budgets.fn.ts`                          | API    | Budget CRUD server functions          |
+| `src/modules/budgets/api/budgets.queries.ts`                     | API    | TQ hooks + query keys                 |
+| `src/modules/budgets/api/budget-members.fn.ts`                   | API    | Member management                     |
+| `src/modules/budgets/api/budget-members.queries.ts`              | API    | TQ hooks                              |
+| `src/modules/budgets/api/budget-limits.fn.ts`                    | API    | Category limit CRUD                   |
+| `src/modules/budgets/api/budget-limits.queries.ts`               | API    | TQ hooks                              |
+| `src/modules/budgets/api/budget-recurrences.fn.ts`               | API    | Recurrence CRUD + engine              |
+| `src/modules/budgets/api/budget-recurrences.queries.ts`          | API    | TQ hooks                              |
+| `src/modules/budgets/api/budget-analytics.fn.ts`                 | API    | Aggregation queries                   |
+| `src/modules/budgets/api/budget-analytics.queries.ts`            | API    | TQ hooks                              |
+| `src/modules/budgets/components/BudgetsPage.tsx`                 | UI     | Main listing page                     |
+| `src/modules/budgets/components/BudgetDetailPage.tsx`            | UI     | Single budget dashboard               |
+| `src/modules/budgets/components/CreateBudgetSheet.tsx`           | UI     | CrudSheet creation                    |
+| `src/modules/budgets/components/EditBudgetSheet.tsx`             | UI     | CrudSheet editing                     |
+| `src/modules/budgets/components/BudgetForm.tsx`                  | UI     | TanStack Form + Zod                   |
+| `src/modules/budgets/components/BudgetTransactionsList.tsx`      | UI     | Filtered transactions                 |
+| `src/modules/budgets/components/AddTransactionToBudgetSheet.tsx` | UI     | Simplified transaction form           |
+| `src/modules/budgets/components/BudgetCategoryLimits.tsx`        | UI     | Category limit management             |
+| `src/modules/budgets/components/BudgetMembersPanel.tsx`          | UI     | Member management                     |
+| `src/modules/budgets/components/BudgetSummaryCards.tsx`          | UI     | Summary cards                         |
+| `src/modules/budgets/components/BudgetRecurrencesPanel.tsx`      | UI     | Recurrence rules list                 |
+| `src/modules/budgets/components/CreateRecurrenceSheet.tsx`       | UI     | CrudSheet for rules                   |
+| `src/modules/budgets/components/MonthlyBalanceWidget.tsx`        | Widget | Dashboard widget (sm)                 |
+| `src/modules/budgets/components/BudgetOverviewWidget.tsx`        | Widget | Dashboard widget (md)                 |
+| `src/modules/budgets/components/SpendingByCategoryWidget.tsx`    | Widget | Dashboard widget (md)                 |
+| `src/modules/budgets/config/index.ts`                            | Config | Module defaults                       |
+| `src/routes/_dashboard/budgets.tsx`                              | Route  | Thin adapter                          |
+| `src/routes/_dashboard/budgets.$budgetId.tsx`                    | Route  | Thin adapter                          |
+| `src/routes/api/budgets/process-recurrences.tsx`                 | Route  | API for cron                          |
+
+**Total archivos nuevos: 35**
+
+### 7.2 Archivos a Modificar
+
+| Archivo                                                     | Cambio                                       | Fase |
+| ----------------------------------------------------------- | -------------------------------------------- | ---- |
+| `src/shared/lib/db/schema.ts`                               | 6 enums + 4 tablas + extend transactions     | 1    |
+| `src/modules/core/registry.ts`                              | Import + register budgetsModule              | 3    |
+| `src/modules/core/types.ts`                                 | Add `'over-budget'` to ModuleBadgeId         | 3    |
+| `src/modules/transactions/model/types.ts`                   | budgetId, isPrivate, optional customer       | 2    |
+| `src/modules/transactions/api/transactions.fn.ts`           | Schema + CRUD + filter + budget health check | 2    |
+| `src/modules/transactions/api/transactions.queries.ts`      | Expose budgetId filter                       | 2    |
+| `src/modules/transactions/components/TransactionForm.tsx`   | Budget select + isPrivate toggle             | 2    |
+| `src/modules/transactions/components/TransactionsPage.tsx`  | Budget column + filter                       | 2    |
+| `src/modules/dashboard/ui/navigation/AppSidebar.tsx`        | Over-budget badge                            | 10   |
+| `src/modules/ai/rag/context.ts`                             | Budget intents + keywords + dynamic context  | 6    |
+| `src/modules/ai/components/ActionConfirmationCard.utils.ts` | Budget action types + configs                | 6    |
+| `src/modules/ai/components/ActionConfirmationCard.tsx`      | performAction cases                          | 6    |
+| `src/modules/ai/rag/sync.ts`                                | 'budget' entity type                         | 6    |
+| `src/shared/lib/i18n/locales/en/common.json`                | budgets.\* keys                              | 7    |
+| `src/shared/lib/i18n/locales/es/common.json`                | budgets.\* keys                              | 7    |
+| `src/shared/lib/i18n/locales/dk/common.json`                | budgets.\* keys                              | 7    |
+| `scripts/db/utils/corporate-dataset.ts`                     | Budget seed data                             | 8    |
+
+**Total archivos modificados: 17**
+
+### 7.3 Archivos de Referencia (patrones a seguir)
+
+| Archivo                                                  | Patrón                                    |
+| -------------------------------------------------------- | ----------------------------------------- |
+| `src/modules/projects/manifest.ts`                       | Manifest con widgets                      |
+| `src/modules/projects/api/projects.fn.ts`                | createServerFn + loadDb() + Zod           |
+| `src/modules/projects/api/projects.queries.ts`           | useTQuery/useTQMutation + query keys      |
+| `src/modules/projects/components/CreateProjectSheet.tsx` | CrudSheet protocol                        |
+| `src/modules/projects/components/ProjectForm.tsx`        | TanStack Form + Zod                       |
+| `src/modules/transactions/api/transactions.fn.ts`        | Paginated list + approval logic           |
+| `src/modules/dashboard/api/dashboard.fn.ts`              | SUM/COUNT aggregation                     |
+| `src/modules/analytics/api/analytics.fn.ts`              | Expense distribution, project performance |
+| `src/modules/ai/rag/context.ts`                          | Intent/action detection extension         |
+| `src/modules/ai/components/ActionConfirmationCard.tsx`   | Action card extension                     |
+
+---
+
+## 8. Checklist de Verificación
+
+### Build & Types
+
+- [ ] `pnpm drizzle-kit generate` — migración genera sin errores
+- [ ] `pnpm drizzle-kit push` — tablas creadas en BD
+- [ ] `pnpm type-check` — zero errores (especialmente transactions después de cambios)
+- [ ] `pnpm lint` — zero errores
+
+### Regression Test (Transactions Module)
+
+- [ ] Crear transacción enterprise con customer name/email + approval → funciona como antes
+- [ ] Editar transacción existente → customer fields siguen presentes
+- [ ] Aprobar/rechazar transacción → flujo de approval sin cambios
+- [ ] Filtrar transacciones por status/userId/projectId → filtros originales intactos
+
+### Budget CRUD
+
+- [ ] Crear budget personal → aparece en listing
+- [ ] Crear budget project-scoped → vincula correctamente al proyecto
+- [ ] Crear budget department-scoped → vincula al departamento
+- [ ] Crear budget company-wide → sin FK adicional
+- [ ] Editar budget (nombre, target, período) → se actualiza
+- [ ] Eliminar budget → members y limits se borran, transactions quedan con budgetId=null
+
+### Transactions ↔ Budget Integration
+
+- [ ] Crear transacción con budgetId → aparece en budget detail
+- [ ] Crear transacción desde budget detail (AddTransactionToBudgetSheet) → budgetId pre-filled
+- [ ] Filtrar transacciones por budget en TransactionsPage → funciona
+- [ ] Columna "Budget" visible en la tabla de transacciones
+
+### Members
+
+- [ ] Añadir miembro como admin → miembro aparece con rol
+- [ ] Contributor puede crear transacciones propias → OK
+- [ ] Contributor no puede eliminar budget → error 403
+- [ ] Viewer solo ve datos → no puede crear/editar
+- [ ] No se puede eliminar al owner → error
+
+### Category Limits
+
+- [ ] Set limit en una categoría → barra allocated/spent aparece
+- [ ] Transacción en esa categoría → spent se actualiza
+- [ ] Spent > allocated → barra roja + alerta visual
+
+### Over-Budget Detection
+
+- [ ] Crear transacciones hasta superar target → progress bar se vuelve roja + "Over by $X"
+- [ ] Toast warning aparece en la transacción que empuja al over-budget
+- [ ] Sidebar badge muestra count > 0 de budgets excedidos
+- [ ] BudgetOverviewWidget resalta budgets over-budget
+
+### Recurrence Engine
+
+- [ ] Crear regla mensual con nextDate = hoy → recargar budget → transacción auto-creada
+- [ ] Crear regla con nextDate 3 meses atrás → recargar → 3 transacciones creadas (catch-up)
+- [ ] POST /api/budgets/process-recurrences → retorna `{ processed: N }`
+- [ ] Pausar regla → no se procesa en siguiente carga
+- [ ] Eliminar regla → desaparece de la lista
+
+### Dashboard Widgets
+
+- [ ] MonthlyBalanceWidget renderea (empty state + con datos)
+- [ ] BudgetOverviewWidget muestra top budgets con progress bars
+- [ ] SpendingByCategoryWidget muestra barras por categoría
+
+### AI Integration
+
+- [ ] Chat: "¿cuánto he gastado este mes?" → recibe contexto de budget
+- [ ] Chat: preguntar sobre over-budget → recibe alerta
+- [ ] Chat: "crea un gasto de $30 en comida" → action card aparece
+- [ ] Confirmar action card → transacción creada con budgetId correcto
+
+### i18n
+
+- [ ] Cambiar a EN → todos los strings de budgets en inglés
+- [ ] Cambiar a ES → todos los strings en español
+- [ ] Cambiar a DK → todos los strings en danés
+
+### Plug & Play
+
+- [ ] Quitar `budgetsModule` del registry → app compila sin errores
+- [ ] App funciona completa sin budgets (transactions pierde budget select, sin romper)
+- [ ] TransactionForm verifica si budgets module está registrado antes de mostrar el select
+
+### Visual
+
+- [ ] Light theme funciona en todas las páginas de budget
+- [ ] Dark theme funciona en todas las páginas de budget
+- [ ] Responsive: mobile y desktop correcto
+
+---
+
+## 9. Scope Boundaries
+
+### Incluido en MVP
+
+- Budget CRUD con 4 scopes (personal, project, department, company)
+- Integración con transactions (budgetId FK, filtros, extensión de form)
+- Budget members con roles (admin, contributor, viewer)
+- Category spending limits por budget
+- Budget detail page con summary, transactions, limits, members, recurring
+- 3 dashboard widgets
+- Motor de recurrencia (lazy evaluation + API endpoint)
+- Over-budget detection (cálculo por período + alertas + sidebar badge)
+- Post-transaction budget health check con toast warnings
+- AI intent detection + action cards + RAG context para budgets
+- i18n (en/es/dk)
+- Seed data
+
+### Excluido (fases futuras)
+
+| Feature                             | Fase Futura | Notas                                                          |
+| ----------------------------------- | ----------- | -------------------------------------------------------------- |
+| Budget templates / cloning          | Phase 2     | Crear budget desde template predefinido                        |
+| Historical budget comparison        | Phase 2     | Comparar período actual vs anterior en una vista dedicada      |
+| Docker cron service                 | Phase 2     | MVP usa lazy eval + manual API; docker-compose cron en Phase 2 |
+| Mobile-optimized views              | Phase 2     | Responsive básico en MVP, PWA views en Phase 2                 |
+| Multi-currency conversion           | Phase 3     | MVP almacena currency pero no convierte                        |
+| Budget approval workflow            | Phase 3     | Aprobación de budgets por un superior                          |
+| Advanced AI predictions (ML)        | Phase 3     | Predicciones basadas en trends con modelo entrenado            |
+| Bank integration / CSV import       | Phase 4     | Importar transacciones desde bancos o archivos                 |
+| Jerarquía de budgets (parent-child) | Phase 2     | Roll-up automático de department → company                     |
+
+---
+
+## 10. Consideraciones Adicionales
+
+### ¿Jerarquía de budgets?
+
+Actualmente cada budget es independiente (flat). Si se necesita que un company budget agrupe automáticamente los department budgets (roll-up), requeriría un `parentBudgetId` FK. **Recomendación**: dejar flat en MVP, agregar hierarchy en Phase 2.
+
+### ¿Una transacción en múltiples budgets?
+
+Con FK simple (`budgetId`), una transacción → un budget. Si necesitas many-to-many (ej: la misma factura afecta al budget del proyecto Y al del departamento), necesitaría una junction table `budget_transactions`. **Recomendación**: single budget en MVP, evaluar en Phase 2 si surge la necesidad.
+
+### Formateo de moneda
+
+Usar `Intl.NumberFormat` con el `currency` del budget:
+
+```ts
+const formatter = new Intl.NumberFormat(locale, { style: 'currency', currency: budget.currency })
+formatter.format(amountInCents / 100) // "$1,234.50"
+```
+
+### Seguridad
+
+- Ver sección 11 (Seguridad, Fiabilidad y Escalabilidad) para el análisis completo
+
+---
+
+## 11. Seguridad, Fiabilidad y Escalabilidad
+
+> Esta sección documenta los 21 problemas identificados durante el audit de seguridad del diseño. Cada uno incluye el impacto concreto y la mitigación requerida. Estamos hablando de datos financieros reales — cada punto P0 es un bloqueante de producción.
+
+### Clasificación de Severidad
+
+| Nivel            | Criterio                                                        | Acción                          |
+| ---------------- | --------------------------------------------------------------- | ------------------------------- |
+| **P0 — Crítico** | Pérdida de datos, acceso no autorizado, corrupción silenciosa   | Bloquear release hasta resolver |
+| **P1 — Alto**    | Degradación de rendimiento, inconsistencia de datos recuperable | Resolver antes de beta          |
+| **P2 — Medio**   | Riesgo operacional o compliance, workaround disponible          | Resolver antes de v1.0 estable  |
+
+---
+
+### P0 — Problemas Críticos (7)
+
+#### P0-1: Sin autenticación en lecturas/eliminaciones de transacciones
+
+**Problema**: `getTransactionsFn`, `getTransactionByIdFn` y `deleteTransactionFn` en `transactions.fn.ts` no llaman a `requireCurrentAppUser()`. Cualquier request autenticado (o no autenticado según el middleware) puede leer o eliminar datos financieros de cualquier usuario.
+
+**Impacto**: Exposición total de datos financieros. Equivalente a tener una base de datos sin contraseña.
+
+**Mitigación**:
+
+```ts
+// transactions.fn.ts — agregar en CADA server function de lectura/eliminación
+export const getTransactionsFn = createServerFn({ method: 'GET' })
+  .inputValidator(...)
+  .handler(async ({ data }) => {
+    const user = await requireCurrentAppUser() // ← OBLIGATORIO
+    const db = await loadDb()
+    // Agregar filtro de ownership:
+    const results = await db.select().from(transactions)
+      .where(and(
+        eq(transactions.userId, user.id), // ← filtrar por usuario
+        data.budgetId ? eq(transactions.budgetId, data.budgetId) : undefined,
+        // ...resto de filtros
+      ))
+    return results
+  })
+```
+
+**Checklist**: `getTransactionsFn` tiene `requireCurrentAppUser()` ✓ · `getTransactionByIdFn` tiene ownership check ✓ · `deleteTransactionFn` verifica que `userId === user.id` antes de eliminar ✓
+
+---
+
+#### P0-2: Sin atomicidad SQL — operaciones multi-paso sin transacción de BD
+
+**Problema**: Al crear un budget (INSERT budget → INSERT budget_member), si el segundo INSERT falla, el budget queda huérfano sin owner. En recurrencias (INSERT transaction → UPDATE rule.nextDate), si la actualización falla, la misma regla se reprocessa en el próximo ciclo creando transacciones duplicadas.
+
+**Impacto**: Datos financieros inconsistentes, transacciones perdidas o duplicadas.
+
+**Mitigación**: Envolver en `db.transaction()` TODAS las operaciones multi-paso:
+
+```ts
+// budgets.fn.ts
+export const createBudgetFn = createServerFn({ method: 'POST' }).handler(async ({ data }) => {
+  const user = await requireCurrentAppUser()
+  const db = await loadDb()
+
+  return await db.transaction(async (tx) => {
+    const [budget] = await tx
+      .insert(budgets)
+      .values({
+        ...data,
+        ownerId: user.id,
+      })
+      .returning()
+
+    await tx.insert(budgetMembers).values({
+      budgetId: budget.id,
+      userId: user.id,
+      role: 'admin',
+    })
+
+    return budget
+  })
+})
+
+// budget-recurrences.fn.ts — dentro del loop de procesamiento
+await db.transaction(async (tx) => {
+  const [created] = await tx.insert(transactions).values(newTransaction).returning()
+  await tx
+    .update(budgetRecurrenceRules)
+    .set({ nextDate: computeNextDate(rule), lastRunAt: new Date() })
+    .where(eq(budgetRecurrenceRules.id, rule.id))
+  return created
+})
+```
+
+**Checklist**: `createBudgetFn` usa `db.transaction()` ✓ · recurrence processor usa `db.transaction()` por regla ✓ · cualquier operación con ≥2 writes usa `db.transaction()` ✓
+
+---
+
+#### P0-3: Race condition en el chequeo over-budget
+
+**Problema**: Dos usuarios del mismo group budget crean transacciones simultáneamente. Ambas requests leen el health status antes de que la otra escriba. Ambas pasan el check. El budget termina $X por encima del límite sin ninguna advertencia.
+
+**Impacto**: Pérdida silenciosa de control presupuestario. En un deployment con varios usuarios el problema es garantizado.
+
+**Mitigación**: Usar `SELECT FOR UPDATE` para serializar el acceso por budget:
+
+```ts
+// budget-analytics.fn.ts — dentro de db.transaction()
+const [budgetRow] = await tx
+  .select()
+  .from(budgets)
+  .where(eq(budgets.id, budgetId))
+  .for('update') // Drizzle: .for('update') → FOR UPDATE en Postgres
+  // Alternativa: pg_try_advisory_lock si se prefiere no bloquear la fila
+
+const { spent } = await tx
+  .select({ spent: sql<number>`SUM(${transactions.amount})` })
+  .from(transactions)
+  .where(eq(transactions.budgetId, budgetId))
+  .then(r => r[0])
+
+const health = computeHealth(budgetRow, spent)
+// INSERT transaction dentro de la misma transacción
+await tx.insert(transactions).values(...)
+return health
+```
+
+**Checklist**: `createTransactionFn` con budgetId usa `SELECT FOR UPDATE` ✓ · health check y INSERT están en el mismo `db.transaction()` ✓
+
+---
+
+#### P0-4: Recurrencias — doble procesamiento por cargas concurrentes
+
+**Problema**: Dos pestañas abiertas del mismo budget, o dos usuarios del mismo group budget, cargan la página simultáneamente. `processRecurrenceRules()` es invocado en ambas. Ambas leen las reglas con `status='active' AND nextDate <= now` antes de que cualquiera actualice `nextDate`. Resultado: transacciones duplicadas.
+
+**Impacto**: Gastos fantasma que inflan el consumo del budget, posibles pagos dobles si el sistema se conecta a ERP.
+
+**Mitigación**: Advisory lock de PostgreSQL por budget:
+
+```ts
+// budget-recurrences.fn.ts
+async function processRecurrenceRulesForBudget(budgetId: string) {
+  const db = await loadDb()
+
+  // Convertir budgetId (UUID) a bigint para pg_try_advisory_lock
+  const lockKey = BigInt('0x' + budgetId.replace(/-/g, '').slice(0, 16))
+
+  return await db.transaction(async (tx) => {
+    // Si no se obtiene el lock, otro proceso está procesando este budget
+    const [{ locked }] = await tx.execute(
+      sql`SELECT pg_try_advisory_xact_lock(${lockKey}) AS locked`,
+    )
+    if (!locked) return { skipped: true }
+
+    const dueRules = await tx
+      .select()
+      .from(budgetRecurrenceRules)
+      .where(
+        and(
+          eq(budgetRecurrenceRules.budgetId, budgetId),
+          eq(budgetRecurrenceRules.status, 'active'),
+          lte(budgetRecurrenceRules.nextDate, new Date()),
+        ),
+      )
+
+    for (const rule of dueRules) {
+      await tx.insert(transactions).values(buildTransaction(rule))
+      await tx
+        .update(budgetRecurrenceRules)
+        .set({ nextDate: computeNextDate(rule), lastRunAt: new Date() })
+        .where(eq(budgetRecurrenceRules.id, rule.id))
+    }
+
+    return { processed: dueRules.length }
+  })
+}
+```
+
+**Checklist**: `processRecurrenceRulesForBudget` usa advisory lock ✓ · lock scope es por budgetId (no global) ✓ · test con 2 requests concurrentes retorna `{ skipped: true }` correctamente ✓
+
+---
+
+#### P0-5: Montos sin límite — cualquier valor acepta Zod
+
+**Problema**: `z.number()` en el schema de transacciones acepta `Number.MAX_SAFE_INTEGER` = $9.007 trillones. Un typo o un ataque crea una transacción de $9T que corrompe analytics y hace overflow en columnas `integer` de PostgreSQL (máx ~$21.4M si se usa cents como integer).
+
+**Impacto**: Corrupción de datos financieros, posibles crashes en queries de agregación.
+
+**Mitigación**:
+
+```ts
+// model/schema.ts — validación Zod
+const transactionAmountSchema = z.number()
+  .int('El monto debe ser un entero (cents)')
+  .min(-99_999_999, 'Monto mínimo: -$999,999.99')
+  .max(99_999_999, 'Monto máximo: $999,999.99')
+
+// schema.ts — constraint en BD
+amount: integer('amount').notNull(),
+// Agregar check constraint en la migración:
+// ADD CONSTRAINT transactions_amount_range CHECK (amount BETWEEN -99999999 AND 99999999)
+```
+
+**Nota**: Si el negocio requiere transacciones >$1M, usar `bigint` en lugar de `integer` Y ajustar el máximo de Zod acordemente.
+
+**Checklist**: transactionAmountSchema tiene `.min()` y `.max()` ✓ · CHECK constraint en BD ✓ · budgetTargetAmount tiene los mismos límites ✓
+
+---
+
+#### P0-6: Explosión de catch-up en recurrencias — regla antigua genera N transacciones sin límite
+
+**Problema**: Una regla mensual con `nextDate` hace 5 años genera 60 transacciones en una sola invocación de `processRecurrenceRules`. Sin límite, esto puede crear miles de transacciones en segundos, saturar la BD y hacer el budget completamente inútil.
+
+**Impacto**: DoS de facto en el módulo de budgets, datos históricos falsos, posible timeout de la request.
+
+**Mitigación**:
+
+```ts
+const MAX_CATCHUP_ITERATIONS = 24 // máx 2 años de catch-up para recurrencia mensual
+
+async function processSingleRule(rule: BudgetRecurrenceRule, tx: DbTransaction) {
+  let iterations = 0
+  let nextDate = rule.nextDate
+
+  while (nextDate <= new Date() && iterations < MAX_CATCHUP_ITERATIONS) {
+    await tx.insert(transactions).values(buildTransaction(rule, nextDate))
+    nextDate = computeNextDate(rule, nextDate)
+    iterations++
+  }
+
+  if (iterations >= MAX_CATCHUP_ITERATIONS) {
+    console.warn(`[Recurrence] Rule ${rule.id} hit catch-up limit. Pausing.`)
+    await tx
+      .update(budgetRecurrenceRules)
+      .set({ status: 'paused', pausedReason: 'catch-up-limit' })
+      .where(eq(budgetRecurrenceRules.id, rule.id))
+  } else {
+    await tx
+      .update(budgetRecurrenceRules)
+      .set({ nextDate, lastRunAt: new Date() })
+      .where(eq(budgetRecurrenceRules.id, rule.id))
+  }
+}
+```
+
+**Checklist**: `MAX_CATCHUP_ITERATIONS = 24` definido como constante ✓ · regla se pausa automáticamente si se excede el límite ✓ · warning en logs con `rule.id` ✓ · UI muestra `pausedReason: 'catch-up-limit'` con mensaje explicativo ✓
+
+---
+
+#### P0-7: Endpoint de procesamiento de recurrencias sin autenticación
+
+**Problema**: `src/routes/api/budgets/process-recurrences.tsx` es un endpoint HTTP pensado para ser llamado por un cron externo. Sin auth, cualquiera puede hacer `POST /api/budgets/process-recurrences` y disparar el procesamiento de recurrencias globalmente (DoS, datos duplicados, costo computacional).
+
+**Impacto**: Abuso externo trivial. Un atacante puede crear miles de transacciones con un curl en bucle.
+
+**Mitigación**: Shared secret via variable de entorno:
+
+```ts
+// src/routes/api/budgets/process-recurrences.tsx
+import { createAPIFileRoute } from '@tanstack/start/api'
+
+export const APIRoute = createAPIFileRoute('/api/budgets/process-recurrences')({
+  POST: async ({ request }) => {
+    const authHeader = request.headers.get('authorization')
+    const expected = `Bearer ${process.env.BUDGET_CRON_SECRET}`
+
+    if (!process.env.BUDGET_CRON_SECRET || authHeader !== expected) {
+      return new Response('Unauthorized', { status: 401 })
+    }
+
+    const result = await processAllBudgetRecurrences()
+    return Response.json(result)
+  },
+})
+```
+
+```bash
+# .env.local / .env.production
+BUDGET_CRON_SECRET=<secreto-aleatorio-256-bits>
+```
+
+**Checklist**: `BUDGET_CRON_SECRET` en `.env.example` (vacío) ✓ · endpoint retorna 401 sin header correcto ✓ · secreto NO committed al repo ✓ · `.env.example` documenta la variable ✓
+
+---
+
+### P1 — Problemas de Alto Impacto (8)
+
+#### P1-1: Cero índices en base de datos — full table scans en cada query
+
+**Problema**: `src/shared/lib/db/schema.ts` no define ningún índice (`index()` de Drizzle). Todas las queries hacen full table scan. Con 10,000 transacciones, `getTransactionsFn` con filtro por `budgetId` escanea la tabla completa.
+
+**Impacto**: Degradación cuadrática del rendimiento. A escala real (>50K filas), queries de 5-30 segundos.
+
+**Mitigación** — agregar en `schema.ts`:
+
+```ts
+import { pgTable, index, ... } from 'drizzle-orm/pg-core'
+
+export const transactions = pgTable('transactions', {
+  // ... columnas existentes
+  budgetId: uuid('budget_id').references(() => budgets.id),
+  // ...
+}, (table) => ({
+  // Índices críticos
+  budgetIdIdx:    index('transactions_budget_id_idx').on(table.budgetId),
+  userIdDateIdx:  index('transactions_user_id_date_idx').on(table.userId, table.date),
+  categoryIdIdx:  index('transactions_category_id_idx').on(table.categoryId),
+}))
+
+export const budgets = pgTable('budgets', {
+  // ...
+}, (table) => ({
+  ownerIdIdx:     index('budgets_owner_id_idx').on(table.ownerId),
+  scopeIdx:       index('budgets_scope_idx').on(table.scope),
+  isActiveIdx:    index('budgets_is_active_idx').on(table.isActive),
+}))
+
+export const budgetMembers = pgTable('budget_members', {
+  // ...
+}, (table) => ({
+  userIdIdx:      index('budget_members_user_id_idx').on(table.userId),
+  budgetUserIdx:  index('budget_members_budget_user_idx').on(table.budgetId, table.userId),
+}))
+
+export const budgetRecurrenceRules = pgTable('budget_recurrence_rules', {
+  // ...
+}, (table) => ({
+  nextDateStatusIdx: index('recurrence_next_date_status_idx').on(table.nextDate, table.status),
+}))
+```
+
+**Checklist**: `pnpm drizzle-kit generate` genera migración con los `CREATE INDEX` ✓ · `EXPLAIN ANALYZE` en query de transacciones muestra Index Scan ✓
+
+---
+
+#### P1-2: Hard delete — pérdida de trazabilidad financiera
+
+**Problema**: `deleteBudgetFn` y `deleteTransactionFn` ejecutan `DELETE FROM ...`. Historial financiero eliminado permanentemente. Imposible auditar quién gastó qué en un budget ya eliminado.
+
+**Impacto**: Riesgo de compliance. En contextos corporativos, registros contables deben ser inmutables.
+
+**Mitigación**: Soft delete con `deletedAt`:
+
+```ts
+// schema.ts
+export const budgets = pgTable('budgets', {
+  // ...
+  deletedAt: timestamp('deleted_at'), // NULL = activo, no-NULL = eliminado
+})
+
+// budgets.fn.ts — reemplazar DELETE por UPDATE
+export const deleteBudgetFn = createServerFn({ method: 'POST' })
+  .handler(async ({ data }) => {
+    const user = await requireCurrentAppUser()
+    const db = await loadDb()
+    await db
+      .update(budgets)
+      .set({ deletedAt: new Date() })
+      .where(
+        and(
+          eq(budgets.id, data.id),
+          eq(budgets.ownerId, user.id), // solo el owner puede eliminar
+        ),
+      )
+  })
+
+  // TODAS las queries deben filtrar:
+  .where(
+    and(
+      isNull(budgets.deletedAt), // ← siempre incluir este filtro
+      // ...resto de condiciones
+    ),
+  )
+```
+
+**Checklist**: `budgets.deletedAt` en schema ✓ · `transactions.deletedAt` en schema ✓ · todas las queries filtran `IS NULL deleted_at` ✓ · `deleteBudgetFn` hace UPDATE no DELETE ✓
+
+---
+
+#### P1-3: Violación de integridad de scope — scope sin FK correspondiente
+
+**Problema**: El schema permite insertar `scope = 'project'` con `projectId = NULL`, o `scope = 'company'` con `companyId` apuntando a un registro inexistente. El código de negocio puede verificarlo, pero la BD no garantiza la consistencia si se hacen inserts directos.
+
+**Impacto**: Datos inválidos en la BD. Queries que unen budgets con projects obtienen resultados inconsistentes.
+
+**Mitigación**:
+
+```sql
+-- En la migración SQL (o como raw SQL en drizzle migration):
+ALTER TABLE budgets ADD CONSTRAINT budgets_scope_project_fk
+  CHECK (scope != 'project' OR project_id IS NOT NULL);
+
+ALTER TABLE budgets ADD CONSTRAINT budgets_scope_department_fk
+  CHECK (scope != 'department' OR department_id IS NOT NULL);
+```
+
+```ts
+// En Zod schema (validación de aplicación):
+const createBudgetSchema = z
+  .object({
+    scope: budgetScopeEnum,
+    projectId: z.string().uuid().nullable(),
+    departmentId: z.string().uuid().nullable(),
+  })
+  .refine((data) => data.scope !== 'project' || data.projectId !== null, {
+    message: 'projectId es requerido para scope=project',
+    path: ['projectId'],
+  })
+  .refine((data) => data.scope !== 'department' || data.departmentId !== null, {
+    message: 'departmentId es requerido para scope=department',
+    path: ['departmentId'],
+  })
+```
+
+**Checklist**: CHECK constraints en migración SQL ✓ · `.refine()` en Zod schema ✓ · test: crear budget `scope='project'` sin `projectId` retorna 422 ✓
+
+---
+
+#### P1-4: Sin enforcement de timezone — cálculos de período incorrectos
+
+**Problema**: `new Date()` en Node.js usa el timezone del servidor. Si el servidor está en UTC+2, `new Date()` a las 23:00 local retorna el día siguiente en UTC. Los cálculos de período (`getPeriodBounds()`) pueden asignar transacciones al período incorrecto.
+
+**Impacto**: Transacciones aparecen en el período equivocado. Over-budget detection puede fallar o dispararse incorrectamente.
+
+**Mitigación**:
+
+```ts
+// model/period-utils.ts — SIEMPRE trabajar en UTC
+export function getPeriodBounds(
+  periodType: BudgetPeriodType,
+  referenceDate: Date = new Date(), // Date en JS siempre es UTC internamente
+): { start: Date; end: Date } {
+  // Usar UTC methods, no locales
+  const now = new Date(Date.now()) // explícitamente UTC epoch
+  const year = now.getUTCFullYear()
+  const month = now.getUTCMonth()
+  const day = now.getUTCDate()
+
+  switch (periodType) {
+    case 'monthly':
+      return {
+        start: new Date(Date.UTC(year, month, 1, 0, 0, 0, 0)),
+        end: new Date(Date.UTC(year, month + 1, 0, 23, 59, 59, 999)),
+      }
+    case 'quarterly': {
+      const quarter = Math.floor(month / 3)
+      return {
+        start: new Date(Date.UTC(year, quarter * 3, 1)),
+        end: new Date(Date.UTC(year, quarter * 3 + 3, 0, 23, 59, 59, 999)),
+      }
+    }
+    // ...
+  }
+}
+
+// Recurrencias — nextDate siempre en UTC
+function computeNextDate(rule: BudgetRecurrenceRule, from: Date): Date {
+  const d = new Date(from)
+  switch (rule.frequency) {
+    case 'monthly':
+      return addMonths(d, rule.interval) // date-fns (ver P2-3)
+    case 'weekly':
+      return addWeeks(d, rule.interval)
+    case 'yearly':
+      return addYears(d, rule.interval)
+  }
+}
+```
+
+**Checklist**: `getPeriodBounds` usa `Date.UTC()` exclusivamente ✓ · no hay `new Date().getMonth()` (local) en period-utils ✓ · `nextDate` de recurrencias usa `addMonths` de date-fns ✓
+
+---
+
+#### P1-5: Sin verificación de moneda — transacciones en EUR en un budget USD
+
+**Problema**: El budget tiene `currency: 'USD'`. Una transacción de `currency: 'EUR'` con `budgetId` apunta al mismo budget. El sistema suma EUR + USD como si fueran iguales. Los totales son incorrectos.
+
+**Impacto**: Datos financieros silenciosamente incorrectos. El usuario confía en cifras que mezclan monedas.
+
+**Mitigación**:
+
+```ts
+// transactions.fn.ts — al crear/editar una transacción con budgetId
+if (data.budgetId) {
+  const [budget] = await db
+    .select({ currency: budgets.currency })
+    .from(budgets)
+    .where(eq(budgets.id, data.budgetId))
+
+  if (!budget) throw new Error('Budget not found')
+
+  if (data.currency && data.currency !== budget.currency) {
+    throw new Error(
+      `Currency mismatch: transaction is ${data.currency} but budget is ${budget.currency}`,
+    )
+  }
+
+  // Si la transacción no especifica currency, heredarla del budget
+  data.currency = budget.currency
+}
+```
+
+**Checklist**: `createTransactionFn` valida currency match ✓ · `updateTransactionFn` también valida si se cambia `budgetId` o `currency` ✓ · error descriptivo retornado al cliente ✓
+
+---
+
+#### P1-6: Budget mutable después de transacciones existentes — historial invalidado
+
+**Problema**: Cambiar `periodType` de `monthly` a `quarterly` en un budget con 3 meses de transacciones hace que todas las transacciones históricas aparezcan asignadas a períodos diferentes. El historial queda sin sentido.
+
+**Impacto**: Datos financieros históricos inútiles. Comparaciones de períodos incorrectas.
+
+**Mitigación**:
+
+```ts
+// budgets.fn.ts — updateBudgetFn
+export const updateBudgetFn = createServerFn({ method: 'POST' }).handler(async ({ data }) => {
+  const db = await loadDb()
+  const user = await requireCurrentAppUser()
+
+  // Verificar si hay transacciones
+  const [{ count }] = await db
+    .select({ count: sql<number>`COUNT(*)` })
+    .from(transactions)
+    .where(eq(transactions.budgetId, data.id))
+
+  const hasTransactions = count > 0
+  const IMMUTABLE_FIELDS = ['periodType', 'startDate', 'currency'] as const
+
+  for (const field of IMMUTABLE_FIELDS) {
+    if (hasTransactions && data[field] !== undefined) {
+      throw new Error(
+        `Cannot change ${field} on a budget with existing transactions. ` +
+          `Archive this budget and create a new one instead.`,
+      )
+    }
+  }
+
+  await db.update(budgets).set(data).where(eq(budgets.id, data.id))
+})
+```
+
+**Checklist**: Intentar cambiar `periodType` con transacciones retorna error claro ✓ · UI desactiva los campos inmutables si el budget tiene transacciones ✓ · campos inmutables documentados en tooltip ✓
+
+---
+
+#### P1-7: Suma de límites por categoría puede exceder el target del budget
+
+**Problema**: Si un budget tiene `targetAmount = 10,000`, se pueden crear 10 límites de categoría de $1,500 cada uno (total $15,000). El sistema mostrará que se han consumido $15,000 de un budget de $10,000 — sin ningún error.
+
+**Impacto**: Los límites de categoría dejan de ser útiles como herramienta de control.
+
+**Mitigación**:
+
+```ts
+// budget-limits.fn.ts
+export const upsertBudgetLimitFn = createServerFn({ method: 'POST' }).handler(async ({ data }) => {
+  const db = await loadDb()
+
+  // Calcular total de límites actuales (excluyendo el que se está editando)
+  const [{ currentTotal }] = await db
+    .select({
+      currentTotal: sql<number>`COALESCE(SUM(${budgetCategoryLimits.allocatedAmount}), 0)`,
+    })
+    .from(budgetCategoryLimits)
+    .where(
+      and(
+        eq(budgetCategoryLimits.budgetId, data.budgetId),
+        data.id ? ne(budgetCategoryLimits.id, data.id) : undefined,
+      ),
+    )
+
+  const [{ targetAmount }] = await db
+    .select({ targetAmount: budgets.targetAmount })
+    .from(budgets)
+    .where(eq(budgets.id, data.budgetId))
+
+  if (currentTotal + data.allocatedAmount > targetAmount) {
+    throw new Error(
+      `Category limit would exceed budget target. ` +
+        `Available: ${targetAmount - currentTotal}. Requested: ${data.allocatedAmount}`,
+    )
+  }
+
+  // upsert...
+})
+```
+
+**Checklist**: `upsertBudgetLimitFn` valida que suma de límites ≤ `targetAmount` ✓ · error descriptivo con "disponible" restante ✓ · UI muestra barra de distribución de límites totales ✓
+
+---
+
+#### P1-8: `isPrivate` solo verificado en cliente — filtro ausente en servidor
+
+**Problema**: La flag `isPrivate` en transacciones está mencionada en los controles de la UI, pero los server functions de analytics y listado de grupos no filtran por ella. Un miembro del grupo budget puede ver transacciones privadas de otros miembros en la respuesta de la API.
+
+**Impacto**: Privacidad inexistente en la práctica. Network tab del browser expone transacciones privadas.
+
+**Mitigación**:
+
+```ts
+// budget-analytics.fn.ts y budget-members listado — agregar filtro
+const privateTxFilter = or(
+  eq(transactions.isPrivate, false),
+  eq(transactions.userId, user.id), // el propio usuario ve sus privadas
+)
+  // En TODAS las queries de transacciones de grupo:
+  .where(
+    and(
+      eq(transactions.budgetId, budgetId),
+      privateTxFilter, // ← OBLIGATORIO en server
+      isNull(transactions.deletedAt),
+    ),
+  )
+```
+
+**Checklist**: `getTransactionsFn` con `budgetId` aplica `privateTxFilter` ✓ · `getBudgetAnalyticsFn` aplica `privateTxFilter` ✓ · test: member B no puede ver transacciones privadas de member A via API ✓
+
+---
+
+### P2 — Problemas de Severidad Media (6)
+
+#### P2-1: Sin rate limiting en endpoints financieros
+
+**Problema**: No existe ningún middleware de rate limiting. Un usuario (o bot) puede crear 10,000 transacciones por segundo, saturando la BD y generando datos de analytics inútiles.
+
+**Mitigación**: Rate limiting por `userId` en server functions críticos:
+
+```ts
+// shared/lib/rate-limit.ts (nuevo archivo)
+const RateLimiter = new Map<string, { count: number; resetAt: number }>()
+
+export function checkRateLimit(key: string, maxPerMinute = 60) {
+  const now = Date.now()
+  const entry = RateLimiter.get(key) ?? { count: 0, resetAt: now + 60_000 }
+
+  if (now > entry.resetAt) {
+    entry.count = 0
+    entry.resetAt = now + 60_000
+  }
+
+  entry.count++
+  RateLimiter.set(key, entry)
+
+  if (entry.count > maxPerMinute) {
+    throw new Error(`Rate limit exceeded. Try again in ${Math.ceil((entry.resetAt - now) / 1000)}s`)
+  }
+}
+
+// En createTransactionFn:
+const user = await requireCurrentAppUser()
+checkRateLimit(`transaction:create:${user.id}`, 60) // max 60 transacciones/min
+```
+
+**Nota**: Para producción real, usar Redis-backed rate limiting o un middleware a nivel de reverse proxy (nginx, Cloudflare). El ejemplo de Map en memoria no persiste entre reinicios del servidor.
+
+**Checklist**: `createTransactionFn` tiene rate limiting por userId ✓ · `processRecurrencesFn` tiene rate limiting global ✓
+
+---
+
+#### P2-2: Sin log de auditoría inmutable
+
+**Problema**: No hay registro de quién hizo qué y cuándo: quién creó un budget, quién modificó el target, quién eliminó una transacción. En contextos corporativos esto es un requisito de compliance básico.
+
+**Mitigación**: Tabla append-only de audit log:
+
+```ts
+// schema.ts — nueva tabla
+export const budgetAuditLog = pgTable('budget_audit_log', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  budgetId: uuid('budget_id').references(() => budgets.id, { onDelete: 'restrict' }), // no borrar si hay audit
+  userId: text('user_id').notNull(),
+  action: text('action').notNull(), // 'create_budget' | 'update_budget' | 'delete_transaction' | ...
+  entityId: text('entity_id'), // ID del objeto afectado
+  payload: jsonb('payload'), // diff del cambio (before/after)
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  // NO hay deletedAt — esta tabla es immutable
+})
+
+// Helper para loggear:
+async function auditLog(
+  tx: DbTransaction,
+  action: string,
+  { budgetId, userId, entityId, payload }: AuditLogEntry,
+) {
+  await tx.insert(budgetAuditLog).values({ budgetId, userId, action, entityId, payload })
+}
+
+// Uso en createBudgetFn dentro de db.transaction():
+await auditLog(tx, 'create_budget', { budgetId: budget.id, userId: user.id, payload: data })
+```
+
+**Checklist**: `budgetAuditLog` tabla existe en schema ✓ · `createBudgetFn` loggea ✓ · `deleteBudgetFn` loggea ✓ · tabla no tiene `onDelete: 'cascade'` ✓
+
+---
+
+#### P2-3: Aritmética de meses incorrecta — `Jan 31 + 1 month = ???`
+
+**Problema**: Calcular manualmente `nextDate` sumando meses con `date.setMonth(date.getMonth() + 1)` produce resultados erróneos en fechas finales de mes. `Jan 31 + 1 month` → `March 3` (febrero no tiene 31 días → overflow a marzo). La regla mensual del día 31 procesa el 3 de marzo en lugar del 28 de febrero.
+
+**Mitigación**: Usar `date-fns` que maneja correctamente los edge cases:
+
+```ts
+import { addMonths, addWeeks, addQuarters, addYears } from 'date-fns'
+
+// model/period-utils.ts
+export function computeNextDate(rule: BudgetRecurrenceRule, from: Date = new Date()): Date {
+  switch (rule.frequency) {
+    case 'daily':
+      return addDays(from, rule.interval)
+    case 'weekly':
+      return addWeeks(from, rule.interval)
+    case 'monthly':
+      return addMonths(from, rule.interval) // Jan 31 + 1 = Feb 28 ✓
+    case 'quarterly':
+      return addQuarters(from, rule.interval)
+    case 'semiannual':
+      return addMonths(from, rule.interval * 6)
+    case 'yearly':
+      return addYears(from, rule.interval)
+    default:
+      throw new Error(`Unknown frequency: ${rule.frequency}`)
+  }
+}
+```
+
+**Nota**: `date-fns` ya es una dependencia de proyectos TanStack Start; verificar si ya está instalada antes de añadir.
+
+**Checklist**: `date-fns` en `package.json` ✓ · `computeNextDate` usa `addMonths` de date-fns ✓ · test: `Jan 31 + 1 month = Feb 28` ✓ · test: `Feb 28 + 1 month = Mar 28` ✓
+
+---
+
+#### P2-4: Integer overflow en agregaciones de analytics
+
+**Problema**: La columna `amount` en transactions es `integer` (PostgreSQL signed 32-bit, máx 2,147,483,647 ≈ $21.4M en cents). Una query `SUM(amount)` sobre un budget corporativo con muchas transacciones puede retornar overflow silencioso o error de PostgreSQL.
+
+**Mitigación**:
+
+```ts
+// Usar sql<bigint> para todas las agregaciones de SUM:
+const [{ totalSpent }] = await db
+  .select({
+    totalSpent: sql<bigint>`SUM(${transactions.amount})::bigint`,
+  })
+  .from(transactions)
+  .where(eq(transactions.budgetId, budgetId))
+
+// Convertir a number para UI (BigInt no es serializable por JSON):
+const totalSpentNumber = Number(totalSpent ?? 0n)
+
+// Alternativa a largo plazo: cambiar columna a bigint en schema
+amount: bigint('amount', { mode: 'number' }).notNull()
+```
+
+**Checklist**: Todas las queries con `SUM(amount)` usan `::bigint` cast ✓ · resultado BigInt se convierte a Number antes de serializar ✓
+
+---
+
+#### P2-5: Auth bypass activo en producción via `VITE_E2E=true`
+
+**Problema**: El middleware de auth bypass chequea `process.env.VITE_E2E === 'true'` pero no verifica que `NODE_ENV !== 'production'`. Si `VITE_E2E=true` se filtra a las variables de entorno de producción (ej: por un `.env` commiteado por error), cualquier usuario puede obtener acceso de admin.
+
+**Mitigación**:
+
+```ts
+// src/modules/auth/middleware/bypass.ts (o donde vive el bypass actual)
+function isE2EBypassAllowed(): boolean {
+  return (
+    process.env.VITE_E2E === 'true' &&
+    process.env.NODE_ENV !== 'production' && // ← CRÍTICO
+    // Opcional: verificar que la IP sea localhost
+    true
+  )
+}
+```
+
+```ts
+// .env.production (o Dockerfile/CI config) — asegurar que NO esté:
+# VITE_E2E=true   ← NUNCA en producción
+```
+
+**Checklist**: Bypass verifica `NODE_ENV !== 'production'` ✓ · `VITE_E2E` no aparece en secrets de producción ✓ · CI/CD valida que `VITE_E2E` no esté en env de prod ✓
+
+---
+
+#### P2-6: Remover miembro no desactiva sus reglas de recurrencia
+
+**Problema**: Un miembro con `role: 'contributor'` crea 3 reglas de recurrencia en un group budget. El admin lo remueve del budget. Las reglas siguen activas y siguen creando transacciones en nombre del ex-miembro, que ya no tiene acceso al budget.
+
+**Impacto**: Transacciones fantasma creadas por usuarios sin acceso. Imposible de corregir sin acceso directo a BD.
+
+**Mitigación**:
+
+```ts
+// budget-members.fn.ts
+export const removeBudgetMemberFn = createServerFn({ method: 'POST' }).handler(async ({ data }) => {
+  const db = await loadDb()
+
+  await db.transaction(async (tx) => {
+    // 1. Pausar todas las reglas de recurrencia del miembro en este budget
+    await tx
+      .update(budgetRecurrenceRules)
+      .set({ status: 'paused', pausedReason: 'member-removed' })
+      .where(
+        and(
+          eq(budgetRecurrenceRules.budgetId, data.budgetId),
+          eq(budgetRecurrenceRules.userId, data.userId),
+          eq(budgetRecurrenceRules.status, 'active'),
+        ),
+      )
+
+    // 2. Soft-delete las transacciones privadas del miembro (opcional, según política)
+    // await tx.update(transactions).set({ deletedAt: new Date() })...
+
+    // 3. Eliminar el miembro
+    await tx
+      .delete(budgetMembers)
+      .where(and(eq(budgetMembers.budgetId, data.budgetId), eq(budgetMembers.userId, data.userId)))
+  })
+})
+```
+
+**Checklist**: `removeBudgetMemberFn` pausa reglas del miembro ✓ · reglas muestran `pausedReason: 'member-removed'` en UI ✓ · test: ex-miembro no aparece en `processRecurrenceRules` ✓
+
+---
+
+### 11.1 Checklist de Seguridad (para code review)
+
+Agregar a la lista de verificación de la sección 8:
+
+#### Autenticación y Autorización
+
+- [ ] `getTransactionsFn` tiene `requireCurrentAppUser()` y filtra por `userId`
+- [ ] `getTransactionByIdFn` verifica que `transaction.userId === user.id`
+- [ ] `deleteTransactionFn` verifica ownership antes de eliminar
+- [ ] Endpoint `/api/budgets/process-recurrences` retorna 401 sin `BUDGET_CRON_SECRET`
+- [ ] `isPrivate` filtrado en servidor, no solo en cliente
+
+#### Integridad de Datos
+
+- [ ] `createBudgetFn` y `createTransactionFn` + member usa `db.transaction()`
+- [ ] `processSingleRule` usa `db.transaction()` por cada regla
+- [ ] `createTransactionFn` con `budgetId` usa `SELECT FOR UPDATE`
+- [ ] `processRecurrenceRules` usa `pg_try_advisory_xact_lock`
+- [ ] Amount en Zod: `.int().min(-99_999_999).max(99_999_999)`
+- [ ] CHECK constraint de amount en migración SQL
+- [ ] `MAX_CATCHUP_ITERATIONS = 24` implementado
+- [ ] `upsertBudgetLimitFn` valida suma de límites ≤ `targetAmount`
+- [ ] `updateBudgetFn` bloquea cambios a `periodType`/`startDate`/`currency` si hay transacciones
+- [ ] `createTransactionFn` verifica currency match con budget
+
+#### Rendimiento
+
+- [ ] Índices `transactions_budget_id_idx`, `transactions_user_id_date_idx` en migración
+- [ ] Índice `recurrence_next_date_status_idx` en migración
+- [ ] `EXPLAIN ANALYZE` en queries principales — cero Seq Scan en tablas grandes
+
+#### Resiliencia
+
+- [ ] Soft delete en `budgets` y `transactions` (campo `deletedAt`)
+- [ ] Todas las queries filtran `IS NULL deleted_at`
+- [ ] `budgetAuditLog` tabla existe y se usa en CRUD de budget
+- [ ] `removeBudgetMemberFn` pausa recurrencias del miembro eliminado
+- [ ] `computeNextDate` usa `addMonths` de date-fns (no `.setMonth()`)
+- [ ] Aggregaciones de SUM usan `::bigint` cast
+- [ ] Bypass de auth verifica `NODE_ENV !== 'production'`
+- [ ] CHECK constraints de scope en migración (`scope='project' → projectId NOT NULL`)
+
+---
+
+### 11.2 Resumen de Prioridades de Implementación
+
+```
+SEMANA 1 (antes de cualquier dato real):
+  P0-1: Auth en reads/deletes ──────── 30 min
+  P0-2: db.transaction() en creates ── 1 hora
+  P0-7: Auth en cron endpoint ──────── 20 min
+  P0-5: Bounds en z.number() ───────── 20 min
+
+SEMANA 2 (antes de multi-usuario):
+  P0-3: SELECT FOR UPDATE ──────────── 2 horas
+  P0-4: Advisory lock recurrencias ─── 2 horas
+  P0-6: Catch-up limit ─────────────── 1 hora
+  P1-1: Índices de BD ──────────────── 1 hora (schema + migración)
+
+SEMANA 3 (antes de v1.0):
+  P1-2: Soft delete ───────────────── 2 horas
+  P1-3: CHECK constraints scope ────── 30 min
+  P1-4: UTC enforcement ────────────── 1 hora
+  P1-5: Currency mismatch guard ────── 1 hora
+  P1-6: Inmutabilidad de período ───── 1 hora
+  P1-7: Límites de categoría ───────── 1 hora
+  P1-8: isPrivate en servidor ──────── 30 min
+
+ANTES DE GA (conformidad):
+  P2-2: Audit log ─────────────────── 3 horas (schema + helper + uso)
+  P2-6: Cascade member removal ────── 1 hora
+  P2-3: addMonths de date-fns ──────── 30 min
+  P2-4: Bigint en SUM ─────────────── 30 min
+  P2-1: Rate limiting ─────────────── 2 horas
+  P2-5: E2E guard en producción ────── 20 min
+```
+
+**Esfuerzo total estimado**: ~24 horas de desarrollo + ~8 horas de testing = **~32 horas**. Desglosado: P0 → 7h, P1 → 10h, P2 → 7h, tests → 8h.

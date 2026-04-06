@@ -9,7 +9,7 @@ import {
   writeCorporateSnapshot,
 } from './utils/corporate-dataset'
 
-dotenv.config()
+dotenv.config({ path: '.env.development' })
 
 const connectionString = process.env.DATABASE_URL
 if (!connectionString) {
@@ -305,6 +305,89 @@ async function seed() {
       })),
       500,
     )
+
+    // Seed sample budgets owned by the local dev bypass user
+    const BYPASS_USER_ID = process.env.VITE_TEST_USER_ID ?? 'user_1'
+    {
+      console.log('Seeding sample budgets...')
+      const now = new Date()
+      const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
+
+      // Ensure the local dev bypass user exists in the users table (FK constraint)
+      await db
+        .insert(schema.users)
+        .values({
+          id: BYPASS_USER_ID,
+          name: 'Local Test User',
+          email: 'local-test@example.com',
+        })
+        .onConflictDoNothing()
+
+      await safeDelete(schema.budgetRecurrenceRules)
+      await safeDelete(schema.budgetCategoryLimits)
+      await safeDelete(schema.budgetMembers)
+      await safeDelete(schema.budgets)
+
+      const sampleBudgets = [
+        {
+          id: crypto.randomUUID(),
+          name: 'Monthly Operations',
+          description: 'Monthly operational budget for the company',
+          scope: 'company',
+          ownerId: BYPASS_USER_ID,
+          targetAmount: 5_000_000, // $50,000 in cents
+          currency: 'USD',
+          periodType: 'monthly',
+          startDate: monthStart,
+          endDate: null,
+          status: 'active',
+          isActive: true,
+          projectId: null,
+          departmentId: null,
+          createdAt: now,
+          updatedAt: now,
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Marketing Q4',
+          description: 'Q4 marketing campaign budget',
+          scope: 'department',
+          ownerId: BYPASS_USER_ID,
+          targetAmount: 1_500_000, // $15,000 in cents
+          currency: 'USD',
+          periodType: 'quarterly',
+          startDate: new Date(Date.UTC(now.getUTCFullYear(), 9, 1)), // Oct 1
+          endDate: new Date(Date.UTC(now.getUTCFullYear(), 11, 31)), // Dec 31
+          status: 'active',
+          isActive: true,
+          projectId: null,
+          departmentId: null,
+          createdAt: now,
+          updatedAt: now,
+        },
+        {
+          id: crypto.randomUUID(),
+          name: 'Personal Expenses',
+          description: 'My personal monthly budget',
+          scope: 'personal',
+          ownerId: BYPASS_USER_ID,
+          targetAmount: 300_000, // $3,000 in cents
+          currency: 'USD',
+          periodType: 'monthly',
+          startDate: monthStart,
+          endDate: null,
+          status: 'active',
+          isActive: true,
+          projectId: null,
+          departmentId: null,
+          createdAt: now,
+          updatedAt: now,
+        },
+      ]
+
+      await insertInChunks(schema.budgets, sampleBudgets)
+      console.log(`✅ Inserted ${sampleBudgets.length} sample budgets`)
+    }
 
     console.log('✅ Database imported successfully!')
     console.log(

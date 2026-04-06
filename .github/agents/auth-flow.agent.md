@@ -17,7 +17,7 @@ This project uses a **hybrid auth model**:
 - **Clerk** — identity provider (OAuth, magic links, MFA)
 - **Auth module** — `src/modules/auth/` contains UI; `src/shared/lib/` contains auth utilities
 
-Read `docs/auth-better-auth-clerk-plan.md` and `docs/auth-flow-audit.md` before making any changes.
+Read `docs/auth/better-auth-clerk-plan.md` and `docs/auth/flow-audit.md` before making any changes.
 
 ## Key Files
 
@@ -32,9 +32,10 @@ src/routes/
   __root.tsx            # Root layout with session hydration
   (auth)/               # Auth route group (if present)
 
-docs/
-  auth-better-auth-clerk-plan.md   # Architecture decisions
-  auth-flow-audit.md               # Current flow audit
+docs/auth/
+  better-auth-clerk-plan.md       # Architecture decisions
+  flow-audit.md                    # Current flow audit
+docs/testing/
   local-auth-bypass.md             # Dev/test bypass patterns
 ```
 
@@ -85,7 +86,7 @@ Check `src/modules/auth/` for role definitions. Apply RBAC at:
 
 ## Workflow
 
-1. Read `docs/auth-better-auth-clerk-plan.md` first — all decisions are documented there
+1. Read `docs/auth/better-auth-clerk-plan.md` first — all decisions are documented there
 2. Check `src/modules/auth/` for existing patterns
 3. Check `src/routes/__root.tsx` for context shape
 4. Implement following the established hybrid pattern — do not introduce a third auth system

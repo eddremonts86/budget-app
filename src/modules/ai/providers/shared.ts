@@ -173,10 +173,13 @@ export async function probeProviderConfig(options: {
     }
 
     if (response.status === 401 || response.status === 403) {
+      // Auth error: server is reachable but credentials are invalid/missing.
+      // Mark as available=false so provider selection skips it and falls back
+      // to a working local provider. The auth_required status is kept for UI display.
       return {
         id,
         label,
-        available: true,
+        available: false,
         status: 'auth_required',
         latencyMs,
         message: 'AUTH_REQUIRED',

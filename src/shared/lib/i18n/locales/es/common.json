@@ -313,6 +313,7 @@
       "transactions": "Transacciones",
       "categories": "Categorías",
       "projects": "Proyectos",
+      "budgets": "Presupuestos",
       "team": "Equipo",
       "settings": "Configuración"
     },
@@ -517,6 +518,208 @@
       "refreshUpcomingTasks": "Actualizar tareas próximas",
       "refreshExpenseDistribution": "Actualizar distribución de gastos",
       "refreshWorkload": "Actualizar carga de trabajo"
+    }
+  },
+  "budgets": {
+    "title": "Presupuestos",
+    "description": "Administra y rastrea tus presupuestos financieros.",
+    "empty": {
+      "title": "Sin presupuestos todavía",
+      "description": "Crea tu primer presupuesto para comenzar a rastrear ingresos y gastos."
+    },
+    "actions": {
+      "create": "Nuevo Presupuesto",
+      "edit": "Editar Presupuesto",
+      "save": "Guardar Presupuesto",
+      "delete": "Eliminar Presupuesto",
+      "deleteConfirm": "¿Estás seguro de que deseas eliminar este presupuesto?"
+    },
+    "create": {
+      "title": "Nuevo Presupuesto",
+      "description": "Crea un nuevo presupuesto para rastrear ingresos y gastos."
+    },
+    "edit": {
+      "title": "Editar Presupuesto",
+      "description": "Actualiza los detalles de tu presupuesto."
+    },
+    "fields": {
+      "name": "Nombre del Presupuesto",
+      "namePlaceholder": "ej. Marketing T1",
+      "description": "Descripción",
+      "descriptionPlaceholder": "¿Para qué es este presupuesto?",
+      "scope": "Alcance",
+      "project": "Proyecto",
+      "projectPlaceholder": "Seleccionar proyecto",
+      "targetAmount": "Límite de gasto",
+      "noLimit": "Sin límite",
+      "currency": "Moneda",
+      "periodType": "Período",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin (opcional)"
+    },
+    "scopes": {
+      "personal": "Personal",
+      "project": "Proyecto",
+      "department": "Departamento",
+      "company": "Empresa"
+    },
+    "periods": {
+      "monthly": "Mensual",
+      "quarterly": "Trimestral",
+      "semiannual": "Semestral",
+      "annual": "Anual",
+      "one_time": "Único"
+    },
+    "health": {
+      "healthy": "Saludable",
+      "on_track": "En curso",
+      "warning": "Advertencia",
+      "approaching": "Próximo al límite",
+      "overBudget": "Sobre el límite",
+      "noLimit": "Sin límite"
+    },
+    "summary": {
+      "income": "Ingresos",
+      "expenses": "Gastos",
+      "balance": "Balance",
+      "remaining": "Restante",
+      "overBy": "Excedido por",
+      "noLimit": "Sin límite",
+      "used": "usado"
+    },
+    "detail": {
+      "notFound": "Presupuesto no encontrado.",
+      "overBudget": "Sobre el límite",
+      "spent": "gastado",
+      "overBy": "Excedido por {{amount}}",
+      "totalSpent": "Total Gastado",
+      "balance": "Balance",
+      "tabs": {
+        "transactions": "Transacciones",
+        "categories": "Categorías",
+        "members": "Miembros",
+        "recurring": "Recurrentes"
+      }
+    },
+    "alerts": {
+      "overBudget": "presupuesto(s) sobre el límite"
+    },
+    "toast": {
+      "created": "Presupuesto creado exitosamente",
+      "updated": "Presupuesto actualizado exitosamente",
+      "deleted": "Presupuesto eliminado exitosamente"
+    },
+    "messages": {
+      "created": "Presupuesto creado exitosamente",
+      "updated": "Presupuesto actualizado exitosamente",
+      "deleted": "Presupuesto eliminado exitosamente",
+      "memberAdded": "Miembro agregado al presupuesto",
+      "memberRemoved": "Miembro eliminado del presupuesto",
+      "limitSet": "Límite de categoría guardado",
+      "recurrenceCreated": "Transacción recurrente creada",
+      "recurrenceDeleted": "Transacción recurrente eliminada"
+    },
+    "transactions": {
+      "count": "transacciones",
+      "add": "Agregar transacción",
+      "addTitle": "Agregar transacción al presupuesto",
+      "editTitle": "Editar transacción",
+      "deleteConfirm": "¿Eliminar esta transacción?",
+      "empty": "Sin transacciones vinculadas a este presupuesto.",
+      "noDescription": "Sin descripción",
+      "type": "Tipo",
+      "expense": "Gasto",
+      "income": "Ingreso",
+      "description": "Descripción",
+      "descriptionPlaceholder": "¿Para qué es esto?",
+      "amount": "Monto",
+      "date": "Fecha",
+      "category": "Categoría",
+      "categoryPlaceholder": "Seleccionar categoría"
+    },
+    "limits": {
+      "count": "límites de categoría",
+      "add": "Agregar límite",
+      "addTitle": "Establecer límite de categoría",
+      "editTitle": "Editar límite de categoría",
+      "empty": "Sin límites de categoría configurados.",
+      "category": "Categoría",
+      "selectCategory": "Seleccionar categoría",
+      "amount": "Monto límite",
+      "spent": "Gastado",
+      "allocated": "límite",
+      "toast": {
+        "upserted": "Límite de categoría guardado",
+        "deleted": "Límite de categoría eliminado"
+      }
+    },
+    "members": {
+      "count": "miembros",
+      "add": "Agregar miembro",
+      "addTitle": "Agregar miembro al presupuesto",
+      "empty": "Aún sin miembros.",
+      "owner": "Propietario",
+      "role": "Rol",
+      "searchUser": "Buscar usuarios",
+      "searchPlaceholder": "Escribe un nombre o email...",
+      "selectUser": "Seleccionar usuario",
+      "userPlaceholder": "Elige un usuario",
+      "addBtn": "Agregar Miembro",
+      "toast": {
+        "added": "Miembro agregado",
+        "roleUpdated": "Rol actualizado",
+        "removed": "Miembro eliminado"
+      }
+    },
+    "roles": {
+      "admin": "Administrador",
+      "contributor": "Contribuidor",
+      "viewer": "Lector"
+    },
+    "recurrences": {
+      "count": "reglas",
+      "add": "Agregar regla",
+      "createTitle": "Crear regla de recurrencia",
+      "empty": "Aún sin reglas recurrentes.",
+      "noDescription": "Regla sin nombre",
+      "description": "Descripción",
+      "descriptionPlaceholder": "ej. Renta mensual",
+      "amount": "Monto",
+      "frequencyLabel": "Frecuencia",
+      "interval": "Cada (n)",
+      "startDate": "Fecha de inicio",
+      "category": "Categoría",
+      "categoryPlaceholder": "Sin categoría",
+      "nextOn": "próximo",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "manualPause": "Pausado manualmente",
+      "status": {
+        "active": "Activo",
+        "paused": "Pausado",
+        "completed": "Completado"
+      },
+      "frequency": {
+        "daily": "Diario",
+        "weekly": "Semanal",
+        "monthly": "Mensual",
+        "quarterly": "Trimestral",
+        "semiannual": "Semestral",
+        "annual": "Anual"
+      },
+      "toast": {
+        "created": "Regla de recurrencia creada",
+        "updated": "Regla de recurrencia actualizada",
+        "deleted": "Regla de recurrencia eliminada"
+      }
+    },
+    "categories": {
+      "uncategorized": "Sin categoría"
+    },
+    "widgets": {
+      "refreshBalance": "Actualizar balance",
+      "refreshOverview": "Actualizar resumen",
+      "refreshCategories": "Actualizar categorías"
     }
   }
 }

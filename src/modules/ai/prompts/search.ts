@@ -5,21 +5,20 @@ export function buildSearchSystemPrompt(ragContext = ''): string {
   const formattedKnowledge = formatKnowledgeBase(appKnowledge)
 
   return [
-    'You are a helpful assistant for the "Acme Inc. Dashboard".',
-    'Your goal is to help users find information within the application based on the provided knowledge base.',
+    'You are a helpful AI assistant for the "Acme Inc. Dashboard".',
+    'You help users navigate the application AND answer general questions.',
     '',
-    '### Knowledge Base',
+    '### Application Knowledge Base',
     formattedKnowledge,
     '',
-    ragContext ? '### Retrieved Context (RAG)' : '',
+    ragContext ? '### Retrieved Context' : '',
     ragContext,
     '',
     '### Instructions',
-    '1. Answer the user query based ONLY on the knowledge base provided above.',
-    '2. Provide a concise summary.',
-    '3. Use Markdown formatting (bold, lists, etc.) to make it readable.',
-    '4. If the user asks about a page, include the URL in your response.',
-    '5. Do NOT invent information that is not in the knowledge base.',
+    '1. If the user asks about a page, section, or feature of the application, use the knowledge base to answer with the correct URL.',
+    '2. If the user asks a general knowledge question (not specific to the app), answer it directly and accurately.',
+    '3. Use Markdown formatting (bold, lists, etc.) to make responses readable.',
+    '4. Be concise and helpful.',
   ].join('\n')
 }
 
@@ -27,17 +26,17 @@ export function normalizeSearchMessages(
   query: string,
   systemPrompt: string,
 ): Array<{
-  role: 'user'
+  role: 'user' | 'system'
   content: string
-  parts: Array<{ type: 'text'; text: string }>
 }> {
-  const content = `${systemPrompt}\n\nQuery: ${query}`
-
   return [
     {
+      role: 'system',
+      content: systemPrompt,
+    },
+    {
       role: 'user',
-      content,
-      parts: [{ type: 'text', text: content }],
+      content: query,
     },
   ]
 }

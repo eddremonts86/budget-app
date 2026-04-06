@@ -15,11 +15,11 @@ function isApprovalStatus(status: string | undefined): status is 'Approved' | 'R
 }
 
 export const transactionSchema = z.object({
-  customerName: z.string().min(1),
-  customerEmail: z.string().email(),
+  customerName: z.string().min(1).optional(),
+  customerEmail: z.string().email().optional(),
   status: z.enum(['Approved', 'Pending', 'Rejected']).default('Pending'),
   date: z.string(), // ISO string
-  amount: z.number(),
+  amount: z.number().int().min(-99_999_999).max(99_999_999),
   paymentMethod: z.string().optional(),
   description: z.string().optional(),
   userId: z.string().optional(),
@@ -29,6 +29,8 @@ export const transactionSchema = z.object({
   approvedBy: z.string().optional(),
   approvedAt: z.string().optional(),
   rejectionReason: z.string().optional(),
+  budgetId: z.string().optional().nullable(),
+  isPrivate: z.boolean().optional().default(false),
 })
 
 export type TransactionInput = z.infer<typeof transactionSchema>
@@ -232,17 +234,22 @@ export const createTransactionFn = createServerFn({ method: 'POST' })
         .insert(transactions)
         .values({
           id: crypto.randomUUID(),
-          customerName: input.customerName,
-          customerEmail: input.customerEmail,
+          customerName: input.customerName ?? null,
+          customerEmail: input.customerEmail ?? null,
           status: requestedStatus,
           date: new Date(input.date),
           amount: input.amount,
           userId: input.userId,
           projectId: input.projectId,
+          categoryId: input.categoryId,
           assignedAdminId: input.assignedAdminId,
           approvedBy,
           approvedAt,
           rejectionReason: input.rejectionReason,
+          budgetId: input.budgetId ?? null,
+          isPrivate: input.isPrivate ?? false,
+          createdAt: new Date(),
+          updatedAt: new Date(),
         })
         .returning()
 
@@ -293,6 +300,7 @@ export const updateTransactionFn = createServerFn({ method: 'POST' })
       // Handle specific fields if needed
       const updatePayload: Record<string, unknown> = { ...updateData }
       if (updateData.date) updatePayload.date = new Date(updateData.date)
+      updatePayload.updatedAt = new Date()
       delete updatePayload.approvedBy
       delete updatePayload.approvedAt
 

@@ -622,6 +622,7 @@ export function TransactionsPage() {
                     ...rest,
                     customerName: customer.name,
                     customerEmail: customer.email,
+                    isPrivate: false,
                   },
                   {
                     onSuccess: () => {

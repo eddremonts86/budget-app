@@ -119,6 +119,7 @@
       "transactions": "Transaktioner",
       "categories": "Kategorier",
       "projects": "Projekter",
+      "budgets": "Budgetter",
       "team": "Team",
       "settings": "Indstillinger"
     },
@@ -940,6 +941,208 @@
           "items": ["Etisk Privatliv", "Brugsvilkår", "Cookies", "Licenser"]
         }
       }
+    }
+  },
+  "budgets": {
+    "title": "Budgetter",
+    "description": "Administrer og følg dine finansielle budgetter.",
+    "empty": {
+      "title": "Ingen budgetter endnu",
+      "description": "Opret dit første budget for at begynde at spore indtægter og udgifter."
+    },
+    "actions": {
+      "create": "Nyt Budget",
+      "edit": "Rediger Budget",
+      "save": "Gem Budget",
+      "delete": "Slet Budget",
+      "deleteConfirm": "Er du sikker på, at du vil slette dette budget?"
+    },
+    "create": {
+      "title": "Nyt Budget",
+      "description": "Opret et nyt budget for at spore dine indtægter og udgifter."
+    },
+    "edit": {
+      "title": "Rediger Budget",
+      "description": "Opdater dine budgetdetaljer."
+    },
+    "fields": {
+      "name": "Budgetnavn",
+      "namePlaceholder": "f.eks. Marketing K1",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hvad er dette budget til?",
+      "scope": "Omfang",
+      "project": "Projekt",
+      "projectPlaceholder": "Vælg projekt",
+      "targetAmount": "Forbrugsgrænse",
+      "noLimit": "Ingen grænse",
+      "currency": "Valuta",
+      "periodType": "Periode",
+      "startDate": "Startdato",
+      "endDate": "Slutdato (valgfri)"
+    },
+    "scopes": {
+      "personal": "Personlig",
+      "project": "Projekt",
+      "department": "Afdeling",
+      "company": "Virksomhed"
+    },
+    "periods": {
+      "monthly": "Månedlig",
+      "quarterly": "Kvartalsvis",
+      "semiannual": "Halvårlig",
+      "annual": "Årlig",
+      "one_time": "Engangsbetaling"
+    },
+    "health": {
+      "healthy": "Sund",
+      "on_track": "På sporet",
+      "warning": "Advarsel",
+      "approaching": "Nærmer sig grænse",
+      "overBudget": "Over budget",
+      "noLimit": "Ingen grænse"
+    },
+    "summary": {
+      "income": "Indtægt",
+      "expenses": "Udgifter",
+      "balance": "Balance",
+      "remaining": "Resterende",
+      "overBy": "Overskredet med",
+      "noLimit": "Ingen grænse",
+      "used": "brugt"
+    },
+    "detail": {
+      "notFound": "Budget ikke fundet.",
+      "overBudget": "Over budget",
+      "spent": "brugt",
+      "overBy": "Over med {{amount}}",
+      "totalSpent": "Samlet forbrug",
+      "balance": "Balance",
+      "tabs": {
+        "transactions": "Transaktioner",
+        "categories": "Kategorier",
+        "members": "Medlemmer",
+        "recurring": "Tilbagevendende"
+      }
+    },
+    "alerts": {
+      "overBudget": "budget(ter) over grænsen"
+    },
+    "toast": {
+      "created": "Budget oprettet",
+      "updated": "Budget opdateret",
+      "deleted": "Budget slettet"
+    },
+    "messages": {
+      "created": "Budget oprettet",
+      "updated": "Budget opdateret",
+      "deleted": "Budget slettet",
+      "memberAdded": "Medlem tilføjet til budget",
+      "memberRemoved": "Medlem fjernet fra budget",
+      "limitSet": "Kategorigrænse gemt",
+      "recurrenceCreated": "Tilbagevendende transaktion oprettet",
+      "recurrenceDeleted": "Tilbagevendende transaktion slettet"
+    },
+    "transactions": {
+      "count": "transaktioner",
+      "add": "Tilføj transaktion",
+      "addTitle": "Tilføj transaktion til budget",
+      "editTitle": "Rediger transaktion",
+      "deleteConfirm": "Slet denne transaktion?",
+      "empty": "Ingen transaktioner knyttet til dette budget.",
+      "noDescription": "Ingen beskrivelse",
+      "type": "Type",
+      "expense": "Udgift",
+      "income": "Indtægt",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hvad er dette til?",
+      "amount": "Beløb",
+      "date": "Dato",
+      "category": "Kategori",
+      "categoryPlaceholder": "Vælg kategori"
+    },
+    "limits": {
+      "count": "kategorigrænser",
+      "add": "Tilføj grænse",
+      "addTitle": "Sæt kategorigrænse",
+      "editTitle": "Rediger kategorigrænse",
+      "empty": "Ingen kategorigrænser konfigureret.",
+      "category": "Kategori",
+      "selectCategory": "Vælg kategori",
+      "amount": "Grænsebeløb",
+      "spent": "Brugt",
+      "allocated": "grænse",
+      "toast": {
+        "upserted": "Kategorigrænse gemt",
+        "deleted": "Kategorigrænse fjernet"
+      }
+    },
+    "members": {
+      "count": "medlemmer",
+      "add": "Tilføj medlem",
+      "addTitle": "Tilføj medlem til budget",
+      "empty": "Ingen medlemmer endnu.",
+      "owner": "Ejer",
+      "role": "Rolle",
+      "searchUser": "Søg brugere",
+      "searchPlaceholder": "Skriv et navn eller email...",
+      "selectUser": "Vælg bruger",
+      "userPlaceholder": "Vælg en bruger",
+      "addBtn": "Tilføj Medlem",
+      "toast": {
+        "added": "Medlem tilføjet",
+        "roleUpdated": "Rolle opdateret",
+        "removed": "Medlem fjernet"
+      }
+    },
+    "roles": {
+      "admin": "Administrator",
+      "contributor": "Bidragyder",
+      "viewer": "Læser"
+    },
+    "recurrences": {
+      "count": "regler",
+      "add": "Tilføj regel",
+      "createTitle": "Opret tilbagevendende regel",
+      "empty": "Ingen tilbagevendende regler endnu.",
+      "noDescription": "Unavngiven regel",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "f.eks. Månedlig husleje",
+      "amount": "Beløb",
+      "frequencyLabel": "Frekvens",
+      "interval": "Hver (n)",
+      "startDate": "Startdato",
+      "category": "Kategori",
+      "categoryPlaceholder": "Ingen kategori",
+      "nextOn": "næste",
+      "pause": "Pause",
+      "resume": "Genoptag",
+      "manualPause": "Manuelt sat på pause",
+      "status": {
+        "active": "Aktiv",
+        "paused": "På pause",
+        "completed": "Afsluttet"
+      },
+      "frequency": {
+        "daily": "Daglig",
+        "weekly": "Ugentlig",
+        "monthly": "Månedlig",
+        "quarterly": "Kvartalsvis",
+        "semiannual": "Halvårlig",
+        "annual": "Årlig"
+      },
+      "toast": {
+        "created": "Tilbagevendende regel oprettet",
+        "updated": "Tilbagevendende regel opdateret",
+        "deleted": "Tilbagevendende regel slettet"
+      }
+    },
+    "categories": {
+      "uncategorized": "Ukategoriseret"
+    },
+    "widgets": {
+      "refreshBalance": "Opdater balance",
+      "refreshOverview": "Opdater oversigt",
+      "refreshCategories": "Opdater kategorier"
     }
   }
 }

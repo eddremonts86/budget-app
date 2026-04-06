@@ -30,7 +30,6 @@ type Inventory = {
 const workspaceRoot = process.cwd()
 const routeTreePath = path.join(workspaceRoot, 'src', 'routeTree.gen.ts')
 const routesDir = path.join(workspaceRoot, 'src', 'routes')
-const outputJson = path.join(workspaceRoot, 'docs', 'testing', 'routes-inventory.json')
 const outputYaml = path.join(workspaceRoot, 'docs', 'testing', 'routes-inventory.yaml')
 
 const toTitleModule = (routePath: string) => {
@@ -173,12 +172,10 @@ const buildInventory = async (): Promise<Inventory> => {
 const run = async () => {
   const inventory = await buildInventory()
 
-  await fs.mkdir(path.dirname(outputJson), { recursive: true })
-  await fs.writeFile(outputJson, `${JSON.stringify(inventory, null, 2)}\n`, 'utf8')
+  await fs.mkdir(path.dirname(outputYaml), { recursive: true })
   await fs.writeFile(outputYaml, `${yamlValue(inventory)}\n`, 'utf8')
 
   console.log('Route inventory updated:')
-  console.log(`- ${path.relative(workspaceRoot, outputJson)}`)
   console.log(`- ${path.relative(workspaceRoot, outputYaml)}`)
 }
 

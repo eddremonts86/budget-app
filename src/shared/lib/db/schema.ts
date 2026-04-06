@@ -44,6 +44,40 @@ export const transactionStatusEnum = pgEnum('transaction_status', [
   'Rejected',
 ])
 
+export const budgetScopeEnum = pgEnum('budget_scope', [
+  'personal',
+  'project',
+  'department',
+  'company',
+])
+
+export const budgetStatusEnum = pgEnum('budget_status', ['active', 'closed', 'archived'])
+
+export const budgetPeriodTypeEnum = pgEnum('budget_period_type', [
+  'monthly',
+  'quarterly',
+  'semiannual',
+  'annual',
+  'one_time',
+])
+
+export const budgetMemberRoleEnum = pgEnum('budget_member_role', ['admin', 'contributor', 'viewer'])
+
+export const budgetRecurrenceFrequencyEnum = pgEnum('budget_recurrence_frequency', [
+  'daily',
+  'weekly',
+  'monthly',
+  'quarterly',
+  'semiannual',
+  'annual',
+])
+
+export const budgetRecurrenceStatusEnum = pgEnum('budget_recurrence_status', [
+  'active',
+  'paused',
+  'completed',
+])
+
 export const projectMemberRoleEnum = pgEnum('project_member_role', [
   'owner',
   'manager',
@@ -351,10 +385,97 @@ export const todoDependencies = pgTable(
   }),
 )
 
+// --- Budget Tables ---
+
+export const budgets = pgTable('budgets', {
+  id: text('id').primaryKey(),
+  name: text('name').notNull(),
+  description: text('description'),
+  scope: budgetScopeEnum('scope').notNull(),
+  projectId: text('project_id').references(() => projects.id, {
+    onDelete: 'set null',
+    onUpdate: 'cascade',
+  }),
+  departmentId: text('department_id').references(() => departments.id, {
+    onDelete: 'set null',
+    onUpdate: 'cascade',
+  }),
+  ownerId: text('owner_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  targetAmount: integer('target_amount'),
+  currency: text('currency').default('USD').notNull(),
+  periodType: budgetPeriodTypeEnum('period_type').notNull(),
+  startDate: timestamp('start_date').notNull(),
+  endDate: timestamp('end_date'),
+  status: budgetStatusEnum('status').default('active').notNull(),
+  isActive: boolean('is_active').default(true).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const budgetMembers = pgTable(
+  'budget_members',
+  {
+    budgetId: text('budget_id')
+      .notNull()
+      .references(() => budgets.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    userId: text('user_id')
+      .notNull()
+      .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    role: budgetMemberRoleEnum('role').default('contributor').notNull(),
+    joinedAt: timestamp('joined_at').defaultNow().notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.budgetId, t.userId] }),
+  }),
+)
+
+export const budgetCategoryLimits = pgTable(
+  'budget_category_limits',
+  {
+    budgetId: text('budget_id')
+      .notNull()
+      .references(() => budgets.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    categoryId: text('category_id')
+      .notNull()
+      .references(() => categories.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+    allocatedAmount: integer('allocated_amount').notNull(),
+  },
+  (t) => ({
+    pk: primaryKey({ columns: [t.budgetId, t.categoryId] }),
+  }),
+)
+
+export const budgetRecurrenceRules = pgTable('budget_recurrence_rules', {
+  id: text('id').primaryKey(),
+  budgetId: text('budget_id')
+    .notNull()
+    .references(() => budgets.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  categoryId: text('category_id').references(() => categories.id, {
+    onDelete: 'set null',
+    onUpdate: 'cascade',
+  }),
+  userId: text('user_id')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  amount: integer('amount').notNull(),
+  frequency: budgetRecurrenceFrequencyEnum('frequency').notNull(),
+  interval: integer('interval').default(1).notNull(),
+  description: text('description'),
+  startDate: timestamp('start_date').notNull(),
+  nextDate: timestamp('next_date').notNull(),
+  lastRunAt: timestamp('last_run_at'),
+  status: budgetRecurrenceStatusEnum('status').default('active').notNull(),
+  pausedReason: text('paused_reason'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 export const transactions = pgTable('transactions', {
   id: text('id').primaryKey(),
-  customerName: text('customer_name').notNull(),
-  customerEmail: text('customer_email').notNull(),
+  customerName: text('customer_name'),
+  customerEmail: text('customer_email'),
   status: transactionStatusEnum('status').default('Pending').notNull(),
   date: timestamp('date').notNull(),
   amount: integer('amount').notNull(),
@@ -379,6 +500,13 @@ export const transactions = pgTable('transactions', {
   }),
   approvedAt: timestamp('approved_at'),
   rejectionReason: text('rejection_reason'),
+  budgetId: text('budget_id').references((): AnyPgColumn => budgets.id, {
+    onDelete: 'set null',
+    onUpdate: 'cascade',
+  }),
+  isPrivate: boolean('is_private').default(false).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })
 
 export const categories = pgTable('categories', {

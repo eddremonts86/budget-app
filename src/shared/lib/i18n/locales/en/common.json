@@ -97,7 +97,9 @@
     "send": "Send",
     "backToHome": "Go to Homepage",
     "retry": "Retry",
-    "unknownError": "An unexpected error occurred."
+    "unknownError": "An unexpected error occurred.",
+    "none": "None",
+    "saving": "Saving..."
   },
   "theme": {
     "light": "Light",
@@ -124,6 +126,7 @@
       "transactions": "Transactions",
       "categories": "Categories",
       "projects": "Projects",
+      "budgets": "Budgets",
       "team": "Team",
       "settings": "Settings"
     },
@@ -1046,6 +1049,208 @@
           "items": ["Ethical Privacy", "Terms of Use", "Cookies", "Licenses"]
         }
       }
+    }
+  },
+  "budgets": {
+    "title": "Budgets",
+    "description": "Manage and track your financial budgets.",
+    "empty": {
+      "title": "No budgets yet",
+      "description": "Create your first budget to start tracking income and expenses."
+    },
+    "actions": {
+      "create": "New Budget",
+      "edit": "Edit Budget",
+      "save": "Save Budget",
+      "delete": "Delete Budget",
+      "deleteConfirm": "Are you sure you want to delete this budget?"
+    },
+    "create": {
+      "title": "New Budget",
+      "description": "Create a new budget to track your income and spending."
+    },
+    "edit": {
+      "title": "Edit Budget",
+      "description": "Update your budget details."
+    },
+    "fields": {
+      "name": "Budget Name",
+      "namePlaceholder": "e.g. Marketing Q1",
+      "description": "Description",
+      "descriptionPlaceholder": "What is this budget for?",
+      "scope": "Scope",
+      "project": "Project",
+      "projectPlaceholder": "Select project",
+      "targetAmount": "Spending Limit",
+      "noLimit": "No limit",
+      "currency": "Currency",
+      "periodType": "Period",
+      "startDate": "Start Date",
+      "endDate": "End Date (optional)"
+    },
+    "scopes": {
+      "personal": "Personal",
+      "project": "Project",
+      "department": "Department",
+      "company": "Company"
+    },
+    "periods": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannual": "Semiannual",
+      "annual": "Annual",
+      "one_time": "One-time"
+    },
+    "health": {
+      "healthy": "Healthy",
+      "on_track": "On Track",
+      "warning": "Warning",
+      "approaching": "Approaching",
+      "overBudget": "Over Budget",
+      "noLimit": "No Limit"
+    },
+    "summary": {
+      "income": "Income",
+      "expenses": "Expenses",
+      "balance": "Balance",
+      "remaining": "Remaining",
+      "overBy": "Over by",
+      "noLimit": "No limit",
+      "used": "used"
+    },
+    "detail": {
+      "notFound": "Budget not found.",
+      "overBudget": "Over Budget",
+      "spent": "spent",
+      "overBy": "Over by {{amount}}",
+      "totalSpent": "Total Spent",
+      "balance": "Balance",
+      "tabs": {
+        "transactions": "Transactions",
+        "categories": "Categories",
+        "members": "Members",
+        "recurring": "Recurring"
+      }
+    },
+    "alerts": {
+      "overBudget": "budget(s) over limit"
+    },
+    "toast": {
+      "created": "Budget created successfully",
+      "updated": "Budget updated successfully",
+      "deleted": "Budget deleted successfully"
+    },
+    "messages": {
+      "created": "Budget created successfully",
+      "updated": "Budget updated successfully",
+      "deleted": "Budget deleted successfully",
+      "memberAdded": "Member added to budget",
+      "memberRemoved": "Member removed from budget",
+      "limitSet": "Category limit saved",
+      "recurrenceCreated": "Recurring transaction created",
+      "recurrenceDeleted": "Recurring transaction deleted"
+    },
+    "transactions": {
+      "count": "transactions",
+      "add": "Add Transaction",
+      "addTitle": "Add Transaction to Budget",
+      "editTitle": "Edit Transaction",
+      "deleteConfirm": "Delete this transaction?",
+      "empty": "No transactions linked to this budget.",
+      "noDescription": "No description",
+      "type": "Type",
+      "expense": "Expense",
+      "income": "Income",
+      "description": "Description",
+      "descriptionPlaceholder": "What is this for?",
+      "amount": "Amount",
+      "date": "Date",
+      "category": "Category",
+      "categoryPlaceholder": "Select category"
+    },
+    "limits": {
+      "count": "category limits",
+      "add": "Add Limit",
+      "addTitle": "Set Category Limit",
+      "editTitle": "Edit Category Limit",
+      "empty": "No category limits set.",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "amount": "Limit Amount",
+      "spent": "Spent",
+      "allocated": "limit",
+      "toast": {
+        "upserted": "Category limit saved",
+        "deleted": "Category limit removed"
+      }
+    },
+    "members": {
+      "count": "members",
+      "add": "Add Member",
+      "addTitle": "Add Member to Budget",
+      "empty": "No members yet.",
+      "owner": "Owner",
+      "role": "Role",
+      "searchUser": "Search users",
+      "searchPlaceholder": "Type a name or email...",
+      "selectUser": "Select user",
+      "userPlaceholder": "Choose a user",
+      "addBtn": "Add Member",
+      "toast": {
+        "added": "Member added",
+        "roleUpdated": "Role updated",
+        "removed": "Member removed"
+      }
+    },
+    "roles": {
+      "admin": "Admin",
+      "contributor": "Contributor",
+      "viewer": "Viewer"
+    },
+    "recurrences": {
+      "count": "rules",
+      "add": "Add Rule",
+      "createTitle": "Create Recurrence Rule",
+      "empty": "No recurring rules yet.",
+      "noDescription": "Unnamed rule",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Monthly rent",
+      "amount": "Amount",
+      "frequencyLabel": "Frequency",
+      "interval": "Every (n)",
+      "startDate": "Start Date",
+      "category": "Category",
+      "categoryPlaceholder": "No category",
+      "nextOn": "next",
+      "pause": "Pause",
+      "resume": "Resume",
+      "manualPause": "Manually paused",
+      "status": {
+        "active": "Active",
+        "paused": "Paused",
+        "completed": "Completed"
+      },
+      "frequency": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "quarterly": "Quarterly",
+        "semiannual": "Semiannual",
+        "annual": "Annual"
+      },
+      "toast": {
+        "created": "Recurrence rule created",
+        "updated": "Recurrence rule updated",
+        "deleted": "Recurrence rule deleted"
+      }
+    },
+    "categories": {
+      "uncategorized": "Uncategorized"
+    },
+    "widgets": {
+      "refreshBalance": "Refresh balance",
+      "refreshOverview": "Refresh overview",
+      "refreshCategories": "Refresh categories"
     }
   }
 }

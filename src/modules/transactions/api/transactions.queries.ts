@@ -32,7 +32,10 @@ export const useInfiniteTransactions = (limit = 10) => {
 export const useTransactions = (options?: { enabled?: boolean }) => {
   return useTQuery<Transaction[]>(
     transactionKeys.lists(),
-    () => getTransactionsFn({ data: { limit: 50 } }).then((res) => res.data),
+    () =>
+      getTransactionsFn({ data: { limit: 50 } }).then(
+        (res) => res.data as unknown as Transaction[],
+      ),
     options,
   )
 }
@@ -58,7 +61,7 @@ export const useUpdateTransaction = () => {
     ({ id, data }: { id: string; data: Partial<TransactionInput> }) =>
       updateTransactionFn({ data: { id, data } }),
     {
-      invalidateKeys: [transactionKeys.all],
+      invalidateKeys: [transactionKeys.all, ['budgets']],
       successMessage: i18n.t('transactions.toast.updated'),
     },
   )
@@ -69,7 +72,7 @@ export const useDeleteTransaction = () => {
     ['transactions', 'delete'],
     (id: string) => deleteTransactionFn({ data: id }),
     {
-      invalidateKeys: [transactionKeys.all],
+      invalidateKeys: [transactionKeys.all, ['budgets']],
       successMessage: i18n.t('transactions.toast.deleted'),
     },
   )

@@ -4,7 +4,7 @@ import type { ComponentType, ReactNode } from 'react'
 export type AppModuleRouteKind = 'page' | 'layout' | 'api'
 export type ModuleNavigationKind = 'main' | 'secondary'
 export type ModuleActionId = 'open-ai-search'
-export type ModuleBadgeId = 'pending-transactions'
+export type ModuleBadgeId = 'pending-transactions' | 'over-budget'
 export type WidgetSize = 'sm' | 'md' | 'lg' | 'full'
 
 export interface WidgetDefinition {
