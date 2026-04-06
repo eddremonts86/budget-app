@@ -1,6 +1,6 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQMutation } from '@/shared/lib/query'
-import type { CreateRecurrenceRuleInput } from '../model/schema'
+import type { CreateRecurrenceRuleInput, UpdateRecurrenceRuleInput } from '../model/schema'
 import type { BudgetRecurrenceRule } from '../model/types'
 import {
   getBudgetRecurrenceRulesFn,
@@ -23,26 +23,26 @@ export function useCreateRecurrenceRule(budgetId: string) {
     ['budgets', 'recurrences', 'create'],
     (data: CreateRecurrenceRuleInput) => createRecurrenceRuleFn({ data }),
     {
-      invalidateKeys: [budgetKeys.recurrences(budgetId), budgetKeys.detail(budgetId)],
+      invalidateKeys: [
+        budgetKeys.recurrences(budgetId),
+        budgetKeys.detail(budgetId),
+        budgetKeys.analytics(budgetId),
+      ],
       successMessage: i18n.t('budgets.messages.recurrenceCreated'),
     },
   )
 }
 
 export function useUpdateRecurrenceRule(budgetId: string) {
-  return useTQMutation(
-    ['budgets', 'recurrences', 'update'],
-    (data: {
-      id: string
-      status?: 'active' | 'paused' | 'completed'
-      description?: string | null
-      amount?: number
-      pausedReason?: string | null
-    }) => updateRecurrenceRuleFn({ data }),
-    {
-      invalidateKeys: [budgetKeys.recurrences(budgetId)],
-    },
-  )
+  // Local typed wrapper — updateRecurrenceRuleFn's inferred type can lag on schema changes
+  const callFn = (data: UpdateRecurrenceRuleInput): Promise<unknown> =>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    updateRecurrenceRuleFn({ data: data as any })
+
+  return useTQMutation(['budgets', 'recurrences', 'update'], callFn, {
+    invalidateKeys: [budgetKeys.recurrences(budgetId), budgetKeys.analytics(budgetId)],
+    successMessage: i18n.t('budgets.messages.recurrenceUpdated', 'Rule updated'),
+  })
 }
 
 export function useDeleteRecurrenceRule(budgetId: string) {
@@ -50,7 +50,7 @@ export function useDeleteRecurrenceRule(budgetId: string) {
     ['budgets', 'recurrences', 'delete'],
     (id: string) => deleteRecurrenceRuleFn({ data: id }),
     {
-      invalidateKeys: [budgetKeys.recurrences(budgetId)],
+      invalidateKeys: [budgetKeys.recurrences(budgetId), budgetKeys.analytics(budgetId)],
       successMessage: i18n.t('budgets.messages.recurrenceDeleted'),
     },
   )

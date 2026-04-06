@@ -222,6 +222,7 @@ Required in `.env.development`:
 | ------------------------------------ | ------------------------------------------------- |
 | Module architecture & manifests      | `.github/skills/app/module-architecture/SKILL.md` |
 | CRUD operations & CrudSheet Protocol | `.github/skills/app/feature-crud/SKILL.md`        |
+| **Sheet / side-panel UI convention** | `.github/skills/app/crud-sheet/SKILL.md`          |
 | Widget system (create / fix widgets) | `.github/skills/app/widget-system/SKILL.md`       |
 | Multi-provider AI system             | `.github/skills/app/ai-providers/SKILL.md`        |
 | Auth (Clerk + Better Auth)           | `.github/skills/app/auth-dual-provider/SKILL.md`  |
@@ -282,6 +283,7 @@ When working in a domain, load ALL applicable skills before generating code:
 | E2E tests                    | `e2e-testing-auth` + `playwright-skill`              |
 | Docker / local LLM           | `docker-ai-stack`                                    |
 | UI component / accessibility | `frontend-design` + `web-design-guidelines`          |
+| New sheet / side-panel       | `crud-sheet`                                         |
 | Post-change quality check    | `react-doctor`                                       |
 | Code cleanup / refactor      | `code-simplifier` + `vercel-react-best-practices`    |
 

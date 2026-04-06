@@ -1,5 +1,6 @@
 import { ClerkProvider } from '@clerk/tanstack-react-start'
 import { LazyMotion, domAnimation } from 'framer-motion'
+import { NuqsAdapter } from 'nuqs/adapters/tanstack-router'
 import type { ReactNode } from 'react'
 import { Toaster } from '@/components/ui/toaster'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -18,18 +19,20 @@ const SHOULD_USE_CLERK_PROVIDER = isClerkEnabled() && !!PUBLISHABLE_KEY
 
 function ProvidersContent({ children }: AppProvidersProps) {
   return (
-    <LazyMotion features={domAnimation}>
-      <I18nProvider>
-        <ThemeProvider defaultTheme="system">
-          <QueryProvider>
-            <AppAuthProvider>
-              <TooltipProvider>{children}</TooltipProvider>
-              <Toaster />
-            </AppAuthProvider>
-          </QueryProvider>
-        </ThemeProvider>
-      </I18nProvider>
-    </LazyMotion>
+    <NuqsAdapter>
+      <LazyMotion features={domAnimation}>
+        <I18nProvider>
+          <ThemeProvider defaultTheme="system">
+            <QueryProvider>
+              <AppAuthProvider>
+                <TooltipProvider>{children}</TooltipProvider>
+                <Toaster />
+              </AppAuthProvider>
+            </QueryProvider>
+          </ThemeProvider>
+        </I18nProvider>
+      </LazyMotion>
+    </NuqsAdapter>
   )
 }
 

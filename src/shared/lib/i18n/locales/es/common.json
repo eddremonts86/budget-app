@@ -598,8 +598,27 @@
         "transactions": "Transacciones",
         "categories": "Categorías",
         "members": "Miembros",
-        "recurring": "Recurrentes"
+        "recurring": "Recurrentes",
+        "report": "Reporte"
       }
+    },
+    "report": {
+      "title": "Reporte Anual",
+      "subtitle": "Gastos e ingresos por categoría a lo largo de los meses",
+      "year": "Año",
+      "category": "Categoría",
+      "totalExpenses": "Total Gastos",
+      "totalIncome": "Total Ingresos",
+      "expensesTable": "Gastos por Categoría",
+      "incomeTable": "Ingresos por Categoría",
+      "balance": "Balance",
+      "total": "Total",
+      "month": "Mes",
+      "accumExpenses": "Acum. Gastos",
+      "summarySection": "Resumen",
+      "noData": "Sin transacciones para {{year}}",
+      "showIncome": "Mostrar filas de ingresos",
+      "hideIncome": "Ocultar filas de ingresos"
     },
     "alerts": {
       "overBudget": "presupuesto(s) sobre el límite"

@@ -2510,5 +2510,13 @@
     "providerId": "ollama",
     "model": "qwen3.5:2b",
     "contextLength": 0
+  },
+  {
+    "timestamp": "2026-04-06T15:20:14.403Z",
+    "locale": "en",
+    "query": "dame una descripción de 200 palabras para un budge...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
   }
 ]

@@ -49,7 +49,7 @@ export const useCreateTransaction = () => {
     ['transactions', 'create'],
     (data: TransactionInput) => createTransactionFn({ data }),
     {
-      invalidateKeys: [transactionKeys.all],
+      invalidateKeys: [transactionKeys.all, ['budgets']],
       successMessage: i18n.t('transactions.toast.created'),
     },
   )

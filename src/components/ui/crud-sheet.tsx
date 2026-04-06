@@ -1,6 +1,6 @@
 'use client'
 
-import { WifiOff, X } from 'lucide-react'
+import { Pin, WifiOff, X } from 'lucide-react'
 import * as React from 'react'
 import { Button } from '@/components/ui/button'
 import { SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@/components/ui/sheet'
@@ -56,19 +56,41 @@ function useSheetPing(enabled = true) {
   }
 }
 
+// --- Pin context -------------------------------------------------------
+const CrudPinContext = React.createContext<{
+  pinned: boolean
+  onPinToggle: () => void
+  pinnable: boolean
+} | null>(null)
+
+function useCrudPin() {
+  return React.useContext(CrudPinContext)
+}
+// -----------------------------------------------------------------------
+
 export function CrudSheetContent({
   className,
+  pinnable = false,
+  children,
   ...props
-}: React.ComponentProps<typeof SheetContent>) {
+}: React.ComponentProps<typeof SheetContent> & { pinnable?: boolean }) {
+  const [pinned, setPinned] = React.useState(false)
+
   return (
-    <SheetContent
-      showCloseButton={false}
-      className={cn(
-        'sm:max-w-[560px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0',
-        className,
-      )}
-      {...props}
-    />
+    <CrudPinContext.Provider value={{ pinned, onPinToggle: () => setPinned((p) => !p), pinnable }}>
+      <SheetContent
+        showCloseButton={false}
+        onInteractOutside={pinned ? (e) => e.preventDefault() : undefined}
+        onEscapeKeyDown={pinned ? (e) => e.preventDefault() : undefined}
+        className={cn(
+          'sm:max-w-[560px] border-l border-border/40 backdrop-blur-3xl bg-background/80 flex flex-col p-0',
+          className,
+        )}
+        {...props}
+      >
+        {children}
+      </SheetContent>
+    </CrudPinContext.Provider>
   )
 }
 
@@ -88,6 +110,7 @@ export function CrudSheetHeader({
   showPing = true,
 }: CrudSheetHeaderProps) {
   const { isOnline, latencyMs, ping } = useSheetPing(showPing)
+  const pinCtx = useCrudPin()
 
   return (
     <SheetHeader className="gap-1.5 p-4 border-b px-6 h-16 flex flex-row items-center justify-between space-y-0">
@@ -119,6 +142,23 @@ export function CrudSheetHeader({
           </button>
         ) : null}
         {actionsSlot}
+        {pinCtx?.pinnable ? (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            className={cn(
+              'h-8 w-8',
+              pinCtx.pinned
+                ? 'text-primary bg-primary/10 hover:bg-primary/20'
+                : 'text-muted-foreground hover:text-foreground',
+            )}
+            onClick={pinCtx.onPinToggle}
+            title={pinCtx.pinned ? 'Unpin' : 'Pin open'}
+          >
+            <Pin className={cn('size-4', pinCtx.pinned && 'fill-current')} />
+          </Button>
+        ) : null}
         <Button
           type="button"
           variant="ghost"

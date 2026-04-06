@@ -1129,8 +1129,27 @@
         "transactions": "Transactions",
         "categories": "Categories",
         "members": "Members",
-        "recurring": "Recurring"
+        "recurring": "Recurring",
+        "report": "Report"
       }
+    },
+    "report": {
+      "title": "Annual Report",
+      "subtitle": "Expenses and income by category across months",
+      "year": "Year",
+      "category": "Category",
+      "totalExpenses": "Total Expenses",
+      "totalIncome": "Total Income",
+      "expensesTable": "Expenses by Category",
+      "incomeTable": "Income by Category",
+      "balance": "Balance",
+      "total": "Total",
+      "month": "Month",
+      "accumExpenses": "Acum. Expenses",
+      "summarySection": "Summary",
+      "noData": "No transactions found for {{year}}",
+      "showIncome": "Show income rows",
+      "hideIncome": "Hide income rows"
     },
     "alerts": {
       "overBudget": "budget(s) over limit"
@@ -1225,6 +1244,9 @@
       "pause": "Pause",
       "resume": "Resume",
       "manualPause": "Manually paused",
+      "type": "Type",
+      "typeExpense": "Expense",
+      "typeIncome": "Income",
       "status": {
         "active": "Active",
         "paused": "Paused",

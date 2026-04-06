@@ -18,17 +18,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Sheet } from '@/components/ui/sheet'
-import { cn } from '@/shared/lib/utils'
 import { useCategories } from '@/modules/categories'
-import { useCreateRecurrenceRule } from '../api/budget-recurrences.queries'
-import type { BudgetRecurrenceFrequency } from '../model/types'
-
-interface CreateRecurrenceSheetProps {
-  budgetId: string
-  currency: string
-  open: boolean
-  onOpenChange: (open: boolean) => void
-}
+import { cn } from '@/shared/lib/utils'
+import { useUpdateRecurrenceRule } from '../api/budget-recurrences.queries'
+import type { BudgetRecurrenceFrequency, BudgetRecurrenceRule } from '../model/types'
 
 const FREQUENCIES: BudgetRecurrenceFrequency[] = [
   'daily',
@@ -39,25 +32,44 @@ const FREQUENCIES: BudgetRecurrenceFrequency[] = [
   'annual',
 ]
 
-export function CreateRecurrenceSheet({
-  budgetId,
+interface EditRecurrenceSheetProps {
+  rule: BudgetRecurrenceRule
+  currency: string
+  open: boolean
+  onOpenChange: (open: boolean) => void
+}
+
+export function EditRecurrenceSheet({
+  rule,
   currency,
   open,
   onOpenChange,
-}: CreateRecurrenceSheetProps) {
+}: EditRecurrenceSheetProps) {
   const { t } = useTranslation()
-  const createMutation = useCreateRecurrenceRule(budgetId)
+  const updateMutation = useUpdateRecurrenceRule(rule.budgetId)
   const { data: categories = [] } = useCategories()
 
   const [form, setForm] = React.useState({
-    type: 'expense' as 'expense' | 'income',
-    description: '',
-    amount: '',
-    frequency: 'monthly' as BudgetRecurrenceFrequency,
-    interval: '1',
-    categoryId: '',
-    startDate: new Date().toISOString().split('T')[0],
+    type: (rule.amount <= 0 ? 'expense' : 'income') as 'expense' | 'income',
+    description: rule.description ?? '',
+    amount: String(Math.abs(rule.amount) / 100),
+    frequency: rule.frequency,
+    interval: String(rule.interval),
+    categoryId: rule.categoryId ?? '__none__',
   })
+
+  // Sync form when rule changes (e.g. different rule opened)
+  React.useEffect(() => {
+    setForm({
+      type: rule.amount <= 0 ? 'expense' : 'income',
+      description: rule.description ?? '',
+      amount: String(Math.abs(rule.amount) / 100),
+      frequency: rule.frequency,
+      interval: String(rule.interval),
+      categoryId: rule.categoryId ?? '__none__',
+    })
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rule.id])
 
   function updateField<K extends keyof typeof form>(key: K, value: (typeof form)[K]) {
     setForm((prev) => ({ ...prev, [key]: value }))
@@ -67,39 +79,29 @@ export function CreateRecurrenceSheet({
     e.preventDefault()
     const amount = parseFloat(form.amount)
     if (!amount || amount <= 0) return
-
     const signedAmount = Math.round(amount * 100) * (form.type === 'expense' ? -1 : 1)
-    await createMutation.mutateAsync({
-      budgetId,
+
+    await updateMutation.mutateAsync({
+      id: rule.id,
       description: form.description || null,
       amount: signedAmount,
       frequency: form.frequency,
       interval: parseInt(form.interval, 10) || 1,
-      categoryId: form.categoryId || null,
-      startDate: form.startDate,
+      categoryId: form.categoryId === '__none__' ? null : form.categoryId,
     })
     onOpenChange(false)
-    setForm({
-      type: 'expense',
-      description: '',
-      amount: '',
-      frequency: 'monthly',
-      interval: '1',
-      categoryId: '',
-      startDate: new Date().toISOString().split('T')[0],
-    })
   }
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <CrudSheetContent pinnable>
         <CrudSheetHeader
-          title={t('budgets.recurrences.createTitle')}
+          title={t('budgets.recurrences.editTitle', 'Edit Recurring Rule')}
           onClose={() => onOpenChange(false)}
           showPing={false}
         />
 
-        <form id="create-recurrence-form" onSubmit={handleSubmit}>
+        <form id="edit-recurrence-form" onSubmit={handleSubmit}>
           <CrudSheetBody>
             <CrudSheetSection>
               {/* Type toggle */}
@@ -184,16 +186,6 @@ export function CreateRecurrenceSheet({
                 </div>
               </div>
 
-              <div className="space-y-1">
-                <Label>{t('budgets.recurrences.startDate')}</Label>
-                <Input
-                  type="date"
-                  value={form.startDate}
-                  onChange={(e) => updateField('startDate', e.target.value)}
-                  required
-                />
-              </div>
-
               {categories.length > 0 && (
                 <div className="space-y-1">
                   <Label>{t('budgets.recurrences.category')}</Label>
@@ -205,6 +197,9 @@ export function CreateRecurrenceSheet({
                       <SelectValue placeholder={t('budgets.recurrences.categoryPlaceholder')} />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="__none__">
+                        {t('budgets.recurrences.noCategory', 'None')}
+                      </SelectItem>
                       {categories.map((cat) => (
                         <SelectItem key={cat.id} value={cat.id}>
                           {cat.name}
@@ -222,8 +217,8 @@ export function CreateRecurrenceSheet({
           <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
             {t('common.cancel')}
           </Button>
-          <Button form="create-recurrence-form" type="submit" disabled={createMutation.isPending}>
-            {createMutation.isPending ? t('common.saving') : t('common.create')}
+          <Button form="edit-recurrence-form" type="submit" disabled={updateMutation.isPending}>
+            {updateMutation.isPending ? t('common.saving') : t('common.save')}
           </Button>
         </CrudSheetActions>
       </CrudSheetContent>

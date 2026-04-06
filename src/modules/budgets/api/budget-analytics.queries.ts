@@ -3,6 +3,7 @@ import {
   getBudgetSpendingByCategoryFn,
   getBudgetMonthlyTrendFn,
   getBudgetMemberSpendingFn,
+  getBudgetAnnualReportFn,
 } from './budget-analytics.fn'
 import { budgetKeys } from './budgets.queries'
 
@@ -27,5 +28,13 @@ export function useBudgetMemberSpending(budgetId: string) {
     budgetKeys.memberSpending(budgetId),
     () => getBudgetMemberSpendingFn({ data: budgetId }),
     { cache: 'realtime', enabled: !!budgetId },
+  )
+}
+
+export function useBudgetAnnualReport(budgetId: string, year: number) {
+  return useTQuery(
+    budgetKeys.annualReport(budgetId, year),
+    () => getBudgetAnnualReportFn({ data: { budgetId, year } }),
+    { cache: 'standard', enabled: !!budgetId },
   )
 }

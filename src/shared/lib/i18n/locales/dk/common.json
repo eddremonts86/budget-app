@@ -1021,8 +1021,27 @@
         "transactions": "Transaktioner",
         "categories": "Kategorier",
         "members": "Medlemmer",
-        "recurring": "Tilbagevendende"
+        "recurring": "Tilbagevendende",
+        "report": "Rapport"
       }
+    },
+    "report": {
+      "title": "Årsrapport",
+      "subtitle": "Udgifter og indtægter efter kategori på tværs af måneder",
+      "year": "År",
+      "category": "Kategori",
+      "totalExpenses": "Samlede udgifter",
+      "totalIncome": "Samlede indtægter",
+      "expensesTable": "Udgifter efter kategori",
+      "incomeTable": "Indtægter efter kategori",
+      "balance": "Saldo",
+      "total": "Total",
+      "month": "Måned",
+      "accumExpenses": "Akk. udgifter",
+      "summarySection": "Oversigt",
+      "noData": "Ingen transaktioner fundet for {{year}}",
+      "showIncome": "Vis indtægtsrækker",
+      "hideIncome": "Skjul indtægtsrækker"
     },
     "alerts": {
       "overBudget": "budget(ter) over grænsen"
@@ -1117,6 +1136,9 @@
       "pause": "Pause",
       "resume": "Genoptag",
       "manualPause": "Manuelt sat på pause",
+      "type": "Type",
+      "typeExpense": "Udgift",
+      "typeIncome": "Indtægt",
       "status": {
         "active": "Aktiv",
         "paused": "På pause",

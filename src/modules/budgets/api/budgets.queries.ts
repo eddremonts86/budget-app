@@ -28,6 +28,8 @@ export const budgetKeys = {
   monthlyTrend: (budgetId: string, months: number) =>
     [...budgetKeys.all, 'monthly-trend', budgetId, months] as const,
   memberSpending: (budgetId: string) => [...budgetKeys.all, 'member-spending', budgetId] as const,
+  annualReport: (budgetId: string, year: number) =>
+    [...budgetKeys.all, 'annual-report', budgetId, year] as const,
 }
 
 export function useBudgets(filters?: { scope?: string; status?: string }) {

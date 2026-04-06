@@ -1,5 +1,6 @@
 import { IconArrowLeft, IconEdit, IconTrash, IconAlertTriangle } from '@tabler/icons-react'
 import { useParams, Link } from '@tanstack/react-router'
+import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -10,6 +11,7 @@ import { useBudget, useDeleteBudget } from '../api/budgets.queries'
 import { formatAmount } from '../model/period-utils'
 import type { BudgetScope } from '../model/types'
 import { AddTransactionToBudgetSheet } from './AddTransactionToBudgetSheet'
+import { BudgetAnnualReport } from './BudgetAnnualReport'
 import { BudgetCategoryLimits } from './BudgetCategoryLimits'
 import { BudgetMembersPanel } from './BudgetMembersPanel'
 import { BudgetRecurrencesPanel } from './BudgetRecurrencesPanel'
@@ -24,6 +26,9 @@ const SCOPE_COLORS: Record<BudgetScope, string> = {
   company: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300',
 }
 
+const TAB_VALUES = ['transactions', 'categories', 'members', 'recurring', 'report'] as const
+type TabValue = (typeof TAB_VALUES)[number]
+
 export function BudgetDetailPage() {
   const { t } = useTranslation()
   const { budgetId } = useParams({ from: '/_dashboard/dashboard/budgets/$budgetId' })
@@ -31,6 +36,10 @@ export function BudgetDetailPage() {
   const deleteBudget = useDeleteBudget()
   const [editOpen, setEditOpen] = React.useState(false)
   const [addTxOpen, setAddTxOpen] = React.useState(false)
+  const [tab, setTab] = useQueryState<TabValue>(
+    'tab',
+    parseAsStringLiteral(TAB_VALUES).withDefault('transactions'),
+  )
 
   if (isLoading) {
     return (
@@ -62,7 +71,7 @@ export function BudgetDetailPage() {
   }
 
   return (
-    <div className="p-6 space-y-6 max-w-5xl mx-auto">
+    <div className="p-6 space-y-6">
       {/* Back nav */}
       <Link
         to="/dashboard/budgets"
@@ -148,12 +157,13 @@ export function BudgetDetailPage() {
       {health && <BudgetSummaryCards health={health} currency={budget.currency} />}
 
       {/* Tabs */}
-      <Tabs defaultValue="transactions" className="space-y-4">
+      <Tabs value={tab} onValueChange={(v) => setTab(v as TabValue)} className="space-y-4">
         <TabsList className="w-full justify-start">
           <TabsTrigger value="transactions">{t('budgets.detail.tabs.transactions')}</TabsTrigger>
           <TabsTrigger value="categories">{t('budgets.detail.tabs.categories')}</TabsTrigger>
           <TabsTrigger value="members">{t('budgets.detail.tabs.members')}</TabsTrigger>
           <TabsTrigger value="recurring">{t('budgets.detail.tabs.recurring')}</TabsTrigger>
+          <TabsTrigger value="report">{t('budgets.detail.tabs.report')}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="transactions">
@@ -174,6 +184,10 @@ export function BudgetDetailPage() {
 
         <TabsContent value="recurring">
           <BudgetRecurrencesPanel budgetId={budget.id} currency={budget.currency} />
+        </TabsContent>
+
+        <TabsContent value="report">
+          <BudgetAnnualReport budgetId={budget.id} currency={budget.currency} />
         </TabsContent>
       </Tabs>
 

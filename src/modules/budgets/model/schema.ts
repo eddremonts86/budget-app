@@ -63,6 +63,10 @@ export const updateRecurrenceRuleSchema = z.object({
   status: z.enum(['active', 'paused', 'completed']).optional(),
   description: z.string().max(200).optional().nullable(),
   amount: z.number().int().optional(),
+  frequency: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'semiannual', 'annual']).optional(),
+  interval: z.number().int().min(1).max(12).optional(),
+  categoryId: z.string().optional().nullable(),
+  pausedReason: z.string().optional().nullable(),
 })
 
 export type CreateBudgetInput = z.infer<typeof createBudgetSchema>
@@ -70,3 +74,4 @@ export type UpdateBudgetInput = z.infer<typeof updateBudgetSchema>
 export type CreateBudgetMemberInput = z.infer<typeof createBudgetMemberSchema>
 export type UpsertBudgetCategoryLimitInput = z.infer<typeof upsertBudgetCategoryLimitSchema>
 export type CreateRecurrenceRuleInput = z.infer<typeof createRecurrenceRuleSchema>
+export type UpdateRecurrenceRuleInput = z.infer<typeof updateRecurrenceRuleSchema>

@@ -150,9 +150,7 @@ export function BudgetMiniCharts({ budgetId, currency }: BudgetMiniChartsProps) 
         <div className="flex flex-col gap-2.5 px-0.5">
           {spendRows.map((row, i) => {
             const hasLimit = row.budget > 0
-            const pct = hasLimit
-              ? Math.min(100, Math.round((row.actual / row.budget) * 100))
-              : 100
+            const pct = hasLimit ? Math.min(100, Math.round((row.actual / row.budget) * 100)) : 100
             const isOver = hasLimit && row.actual > row.budget
             const limitLabel = hasLimit ? formatAmount(row.budget, currency) : '∞'
             return (

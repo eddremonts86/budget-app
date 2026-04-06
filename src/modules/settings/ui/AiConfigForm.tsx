@@ -11,6 +11,7 @@ import {
 } from '@tabler/icons-react'
 import { useForm } from '@tanstack/react-form'
 import { useStore } from '@tanstack/react-store'
+import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import type { AiConfigFormData, AiProvider } from '@/modules/ai/config'
@@ -131,8 +132,15 @@ const PROVIDER_DEFAULTS: Record<AiProvider, Partial<AiConfigFormData>> = {
   },
 }
 
+const AI_CONFIG_TABS = ['status', 'configurations', 'logs'] as const
+type AiConfigTab = (typeof AI_CONFIG_TABS)[number]
+
 export function AiConfigForm() {
   const { t } = useTranslation()
+  const [tab, setTab] = useQueryState<AiConfigTab>(
+    'tab',
+    parseAsStringLiteral(AI_CONFIG_TABS).withDefault('status'),
+  )
   const { data: config, isLoading: isConfigLoading } = useAiConfig()
   const { data: configStore } = useAiConfigStore()
   const updateMutation = useUpdateAiConfig()
@@ -388,7 +396,11 @@ export function AiConfigForm() {
       }}
       className="space-y-6"
     >
-      <Tabs defaultValue="status" className="w-full space-y-6">
+      <Tabs
+        value={tab}
+        onValueChange={(v) => setTab(v as AiConfigTab)}
+        className="w-full space-y-6"
+      >
         <TabsList
           variant="line"
           className="grid w-full grid-cols-3 border-b rounded-none h-auto p-0 bg-transparent"
@@ -490,7 +502,12 @@ export function AiConfigForm() {
                       role="button"
                       tabIndex={0}
                       onClick={() => handleProviderChange(providerId)}
-                      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handleProviderChange(providerId) } }}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault()
+                          handleProviderChange(providerId)
+                        }
+                      }}
                       className={`group relative flex flex-col items-center text-center p-6 rounded-xl border transition-all duration-300 cursor-pointer hover:-translate-y-1 ${
                         isActive
                           ? 'bg-black/80 border-primary shadow-md ring-1 ring-primary/20'
