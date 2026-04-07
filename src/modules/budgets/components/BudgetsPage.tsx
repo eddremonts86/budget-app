@@ -1,4 +1,4 @@
-import { IconPlus, IconWallet, IconAlertTriangle, IconUsers } from '@tabler/icons-react'
+import { IconPlus, IconWallet, IconAlertTriangle, IconUsers, IconUpload } from '@tabler/icons-react'
 import { Link } from '@tanstack/react-router'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
@@ -10,6 +10,9 @@ import { formatAmount } from '../model/period-utils'
 import type { BudgetHealthStatus, BudgetScope } from '../model/types'
 import { BudgetMiniCharts } from './BudgetMiniCharts'
 import { CreateBudgetSheet } from './CreateBudgetSheet'
+import { BudgetImportWizard } from './BudgetImportWizard'
+import type { ImportOverride } from './BudgetImportWizard'
+import type { BudgetImport } from '../api/budget-import.queries'
 
 const SCOPE_COLORS: Record<BudgetScope, string> = {
   personal: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300',
@@ -30,7 +33,25 @@ const HEALTH_PROGRESS_COLOR: Record<BudgetHealthStatus, string> = {
 export function BudgetsPage() {
   const { t } = useTranslation()
   const [createOpen, setCreateOpen] = React.useState(false)
+  const [importOpen, setImportOpen] = React.useState(false)
+  const [pendingImportId, setPendingImportId] = React.useState<string | null>(null)
+  const [pendingOverrides, setPendingOverrides] = React.useState<ImportOverride[]>([])
   const { data: budgets, isLoading } = useBudgets()
+
+  function handleImportComplete(result: BudgetImport, overrides: ImportOverride[]) {
+    setPendingImportId(result.id)
+    setPendingOverrides(overrides)
+    setImportOpen(false)
+    setCreateOpen(true)
+  }
+
+  function handleCreateOpenChange(open: boolean) {
+    setCreateOpen(open)
+    if (!open) {
+      setPendingImportId(null)
+      setPendingOverrides([])
+    }
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -40,17 +61,23 @@ export function BudgetsPage() {
           <h1 className="text-2xl font-bold tracking-tight">{t('budgets.title')}</h1>
           <p className="text-muted-foreground">{t('budgets.description')}</p>
         </div>
-        <Button onClick={() => setCreateOpen(true)} className="gap-2">
-          <IconPlus className="size-4" />
-          {t('budgets.actions.create')}
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
+            <IconUpload className="size-4" />
+            {t('budgets.import.actions.import')}
+          </Button>
+          <Button onClick={() => setCreateOpen(true)} className="gap-2">
+            <IconPlus className="size-4" />
+            {t('budgets.actions.create')}
+          </Button>
+        </div>
       </div>
 
       {/* Budget Cards Grid */}
       {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-x-4">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 rounded-xl" />
+            <Skeleton key={i} className="h-48 rounded-xl mb-4 break-inside-avoid" />
           ))}
         </div>
       ) : !budgets?.length ? (
@@ -68,7 +95,7 @@ export function BudgetsPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="columns-1 md:columns-2 lg:columns-3 gap-x-4">
           {budgets.map((budget) => {
             const health = budget.health
             const usagePct = health?.usagePct ?? 0
@@ -79,7 +106,7 @@ export function BudgetsPage() {
                 key={budget.id}
                 to="/dashboard/budgets/$budgetId"
                 params={{ budgetId: budget.id }}
-                className="block group"
+                className="block group mb-4 break-inside-avoid"
               >
                 <div
                   className={cn(
@@ -188,7 +215,18 @@ export function BudgetsPage() {
         </div>
       )}
 
-      <CreateBudgetSheet open={createOpen} onOpenChange={setCreateOpen} />
+      <CreateBudgetSheet
+        open={createOpen}
+        onOpenChange={handleCreateOpenChange}
+        importId={pendingImportId}
+        importOverrides={pendingOverrides}
+      />
+
+      <BudgetImportWizard
+        open={importOpen}
+        onOpenChange={setImportOpen}
+        onImportComplete={handleImportComplete}
+      />
     </div>
   )
 }

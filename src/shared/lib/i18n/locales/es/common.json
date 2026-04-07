@@ -605,6 +605,7 @@
     "report": {
       "title": "Reporte Anual",
       "subtitle": "Gastos e ingresos por categoría a lo largo de los meses",
+      "item": "Transacciones",
       "year": "Año",
       "category": "Categoría",
       "totalExpenses": "Total Gastos",
@@ -618,7 +619,9 @@
       "summarySection": "Resumen",
       "noData": "Sin transacciones para {{year}}",
       "showIncome": "Mostrar filas de ingresos",
-      "hideIncome": "Ocultar filas de ingresos"
+      "hideIncome": "Ocultar filas de ingresos",
+      "directLabel": "no planificado",
+      "directExpenseLabel": "no planificado"
     },
     "alerts": {
       "overBudget": "presupuesto(s) sobre el límite"
@@ -739,6 +742,48 @@
       "refreshBalance": "Actualizar balance",
       "refreshOverview": "Actualizar resumen",
       "refreshCategories": "Actualizar categorías"
+    },
+    "import": {
+      "title": "Importar Presupuesto",
+      "description": "Sube un extracto bancario para analizar y crear un presupuesto con datos reales.",
+      "upload": {
+        "dropLabel": "Suelta el archivo aquí, o haz clic para seleccionar",
+        "dropSub": "Soportado: CSV, XLSX, extractos PDF bancarios",
+        "maxSize": "Máx {{size}}",
+        "supportedHint": "Compatible con cualquier formato bancario",
+        "supportedDesc": "Las columnas se detectan automáticamente en inglés, español y danés. Fechas y montos se manejan automáticamente."
+      },
+      "analysis": {
+        "title": "Resultados del Análisis",
+        "processing": "Analizando transacciones…",
+        "parsed": "Procesado",
+        "transactions": "transacciones",
+        "recurringFound": "{{count}} transacciones recurrentes detectadas",
+        "confidence": "Confianza",
+        "noRecurring": "No se detectaron transacciones recurrentes.",
+        "dateRange": "Período: {{from}} — {{to}}"
+      },
+      "confirm": {
+        "title": "Listo para Crear Presupuesto",
+        "readyTitle": "Importación lista",
+        "readyDesc": "{{recurrences}} reglas recurrentes y {{transactions}} transacciones en total. Crea el presupuesto para aplicarlas.",
+        "incomeRecurrences": "Ingresos recurrentes",
+        "expenseRecurrences": "Gastos recurrentes",
+        "nextStepHint": "Las reglas recurrentes se añadirán al nuevo presupuesto. Puedes revisarlas después de crearlo."
+      },
+      "actions": {
+        "import": "Importar",
+        "next": "Continuar",
+        "back": "Atrás",
+        "retry": "Intentar de nuevo",
+        "createBudget": "Crear Presupuesto",
+        "downloadOriginal": "Descargar archivo original"
+      },
+      "errors": {
+        "fileTooLarge": "El archivo supera el límite de 10 MB.",
+        "unsupportedType": "Solo se admiten archivos CSV, XLSX y PDF.",
+        "parseFailed": "No se pudo leer el archivo. Asegúrate de que sea un extracto bancario válido."
+      }
     }
   }
 }

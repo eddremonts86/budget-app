@@ -1,6 +1,6 @@
 import { Document, Page, StyleSheet, Text, View } from '@react-pdf/renderer'
 import { format } from 'date-fns'
-import { formatAmount } from '../model/period-utils'
+
 import type { BudgetRecurrenceFrequency } from '../model/types'
 
 // ---------------------------------------------------------------------------
@@ -227,8 +227,35 @@ const s = StyleSheet.create({
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-function fmt(cents: number, currency: string): string {
-  return formatAmount(cents, currency)
+function splitAmount(cents: number, currency: string): { code: string; number: string } {
+  const parts = new Intl.NumberFormat('en-US', { style: 'currency', currency }).formatToParts(
+    cents / 100,
+  )
+  let code = ''
+  const numParts: string[] = []
+  let afterCode = false
+  for (const p of parts) {
+    if (p.type === 'currency') {
+      code = p.value
+      afterCode = true
+    } else if (p.type === 'literal' && afterCode && numParts.length === 0) {
+      // swallow space after currency code
+    } else {
+      numParts.push(p.value)
+    }
+  }
+  return { code, number: numParts.join('') }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function PdfAmount({ cents, currency, style }: { cents: number; currency: string; style?: any }) {
+  const { code, number } = splitAmount(cents, currency)
+  return (
+    <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
+      <Text style={{ fontSize: 4.5, color: '#9ca3af', marginRight: 1 }}>{code}</Text>
+      <Text style={style}>{number}</Text>
+    </View>
+  )
 }
 
 function monthLabel(m: string): string {
@@ -320,7 +347,11 @@ function RuleRow({
         return (
           <View key={m} style={s.amountCell}>
             {val > 0 ? (
-              <Text style={[s.amountText, { color: amountColor }]}>{fmt(val, currency)}</Text>
+              <PdfAmount
+                cents={val}
+                currency={currency}
+                style={[s.amountText, { color: amountColor }]}
+              />
             ) : (
               <Text style={s.dashText}>—</Text>
             )}
@@ -328,9 +359,15 @@ function RuleRow({
         )
       })}
       <View style={s.totalCell}>
-        <Text style={[s.totalText, { color: amountColor }]}>
-          {total > 0 ? fmt(total, currency) : '—'}
-        </Text>
+        {total > 0 ? (
+          <PdfAmount
+            cents={total}
+            currency={currency}
+            style={[s.totalText, { color: amountColor }]}
+          />
+        ) : (
+          <Text style={s.dashText}>—</Text>
+        )}
       </View>
     </View>
   )
@@ -369,7 +406,11 @@ function DirectRow({
         return (
           <View key={m} style={s.amountCell}>
             {val > 0 ? (
-              <Text style={[s.amountText, { color: amountColor }]}>{fmt(val, currency)}</Text>
+              <PdfAmount
+                cents={val}
+                currency={currency}
+                style={[s.amountText, { color: amountColor }]}
+              />
             ) : (
               <Text style={s.dashText}>—</Text>
             )}
@@ -377,7 +418,11 @@ function DirectRow({
         )
       })}
       <View style={s.totalCell}>
-        <Text style={[s.totalText, { color: amountColor }]}>{fmt(total, currency)}</Text>
+        <PdfAmount
+          cents={total}
+          currency={currency}
+          style={[s.totalText, { color: amountColor }]}
+        />
       </View>
     </View>
   )
@@ -424,9 +469,11 @@ function SummaryRow({
         return (
           <View key={m} style={s.amountCell}>
             {val !== 0 ? (
-              <Text style={[s.amountText, { color: amountColor, fontFamily: 'Helvetica-Bold' }]}>
-                {fmt(val, currency)}
-              </Text>
+              <PdfAmount
+                cents={val}
+                currency={currency}
+                style={[s.amountText, { color: amountColor, fontFamily: 'Helvetica-Bold' }]}
+              />
             ) : (
               <Text style={s.dashText}>—</Text>
             )}
@@ -434,7 +481,11 @@ function SummaryRow({
         )
       })}
       <View style={[s.totalCell, { backgroundColor: bg }]}>
-        <Text style={[s.totalText, { color: amountColor }]}>{fmt(total, currency)}</Text>
+        <PdfAmount
+          cents={total}
+          currency={currency}
+          style={[s.totalText, { color: amountColor }]}
+        />
       </View>
     </View>
   )

@@ -1028,6 +1028,7 @@
     "report": {
       "title": "Årsrapport",
       "subtitle": "Udgifter og indtægter efter kategori på tværs af måneder",
+      "item": "Transaktioner",
       "year": "År",
       "category": "Kategori",
       "totalExpenses": "Samlede udgifter",
@@ -1041,7 +1042,9 @@
       "summarySection": "Oversigt",
       "noData": "Ingen transaktioner fundet for {{year}}",
       "showIncome": "Vis indtægtsrækker",
-      "hideIncome": "Skjul indtægtsrækker"
+      "hideIncome": "Skjul indtægtsrækker",
+      "directLabel": "ikke planlagt",
+      "directExpenseLabel": "ikke planlagt"
     },
     "alerts": {
       "overBudget": "budget(ter) over grænsen"
@@ -1165,6 +1168,48 @@
       "refreshBalance": "Opdater balance",
       "refreshOverview": "Opdater oversigt",
       "refreshCategories": "Opdater kategorier"
+    },
+    "import": {
+      "title": "Importer Budget",
+      "description": "Upload et kontoudtog for at analysere og oprette et budget med rigtige data.",
+      "upload": {
+        "dropLabel": "Slip filen her, eller klik for at vælge",
+        "dropSub": "Understøttet: CSV, XLSX, PDF kontoudtog",
+        "maxSize": "Maks {{size}}",
+        "supportedHint": "Kompatibel med alle bankformater",
+        "supportedDesc": "Kolonner registreres automatisk på engelsk, spansk og dansk. Datoer og beløb håndteres automatisk."
+      },
+      "analysis": {
+        "title": "Analyseresultater",
+        "processing": "Analyserer transaktioner…",
+        "parsed": "Behandlet",
+        "transactions": "transaktioner",
+        "recurringFound": "{{count}} tilbagevendende transaktioner fundet",
+        "confidence": "Sikkerhed",
+        "noRecurring": "Ingen tilbagevendende transaktioner fundet.",
+        "dateRange": "Periode: {{from}} — {{to}}"
+      },
+      "confirm": {
+        "title": "Klar til at oprette budget",
+        "readyTitle": "Import klar",
+        "readyDesc": "{{recurrences}} tilbagevendende regler og {{transactions}} transaktioner i alt. Opret budgettet for at anvende dem.",
+        "incomeRecurrences": "Tilbagevendende indkomst",
+        "expenseRecurrences": "Tilbagevendende udgifter",
+        "nextStepHint": "Tilbagevendende regler tilføjes til det nye budget. Du kan gennemgå og justere dem efter oprettelsen."
+      },
+      "actions": {
+        "import": "Importer",
+        "next": "Fortsæt",
+        "back": "Tilbage",
+        "retry": "Prøv igen",
+        "createBudget": "Opret Budget",
+        "downloadOriginal": "Download original fil"
+      },
+      "errors": {
+        "fileTooLarge": "Filen overstiger grænsen på 10 MB.",
+        "unsupportedType": "Kun CSV, XLSX og PDF-filer er understøttet.",
+        "parseFailed": "Kunne ikke læse filen. Kontroller at det er et gyldigt kontoudtog."
+      }
     }
   }
 }

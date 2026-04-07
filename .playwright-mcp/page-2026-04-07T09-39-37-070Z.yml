@@ -1,0 +1,119 @@
+- generic [ref=e2]:
+  - generic [ref=e5]:
+    - list [ref=e7]:
+      - listitem [ref=e8]:
+        - link "Acme Inc." [ref=e9] [cursor=pointer]:
+          - /url: /
+          - img [ref=e10]
+          - generic [ref=e13]: Acme Inc.
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - generic [ref=e16]: Core
+        - list [ref=e18]:
+          - listitem [ref=e19]:
+            - link "Dashboard" [ref=e20] [cursor=pointer]:
+              - /url: /dashboard
+              - img [ref=e21]
+              - generic [ref=e25]: Dashboard
+          - listitem [ref=e26]:
+            - button "Search" [ref=e27]:
+              - img [ref=e28]
+              - generic [ref=e31]: Search
+      - generic [ref=e32]:
+        - generic [ref=e33]: Workspace
+        - list [ref=e35]:
+          - listitem [ref=e36]:
+            - link "Todos" [ref=e37] [cursor=pointer]:
+              - /url: /dashboard/todos
+              - img [ref=e38]
+              - generic [ref=e41]: Todos
+          - listitem [ref=e42]:
+            - link "Categories" [ref=e43] [cursor=pointer]:
+              - /url: /dashboard/categories
+              - img [ref=e44]
+              - generic [ref=e47]: Categories
+          - listitem [ref=e48]:
+            - link "Projects" [ref=e49] [cursor=pointer]:
+              - /url: /dashboard/projects
+              - img [ref=e50]
+              - generic [ref=e52]: Projects
+          - listitem [ref=e53]:
+            - link "Budgets" [ref=e54] [cursor=pointer]:
+              - /url: /dashboard/budgets
+              - img [ref=e55]
+              - generic [ref=e58]: Budgets
+      - generic [ref=e59]:
+        - generic [ref=e60]: Operations
+        - list [ref=e62]:
+          - listitem [ref=e63]:
+            - link "Transactions" [ref=e64] [cursor=pointer]:
+              - /url: /dashboard/transactions
+              - img [ref=e65]
+              - generic [ref=e71]: Transactions
+          - listitem [ref=e72]:
+            - link "Analytics" [ref=e73] [cursor=pointer]:
+              - /url: /dashboard/analytics
+              - img [ref=e74]
+              - generic [ref=e78]: Analytics
+      - generic [ref=e79]:
+        - generic [ref=e80]: Administration
+        - list [ref=e82]:
+          - listitem [ref=e83]:
+            - link "Users" [ref=e84] [cursor=pointer]:
+              - /url: /dashboard/users
+              - img [ref=e85]
+              - generic [ref=e90]: Users
+          - listitem [ref=e91]:
+            - link "Team" [ref=e92] [cursor=pointer]:
+              - /url: /dashboard/team
+              - img [ref=e93]
+              - generic [ref=e98]: Team
+          - listitem [ref=e99]:
+            - link "Settings" [ref=e100] [cursor=pointer]:
+              - /url: /dashboard/settings
+              - img [ref=e101]
+              - generic [ref=e104]: Settings
+      - list [ref=e107]:
+        - listitem [ref=e108]:
+          - link "Get Help" [ref=e109] [cursor=pointer]:
+            - /url: /dashboard/help
+            - img [ref=e110]
+            - generic [ref=e113]: Get Help
+    - list [ref=e115]:
+      - listitem [ref=e116]:
+        - button "LO Local Test User local-test@example.com" [ref=e117]:
+          - generic [ref=e119]: LO
+          - generic [ref=e120]:
+            - generic [ref=e121]: Local Test User
+            - generic [ref=e122]: local-test@example.com
+          - img [ref=e123]
+  - main [ref=e127]:
+    - generic [ref=e128]:
+      - generic [ref=e129]:
+        - button "Toggle Sidebar" [ref=e130]:
+          - img
+          - generic [ref=e131]: Toggle Sidebar
+        - navigation "breadcrumb" [ref=e132]:
+          - list [ref=e133]:
+            - listitem [ref=e134]:
+              - link "Dashboard" [ref=e135] [cursor=pointer]:
+                - /url: /dashboard
+            - listitem [ref=e136]:
+              - img [ref=e137]
+            - listitem [ref=e139]:
+              - link "Budgets" [disabled] [ref=e140]
+      - link "Go to Homepage" [ref=e142] [cursor=pointer]:
+        - /url: /
+        - img
+        - generic [ref=e143]: Go to Homepage
+    - generic [ref=e146]:
+      - generic [ref=e147]:
+        - heading "Budgets" [level=1] [ref=e148]
+        - paragraph [ref=e149]: Manage and track your financial budgets.
+      - generic [ref=e150]:
+        - button "Import" [ref=e151]:
+          - img
+          - text: Import
+        - button "New Budget" [ref=e152]:
+          - img
+          - text: New Budget

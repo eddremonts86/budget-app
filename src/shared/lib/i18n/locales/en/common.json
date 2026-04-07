@@ -1136,6 +1136,7 @@
     "report": {
       "title": "Annual Report",
       "subtitle": "Expenses and income by category across months",
+      "item": "Transactions",
       "year": "Year",
       "category": "Category",
       "totalExpenses": "Total Expenses",
@@ -1149,7 +1150,9 @@
       "summarySection": "Summary",
       "noData": "No transactions found for {{year}}",
       "showIncome": "Show income rows",
-      "hideIncome": "Hide income rows"
+      "hideIncome": "Hide income rows",
+      "directLabel": "unplanned",
+      "directExpenseLabel": "unplanned"
     },
     "alerts": {
       "overBudget": "budget(s) over limit"
@@ -1273,6 +1276,48 @@
       "refreshBalance": "Refresh balance",
       "refreshOverview": "Refresh overview",
       "refreshCategories": "Refresh categories"
+    },
+    "import": {
+      "title": "Import Budget",
+      "description": "Upload a bank statement to analyze and create a budget from real data.",
+      "upload": {
+        "dropLabel": "Drop your file here, or click to browse",
+        "dropSub": "Supported: CSV, XLSX, PDF bank statements",
+        "maxSize": "Max {{size}}",
+        "supportedHint": "Compatible with any bank format",
+        "supportedDesc": "Columns are auto-detected in English, Spanish, and Danish. Date and amount formats are handled automatically."
+      },
+      "analysis": {
+        "title": "Analysis Results",
+        "processing": "Parsing and analysing transactions…",
+        "parsed": "Parsed",
+        "transactions": "transactions",
+        "recurringFound": "{{count}} recurring transactions detected",
+        "confidence": "Confidence",
+        "noRecurring": "No recurring transactions detected.",
+        "dateRange": "Period: {{from}} — {{to}}"
+      },
+      "confirm": {
+        "title": "Ready to Create Budget",
+        "readyTitle": "Import ready",
+        "readyDesc": "{{recurrences}} recurring rules and {{transactions}} total transactions found. Create the budget to apply them.",
+        "incomeRecurrences": "Recurring income",
+        "expenseRecurrences": "Recurring expenses",
+        "nextStepHint": "Recurring rules will be added to the new budget. You can review and adjust them after creation."
+      },
+      "actions": {
+        "import": "Import",
+        "next": "Continue",
+        "back": "Back",
+        "retry": "Try again",
+        "createBudget": "Create Budget",
+        "downloadOriginal": "Download original file"
+      },
+      "errors": {
+        "fileTooLarge": "File exceeds the 10 MB limit.",
+        "unsupportedType": "Only CSV, XLSX, and PDF files are supported.",
+        "parseFailed": "Could not read the file. Make sure it's a valid bank statement."
+      }
     }
   }
 }

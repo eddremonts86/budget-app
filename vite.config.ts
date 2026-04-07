@@ -92,6 +92,9 @@ const config = defineConfig((configEnv) => {
         },
       ],
     },
+    ssr: {
+      external: ['xlsx', 'pdf-parse'],
+    },
     plugins: [
       !isViteDevtoolsDisabled && devtools(),
       tailwindcss(),

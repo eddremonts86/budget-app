@@ -72,6 +72,36 @@ function getFireMonthsInYear(
 }
 
 // ---------------------------------------------------------------------------
+// Currency display — code small + muted, number prominent
+// ---------------------------------------------------------------------------
+function FormattedCurrency({ amount, currency }: { amount: number; currency: string }) {
+  const parts = new Intl.NumberFormat('en-US', { style: 'currency', currency }).formatToParts(
+    amount / 100,
+  )
+  let code = ''
+  const numParts: string[] = []
+  let afterCode = false
+  for (const p of parts) {
+    if (p.type === 'currency') {
+      code = p.value
+      afterCode = true
+    } else if (p.type === 'literal' && afterCode && numParts.length === 0) {
+      // swallow the space immediately after the currency code
+    } else {
+      numParts.push(p.value)
+    }
+  }
+  return (
+    <>
+      <span className="text-[9px] font-normal tracking-tight text-muted-foreground/40 mr-0.5 select-none">
+        {code}
+      </span>
+      {numParts.join('')}
+    </>
+  )
+}
+
+// ---------------------------------------------------------------------------
 // Shared amount cell
 // ---------------------------------------------------------------------------
 function AmountCell({
@@ -90,7 +120,7 @@ function AmountCell({
   }
   return (
     <td className={cn('px-3 py-2 text-left text-xs tabular-nums', className)}>
-      {formatAmount(value, currency)}
+      <FormattedCurrency amount={value} currency={currency} />
     </td>
   )
 }
@@ -111,10 +141,7 @@ function SectionRow({
     <tr>
       <td
         colSpan={colSpan}
-        className={cn(
-          'px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest sticky left-0',
-          className,
-        )}
+        className={cn('px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest', className)}
       >
         {label}
       </td>
@@ -324,13 +351,13 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
           {t('budgets.report.noData', 'No data for {{year}}', { year })}
         </div>
       ) : (
-        <div className="rounded-xl border overflow-hidden">
+        <div className="rounded-xl border overflow-clip">
           <div className="overflow-x-auto">
             <table className="w-full text-sm border-collapse">
               {/* ── Column headers ── */}
               <thead>
                 <tr className="border-b bg-muted/40">
-                  <th className="sticky left-0 z-20 bg-muted/40 px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground min-w-48 border-r border-border/60">
+                  <th className="sticky left-0 z-20 bg-card px-4 py-2.5 text-left text-xs font-semibold text-muted-foreground min-w-48 border-r border-border/60">
                     {t('budgets.report.item', 'Item')}
                   </th>
                   {months.map((m) => {
@@ -429,24 +456,31 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                           />
                         ))}
                         <td className="px-3 py-2.5 text-left text-xs font-semibold tabular-nums border-l border-border/60 text-emerald-700 dark:text-emerald-400">
-                          {ruleTotal > 0 ? formatAmount(ruleTotal, currency) : '—'}
+                          {ruleTotal > 0 ? (
+                            <FormattedCurrency amount={ruleTotal} currency={currency} />
+                          ) : (
+                            '—'
+                          )}
                         </td>
                       </tr>
                     )
                   })
                 )}
 
-                {/* Direct (non-recurring) income transactions */}
+                {/* Direct (non-recurring) income transactions — unplanned, high visibility */}
                 {(reportData?.directTransactions ?? [])
                   .filter((d) => d.totalIncome > 0)
                   .map((d) => (
                     <tr
                       key={`direct-inc-${d.description}`}
-                      className="border-b border-border/30 transition-colors hover:bg-muted/10"
+                      className="border-b border-amber-300/30 dark:border-amber-700/20 bg-amber-500/6 transition-colors hover:bg-amber-500/15"
                     >
-                      <td className="sticky left-0 z-10 bg-background px-4 py-2 border-r border-border/60">
+                      <td className="sticky left-0 z-10 bg-amber-50 dark:bg-amber-950 px-4 py-2 border-r border-amber-300/40 dark:border-amber-700/30">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs font-medium truncate">{d.description}</span>
+                          <AlertTriangle className="size-3 text-amber-500 shrink-0" />
+                          <span className="text-xs font-semibold truncate text-amber-900 dark:text-amber-100">
+                            {d.description}
+                          </span>
                           {d.categoryName && (
                             <span
                               className="text-[10px] px-1.5 py-0.5 rounded-full border shrink-0"
@@ -464,8 +498,8 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
-                          {t('budgets.report.directLabel', 'direct')}
+                        <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-semibold uppercase tracking-wide">
+                          {t('budgets.report.directLabel', 'unplanned')}
                         </p>
                       </td>
                       {months.map((m) => (
@@ -473,20 +507,20 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                           key={m}
                           value={d.income[m] ?? 0}
                           currency={currency}
-                          className="text-emerald-700 dark:text-emerald-400"
+                          className="text-emerald-700 dark:text-emerald-400 font-semibold"
                         />
                       ))}
-                      <td className="px-3 py-2 text-left text-xs font-semibold tabular-nums border-l border-border/60 text-emerald-700 dark:text-emerald-400">
-                        {formatAmount(d.totalIncome, currency)}
+                      <td className="px-3 py-2 text-left text-xs font-bold tabular-nums border-l border-amber-300/40 dark:border-amber-700/30 text-emerald-700 dark:text-emerald-400">
+                        <FormattedCurrency amount={d.totalIncome} currency={currency} />
                       </td>
                     </tr>
                   ))}
 
                 {/* Projected income row (blue) */}
                 <tr className="border-b border-border/40 bg-blue-500/5">
-                  <td className="sticky left-0 z-10 bg-blue-500/5 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-blue-600 dark:text-blue-400">
+                  <td className="sticky left-0 z-10 bg-blue-50 dark:bg-blue-950 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-blue-600 dark:text-blue-400">
                     {t('budgets.report.projectedIncome', 'Projected Income')}
-                    <span className="block text-[10px] font-normal text-muted-foreground">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {t('budgets.report.projectedLabel', 'estimated')}
                     </span>
                   </td>
@@ -501,7 +535,7 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                         )}
                       >
                         {val > 0 ? (
-                          formatAmount(val, currency)
+                          <FormattedCurrency amount={val} currency={currency} />
                         ) : (
                           <span className="text-muted-foreground/25">—</span>
                         )}
@@ -509,15 +543,19 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                     )
                   })}
                   <td className="px-3 py-2.5 text-left text-xs font-bold tabular-nums border-l border-border/60 text-blue-600 dark:text-blue-400">
-                    {projectedTotalIncome > 0 ? formatAmount(projectedTotalIncome, currency) : '—'}
+                    {projectedTotalIncome > 0 ? (
+                      <FormattedCurrency amount={projectedTotalIncome} currency={currency} />
+                    ) : (
+                      '—'
+                    )}
                   </td>
                 </tr>
 
                 {/* Total real income row */}
                 <tr className="border-b-2 border-border bg-emerald-500/5">
-                  <td className="sticky left-0 z-10 bg-emerald-500/5 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-emerald-800 dark:text-emerald-300">
+                  <td className="sticky left-0 z-10 bg-emerald-50 dark:bg-emerald-950 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-emerald-800 dark:text-emerald-300">
                     {t('budgets.report.totalIncome', 'Total Income')}
-                    <span className="block text-[10px] font-normal text-muted-foreground">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {t('budgets.report.realLabel', 'actual')}
                     </span>
                   </td>
@@ -533,7 +571,10 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                     />
                   ))}
                   <td className="px-3 py-2.5 text-left text-xs font-bold tabular-nums border-l border-border/60 text-emerald-700 dark:text-emerald-400">
-                    {formatAmount(reportData?.summary.totalIncome ?? 0, currency)}
+                    <FormattedCurrency
+                      amount={reportData?.summary.totalIncome ?? 0}
+                      currency={currency}
+                    />
                   </td>
                 </tr>
 
@@ -610,24 +651,31 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                           />
                         ))}
                         <td className="px-3 py-2.5 text-left text-xs font-semibold tabular-nums border-l border-border/60 text-red-600 dark:text-red-400">
-                          {ruleTotal > 0 ? formatAmount(ruleTotal, currency) : '—'}
+                          {ruleTotal > 0 ? (
+                            <FormattedCurrency amount={ruleTotal} currency={currency} />
+                          ) : (
+                            '—'
+                          )}
                         </td>
                       </tr>
                     )
                   })
                 )}
 
-                {/* Direct (non-recurring) expense transactions */}
+                {/* Direct (non-recurring) expense transactions — unplanned, high visibility */}
                 {(reportData?.directTransactions ?? [])
                   .filter((d) => d.totalExpenses > 0)
                   .map((d) => (
                     <tr
                       key={`direct-exp-${d.description}`}
-                      className="border-b border-border/30 transition-colors hover:bg-muted/10"
+                      className="border-b border-amber-300/30 dark:border-amber-700/20 bg-amber-500/6 transition-colors hover:bg-amber-500/15"
                     >
-                      <td className="sticky left-0 z-10 bg-background px-4 py-2 border-r border-border/60">
+                      <td className="sticky left-0 z-10 bg-amber-50 dark:bg-amber-950 px-4 py-2 border-r border-amber-300/40 dark:border-amber-700/30">
                         <div className="flex items-center gap-2 min-w-0">
-                          <span className="text-xs font-medium truncate">{d.description}</span>
+                          <AlertTriangle className="size-3 text-amber-500 shrink-0" />
+                          <span className="text-xs font-semibold truncate text-amber-900 dark:text-amber-100">
+                            {d.description}
+                          </span>
                           {d.categoryName && (
                             <span
                               className="text-[10px] px-1.5 py-0.5 rounded-full border shrink-0"
@@ -645,8 +693,8 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                             </span>
                           )}
                         </div>
-                        <p className="text-[10px] text-muted-foreground mt-0.5">
-                          {t('budgets.report.directLabel', 'direct')}
+                        <p className="text-[10px] text-amber-600 dark:text-amber-400 mt-0.5 font-semibold uppercase tracking-wide">
+                          {t('budgets.report.directExpenseLabel', 'unplanned')}
                         </p>
                       </td>
                       {months.map((m) => (
@@ -654,20 +702,20 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                           key={m}
                           value={d.expenses[m] ?? 0}
                           currency={currency}
-                          className="text-red-600 dark:text-red-400"
+                          className="text-amber-700 dark:text-amber-400 font-semibold"
                         />
                       ))}
-                      <td className="px-3 py-2 text-left text-xs font-semibold tabular-nums border-l border-border/60 text-red-600 dark:text-red-400">
-                        {formatAmount(d.totalExpenses, currency)}
+                      <td className="px-3 py-2 text-left text-xs font-bold tabular-nums border-l border-amber-300/40 dark:border-amber-700/30 text-amber-700 dark:text-amber-400">
+                        <FormattedCurrency amount={d.totalExpenses} currency={currency} />
                       </td>
                     </tr>
                   ))}
 
                 {/* Projected expenses row (blue) */}
                 <tr className="border-b border-border/40 bg-blue-500/5">
-                  <td className="sticky left-0 z-10 bg-blue-500/5 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-blue-600 dark:text-blue-400">
+                  <td className="sticky left-0 z-10 bg-blue-50 dark:bg-blue-950 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-blue-600 dark:text-blue-400">
                     {t('budgets.report.projectedExpenses', 'Projected Expenses')}
-                    <span className="block text-[10px] font-normal text-muted-foreground">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {t('budgets.report.projectedLabel', 'estimated')}
                     </span>
                   </td>
@@ -682,7 +730,7 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                         )}
                       >
                         {val > 0 ? (
-                          formatAmount(val, currency)
+                          <FormattedCurrency amount={val} currency={currency} />
                         ) : (
                           <span className="text-muted-foreground/25">—</span>
                         )}
@@ -690,17 +738,19 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                     )
                   })}
                   <td className="px-3 py-2.5 text-left text-xs font-bold tabular-nums border-l border-border/60 text-blue-600 dark:text-blue-400">
-                    {projectedTotalExpenses > 0
-                      ? formatAmount(projectedTotalExpenses, currency)
-                      : '—'}
+                    {projectedTotalExpenses > 0 ? (
+                      <FormattedCurrency amount={projectedTotalExpenses} currency={currency} />
+                    ) : (
+                      '—'
+                    )}
                   </td>
                 </tr>
 
                 {/* Total real expenses row */}
                 <tr className="border-b-2 border-border bg-red-500/5">
-                  <td className="sticky left-0 z-10 bg-red-500/5 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-red-700 dark:text-red-400">
+                  <td className="sticky left-0 z-10 bg-red-50 dark:bg-red-950 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-red-700 dark:text-red-400">
                     {t('budgets.report.totalExpenses', 'Total Expenses')}
-                    <span className="block text-[10px] font-normal text-muted-foreground">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {t('budgets.report.realLabel', 'actual')}
                     </span>
                   </td>
@@ -716,15 +766,18 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                     />
                   ))}
                   <td className="px-3 py-2.5 text-left text-xs font-bold tabular-nums border-l border-border/60 text-red-600 dark:text-red-400">
-                    {formatAmount(reportData?.summary.totalExpenses ?? 0, currency)}
+                    <FormattedCurrency
+                      amount={reportData?.summary.totalExpenses ?? 0}
+                      currency={currency}
+                    />
                   </td>
                 </tr>
 
                 {/* ══════════════════ PROJECTED BALANCE */}
                 <tr className="border-b border-border/30 bg-blue-500/15 dark:bg-blue-500/10">
-                  <td className="sticky left-0 z-10 bg-blue-500/15 dark:bg-blue-500/10 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-blue-600 dark:text-blue-400">
+                  <td className="sticky left-0 z-10 bg-blue-100 dark:bg-blue-950 px-4 py-2.5 text-xs font-bold border-r border-border/60 text-blue-600 dark:text-blue-400">
                     {t('budgets.report.projectedBalance', 'Projected Balance')}
-                    <span className="block text-[10px] font-normal text-muted-foreground">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {t('budgets.report.projectedLabel', 'estimated')}
                     </span>
                   </td>
@@ -743,7 +796,7 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                               : 'text-muted-foreground/25',
                         )}
                       >
-                        {bal === 0 ? '—' : formatAmount(bal, currency)}
+                        {bal === 0 ? '—' : <FormattedCurrency amount={bal} currency={currency} />}
                       </td>
                     )
                   })}
@@ -757,15 +810,18 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                           : 'text-muted-foreground',
                     )}
                   >
-                    {formatAmount(projectedTotalIncome - projectedTotalExpenses, currency)}
+                    <FormattedCurrency
+                      amount={projectedTotalIncome - projectedTotalExpenses}
+                      currency={currency}
+                    />
                   </td>
                 </tr>
 
                 {/* ══════════════════ BALANCE */}
                 <tr className="border-b border-border/40 bg-slate-500/10 dark:bg-slate-500/15">
-                  <td className="sticky left-0 z-10 bg-slate-500/10 dark:bg-slate-500/15 px-4 py-2.5 text-xs font-bold border-r border-border/60">
+                  <td className="sticky left-0 z-10 bg-slate-100 dark:bg-slate-900 px-4 py-2.5 text-xs font-bold border-r border-border/60">
                     {t('budgets.report.balance', 'Balance')}
-                    <span className="block text-[10px] font-normal text-muted-foreground">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
                       {t('budgets.report.realLabel', 'actual')}
                     </span>
                   </td>
@@ -791,7 +847,7 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                         ) : (
                           <span className="flex items-center justify-start gap-1">
                             {bal < 0 && <AlertTriangle className="size-3 text-red-500 shrink-0" />}
-                            {formatAmount(bal, currency)}
+                            <FormattedCurrency amount={bal} currency={currency} />
                           </span>
                         )}
                       </td>
@@ -807,15 +863,18 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                           : 'text-muted-foreground',
                     )}
                   >
-                    {formatAmount(reportData?.summary.totalBalance ?? 0, currency)}
+                    <FormattedCurrency
+                      amount={reportData?.summary.totalBalance ?? 0}
+                      currency={currency}
+                    />
                   </td>
                 </tr>
 
                 {/* ══════════════════ ACCUMULATED EXPENSES */}
                 <tr className="bg-orange-500/10 dark:bg-orange-500/8">
-                  <td className="sticky left-0 z-10 bg-orange-500/10 dark:bg-orange-500/8 px-4 py-2.5 text-xs font-semibold text-muted-foreground border-r border-border/60">
+                  <td className="sticky left-0 z-10 bg-orange-50 dark:bg-orange-950 px-4 py-2.5 text-xs font-semibold text-muted-foreground border-r border-border/60">
                     {t('budgets.report.accumExpenses', 'Acum. Expenses')}
-                    <span className="block text-[10px] font-normal">
+                    <span className="block text-[10px] font-semibold uppercase tracking-wide">
                       {t('budgets.report.realLabel', 'actual')}
                     </span>
                   </td>
@@ -830,12 +889,15 @@ export function BudgetAnnualReport({ budgetId, budgetName, currency }: BudgetAnn
                           isFuture && 'opacity-20',
                         )}
                       >
-                        {accum > 0 ? formatAmount(accum, currency) : '—'}
+                        {accum > 0 ? <FormattedCurrency amount={accum} currency={currency} /> : '—'}
                       </td>
                     )
                   })}
                   <td className="px-3 py-2.5 text-left text-xs font-bold tabular-nums border-l border-border/60 text-foreground/60">
-                    {formatAmount(reportData?.summary.totalExpenses ?? 0, currency)}
+                    <FormattedCurrency
+                      amount={reportData?.summary.totalExpenses ?? 0}
+                      currency={currency}
+                    />
                   </td>
                 </tr>
               </tbody>

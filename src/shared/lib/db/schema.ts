@@ -571,3 +571,29 @@ export const projectMembers = pgTable(
     ),
   }),
 )
+
+// --- Budget Import Tables ---
+
+export const budgetImports = pgTable('budget_imports', {
+  id: text('id').primaryKey(),
+  createdBy: text('created_by')
+    .notNull()
+    .references(() => users.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  budgetId: text('budget_id').references((): AnyPgColumn => budgets.id, {
+    onDelete: 'set null',
+    onUpdate: 'cascade',
+  }),
+  fileName: text('file_name').notNull(),
+  fileType: text('file_type').notNull(), // 'csv' | 'xlsx' | 'pdf'
+  fileSize: integer('file_size').notNull(),
+  fileContent: text('file_content').notNull(), // base64 encoded original file
+  status: text('status')
+    .$type<'pending' | 'analyzed' | 'imported' | 'failed'>()
+    .default('pending')
+    .notNull(),
+  rawTransactions: text('raw_transactions'), // JSON string
+  analysis: text('analysis'), // JSON string
+  accountMeta: text('account_meta'), // JSON string: account number, date range, etc.
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
