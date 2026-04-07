@@ -534,6 +534,7 @@
       "searchMembers": "Search team members...",
       "noAvailableUsers": "No more users available.",
       "empty": "No members in this project.",
+      "removeConfirm": "Are you sure you want to remove {{name}} from this project?",
       "success": {
         "added": "Member added successfully",
         "updated": "Role updated successfully",

@@ -19,7 +19,12 @@ interface CreateBudgetSheetProps {
   importOverrides?: ImportOverride[]
 }
 
-export function CreateBudgetSheet({ open, onOpenChange, importId, importOverrides }: CreateBudgetSheetProps) {
+export function CreateBudgetSheet({
+  open,
+  onOpenChange,
+  importId,
+  importOverrides,
+}: CreateBudgetSheetProps) {
   const { t } = useTranslation()
   const createBudget = useCreateBudget()
   const applyImport = useApplyImportTransactions()

@@ -1,15 +1,34 @@
-import { IconPlus, IconWallet, IconAlertTriangle, IconUsers, IconUpload } from '@tabler/icons-react'
-import { Link } from '@tanstack/react-router'
+import {
+  IconPlus,
+  IconWallet,
+  IconAlertTriangle,
+  IconUsers,
+  IconUpload,
+  IconDotsVertical,
+  IconEdit,
+  IconTrash,
+} from '@tabler/icons-react'
+import { Link, useNavigate } from '@tanstack/react-router'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
-import { useBudgets } from '../api/budgets.queries'
+import { useBudgets, useDeleteBudget } from '../api/budgets.queries'
 import { formatAmount } from '../model/period-utils'
 import type { BudgetHealthStatus, BudgetScope } from '../model/types'
+import type { Budget } from '../model/types'
 import { BudgetMiniCharts } from './BudgetMiniCharts'
 import { CreateBudgetSheet } from './CreateBudgetSheet'
+import { EditBudgetSheet } from './EditBudgetSheet'
 import { BudgetImportWizard } from './BudgetImportWizard'
 import type { ImportOverride } from './BudgetImportWizard'
 import type { BudgetImport } from '../api/budget-import.queries'
@@ -32,11 +51,25 @@ const HEALTH_PROGRESS_COLOR: Record<BudgetHealthStatus, string> = {
 
 export function BudgetsPage() {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const [createOpen, setCreateOpen] = React.useState(false)
   const [importOpen, setImportOpen] = React.useState(false)
+  const [editingBudget, setEditingBudget] = React.useState<Budget | null>(null)
   const [pendingImportId, setPendingImportId] = React.useState<string | null>(null)
   const [pendingOverrides, setPendingOverrides] = React.useState<ImportOverride[]>([])
   const { data: budgets, isLoading } = useBudgets()
+  const deleteBudget = useDeleteBudget()
+
+  function handleDeleteBudget(budget: Budget) {
+    toast.error(t('budgets.actions.deleteConfirm'), {
+      description: t('common.undoWarning'),
+      action: {
+        label: t('common.delete'),
+        onClick: () => deleteBudget.mutate(budget.id),
+      },
+      duration: 10000,
+    })
+  }
 
   function handleImportComplete(result: BudgetImport, overrides: ImportOverride[]) {
     setPendingImportId(result.id)
@@ -102,11 +135,15 @@ export function BudgetsPage() {
             const isOver = health?.status === 'over_budget'
 
             return (
-              <Link
+              <div
                 key={budget.id}
-                to="/dashboard/budgets/$budgetId"
-                params={{ budgetId: budget.id }}
-                className="block group mb-4 break-inside-avoid"
+                className="block group mb-4 break-inside-avoid cursor-pointer"
+                onClick={() =>
+                  navigate({
+                    to: '/dashboard/budgets/$budgetId',
+                    params: { budgetId: budget.id },
+                  })
+                }
               >
                 <div
                   className={cn(
@@ -129,14 +166,45 @@ export function BudgetsPage() {
                         </p>
                       )}
                     </div>
-                    <span
-                      className={cn(
-                        'text-xs px-2 py-0.5 rounded-full font-medium shrink-0',
-                        SCOPE_COLORS[budget.scope],
-                      )}
-                    >
-                      {t(`budgets.scopes.${budget.scope}`)}
-                    </span>
+                    <div className="flex items-center gap-1.5 shrink-0">
+                      <span
+                        className={cn(
+                          'text-xs px-2 py-0.5 rounded-full font-medium',
+                          SCOPE_COLORS[budget.scope],
+                        )}
+                      >
+                        {t(`budgets.scopes.${budget.scope}`)}
+                      </span>
+                      {/* Actions menu — stops propagation so card onClick doesn't navigate */}
+                      <div onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="size-6 opacity-0 group-hover:opacity-100 transition-opacity"
+                            >
+                              <IconDotsVertical className="size-3.5" />
+                              <span className="sr-only">{t('common.actions')}</span>
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem onClick={() => setEditingBudget(budget)}>
+                              <IconEdit className="size-4 mr-2" />
+                              {t('common.edit')}
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive focus:text-destructive"
+                              onClick={() => handleDeleteBudget(budget)}
+                            >
+                              <IconTrash className="size-4 mr-2" />
+                              {t('common.delete')}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
+                    </div>
                   </div>
 
                   {/* Period + member count */}
@@ -209,7 +277,7 @@ export function BudgetsPage() {
                   {/* Mini charts */}
                   <BudgetMiniCharts budgetId={budget.id} currency={budget.currency} />
                 </div>
-              </Link>
+              </div>
             )
           })}
         </div>
@@ -221,6 +289,16 @@ export function BudgetsPage() {
         importId={pendingImportId}
         importOverrides={pendingOverrides}
       />
+
+      {editingBudget && (
+        <EditBudgetSheet
+          open={!!editingBudget}
+          onOpenChange={(open) => {
+            if (!open) setEditingBudget(null)
+          }}
+          budget={editingBudget}
+        />
+      )}
 
       <BudgetImportWizard
         open={importOpen}

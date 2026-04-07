@@ -29,6 +29,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { useCreateUser, useUserDirectory } from '@/modules/users'
 import { UserForm, type UserFormValues } from '@/modules/users'
 import type { User } from '@/modules/users'
+import { toast } from '@/shared/lib/toast'
 import {
   useProjectMembers,
   useAddProjectMember,
@@ -101,12 +102,14 @@ export function ProjectMembersList({ projectId }: ProjectMembersListProps) {
   }
 
   const handleRemoveMember = (userId: string, userName: string) => {
-    if (window.confirm(t('projects.members.removeConfirm', { name: userName }))) {
-      removeMember.mutate({
-        projectId,
-        userId,
-      })
-    }
+    toast.error(t('projects.members.removeConfirm', { name: userName }), {
+      description: t('common.undoWarning'),
+      action: {
+        label: t('common.delete'),
+        onClick: () => removeMember.mutate({ projectId, userId }),
+      },
+      duration: 10000,
+    })
   }
 
   if (isLoadingMembers) {

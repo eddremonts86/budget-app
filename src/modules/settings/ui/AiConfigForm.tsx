@@ -293,15 +293,21 @@ export function AiConfigForm() {
     [configStore],
   )
 
-  const handleReset = async () => {
-    if (confirm(t('settings.ai.actions.confirmReset'))) {
-      try {
-        await resetMutation.mutateAsync()
-        form.reset(defaultValues)
-      } catch {
-        // Error handled by mutation and toast
-      }
-    }
+  const handleReset = () => {
+    toast.warning(t('settings.ai.actions.confirmReset'), {
+      action: {
+        label: t('common.confirm'),
+        onClick: async () => {
+          try {
+            await resetMutation.mutateAsync()
+            form.reset(defaultValues)
+          } catch {
+            // Error handled by mutation and toast
+          }
+        },
+      },
+      duration: 10000,
+    })
   }
 
   const handleTestConnection = async () => {

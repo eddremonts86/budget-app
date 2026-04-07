@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useUserDirectory, useUsersByIds } from '@/modules/users'
+import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
 import {
   useCreateTeam,
@@ -135,11 +136,15 @@ export function TeamPage() {
     resetForm()
   }
 
-  const handleDelete = async (team: TeamWithUsers) => {
-    if (!window.confirm(t('team.confirm.delete', { defaultValue: `Delete "${team.name}"?` }))) {
-      return
-    }
-    await deleteTeam.mutateAsync(team.id)
+  const handleDelete = (team: TeamWithUsers) => {
+    toast.error(t('team.confirm.delete', { name: team.name }), {
+      description: t('common.undoWarning'),
+      action: {
+        label: t('common.delete'),
+        onClick: () => deleteTeam.mutate(team.id),
+      },
+      duration: 10000,
+    })
   }
 
   if (isLoading) {

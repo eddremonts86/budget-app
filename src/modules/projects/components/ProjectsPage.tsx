@@ -32,10 +32,7 @@ export function ProjectsPage() {
 
   const handleDelete = async (id: string, name: string) => {
     try {
-      // Check if project has associated tasks
-      const projectTasks = await getTodosByProjectIdFn({
-        data: id,
-      })
+      const projectTasks = await getTodosByProjectIdFn({ data: id })
       const hasTasks = projectTasks && projectTasks.length > 0
 
       if (hasTasks) {
@@ -43,11 +40,22 @@ export function ProjectsPage() {
         return
       }
 
-      if (window.confirm(t('projects.confirm.delete', { name }))) {
-        await deleteProjectFn({ data: id })
-        queryClient.invalidateQueries({ queryKey: projectsKeys.all })
-        toast.success(t('projects.success.deleted'))
-      }
+      toast.error(t('projects.confirm.delete', { name }), {
+        description: t('common.undoWarning'),
+        action: {
+          label: t('common.delete'),
+          onClick: async () => {
+            try {
+              await deleteProjectFn({ data: id })
+              queryClient.invalidateQueries({ queryKey: projectsKeys.all })
+              toast.success(t('projects.success.deleted'))
+            } catch {
+              toast.error(t('projects.error.delete'))
+            }
+          },
+        },
+        duration: 10000,
+      })
     } catch {
       toast.error(t('projects.error.delete'))
     }

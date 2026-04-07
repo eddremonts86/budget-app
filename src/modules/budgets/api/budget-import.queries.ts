@@ -56,7 +56,11 @@ export function useApplyImportTransactions() {
     (data: {
       importId: string
       budgetId: string
-      overrides?: Array<{ description: string; action: 'make_recurring' | 'make_direct'; frequency?: string }>
+      overrides?: Array<{
+        description: string
+        action: 'make_recurring' | 'make_direct'
+        frequency?: string
+      }>
     }) => applyImportTransactionsFn({ data }),
     {
       invalidateKeys: [importKeys.list()],

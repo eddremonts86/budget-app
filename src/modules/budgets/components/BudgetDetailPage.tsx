@@ -5,6 +5,7 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
+import { toast } from '@/shared/lib/toast'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { cn } from '@/shared/lib/utils'
 import { useBudget, useDeleteBudget } from '../api/budgets.queries'
@@ -64,10 +65,15 @@ export function BudgetDetailPage() {
   const health = budget.health
   const isOver = health?.status === 'over_budget'
 
-  const handleDelete = async () => {
-    if (!confirm(t('budgets.actions.deleteConfirm'))) return
-    await deleteBudget.mutateAsync(budget.id)
-    window.history.back()
+  const handleDelete = () => {
+    toast.error(t('budgets.actions.deleteConfirm'), {
+      description: t('common.undoWarning'),
+      action: {
+        label: t('common.delete'),
+        onClick: () => deleteBudget.mutateAsync(budget.id).then(() => window.history.back()),
+      },
+      duration: 10000,
+    })
   }
 
   return (

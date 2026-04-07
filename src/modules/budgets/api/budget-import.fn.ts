@@ -560,7 +560,9 @@ export const applyImportTransactionsFn = createServerFn({ method: 'POST' })
           effectiveRecurrences.push({
             description: desc,
             normalizedKey: desc.toLowerCase(),
-            frequency: (override?.frequency as import('./budget-import.analyzer').RecurrenceFrequency) ?? 'monthly',
+            frequency:
+              (override?.frequency as import('./budget-import.analyzer').RecurrenceFrequency) ??
+              'monthly',
             intervalDays: 30,
             averageAmount: avgAmount,
             amounts: txList.map((t) => t.amount),
@@ -604,7 +606,8 @@ export const applyImportTransactionsFn = createServerFn({ method: 'POST' })
         .where(eq(budgetImports.id, data.importId))
     })
 
-    const recurrenceCount = (analysis?.recurrences?.filter((r) => r.confidence >= 0.5).length ?? 0) +
+    const recurrenceCount =
+      (analysis?.recurrences?.filter((r) => r.confidence >= 0.5).length ?? 0) +
       data.overrides.filter((o) => o.action === 'make_recurring').length
     return { count: rawTransactions.length, recurrenceCount }
   })

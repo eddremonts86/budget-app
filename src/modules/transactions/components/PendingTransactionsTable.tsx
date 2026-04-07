@@ -41,21 +41,26 @@ export function PendingTransactionsTable({
   const usersById = React.useMemo(() => new Map(users.map((user) => [user.id, user])), [users])
 
   const handleApprove = (transaction: Transaction) => {
-    if (confirm(t('transactions.confirm.approve'))) {
-      updateMutation.mutate(
-        {
-          id: transaction.id,
-          data: {
-            status: 'Approved',
-            approvedBy: currentUserId,
-            approvedAt: new Date().toISOString(),
-          },
-        },
-        {
-          onSuccess: () => toast.success(t('transactions.toast.approved')),
-        },
-      )
-    }
+    toast.warning(t('transactions.pending.approveConfirm'), {
+      action: {
+        label: t('transactions.pending.approve'),
+        onClick: () =>
+          updateMutation.mutate(
+            {
+              id: transaction.id,
+              data: {
+                status: 'Approved',
+                approvedBy: currentUserId,
+                approvedAt: new Date().toISOString(),
+              },
+            },
+            {
+              onSuccess: () => toast.success(t('transactions.toast.approved')),
+            },
+          ),
+      },
+      duration: 10000,
+    })
   }
 
   const handleReject = (transaction: Transaction) => {

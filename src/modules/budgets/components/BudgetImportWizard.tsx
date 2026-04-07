@@ -144,7 +144,7 @@ function StepUpload({ onFileSelected }: StepUploadProps) {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4 justify-center h-full">
       {/* Drop zone */}
       <div
         className={cn(
@@ -277,7 +277,11 @@ function RecurringRow({
           isIncome ? 'bg-emerald-100 text-emerald-600' : 'bg-red-100 text-red-600',
         )}
       >
-        {isIncome ? <IconTrendingUp className="size-3.5" /> : <IconTrendingDown className="size-3.5" />}
+        {isIncome ? (
+          <IconTrendingUp className="size-3.5" />
+        ) : (
+          <IconTrendingDown className="size-3.5" />
+        )}
       </div>
       <div className="flex-1 min-w-0">
         <p className="font-medium truncate text-xs">{rec.description}</p>
@@ -287,7 +291,12 @@ function RecurringRow({
             {frequencyLabel(rec.frequency)}
           </span>
           <span className="text-[10px] text-muted-foreground">·</span>
-          <span className={cn('text-[10px] font-mono font-semibold', isIncome ? 'text-emerald-600' : 'text-red-500')}>
+          <span
+            className={cn(
+              'text-[10px] font-mono font-semibold',
+              isIncome ? 'text-emerald-600' : 'text-red-500',
+            )}
+          >
             {isIncome ? '+' : '-'} {formatAmount(absAvg)}
             {hasVariance && (
               <span className="text-muted-foreground font-normal ml-0.5">
@@ -323,6 +332,53 @@ function RecurringRow({
 // Reclassifiable direct row
 // ─────────────────────────────────────────────────────────────────────────────
 
+function DemotedRecurringRow({
+  rec,
+  onRestoreRecurring,
+}: {
+  rec: DetectedRecurrence
+  onRestoreRecurring: () => void
+}) {
+  const isIncome = rec.type === 'income'
+  const absAvg = Math.abs(rec.averageAmount)
+
+  return (
+    <div className="flex items-start gap-2.5 p-2.5 rounded-lg border border-amber-200/60 dark:border-amber-800/30 bg-amber-50/50 dark:bg-amber-950/10 text-sm group">
+      <div className="mt-0.5 h-6 w-6 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center shrink-0">
+        <IconRepeatOff className="size-3.5" />
+      </div>
+      <div className="flex-1 min-w-0">
+        <p className="font-medium truncate text-xs">{rec.description}</p>
+        <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+          <span className="text-[10px] text-muted-foreground line-through flex items-center gap-0.5">
+            <IconClock className="size-2.5" />
+            {frequencyLabel(rec.frequency)}
+          </span>
+          <span className="text-[10px] text-muted-foreground">·</span>
+          <span
+            className={cn(
+              'text-[10px] font-mono font-semibold',
+              isIncome ? 'text-emerald-600' : 'text-amber-600',
+            )}
+          >
+            {isIncome ? '+' : '-'} {formatAmount(absAvg)}
+          </span>
+          <span className="text-[10px] text-muted-foreground">· {rec.occurrences}×</span>
+        </div>
+        <p className="text-[10px] text-amber-500 mt-0.5">Reclassified as one-time</p>
+      </div>
+      <button
+        type="button"
+        onClick={onRestoreRecurring}
+        title="Restore as recurring"
+        className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-muted-foreground hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 shrink-0"
+      >
+        <IconRepeat className="size-3.5" />
+      </button>
+    </div>
+  )
+}
+
 function DirectRow({
   tx,
   aiSuggestion,
@@ -336,7 +392,12 @@ function DirectRow({
 
   return (
     <div className="flex items-start gap-2.5 p-2.5 rounded-lg border border-amber-200/60 dark:border-amber-800/30 bg-amber-50/50 dark:bg-amber-950/10 text-sm group">
-      <div className={cn('mt-0.5 h-6 w-6 rounded-full flex items-center justify-center shrink-0', isIncome ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600')}>
+      <div
+        className={cn(
+          'mt-0.5 h-6 w-6 rounded-full flex items-center justify-center shrink-0',
+          isIncome ? 'bg-emerald-100 text-emerald-600' : 'bg-amber-100 text-amber-600',
+        )}
+      >
         <IconAlertTriangle className="size-3.5" />
       </div>
       <div className="flex-1 min-w-0">
@@ -344,7 +405,12 @@ function DirectRow({
         <div className="flex items-center gap-1.5 mt-0.5">
           <span className="text-[10px] text-muted-foreground">{tx.date}</span>
           <span className="text-[10px] text-muted-foreground">·</span>
-          <span className={cn('text-[10px] font-mono font-semibold', isIncome ? 'text-emerald-600' : 'text-amber-600')}>
+          <span
+            className={cn(
+              'text-[10px] font-mono font-semibold',
+              isIncome ? 'text-emerald-600' : 'text-amber-600',
+            )}
+          >
             {isIncome ? '+' : '-'} {formatAmount(Math.abs(tx.amount))}
           </span>
         </div>
@@ -382,7 +448,7 @@ function StepAnalysis({
 
   if (isLoading) {
     return (
-      <div className="flex flex-col items-center justify-center py-16 gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="h-14 w-14 rounded-full bg-primary/10 flex items-center justify-center">
           <IconLoader2 className="size-7 text-primary animate-spin" />
         </div>
@@ -396,7 +462,7 @@ function StepAnalysis({
 
   if (error) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 gap-4">
+      <div className="flex flex-col items-center justify-center h-full gap-4">
         <div className="h-14 w-14 rounded-full bg-destructive/10 flex items-center justify-center">
           <IconAlertTriangle className="size-7 text-destructive" />
         </div>
@@ -437,17 +503,18 @@ function StepAnalysis({
       .filter(([, cls]) => cls === 'direct')
       .map(([desc]) => desc),
   )
+  const demotedRecurringItems = recurrences.filter(
+    (r) => r.confidence >= 0.5 && demotedToDirectDesc.has(r.description),
+  )
   const displayDirect = effectiveDirect.slice(0, showAllDirect ? undefined : 10)
 
   // Deduplicate direct by description (show one representative per description)
-  const dedupedDirect = Array.from(
-    new Map(displayDirect.map((t) => [t.description, t])).values(),
-  )
+  const dedupedDirect = Array.from(new Map(displayDirect.map((t) => [t.description, t])).values())
 
   const hasAiSuggestions = (aiSuggestions ?? []).length > 0
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col h-full min-h-0 gap-4">
       {/* File info */}
       <div className="flex items-center gap-3 bg-muted/40 rounded-lg p-3">
         <FileTypeIcon
@@ -493,10 +560,21 @@ function StepAnalysis({
             -{formatAmount(summary.totalExpenses)}
           </p>
         </div>
-        <div className={cn('rounded-lg border p-3 text-center', summary.netBalance < 0 && 'border-red-200')}>
+        <div
+          className={cn(
+            'rounded-lg border p-3 text-center',
+            summary.netBalance < 0 && 'border-red-200',
+          )}
+        >
           <p className="text-xs text-muted-foreground">{t('budgets.summary.balance')}</p>
-          <p className={cn('text-sm font-semibold mt-0.5', summary.netBalance >= 0 ? 'text-foreground' : 'text-red-500')}>
-            {summary.netBalance >= 0 ? '+' : '-'}{formatAmount(Math.abs(summary.netBalance))}
+          <p
+            className={cn(
+              'text-sm font-semibold mt-0.5',
+              summary.netBalance >= 0 ? 'text-foreground' : 'text-red-500',
+            )}
+          >
+            {summary.netBalance >= 0 ? '+' : '-'}
+            {formatAmount(Math.abs(summary.netBalance))}
           </p>
         </div>
       </div>
@@ -506,107 +584,123 @@ function StepAnalysis({
         <div className="flex items-start gap-2 bg-amber-50 dark:bg-amber-950/20 border border-amber-200/60 dark:border-amber-800/30 rounded-lg p-2.5">
           <IconSparkles className="size-3.5 text-amber-500 mt-0.5 shrink-0" />
           <p className="text-xs text-amber-700 dark:text-amber-300">
-            AI found {(aiSuggestions ?? []).length} potential classification issues. Check for ✨ hints below.
+            AI found {(aiSuggestions ?? []).length} potential classification issues. Check for ✨
+            hints below.
           </p>
         </div>
       )}
 
-      {/* RECURRING SECTION */}
-      <div>
-        <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-            <IconRepeat className="size-3" />
-            Recurring ({effectiveRecurring.length + userPromotedToRecurring.length})
-          </p>
-          <span className="text-[10px] text-muted-foreground">Hover to reclassify →</span>
-        </div>
-        {effectiveRecurring.length === 0 && userPromotedToRecurring.length === 0 ? (
-          <p className="text-xs text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
-            {t('budgets.import.analysis.noRecurring')}
-          </p>
-        ) : (
-          <div className="space-y-1.5 max-h-56 overflow-y-auto pr-1">
-            {effectiveRecurring.map((rec, idx) => (
-              <RecurringRow
-                key={idx}
-                rec={rec}
-                aiSuggestion={
-                  aiSuggestionByDesc.get(rec.description)?.suggestedClassification === 'direct'
-                    ? aiSuggestionByDesc.get(rec.description)
-                    : undefined
-                }
-                onMakeDirect={() => onToggle(rec.description, 'recurring')}
-              />
-            ))}
-            {userPromotedToRecurring.map((tx, idx) => (
-              <div
-                key={`promoted-${idx}`}
-                className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-emerald-200/60 dark:border-emerald-800/30 bg-emerald-50/50 dark:bg-emerald-950/10 text-xs group"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <IconRepeat className="size-3.5 text-emerald-500 shrink-0" />
-                  <span className="font-medium truncate">{tx.description}</span>
-                  <span className="text-muted-foreground shrink-0">→ monthly</span>
-                </div>
-                <button
-                  type="button"
-                  onClick={() => onToggle(tx.description, 'recurring')}
-                  className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-muted-foreground hover:text-amber-500 hover:bg-amber-50"
-                >
-                  <IconRepeatOff className="size-3.5" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-
-      {/* DIRECT / UNPLANNED SECTION */}
-      {(effectiveDirect.length > 0 || demotedToDirectDesc.size > 0) && (
+      {/* Scrollable list area — grows to fill remaining panel height */}
+      <div className="flex-1 min-h-0 overflow-y-auto space-y-4 pr-0.5">
+        {/* RECURRING SECTION */}
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
-              <IconAlertTriangle className="size-3" />
-              One-time / Unplanned ({effectiveDirect.length})
+              <IconRepeat className="size-3" />
+              Recurring ({effectiveRecurring.length + userPromotedToRecurring.length})
             </p>
-            <span className="text-[10px] text-muted-foreground">Hover to mark recurring →</span>
+            <span className="text-[10px] text-muted-foreground">Hover to reclassify →</span>
           </div>
-          <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1">
-            {dedupedDirect.map((tx, idx) => (
-              <DirectRow
-                key={idx}
-                tx={tx}
-                aiSuggestion={
-                  aiSuggestionByDesc.get(tx.description)?.suggestedClassification === 'recurring'
-                    ? aiSuggestionByDesc.get(tx.description)
-                    : undefined
-                }
-                onMakeRecurring={() => onToggle(tx.description, 'direct')}
-              />
-            ))}
-          </div>
-          {effectiveDirect.length > 10 && (
-            <button
-              type="button"
-              onClick={() => setShowAllDirect((v) => !v)}
-              className="mt-2 w-full text-xs text-muted-foreground flex items-center justify-center gap-1 py-1 hover:text-foreground transition-colors"
-            >
-              {showAllDirect ? (
-                <><IconChevronUp className="size-3" /> Show less</>
-              ) : (
-                <><IconChevronDown className="size-3" /> Show {effectiveDirect.length - 10} more</>
-              )}
-            </button>
+          {effectiveRecurring.length === 0 && userPromotedToRecurring.length === 0 ? (
+            <p className="text-xs text-muted-foreground text-center py-3 bg-muted/30 rounded-lg">
+              {t('budgets.import.analysis.noRecurring')}
+            </p>
+          ) : (
+            <div className="space-y-1.5 pr-1">
+              {effectiveRecurring.map((rec, idx) => (
+                <RecurringRow
+                  key={idx}
+                  rec={rec}
+                  aiSuggestion={
+                    aiSuggestionByDesc.get(rec.description)?.suggestedClassification === 'direct'
+                      ? aiSuggestionByDesc.get(rec.description)
+                      : undefined
+                  }
+                  onMakeDirect={() => onToggle(rec.description, 'recurring')}
+                />
+              ))}
+              {userPromotedToRecurring.map((tx, idx) => (
+                <div
+                  key={`promoted-${idx}`}
+                  className="flex items-center justify-between gap-2 p-2.5 rounded-lg border border-emerald-200/60 dark:border-emerald-800/30 bg-emerald-50/50 dark:bg-emerald-950/10 text-xs group"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <IconRepeat className="size-3.5 text-emerald-500 shrink-0" />
+                    <span className="font-medium truncate">{tx.description}</span>
+                    <span className="text-muted-foreground shrink-0">→ monthly</span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => onToggle(tx.description, 'recurring')}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity p-1 rounded text-muted-foreground hover:text-amber-500 hover:bg-amber-50"
+                  >
+                    <IconRepeatOff className="size-3.5" />
+                  </button>
+                </div>
+              ))}
+            </div>
           )}
         </div>
-      )}
 
-      {/* Date range */}
-      {result?.accountMeta?.dateFrom && (
-        <p className="text-xs text-muted-foreground text-center">
-          Period: {result.accountMeta.dateFrom} — {result.accountMeta.dateTo}
-        </p>
-      )}
+        {/* DIRECT / UNPLANNED SECTION */}
+        {(effectiveDirect.length > 0 || demotedToDirectDesc.size > 0) && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground flex items-center gap-1.5">
+                <IconAlertTriangle className="size-3" />
+                One-time / Unplanned ({effectiveDirect.length + demotedRecurringItems.length})
+              </p>
+              <span className="text-[10px] text-muted-foreground">Hover to mark recurring →</span>
+            </div>
+            <div className="space-y-1.5 pr-1">
+              {demotedRecurringItems.map((rec, idx) => (
+                <DemotedRecurringRow
+                  key={`demoted-${idx}`}
+                  rec={rec}
+                  onRestoreRecurring={() => onToggle(rec.description, 'direct')}
+                />
+              ))}
+              {dedupedDirect.map((tx, idx) => (
+                <DirectRow
+                  key={idx}
+                  tx={tx}
+                  aiSuggestion={
+                    aiSuggestionByDesc.get(tx.description)?.suggestedClassification === 'recurring'
+                      ? aiSuggestionByDesc.get(tx.description)
+                      : undefined
+                  }
+                  onMakeRecurring={() => onToggle(tx.description, 'direct')}
+                />
+              ))}
+            </div>
+            {effectiveDirect.length > 10 && (
+              <button
+                type="button"
+                onClick={() => setShowAllDirect((v) => !v)}
+                className="mt-2 w-full text-xs text-muted-foreground flex items-center justify-center gap-1 py-1 hover:text-foreground transition-colors"
+              >
+                {showAllDirect ? (
+                  <>
+                    <IconChevronUp className="size-3" /> Show less
+                  </>
+                ) : (
+                  <>
+                    <IconChevronDown className="size-3" /> Show {effectiveDirect.length - 10} more
+                  </>
+                )}
+              </button>
+            )}
+          </div>
+        )}
+
+        {/* Date range */}
+        {result?.accountMeta?.dateFrom && (
+          <p className="text-xs text-muted-foreground text-center">
+            Period: {result.accountMeta.dateFrom} — {result.accountMeta.dateTo}
+          </p>
+        )}
+      </div>
+      {/* end scrollable list area */}
     </div>
   )
 }
@@ -653,7 +747,8 @@ function StepConfirm({ result, file, reclassifications }: StepConfirmProps) {
         </p>
         {reclassifications.size > 0 && (
           <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
-            {reclassifications.size} manual reclassification{reclassifications.size > 1 ? 's' : ''} applied
+            {reclassifications.size} manual reclassification{reclassifications.size > 1 ? 's' : ''}{' '}
+            applied
           </p>
         )}
       </div>
@@ -770,7 +865,9 @@ export function BudgetImportWizard({
   const [selectedFile, setSelectedFile] = React.useState<File | null>(null)
   const [importResult, setImportResult] = React.useState<BudgetImport | null>(null)
   const [parseError, setParseError] = React.useState<string | null>(null)
-  const [reclassifications, setReclassifications] = React.useState<Map<string, 'recurring' | 'direct'>>(new Map())
+  const [reclassifications, setReclassifications] = React.useState<
+    Map<string, 'recurring' | 'direct'>
+  >(new Map())
 
   const uploadMutation = useUploadAndAnalyzeImport()
 
@@ -873,8 +970,8 @@ export function BudgetImportWizard({
           actionsSlot={<StepDots current={stepIndex} />}
         />
 
-        <CrudSheetBody>
-          <CrudSheetSection>
+        <CrudSheetBody className="flex flex-col overflow-hidden">
+          <CrudSheetSection className="flex-1 flex flex-col min-h-0">
             {step === 'upload' && <StepUpload onFileSelected={handleFileSelected} />}
 
             {step === 'analysis' && selectedFile && (

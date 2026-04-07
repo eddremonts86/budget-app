@@ -10,6 +10,7 @@ import {
 } from '@/modules/transactions/api/transactions.queries'
 import type { Transaction } from '@/modules/transactions/model/types'
 import { cn } from '@/shared/lib/utils'
+import { toast } from '@/shared/lib/toast'
 import { formatAmount } from '../model/period-utils'
 import { EditTransactionInBudgetSheet } from './EditTransactionInBudgetSheet'
 
@@ -187,9 +188,14 @@ export function BudgetTransactionsList({
                         variant="ghost"
                         className="size-7 text-muted-foreground hover:text-destructive"
                         onClick={() => {
-                          if (window.confirm(t('budgets.transactions.deleteConfirm'))) {
-                            deleteMutation.mutate(tx.id)
-                          }
+                          toast.error(t('budgets.transactions.deleteConfirm'), {
+                            description: t('common.undoWarning'),
+                            action: {
+                              label: t('common.delete'),
+                              onClick: () => deleteMutation.mutate(tx.id),
+                            },
+                            duration: 10000,
+                          })
                         }}
                         disabled={deleteMutation.isPending}
                       >

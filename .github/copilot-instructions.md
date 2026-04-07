@@ -218,18 +218,19 @@ Required in `.env.development`:
 
 ### App Skills — `.github/skills/app/`
 
-| Domain                               | Skill File                                        |
-| ------------------------------------ | ------------------------------------------------- |
-| Module architecture & manifests      | `.github/skills/app/module-architecture/SKILL.md` |
-| CRUD operations & CrudSheet Protocol | `.github/skills/app/feature-crud/SKILL.md`        |
-| **Sheet / side-panel UI convention** | `.github/skills/app/crud-sheet/SKILL.md`          |
-| Widget system (create / fix widgets) | `.github/skills/app/widget-system/SKILL.md`       |
-| Multi-provider AI system             | `.github/skills/app/ai-providers/SKILL.md`        |
-| Auth (Clerk + Better Auth)           | `.github/skills/app/auth-dual-provider/SKILL.md`  |
-| Drizzle ORM + DB schema              | `.github/skills/app/drizzle-db/SKILL.md`          |
-| i18n (EN/ES/DK translations)         | `.github/skills/app/i18n-deep/SKILL.md`           |
-| Playwright E2E + auth bypass         | `.github/skills/app/e2e-testing-auth/SKILL.md`    |
-| Docker + local AI stack              | `.github/skills/app/docker-ai-stack/SKILL.md`     |
+| Domain                               | Skill File                                         |
+| ------------------------------------ | -------------------------------------------------- |
+| Module architecture & manifests      | `.github/skills/app/module-architecture/SKILL.md`  |
+| CRUD operations & CrudSheet Protocol | `.github/skills/app/feature-crud/SKILL.md`         |
+| **Sheet / side-panel UI convention** | `.github/skills/app/crud-sheet/SKILL.md`           |
+| Widget system (create / fix widgets) | `.github/skills/app/widget-system/SKILL.md`        |
+| Multi-provider AI system             | `.github/skills/app/ai-providers/SKILL.md`         |
+| Auth (Clerk + Better Auth)           | `.github/skills/app/auth-dual-provider/SKILL.md`   |
+| Drizzle ORM + DB schema              | `.github/skills/app/drizzle-db/SKILL.md`           |
+| i18n (EN/ES/DK translations)         | `.github/skills/app/i18n-deep/SKILL.md`            |
+| Playwright E2E + auth bypass         | `.github/skills/app/e2e-testing-auth/SKILL.md`     |
+| Docker + local AI stack              | `.github/skills/app/docker-ai-stack/SKILL.md`      |
+| **Toast delete confirmations**       | `.github/skills/app/toast-confirm-delete/SKILL.md` |
 
 ### Vendor Skills — `.github/skills/vendor/`
 
@@ -284,6 +285,7 @@ When working in a domain, load ALL applicable skills before generating code:
 | Docker / local LLM           | `docker-ai-stack`                                    |
 | UI component / accessibility | `frontend-design` + `web-design-guidelines`          |
 | New sheet / side-panel       | `crud-sheet`                                         |
+| Delete with toast confirm    | `toast-confirm-delete`                               |
 | Post-change quality check    | `react-doctor`                                       |
 | Code cleanup / refactor      | `code-simplifier` + `vercel-react-best-practices`    |
 
