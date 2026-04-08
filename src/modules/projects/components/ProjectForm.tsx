@@ -1,14 +1,10 @@
 import { useForm } from '@tanstack/react-form'
-import { format } from 'date-fns'
-import { da } from 'date-fns/locale/da'
-import { enUS } from 'date-fns/locale/en-US'
-import { es } from 'date-fns/locale/es'
 import { Briefcase, Calendar, Code, Layout, Loader2, Plus, Save, Tag, Users } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { Calendar as CalendarComponent } from '@/components/ui/calendar'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   Combobox,
   ComboboxChip,
@@ -21,7 +17,6 @@ import {
 } from '@/components/ui/combobox'
 import { FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
 import {
   Select,
   SelectContent,
@@ -74,20 +69,12 @@ type ProjectFormProps = {
 }
 
 export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: ProjectFormProps) {
-  const { t, i18n } = useTranslation()
+  const { t } = useTranslation()
   const { data: departments = [] } = useDepartments()
   const { data: availableSkills = [] } = useSkills()
   const createUser = useCreateUser()
   const [isUserSheetOpen, setIsUserSheetOpen] = React.useState(false)
   const [teamSearch, setTeamSearch] = React.useState('')
-
-  const locale = React.useMemo(() => {
-    const language = i18n.language?.toLowerCase() ?? 'en'
-    const normalized = language.split('-')[0]
-    if (normalized === 'es') return es
-    if (normalized === 'dk' || normalized === 'da') return da
-    return enUS
-  }, [i18n.language])
 
   const initialValues = React.useMemo(() => {
     const now = new Date()
@@ -504,36 +491,7 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                 <Calendar className="h-4 w-4" />
                 {t('projects.form.startDateLabel')}
               </FieldLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !field.state.value && 'text-muted-foreground',
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {field.state.value ? (
-                      format(new Date(field.state.value), 'PPP', { locale })
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={field.state.value ? new Date(field.state.value) : undefined}
-                    onSelect={(date: Date | undefined) => {
-                      if (date) {
-                        field.handleChange(date.toISOString().split('T')[0])
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker value={field.state.value} onChange={(v) => field.handleChange(v)} />
               <FieldError
                 errors={field.state.meta.errors.map((e) => {
                   if (typeof e === 'string') return e
@@ -553,36 +511,11 @@ export function ProjectForm({ defaultValues, onSubmit, onCancel, isLoading }: Pr
                 <Calendar className="h-4 w-4" />
                 {t('projects.form.endDateLabel')}
               </FieldLabel>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal',
-                      !field.state.value && 'text-muted-foreground',
-                    )}
-                  >
-                    <Calendar className="mr-2 h-4 w-4" />
-                    {field.state.value ? (
-                      format(new Date(field.state.value), 'PPP', { locale })
-                    ) : (
-                      <span>{t('projects.form.endDatePlaceholder')}</span>
-                    )}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <CalendarComponent
-                    mode="single"
-                    selected={field.state.value ? new Date(field.state.value) : undefined}
-                    onSelect={(date: Date | undefined) => {
-                      if (date) {
-                        field.handleChange(date.toISOString().split('T')[0])
-                      }
-                    }}
-                    initialFocus
-                  />
-                </PopoverContent>
-              </Popover>
+              <DatePicker
+                value={field.state.value}
+                onChange={(v) => field.handleChange(v)}
+                placeholder={t('projects.form.endDatePlaceholder')}
+              />
               <FieldError
                 errors={field.state.meta.errors.map((e) => {
                   if (typeof e === 'string') return e

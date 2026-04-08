@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/crud-sheet'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   Select,
   SelectContent,
@@ -186,12 +187,7 @@ export function CreateRecurrenceSheet({
 
               <div className="space-y-1">
                 <Label>{t('budgets.recurrences.startDate')}</Label>
-                <Input
-                  type="date"
-                  value={form.startDate}
-                  onChange={(e) => updateField('startDate', e.target.value)}
-                  required
-                />
+                <DatePicker value={form.startDate} onChange={(v) => updateField('startDate', v)} />
               </div>
 
               {categories.length > 0 && (

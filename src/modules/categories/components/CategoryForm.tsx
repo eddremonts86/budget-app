@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import type { Category } from '../model/types'
+import { getFieldError } from '@/shared/lib/utils'
 
 const createCategorySchema = (t: (key: string) => string) =>
   z.object({
@@ -58,9 +59,7 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
               onChange={(e) => field.handleChange(e.target.value)}
               placeholder={t('categories.namePlaceholder')}
             />
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map(getFieldError)} />
           </Field>
         )}
       </form.Field>
@@ -85,9 +84,7 @@ export function CategoryForm({ defaultValues, onSubmit, onCancel, isLoading }: C
                 className="flex-1"
               />
             </div>
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map(getFieldError)} />
           </Field>
         )}
       </form.Field>

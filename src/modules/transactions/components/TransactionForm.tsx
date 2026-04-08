@@ -12,6 +12,7 @@ import {
   ComboboxList,
 } from '@/components/ui/combobox'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -29,6 +30,7 @@ import {
   isAdminRole,
 } from '@/modules/users/model/permissions'
 import type { Transaction } from '../model/types'
+import { getFieldError } from '@/shared/lib/utils'
 
 const createTransactionSchema = (t: (key: string) => string) =>
   z.object({
@@ -160,9 +162,7 @@ export function TransactionForm({
               onChange={(e) => field.handleChange(e.target.value)}
               placeholder={t('transactions.form.customerNamePlaceholder')}
             />
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
           </Field>
         )}
       </form.Field>
@@ -181,9 +181,7 @@ export function TransactionForm({
               onChange={(e) => field.handleChange(e.target.value)}
               placeholder={t('transactions.form.customerEmailPlaceholder')}
             />
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
           </Field>
         )}
       </form.Field>
@@ -226,9 +224,7 @@ export function TransactionForm({
                 </ComboboxList>
               </ComboboxContent>
             </Combobox>
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
           </Field>
         )}
       </form.Field>
@@ -249,9 +245,7 @@ export function TransactionForm({
                 ))}
               </SelectContent>
             </Select>
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
           </Field>
         )}
       </form.Field>
@@ -270,9 +264,7 @@ export function TransactionForm({
                 onChange={(e) => field.handleChange(Number(e.target.value))}
                 placeholder="0.00"
               />
-              <FieldError
-                errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-              />
+              <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
             </Field>
           )}
         </form.Field>
@@ -281,16 +273,8 @@ export function TransactionForm({
           {(field) => (
             <Field>
               <FieldLabel htmlFor={field.name}>{t('transactions.form.dateLabel')}</FieldLabel>
-              <Input
-                id={field.name}
-                type="date"
-                value={field.state.value}
-                onBlur={field.handleBlur}
-                onChange={(e) => field.handleChange(e.target.value)}
-              />
-              <FieldError
-                errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-              />
+              <DatePicker value={field.state.value} onChange={field.handleChange} />
+              <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
             </Field>
           )}
         </form.Field>
@@ -320,9 +304,7 @@ export function TransactionForm({
                 ) : null}
               </SelectContent>
             </Select>
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
           </Field>
         )}
       </form.Field>
@@ -369,9 +351,7 @@ export function TransactionForm({
                 </ComboboxList>
               </ComboboxContent>
             </Combobox>
-            <FieldError
-              errors={field.state.meta.errors.map((e) => (typeof e === 'string' ? e : String(e)))}
-            />
+            <FieldError errors={field.state.meta.errors.map((e) => getFieldError(e))} />
           </Field>
         )}
       </form.Field>

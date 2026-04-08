@@ -2,8 +2,10 @@ import { useForm } from '@tanstack/react-form'
 import { useStore } from '@tanstack/react-store'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { getFieldError } from '@/shared/lib/utils'
 import {
   Select,
   SelectContent,
@@ -83,8 +85,10 @@ export function BudgetForm({
               onBlur={field.handleBlur}
               placeholder={t('budgets.fields.namePlaceholder')}
             />
-            {field.state.meta.errors[0] && (
-              <p className="text-xs text-destructive">{String(field.state.meta.errors[0])}</p>
+            {field.state.meta.errors[0] != null && (
+              <p className="text-xs text-destructive">
+                {getFieldError(field.state.meta.errors[0])}
+              </p>
             )}
           </div>
         )}
@@ -234,13 +238,7 @@ export function BudgetForm({
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>{t('budgets.fields.startDate')} *</Label>
-              <Input
-                id={field.name}
-                type="date"
-                value={field.state.value}
-                onChange={(e) => field.handleChange(e.target.value)}
-                onBlur={field.handleBlur}
-              />
+              <DatePicker value={field.state.value} onChange={field.handleChange} />
             </div>
           )}
         </form.Field>
@@ -249,12 +247,11 @@ export function BudgetForm({
           {(field) => (
             <div className="space-y-1.5">
               <Label htmlFor={field.name}>{t('budgets.fields.endDate')}</Label>
-              <Input
-                id={field.name}
-                type="date"
+              <DatePicker
                 value={field.state.value ?? ''}
-                onChange={(e) => field.handleChange(e.target.value || '')}
-                onBlur={field.handleBlur}
+                onChange={(v) => field.handleChange(v)}
+                placeholder={t('budgets.fields.endDatePlaceholder', 'No end date')}
+                optional
               />
             </div>
           )}

@@ -10,6 +10,7 @@ import {
 } from '@/components/ui/crud-sheet'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { DatePicker } from '@/components/ui/date-picker'
 import {
   Select,
   SelectContent,
@@ -146,11 +147,7 @@ export function AddTransactionToBudgetSheet({
                 {(field) => (
                   <div className="space-y-1">
                     <Label>{t('budgets.transactions.date')}</Label>
-                    <Input
-                      type="date"
-                      value={field.state.value}
-                      onChange={(e) => field.handleChange(e.target.value)}
-                    />
+                    <DatePicker value={field.state.value} onChange={field.handleChange} />
                   </div>
                 )}
               </form.Field>

@@ -231,6 +231,7 @@ Required in `.env.development`:
 | Playwright E2E + auth bypass         | `.github/skills/app/e2e-testing-auth/SKILL.md`     |
 | Docker + local AI stack              | `.github/skills/app/docker-ai-stack/SKILL.md`      |
 | **Toast delete confirmations**       | `.github/skills/app/toast-confirm-delete/SKILL.md` |
+| **Shadcn-first UI rule**             | `.github/skills/app/shadcn-first/SKILL.md`         |
 
 ### Vendor Skills — `.github/skills/vendor/`
 
@@ -272,21 +273,21 @@ See `docs/ai/architecture.md` and the `ai-providers` skill.
 
 When working in a domain, load ALL applicable skills before generating code:
 
-| Task                         | Load these skills                                    |
-| ---------------------------- | ---------------------------------------------------- |
-| New module                   | `module-architecture` + `feature-crud` + `i18n-deep` |
-| Add CRUD to existing module  | `feature-crud` + `drizzle-db` + `i18n-deep`          |
-| New widget / fix widget      | `widget-system` + `i18n-deep`                        |
-| AI providers / streaming     | `ai-providers` + `docker-ai-stack`                   |
-| Auth / protected routes      | `auth-dual-provider`                                 |
-| DB schema / migrations       | `drizzle-db`                                         |
-| Translations                 | `i18n-deep`                                          |
-| E2E tests                    | `e2e-testing-auth` + `playwright-skill`              |
-| Docker / local LLM           | `docker-ai-stack`                                    |
-| UI component / accessibility | `frontend-design` + `web-design-guidelines`          |
-| New sheet / side-panel       | `crud-sheet`                                         |
-| Delete with toast confirm    | `toast-confirm-delete`                               |
-| Post-change quality check    | `react-doctor`                                       |
-| Code cleanup / refactor      | `code-simplifier` + `vercel-react-best-practices`    |
+| Task                         | Load these skills                                            |
+| ---------------------------- | ------------------------------------------------------------ |
+| New module                   | `module-architecture` + `feature-crud` + `i18n-deep`         |
+| Add CRUD to existing module  | `feature-crud` + `drizzle-db` + `i18n-deep`                  |
+| New widget / fix widget      | `widget-system` + `i18n-deep`                                |
+| AI providers / streaming     | `ai-providers` + `docker-ai-stack`                           |
+| Auth / protected routes      | `auth-dual-provider`                                         |
+| DB schema / migrations       | `drizzle-db`                                                 |
+| Translations                 | `i18n-deep`                                                  |
+| E2E tests                    | `e2e-testing-auth` + `playwright-skill`                      |
+| Docker / local LLM           | `docker-ai-stack`                                            |
+| UI component / accessibility | `shadcn-first` + `frontend-design` + `web-design-guidelines` |
+| New sheet / side-panel       | `crud-sheet`                                                 |
+| Delete with toast confirm    | `toast-confirm-delete`                                       |
+| Post-change quality check    | `react-doctor`                                               |
+| Code cleanup / refactor      | `code-simplifier` + `vercel-react-best-practices`            |
 
 Agents live in `.github/agents/`. Skills live in `.github/skills/` (`app/` = this repo, `vendor/` = 3rd party).

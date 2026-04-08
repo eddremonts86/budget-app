@@ -533,6 +533,7 @@
       "removeConfirm": "Er du sikker på, at du vil fjerne {{name}} fra dette projekt?"
     }
   },
+  "team": {
     "title": "Team",
     "actions": {
       "new": "Nyt team",
