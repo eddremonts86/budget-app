@@ -104,6 +104,7 @@ test.describe.serial('local auth approval visibility', () => {
     await expectDashboard(page)
     await page.goto('/dashboard/transactions')
 
+    await expect(page.getByTestId('transactions-tab-approval')).toBeVisible()
     await page.getByTestId('transactions-tab-approval').click()
 
     const pendingPanel = page.getByTestId('transactions-pending-panel')
@@ -165,6 +166,7 @@ test.describe.serial('local auth approval visibility', () => {
     await expectDashboard(page)
     await page.goto('/dashboard/transactions')
 
+    await expect(page.getByTestId('transactions-tab-approval')).toBeVisible()
     await page.getByTestId('transactions-tab-approval').click()
 
     const pendingPanel = page.getByTestId('transactions-pending-panel')
@@ -243,13 +245,13 @@ test.describe.serial('local auth approval visibility', () => {
 
     await page.goto('/auth')
     await signInInBrowser(page, manager.credentials)
+    await expectDashboard(page)
     await page.goto('/dashboard/transactions')
-    await expect(page).toHaveURL(/\/dashboard\/transactions$/)
     await expect(page.getByTestId('transactions-tab-approval')).toBeVisible()
     await page.getByTestId('transactions-tab-approval').click()
 
     await expect(page.getByTestId('transactions-pending-panel')).toContainText(customerName)
-    await page.getByTestId(`transactions-approve-${transaction.id}`).click({ force: true })
+    await page.getByTestId(`transactions-approve-${transaction.id}`).dispatchEvent('click')
     await expect(page.getByTestId('transactions-confirm-panel')).toBeVisible()
     await page.getByTestId('transactions-confirm-approve').click()
 

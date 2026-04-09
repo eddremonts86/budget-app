@@ -128,13 +128,17 @@ export async function expectDashboard(page: Page) {
 
 export async function waitForSignedOutSession(page: Page) {
   await page.waitForFunction(async () => {
-    const response = await fetch('/api/auth/get-session')
+    try {
+      const response = await fetch('/api/auth/get-session')
 
-    if (!response.ok) {
+      if (!response.ok) {
+        return false
+      }
+
+      const payload = await response.json()
+      return !payload?.session && !payload?.user
+    } catch {
       return false
     }
-
-    const payload = await response.json()
-    return !payload?.session && !payload?.user
   })
 }

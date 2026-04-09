@@ -33,6 +33,7 @@ test.describe.serial('local auth sign up', () => {
     await page.goto('/auth')
     await signUpInBrowser(page, credentials)
     await expectDashboard(page)
+    await page.waitForLoadState('networkidle')
 
     await expect.poll(async () => Boolean(await getAuthUserByEmail(credentials.email))).toBe(true)
 
