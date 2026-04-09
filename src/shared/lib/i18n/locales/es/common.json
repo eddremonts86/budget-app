@@ -13,6 +13,52 @@
     "signIn": "Iniciar Sesión",
     "signOut": "Cerrar Sesión"
   },
+  "auth": {
+    "topbarCta": "Entrar",
+    "localCta": "Acceso con correo",
+    "workspaceAccess": "Acceso al espacio",
+    "eyebrow": "Autenticación híbrida",
+    "title": "Elige cómo quieres entrar.",
+    "description": "Usa tu correo y contraseña, o continúa con tu cuenta externa desde la misma pantalla.",
+    "singleEntryTitle": "Entra una vez y sigue adelante.",
+    "singleEntryDescription": "Usa la opción que ya conoces. Ambas te llevan al mismo espacio sin pasos de más.",
+    "localOnly": "El acceso con correo no está disponible en este momento.",
+    "localOnlyDescription": "Usa la otra opción de acceso que aparece más abajo para continuar.",
+    "signInTab": "Entrar",
+    "signUpTab": "Crear cuenta",
+    "emailLabel": "Correo",
+    "passwordLabel": "Contraseña",
+    "nameLabel": "Nombre completo",
+    "emailPlaceholder": "tu@empresa.com",
+    "passwordPlaceholder": "Tu contraseña",
+    "passwordRequirementHint": "Usa al menos {{min}} caracteres con letras, números y un símbolo.",
+    "namePlaceholder": "Ada Lovelace",
+    "signInAction": "Entrar al espacio",
+    "signUpAction": "Crear cuenta",
+    "submitting": "Procesando...",
+    "recommendedLocal": "La forma más rápida de entrar",
+    "recommendedExternal": "Otra opción",
+    "signInHint": "Usa el correo con el que ya accedes a este espacio.",
+    "signUpHint": "Crea una cuenta nueva y empieza a usar el espacio en minutos.",
+    "localPanelTitle": "Correo y contraseña",
+    "localPanelDescription": "Entra con la cuenta que usas todos los días.",
+    "clerkPanelTitle": "Otra forma de entrar",
+    "clerkPanelDescription": "Usa tu cuenta de organización o tu acceso externo si esa es tu forma habitual de entrar.",
+    "clerkAction": "Continuar",
+    "clerkUnavailable": "Esta opción de acceso no está disponible en este momento.",
+    "clerkUnavailableLabel": "No disponible",
+    "clerkOffline": "Temporalmente no disponible",
+    "sideTitle": "Un solo espacio, tu forma habitual de entrar.",
+    "sideDescription": "Elige el método que te resulte más familiar. Llegarás al mismo lugar en cualquiera de los dos casos.",
+    "pointOne": "Usa la cuenta que ya reconoces.",
+    "pointTwo": "Cambia de método sin cambiar de destino.",
+    "pointThree": "Entra y sigue justo donde tienes que trabajar.",
+    "backHome": "Volver al inicio",
+    "goDashboard": "Ir al dashboard",
+    "sessionVerificationError": "El servidor aún no confirmó tu sesión. Inténtalo de nuevo en un momento.",
+    "nameRequiredError": "Escribe tu nombre completo para crear una cuenta.",
+    "passwordWeakError": "Usa al menos {{min}} caracteres con letras, números y un símbolo."
+  },
   "common": {
     "loading": "Cargando...",
     "loadingMore": "Cargando más...",
@@ -267,6 +313,7 @@
       "transactions": "Transacciones",
       "categories": "Categorías",
       "projects": "Proyectos",
+      "budgets": "Presupuestos",
       "team": "Equipo",
       "settings": "Configuración"
     },
@@ -417,6 +464,326 @@
       "created": "Tarea creada correctamente",
       "updated": "Tarea actualizada correctamente",
       "deleted": "Tarea eliminada correctamente"
+    }
+  },
+  "dashboard": {
+    "widgets": {
+      "projectsStatus": "Estado de Proyectos",
+      "projectsStatusDesc": "Resumen de proyectos por estado actual.",
+      "totalProjects": "Total de Proyectos",
+      "pendingApprovals": "Aprobaciones Pendientes",
+      "pendingApprovalsDesc": "Transacciones en espera de revisión.",
+      "awaitingReview": "en espera de revisión",
+      "reviewTransactions": "Revisar transacciones →",
+      "recentTransactions": "Transacciones Recientes",
+      "recentTransactionsDesc": "Actividad financiera más reciente.",
+      "teamOverview": "Vista del Equipo",
+      "teamOverviewDesc": "Todos los equipos y su número de miembros.",
+      "totalTeams": "Equipos",
+      "totalMembers": "Miembros",
+      "avgTeamSize": "Tamaño medio",
+      "largestTeams": "Equipos más grandes",
+      "noDescription": "Sin descripción",
+      "members": "miembros",
+      "userStats": "Directorio de Usuarios",
+      "userStatsDesc": "Total de empleados y departamentos principales.",
+      "totalUsers": "Total de usuarios",
+      "topDepartments": "Departamentos Principales",
+      "quickSettings": "Ajustes Rápidos",
+      "quickSettingsDesc": "Ajusta la apariencia e idioma al instante.",
+      "aiStatus": "Proveedores IA",
+      "aiStatusDesc": "Estado de conexión de los proveedores IA configurados.",
+      "aiOnline": "en línea",
+      "models": "modelos",
+      "categoriesList": "Categorías",
+      "categoriesListDesc": "Todas las categorías disponibles de un vistazo.",
+      "totalCategories": "total",
+      "quickLinks": "Accesos Rápidos",
+      "quickLinksDesc": "Acceso rápido a las secciones clave del espacio.",
+      "linkProjects": "Proyectos",
+      "linkTransactions": "Transacciones",
+      "linkTasks": "Tareas",
+      "linkTeam": "Equipo",
+      "linkSettings": "Configuración",
+      "linkHelp": "Ayuda"
+    },
+    "actions": {
+      "refreshProjectsStatus": "Actualizar estado de proyectos",
+      "refreshPendingApprovals": "Actualizar aprobaciones pendientes",
+      "refreshRecentTransactions": "Actualizar transacciones",
+      "refreshTeamOverview": "Actualizar equipos",
+      "refreshUserStats": "Actualizar estadísticas de usuarios",
+      "refreshAiStatus": "Actualizar estado IA",
+      "refreshCategories": "Actualizar categorías",
+      "refreshUpcomingTasks": "Actualizar tareas próximas",
+      "refreshExpenseDistribution": "Actualizar distribución de gastos",
+      "refreshWorkload": "Actualizar carga de trabajo"
+    }
+  },
+  "budgets": {
+    "title": "Presupuestos",
+    "description": "Administra y rastrea tus presupuestos financieros.",
+    "empty": {
+      "title": "Sin presupuestos todavía",
+      "description": "Crea tu primer presupuesto para comenzar a rastrear ingresos y gastos."
+    },
+    "actions": {
+      "create": "Nuevo Presupuesto",
+      "edit": "Editar Presupuesto",
+      "save": "Guardar Presupuesto",
+      "delete": "Eliminar Presupuesto",
+      "deleteConfirm": "¿Estás seguro de que deseas eliminar este presupuesto?"
+    },
+    "create": {
+      "title": "Nuevo Presupuesto",
+      "description": "Crea un nuevo presupuesto para rastrear ingresos y gastos."
+    },
+    "edit": {
+      "title": "Editar Presupuesto",
+      "description": "Actualiza los detalles de tu presupuesto."
+    },
+    "fields": {
+      "name": "Nombre del Presupuesto",
+      "namePlaceholder": "ej. Marketing T1",
+      "description": "Descripción",
+      "descriptionPlaceholder": "¿Para qué es este presupuesto?",
+      "scope": "Alcance",
+      "project": "Proyecto",
+      "projectPlaceholder": "Seleccionar proyecto",
+      "targetAmount": "Límite de gasto",
+      "noLimit": "Sin límite",
+      "currency": "Moneda",
+      "periodType": "Período",
+      "startDate": "Fecha de inicio",
+      "endDate": "Fecha de fin (opcional)"
+    },
+    "scopes": {
+      "personal": "Personal",
+      "project": "Proyecto",
+      "department": "Departamento",
+      "company": "Empresa"
+    },
+    "periods": {
+      "monthly": "Mensual",
+      "quarterly": "Trimestral",
+      "semiannual": "Semestral",
+      "annual": "Anual",
+      "one_time": "Único"
+    },
+    "health": {
+      "healthy": "Saludable",
+      "on_track": "En curso",
+      "warning": "Advertencia",
+      "approaching": "Próximo al límite",
+      "overBudget": "Sobre el límite",
+      "noLimit": "Sin límite"
+    },
+    "summary": {
+      "income": "Ingresos",
+      "expenses": "Gastos",
+      "balance": "Balance",
+      "remaining": "Restante",
+      "overBy": "Excedido por",
+      "noLimit": "Sin límite",
+      "used": "usado"
+    },
+    "detail": {
+      "notFound": "Presupuesto no encontrado.",
+      "overBudget": "Sobre el límite",
+      "spent": "gastado",
+      "overBy": "Excedido por {{amount}}",
+      "totalSpent": "Total Gastado",
+      "balance": "Balance",
+      "tabs": {
+        "transactions": "Transacciones",
+        "categories": "Categorías",
+        "members": "Miembros",
+        "recurring": "Recurrentes",
+        "report": "Reporte"
+      }
+    },
+    "report": {
+      "title": "Reporte Anual",
+      "subtitle": "Gastos e ingresos por categoría a lo largo de los meses",
+      "item": "Transacciones",
+      "year": "Año",
+      "category": "Categoría",
+      "totalExpenses": "Total Gastos",
+      "totalIncome": "Total Ingresos",
+      "expensesTable": "Gastos por Categoría",
+      "incomeTable": "Ingresos por Categoría",
+      "balance": "Balance",
+      "total": "Total",
+      "month": "Mes",
+      "accumExpenses": "Acum. Gastos",
+      "summarySection": "Resumen",
+      "noData": "Sin transacciones para {{year}}",
+      "showIncome": "Mostrar filas de ingresos",
+      "hideIncome": "Ocultar filas de ingresos",
+      "directLabel": "no planificado",
+      "directExpenseLabel": "no planificado"
+    },
+    "alerts": {
+      "overBudget": "presupuesto(s) sobre el límite"
+    },
+    "toast": {
+      "created": "Presupuesto creado exitosamente",
+      "updated": "Presupuesto actualizado exitosamente",
+      "deleted": "Presupuesto eliminado exitosamente"
+    },
+    "messages": {
+      "created": "Presupuesto creado exitosamente",
+      "updated": "Presupuesto actualizado exitosamente",
+      "deleted": "Presupuesto eliminado exitosamente",
+      "memberAdded": "Miembro agregado al presupuesto",
+      "memberRemoved": "Miembro eliminado del presupuesto",
+      "limitSet": "Límite de categoría guardado",
+      "recurrenceCreated": "Transacción recurrente creada",
+      "recurrenceDeleted": "Transacción recurrente eliminada"
+    },
+    "transactions": {
+      "count": "transacciones",
+      "add": "Agregar transacción",
+      "addTitle": "Agregar transacción al presupuesto",
+      "editTitle": "Editar transacción",
+      "deleteConfirm": "¿Eliminar esta transacción?",
+      "empty": "Sin transacciones vinculadas a este presupuesto.",
+      "noDescription": "Sin descripción",
+      "type": "Tipo",
+      "expense": "Gasto",
+      "income": "Ingreso",
+      "description": "Descripción",
+      "descriptionPlaceholder": "¿Para qué es esto?",
+      "amount": "Monto",
+      "date": "Fecha",
+      "category": "Categoría",
+      "categoryPlaceholder": "Seleccionar categoría"
+    },
+    "limits": {
+      "count": "límites de categoría",
+      "add": "Agregar límite",
+      "addTitle": "Establecer límite de categoría",
+      "editTitle": "Editar límite de categoría",
+      "empty": "Sin límites de categoría configurados.",
+      "category": "Categoría",
+      "selectCategory": "Seleccionar categoría",
+      "amount": "Monto límite",
+      "spent": "Gastado",
+      "allocated": "límite",
+      "toast": {
+        "upserted": "Límite de categoría guardado",
+        "deleted": "Límite de categoría eliminado"
+      }
+    },
+    "members": {
+      "count": "miembros",
+      "add": "Agregar miembro",
+      "addTitle": "Agregar miembro al presupuesto",
+      "empty": "Aún sin miembros.",
+      "owner": "Propietario",
+      "role": "Rol",
+      "searchUser": "Buscar usuarios",
+      "searchPlaceholder": "Escribe un nombre o email...",
+      "selectUser": "Seleccionar usuario",
+      "userPlaceholder": "Elige un usuario",
+      "addBtn": "Agregar Miembro",
+      "toast": {
+        "added": "Miembro agregado",
+        "roleUpdated": "Rol actualizado",
+        "removed": "Miembro eliminado"
+      }
+    },
+    "roles": {
+      "admin": "Administrador",
+      "contributor": "Contribuidor",
+      "viewer": "Lector"
+    },
+    "recurrences": {
+      "count": "reglas",
+      "add": "Agregar regla",
+      "createTitle": "Crear regla de recurrencia",
+      "empty": "Aún sin reglas recurrentes.",
+      "noDescription": "Regla sin nombre",
+      "description": "Descripción",
+      "descriptionPlaceholder": "ej. Renta mensual",
+      "amount": "Monto",
+      "frequencyLabel": "Frecuencia",
+      "interval": "Cada (n)",
+      "startDate": "Fecha de inicio",
+      "category": "Categoría",
+      "categoryPlaceholder": "Sin categoría",
+      "nextOn": "próximo",
+      "pause": "Pausar",
+      "resume": "Reanudar",
+      "manualPause": "Pausado manualmente",
+      "status": {
+        "active": "Activo",
+        "paused": "Pausado",
+        "completed": "Completado"
+      },
+      "frequency": {
+        "daily": "Diario",
+        "weekly": "Semanal",
+        "monthly": "Mensual",
+        "quarterly": "Trimestral",
+        "semiannual": "Semestral",
+        "annual": "Anual"
+      },
+      "toast": {
+        "created": "Regla de recurrencia creada",
+        "updated": "Regla de recurrencia actualizada",
+        "deleted": "Regla de recurrencia eliminada"
+      }
+    },
+    "categories": {
+      "uncategorized": "Sin categoría"
+    },
+    "widgets": {
+      "refreshBalance": "Actualizar balance",
+      "refreshOverview": "Actualizar resumen",
+      "refreshCategories": "Actualizar categorías"
+    },
+    "import": {
+      "title": "Importar Presupuesto",
+      "description": "Sube un extracto bancario para analizar y crear un presupuesto con datos reales.",
+      "upload": {
+        "dropLabel": "Suelta el archivo aquí, o haz clic para seleccionar",
+        "dropSub": "Soportado: CSV, XLSX, extractos PDF bancarios",
+        "maxSize": "Máx {{size}}",
+        "supportedHint": "Compatible con cualquier formato bancario",
+        "supportedDesc": "Las columnas se detectan automáticamente en inglés, español y danés. Fechas y montos se manejan automáticamente."
+      },
+      "analysis": {
+        "title": "Resultados del Análisis",
+        "processing": "Analizando transacciones…",
+        "parsed": "Procesado",
+        "transactions": "transacciones",
+        "recurringFound": "{{count}} transacciones recurrentes detectadas",
+        "confidence": "Confianza",
+        "noRecurring": "No se detectaron transacciones recurrentes.",
+        "dateRange": "Período: {{from}} — {{to}}"
+      },
+      "confirm": {
+        "title": "Listo para Crear Presupuesto",
+        "readyTitle": "Importación lista",
+        "readyDesc": "{{recurrences}} reglas recurrentes y {{transactions}} transacciones en total. Crea el presupuesto para aplicarlas.",
+        "incomeRecurrences": "Ingresos recurrentes",
+        "expenseRecurrences": "Gastos recurrentes",
+        "nextStepHint": "Las reglas recurrentes se añadirán al nuevo presupuesto. Puedes revisarlas después de crearlo."
+      },
+      "actions": {
+        "import": "Importar",
+        "next": "Continuar",
+        "back": "Atrás",
+        "retry": "Intentar de nuevo",
+        "createBudget": "Crear Presupuesto",
+        "downloadOriginal": "Descargar archivo original"
+      },
+      "errors": {
+        "fileTooLarge": "El archivo supera el límite de 10 MB.",
+        "unsupportedType": "Solo se admiten archivos CSV, XLSX y PDF.",
+        "parseFailed": "No se pudo leer el archivo. Asegúrate de que sea un extracto bancario válido."
+      }
     }
   }
 }

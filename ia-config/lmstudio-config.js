@@ -6,10 +6,11 @@
 export const LM_STUDIO_CONFIG = {
   /**
    * Supported model versions and their identifiers in LM Studio.
-   * Users must load these models manually in LM Studio or use `lmstudio-load-model.sh` helper.
+   * Users must load these models manually in LM Studio or use `scripts/ai/lmstudio/load-model.sh`.
    */
   models: {
-    'llama3.2-latest': { // As per user's previous request
+    'llama3.2-latest': {
+      // As per user's previous request
       id: 'llama3.2:latest',
       name: 'Llama 3.2 Latest',
       description: 'Default model for LM Studio integration',
@@ -23,7 +24,7 @@ export const LM_STUDIO_CONFIG = {
       id: 'glm4:9b',
       name: 'GLM 4 9B',
       description: 'GLM 4 9B model',
-    }
+    },
   },
 
   /**
@@ -84,4 +85,4 @@ export const LM_STUDIO_CONFIG = {
   logging: {
     level: 'info',
   },
-};
+}

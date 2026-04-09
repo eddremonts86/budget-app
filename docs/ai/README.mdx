@@ -6,7 +6,7 @@ Esta carpeta agrupa la documentacion operativa y arquitectonica de AI para que q
 
 La reorganizacion ya centralizo configuracion, providers, prompts, RAG, storage y audit dentro de `src/ai`.
 La capa de providers ya esta separada por carpeta y por responsabilidad interna (`adapter`, `config`, `models`, `probe`, `types`).
-Las rutas `api.ai.*` ya consumen helpers compartidos desde `src/ai/server` y prompts desde `src/ai/prompts` en lugar de mantener esa logica embebida.
+Las rutas `api.ai.*` ya consumen helpers compartidos desde `src/modules/ai/server` y prompts desde `src/modules/ai/prompts` en lugar de mantener esa logica embebida.
 
 ## Documentos
 
@@ -16,6 +16,7 @@ Las rutas `api.ai.*` ya consumen helpers compartidos desde `src/ai/server` y pro
 - `language-system.md`: reglas del sistema de idioma y prompts.
 - `reorganization-plan.mdx`: plan de reorganizacion integral hacia `src/ai`.
 
-## Nota de transicion
+## Documentos adicionales
 
-Las rutas antiguas de documentacion en `docs/AI-*.md` se mantienen como punto de entrada y redireccion humana. La referencia recomendada para desarrollo nuevo es esta carpeta y el dominio `src/ai`.
+- `docker-stack-guide.mdx`: guia operativa del stack Docker + AI.
+- `implementation-plan.md`: plan de implementacion RAG + context injection.

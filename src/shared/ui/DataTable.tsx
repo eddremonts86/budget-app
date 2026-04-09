@@ -19,7 +19,6 @@ import {
   useReactTable,
 } from '@tanstack/react-table'
 import { useDebounce } from '@uidotdev/usehooks'
-import { motion, AnimatePresence } from 'framer-motion'
 import {
   ChevronDown,
   ChevronLeft,
@@ -59,7 +58,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
-import { useIsMobile } from '@/hooks/use-mobile'
+import { useIsMobile } from '@/shared/hooks/use-mobile'
 import { cn } from '@/shared/lib/utils'
 
 export interface DataTableFilterConfig {
@@ -138,12 +137,44 @@ function downloadCsv(fileName: string, csvContent: string) {
   URL.revokeObjectURL(url)
 }
 
+const EMPTY_FILTERS: DataTableFilterConfig[] = []
+const EMPTY_BULK_ACTIONS: never[] = []
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- React.memo loses generic type parameter
+const RowCell = React.memo(function RowCell({ cell }: { cell: Cell<any, unknown> }) {
+  if (cell.getIsGrouped()) {
+    return (
+      <Button
+        variant="ghost"
+        className="h-auto p-0 font-medium"
+        onClick={cell.row.getToggleExpandedHandler()}
+      >
+        {cell.row.getIsExpanded() ? (
+          <ChevronDown className="mr-2 h-4 w-4" />
+        ) : (
+          <ChevronRight className="mr-2 h-4 w-4" />
+        )}
+        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+        <span className="ml-2 text-xs text-muted-foreground">({cell.row.subRows.length})</span>
+      </Button>
+    )
+  }
+  if (cell.getIsAggregated()) {
+    return flexRender(
+      cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell,
+      cell.getContext(),
+    )
+  }
+  if (cell.getIsPlaceholder()) return null
+  return flexRender(cell.column.columnDef.cell, cell.getContext())
+})
+
 export function UnifiedDataTable<TData, TValue>({
   columns,
   data,
   filterColumn,
-  filters = [],
-  bulkActions = [],
+  filters = EMPTY_FILTERS,
+  bulkActions = EMPTY_BULK_ACTIONS,
   children,
   className,
   fullHeight,
@@ -296,36 +327,6 @@ export function UnifiedDataTable<TData, TValue>({
 
     downloadCsv(exportFileName, [headers.join(','), ...body].join('\n'))
   }, [exportFileName, onExport, selectedRows, table])
-
-  const renderRowCell = React.useCallback((cell: Cell<TData, unknown>) => {
-    if (cell.getIsGrouped()) {
-      return (
-        <Button
-          variant="ghost"
-          className="h-auto p-0 font-medium"
-          onClick={cell.row.getToggleExpandedHandler()}
-        >
-          {cell.row.getIsExpanded() ? (
-            <ChevronDown className="mr-2 h-4 w-4" />
-          ) : (
-            <ChevronRight className="mr-2 h-4 w-4" />
-          )}
-          {flexRender(cell.column.columnDef.cell, cell.getContext())}
-          <span className="ml-2 text-xs text-muted-foreground">({cell.row.subRows.length})</span>
-        </Button>
-      )
-    }
-
-    if (cell.getIsAggregated()) {
-      return flexRender(
-        cell.column.columnDef.aggregatedCell ?? cell.column.columnDef.cell,
-        cell.getContext(),
-      )
-    }
-
-    if (cell.getIsPlaceholder()) return null
-    return flexRender(cell.column.columnDef.cell, cell.getContext())
-  }, [])
 
   const rowModel = enablePagination ? table.getRowModel() : table.getPrePaginationRowModel()
   const canPaginate =
@@ -536,7 +537,9 @@ export function UnifiedDataTable<TData, TValue>({
                       <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                         {toHeaderLabel(cell.column.columnDef.header, cell.column.id)}
                       </span>
-                      <div className="text-right text-sm">{renderRowCell(cell)}</div>
+                      <div className="text-right text-sm">
+                        <RowCell cell={cell} />
+                      </div>
                     </div>
                   ))}
                 </div>
@@ -593,27 +596,21 @@ export function UnifiedDataTable<TData, TValue>({
               ))}
             </TableHeader>
             <TableBody>
-              <AnimatePresence mode="popLayout" initial={false}>
-                {rowModel.rows.map((row, index) => (
-                  <motion.tr
-                    key={row.id}
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.95 }}
-                    transition={{ duration: 0.2, delay: index * 0.02 }}
-                    className="group hover:bg-secondary/10 transition-colors cursor-default"
-                  >
-                    {row.getVisibleCells().map((cell) => (
-                      <TableCell
-                        key={cell.id}
-                        className="py-4 px-6 text-sm border-b border-border/40 align-top"
-                      >
-                        {renderRowCell(cell)}
-                      </TableCell>
-                    ))}
-                  </motion.tr>
-                ))}
-              </AnimatePresence>
+              {rowModel.rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  className="group hover:bg-secondary/10 transition-colors duration-200 cursor-default"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell
+                      key={cell.id}
+                      className="py-4 px-6 text-sm border-b border-border/40 align-top"
+                    >
+                      <RowCell cell={cell} />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
               {children}
               {!rowModel.rows.length && (
                 <TableRow>
@@ -693,7 +690,6 @@ export function DataTable<TData, TValue>({
       columns={columns}
       data={data}
       filterColumn={filterColumn}
-      children={children}
       className={className}
       fullHeight={fullHeight}
       enableSelection={false}
@@ -703,6 +699,8 @@ export function DataTable<TData, TValue>({
       enableColumnVisibility
       filters={[]}
       bulkActions={[]}
-    />
+    >
+      {children}
+    </UnifiedDataTable>
   )
 }

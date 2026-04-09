@@ -255,3 +255,19 @@
     background: var(--accent);
   }
 }
+
+/* Widget grid — 12-column system at lg breakpoint */
+@media (min-width: 1024px) {
+  .masonry-grid {
+    grid-auto-rows: 1px;
+    row-gap: 0;
+  }
+
+  .masonry-item {
+    grid-row-end: span var(--row-span, 400);
+  }
+
+  .widget-grid-item {
+    grid-column: span var(--col-span, 12);
+  }
+}

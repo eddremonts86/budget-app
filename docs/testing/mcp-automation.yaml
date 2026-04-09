@@ -10,7 +10,6 @@ workflows:
       - src/routeTree.gen.ts
       - src/routes/**/*
     outputs:
-      - docs/testing/routes-inventory.json
       - docs/testing/routes-inventory.yaml
     suggestedMcpTools:
       - search_subagent
@@ -20,7 +19,7 @@ workflows:
     purpose: Generate or update route-centric E2E specs by module
     inputs:
       - tests/e2e/route-inventory.ts
-      - docs/testing/routes-inventory.json
+      - docs/testing/routes-inventory.yaml
     outputs:
       - tests/e2e/routes.navigation.spec.ts
       - tests/e2e/routes.api.spec.ts

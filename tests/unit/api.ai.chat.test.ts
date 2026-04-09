@@ -1,17 +1,17 @@
 import { chat } from '@tanstack/ai'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { logAudit } from '@/ai/audit'
-import { getActiveAiConfig, getAllAiConfigs, validateAiConfig } from '@/ai/config'
-import { detectBestProvider, probeProvider } from '@/ai/providers'
-import { Route } from '@/routes/api.ai.chat'
+import { logAudit } from '@/modules/ai/audit'
+import { getActiveAiConfig, getAllAiConfigs, validateAiConfig } from '@/modules/ai/config/store'
+import { detectBestProvider, probeProvider } from '@/modules/ai/providers'
+import { Route } from '@/routes/api/ai/chat/route'
 
 // Mock dependencies
-vi.mock('@/ai/config', () => ({
+vi.mock('@/modules/ai/config/store', () => ({
   getActiveAiConfig: vi.fn(),
   getAllAiConfigs: vi.fn(),
   validateAiConfig: vi.fn(),
 }))
-vi.mock('@/ai/providers', () => ({
+vi.mock('@/modules/ai/providers', () => ({
   detectBestProvider: vi.fn(),
   probeProvider: vi.fn(),
   discoverProviderModels: vi.fn(async (config) => ({
@@ -30,8 +30,10 @@ vi.mock('@/ai/providers', () => ({
     return null
   }),
 }))
-vi.mock('@/ai/rag/context', async () => {
-  const actual = await vi.importActual<typeof import('@/ai/rag/context')>('@/ai/rag/context')
+vi.mock('@/modules/ai/rag/context', async () => {
+  const actual = await vi.importActual<typeof import('@/modules/ai/rag/context')>(
+    '@/modules/ai/rag/context',
+  )
   return {
     ...actual,
     detectIntent: vi.fn(() => []),
@@ -39,10 +41,10 @@ vi.mock('@/ai/rag/context', async () => {
     injectDynamicContext: vi.fn().mockResolvedValue(''),
   }
 })
-vi.mock('@/ai/rag/retrieval', () => ({
+vi.mock('@/modules/ai/rag/retrieval', () => ({
   retrieveContext: vi.fn().mockResolvedValue(''),
 }))
-vi.mock('@/ai/audit', () => ({
+vi.mock('@/modules/ai/audit', () => ({
   logAudit: vi.fn().mockResolvedValue(undefined),
 }))
 vi.mock('@tanstack/ai', () => ({

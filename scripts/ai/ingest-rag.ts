@@ -1,1 +1,217 @@
-import '../ingest-rag'
+import fs from 'fs/promises'
+import * as dotenv from 'dotenv'
+import { drizzle } from 'drizzle-orm/postgres-js'
+import { glob } from 'glob'
+import postgres from 'postgres'
+import { getCollection } from '../../src/modules/ai/rag/chroma-client'
+import { generateEmbedding } from '../../src/modules/ai/rag/embeddings'
+import * as schema from '../../src/shared/lib/db/schema'
+
+dotenv.config()
+
+async function ingest() {
+  console.log('🚀 Starting RAG ingestion...')
+
+  const collection = await getCollection()
+  console.log('✅ Connected to ChromaDB')
+
+  const connectionString = process.env.DATABASE_URL
+  if (!connectionString) {
+    console.warn('⚠️ DATABASE_URL not found, skipping DB ingestion')
+  } else {
+    try {
+      const client = postgres(connectionString)
+      const db = drizzle(client, { schema })
+      console.log('✅ Connected to PostgreSQL')
+
+      const users = await db.select().from(schema.users)
+      console.log(`Found ${users.length} users in DB`)
+
+      for (const user of users) {
+        const doc = `User: ${user.name} (${user.email}). Role ID: ${user.roleId || 'unknown'}. ID: ${user.id}`
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`user-${user.id}`],
+          embeddings: [embedding],
+          metadatas: [{ source: 'postgres', type: 'user', id: user.id }],
+          documents: [doc],
+        })
+      }
+
+      const todos = await db.select().from(schema.todos)
+      console.log(`Found ${todos.length} todos in DB`)
+
+      for (const todo of todos) {
+        const doc = `Task: ${todo.title}. Status: ${todo.status}. Priority: ${todo.priority}. Assigned to: ${todo.assignedTo || 'Unassigned'}. Due: ${todo.dueDate || 'No date'}. Description: ${todo.description || ''}`
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`todo-${todo.id}`],
+          embeddings: [embedding],
+          metadatas: [{ source: 'postgres', type: 'todo', id: todo.id }],
+          documents: [doc],
+        })
+      }
+
+      const projects = await db.select().from(schema.projects)
+      console.log(`Found ${projects.length} projects in DB`)
+
+      for (const project of projects) {
+        const doc = `Project: ${project.name}. Status: ${project.status}. Type: ${project.type}. Priority: ${project.priority || 'unknown'}. Description: ${project.description || ''}`
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`project-${project.id}`],
+          embeddings: [embedding],
+          metadatas: [{ source: 'postgres', type: 'project', id: project.id }],
+          documents: [doc],
+        })
+      }
+
+      const transactions = await db.select().from(schema.transactions)
+      console.log(`Found ${transactions.length} transactions in DB`)
+
+      for (const transaction of transactions) {
+        const doc = `Transaction: ${transaction.customerName} (${transaction.customerEmail}). Status: ${transaction.status}. Amount: ${transaction.amount} cents. Date: ${transaction.date}. Rejection Reason: ${transaction.rejectionReason || 'None'}`
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`transaction-${transaction.id}`],
+          embeddings: [embedding],
+          metadatas: [{ source: 'postgres', type: 'transaction', id: transaction.id }],
+          documents: [doc],
+        })
+      }
+
+      const categories = await db.select().from(schema.categories)
+      console.log(`Found ${categories.length} categories in DB`)
+
+      for (const category of categories) {
+        const doc = `Category: ${category.name}. Color: ${category.color}`
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`category-${category.id}`],
+          embeddings: [embedding],
+          metadatas: [{ source: 'postgres', type: 'category', id: category.id }],
+          documents: [doc],
+        })
+      }
+
+      const teams = await db.select().from(schema.teams)
+      console.log(`Found ${teams.length} teams in DB`)
+
+      for (const team of teams) {
+        const doc = `Team: ${team.name}. Description: ${team.description || ''}. Specialization: ${team.specialization || 'general'}. Lead ID: ${team.leadId || 'unassigned'}`
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`team-${team.id}`],
+          embeddings: [embedding],
+          metadatas: [{ source: 'postgres', type: 'team', id: team.id }],
+          documents: [doc],
+        })
+      }
+    } catch (error) {
+      console.error('❌ Error ingesting DB data:', error)
+    }
+  }
+
+  const docFiles = await glob('docs/**/*.md')
+  console.log(`found ${docFiles.length} documentation files`)
+
+  for (const file of docFiles) {
+    const content = await fs.readFile(file, 'utf-8')
+    const chunks = chunkText(content, 500)
+
+    for (const [index, chunk] of chunks.entries()) {
+      const embedding = await generateEmbedding(chunk)
+      await collection.upsert({
+        ids: [`doc-${file}-${index}`],
+        embeddings: [embedding],
+        metadatas: [{ source: file, type: 'documentation', index }],
+        documents: [chunk],
+      })
+    }
+    console.log(`  Processed ${file}`)
+  }
+
+  try {
+    const knowledgePath = 'src/modules/ai/data/app-knowledge.json'
+    const knowledgeContent = await fs.readFile(knowledgePath, 'utf-8')
+    const knowledge = JSON.parse(knowledgeContent)
+
+    if (knowledge.navigation?.main) {
+      for (const item of knowledge.navigation.main) {
+        const doc = [
+          `Page: ${item.label} (${item.labelEs})`,
+          `URL: ${item.url}`,
+          `Description: ${item.description}`,
+          `Descripción: ${item.descriptionEs}`,
+        ].join('\n')
+
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`nav-${item.url}`],
+          embeddings: [embedding],
+          metadatas: [{ source: knowledgePath, type: 'navigation', url: item.url }],
+          documents: [doc],
+        })
+      }
+      console.log('  Processed navigation items')
+    }
+
+    if (knowledge.pages) {
+      for (const [url, page] of Object.entries(knowledge.pages)) {
+        const p = page as { title: string; titleEs: string; features: string[]; actions?: string[] }
+        const doc = [
+          `Page: ${p.title} (${p.titleEs})`,
+          `URL: ${url}`,
+          `Features: ${p.features.join('; ')}`,
+          p.actions ? `Actions: ${p.actions.join(', ')}` : '',
+        ]
+          .filter(Boolean)
+          .join('\n')
+
+        const embedding = await generateEmbedding(doc)
+        await collection.upsert({
+          ids: [`page-${url}`],
+          embeddings: [embedding],
+          metadatas: [{ source: knowledgePath, type: 'page', url }],
+          documents: [doc],
+        })
+      }
+      console.log('  Processed page details')
+    }
+
+    if (knowledge.commonQuestions) {
+      const allQA: Array<{ key: string; answer: string }> = []
+      for (const [, answers] of Object.entries(knowledge.commonQuestions)) {
+        for (const [key, answer] of Object.entries(answers as Record<string, string>)) {
+          allQA.push({ key, answer })
+        }
+      }
+      for (const qa of allQA) {
+        const embedding = await generateEmbedding(qa.answer)
+        await collection.upsert({
+          ids: [`qa-${qa.key}`],
+          embeddings: [embedding],
+          metadatas: [{ source: knowledgePath, type: 'qa', key: qa.key }],
+          documents: [qa.answer],
+        })
+      }
+      console.log('  Processed Q&A pairs')
+    }
+
+    console.log('✅ App knowledge base ingested')
+  } catch (error) {
+    console.warn('⚠️ Could not process app-knowledge.json, skipping.', error)
+  }
+
+  console.log('🎉 Ingestion complete!')
+}
+
+function chunkText(text: string, size: number): string[] {
+  const chunks = []
+  for (let i = 0; i < text.length; i += size) {
+    chunks.push(text.slice(i, i + size))
+  }
+  return chunks
+}
+
+ingest().catch(console.error)

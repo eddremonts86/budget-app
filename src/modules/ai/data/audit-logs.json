@@ -1,0 +1,2522 @@
+[
+  {
+    "timestamp": "2026-02-15T20:39:04.183Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:39:39.120Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:41:20.507Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:41:47.730Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:49:44.438Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:52:33.973Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:53:06.538Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T20:55:04.174Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:07:44.849Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:09:19.889Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:09:58.110Z",
+    "locale": "en-US",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:33:03.042Z",
+    "locale": "en",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "zai-org/glm-4.6v-flash",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:34:08.026Z",
+    "locale": "en",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:37:43.804Z",
+    "locale": "es",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:38:22.247Z",
+    "locale": "es",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T21:44:53.524Z",
+    "locale": "es",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:01:58.228Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:02:40.712Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:03:24.488Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:03:55.359Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:06:23.267Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:07:54.017Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:08:22.661Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:10:31.080Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:14:28.273Z",
+    "locale": "es-ES",
+    "query": "[CONTEXT]\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] ...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:14:37.032Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:15:29.330Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:15:30.401Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-15T22:45:59.717Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:29:57.332Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "deepseek/deepseek-r1-0528-qwen3-8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:31:30.025Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:31:38.039Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:31:56.796Z",
+    "locale": "es-ES",
+    "query": "Context:\n\n\n--- TECHNICAL CONTEXT ---\n[Context 1] S...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:54:18.195Z",
+    "locale": "en",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T11:58:38.864Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:01:20.996Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:01:32.653Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:02:14.824Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:02:47.705Z",
+    "locale": "es",
+    "query": "Cuanto es 10 + 30?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:03:22.239Z",
+    "locale": "es",
+    "query": "Cuantas tareas faltan por resolverse?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:05:17.083Z",
+    "locale": "es",
+    "query": "Cuantas tareas faltan por resolverse?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:05:53.564Z",
+    "locale": "es",
+    "query": "Donde puedo ver la lista de usuarios de la aplicac...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:07:28.776Z",
+    "locale": "es",
+    "query": "cual cres que es la tarea mas importante que debo ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:08:22.364Z",
+    "locale": "es",
+    "query": "ok dame la lista de las 7 mas importantes para hoy...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:10:49.121Z",
+    "locale": "es",
+    "query": "pero Configurar CI/CD en GitHub Actions luce como ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:12:59.456Z",
+    "locale": "es",
+    "query": "si voy a /api/tasks puedo ver que Configurar CI/CD...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:14:25.008Z",
+    "locale": "es",
+    "query": "ok dame la lista de las 7 mas importantes para hoy...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:15:43.405Z",
+    "locale": "es",
+    "query": "ok dame la lista de las 7 mas importantes para hoy...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:17:01.930Z",
+    "locale": "es",
+    "query": "mepuedes decir cual es el metal mas caro?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:14.118Z",
+    "locale": "en",
+    "query": "Donde puedo ver y gestionar las tareas? Dame la UR...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:24.100Z",
+    "locale": "en",
+    "query": "Cuantas tareas pendientes hay y donde puedo verlas...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:32.966Z",
+    "locale": "en",
+    "query": "Cuantos usuarios hay registrados? Quienes son? Don...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:44.517Z",
+    "locale": "en",
+    "query": "Como cambio el idioma de la aplicacion a español?...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:36:55.981Z",
+    "locale": "en",
+    "query": "Dame un resumen de todas las secciones de la aplic...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T12:47:32.675Z",
+    "locale": "es",
+    "query": "Crea una tarea llamada \"Revisar documentación del ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:07:12.243Z",
+    "locale": "es",
+    "query": "Actualiza la tarea \"Configurar TanStack Start\" y p...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:09:57.612Z",
+    "locale": "en",
+    "query": "la tarea Revisar documentación del API debes actua...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:12:05.039Z",
+    "locale": "es",
+    "query": "Marca la tarea \"Configurar TanStack Start\" como co...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:17:23.849Z",
+    "locale": "en",
+    "query": "actualizala a pendiente, asignala a edd remonts y ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:28:42.319Z",
+    "locale": "en",
+    "query": "actualizala a pendiente, asignala a edd remonts y ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:29:01.151Z",
+    "locale": "en",
+    "query": "actualizala a pendiente, asignala a edd remonts y ...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:46:44.090Z",
+    "locale": "es",
+    "query": "crea una tarea llamada \"Revisar documentación\" con...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T13:47:35.529Z",
+    "locale": "es",
+    "query": "actualiza la tarea \"Configurar TanStack Start\" a e...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T14:10:56.198Z",
+    "locale": "es",
+    "query": "lee este fichero y crea las tareas que contiene\n[F...",
+    "providerId": "lm-studio",
+    "model": "qwen/qwen3-vl-4b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T14:53:12.004Z",
+    "locale": "en",
+    "query": "hola...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T14:53:27.475Z",
+    "locale": "en",
+    "query": "que??...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:00:31.115Z",
+    "locale": "en",
+    "query": "ok, como puedo crear un usuario?...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:02:08.261Z",
+    "locale": "en",
+    "query": "pero no deberia poder decir el nombre y email del ...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:03:43.314Z",
+    "locale": "en",
+    "query": "ok entonces ei te digo que crees un usuario de nom...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:05:07.634Z",
+    "locale": "en",
+    "query": "crea una tarea que se llame \"crear usuarios automa...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:06:54.773Z",
+    "locale": "en",
+    "query": "crea un usuario que se llame \"Antonio Miguel\" con ...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:08:05.043Z",
+    "locale": "en",
+    "query": "que hay aqui\n[Image Attached]...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:16:08.701Z",
+    "locale": "en",
+    "query": "kjawbdaks\n[Image Attached]...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:29:44.722Z",
+    "locale": "es",
+    "query": "Create a new project plan...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:32:00.763Z",
+    "locale": "en",
+    "query": "Create a new project plan...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:44:35.591Z",
+    "locale": "en",
+    "query": "crea una tarea que se llame \"Ensenar a Eline sobre...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:46:27.796Z",
+    "locale": "en",
+    "query": "crea un usuario que se llame Eline con correo \"eli...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:46:53.218Z",
+    "locale": "en",
+    "query": "cuantas tareas tengo pendientes...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:47:46.290Z",
+    "locale": "en",
+    "query": "crea un plan para completar almenos 100 tareas en ...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:48:17.953Z",
+    "locale": "en",
+    "query": "noooooo!!! crea un plan para terminar las tareas q...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T15:48:47.677Z",
+    "locale": "en",
+    "query": "dende puedo cambiar el thema de la app...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:03:46.859Z",
+    "locale": "en",
+    "query": "cuantas tareas tengo endientes...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:05:28.568Z",
+    "locale": "en",
+    "query": "creame una tarea que se llame \"Nueva tarea\" con ri...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:06:46.858Z",
+    "locale": "en",
+    "query": "cual es el mejor footbolista del la histria...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T17:07:18.198Z",
+    "locale": "en",
+    "query": "donde cambio el thema de la app?...",
+    "providerId": "lm-studio",
+    "model": "default_model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:27:12.956Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:27:48.587Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:28:15.755Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:31:35.562Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:37:14.662Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:41:03.332Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:44:30.149Z",
+    "locale": "en",
+    "query": "dime cuantas tareas tenemos?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:44:40.637Z",
+    "locale": "en",
+    "query": "Create a new project plan...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:48:47.559Z",
+    "locale": "en",
+    "query": "quien eres?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:49:22.319Z",
+    "locale": "en",
+    "query": "dime la verdad...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:57:15.941Z",
+    "locale": "en",
+    "query": "Create a new project plan...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:57:31.362Z",
+    "locale": "en",
+    "query": "que quiere decir 2?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:58:11.910Z",
+    "locale": "en",
+    "query": "How many users are currently active in Acme Inc.?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T19:58:38.240Z",
+    "locale": "en",
+    "query": "How many users are in Acme Inc.?...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:18:57.266Z",
+    "locale": "en",
+    "query": "que dia es hoy ?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:19:14.054Z",
+    "locale": "en",
+    "query": "que dia es hoy ?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:20:42.688Z",
+    "locale": "en",
+    "query": "ewfde...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:31:59.323Z",
+    "locale": "en",
+    "query": "que modelo eres ?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:32:18.049Z",
+    "locale": "en",
+    "query": "que?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:33:31.496Z",
+    "locale": "en",
+    "query": "que hay?...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:47:38.358Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:48:10.805Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:48:53.838Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T20:50:31.000Z",
+    "locale": "es-ES",
+    "query": "responde breve...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-16T21:00:04.667Z",
+    "locale": "en",
+    "query": "hola...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-19T11:40:58.661Z",
+    "locale": "en",
+    "query": "dime cuantas transacciones tengo esperando por apr...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-20T09:54:08.998Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-02-20T14:17:39.027Z",
+    "locale": "en",
+    "query": "holaaaaaa...",
+    "providerId": "lm-studio",
+    "model": "local-model",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:08.048Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:14.867Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:15.032Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:19.080Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:19.466Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:24.257Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:24.555Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:42.530Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:32:42.977Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:00.319Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:00.812Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:18.162Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:18.809Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:26.000Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:26.641Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:33.077Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:34.441Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:40.218Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:40.801Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:52.702Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:33:52.897Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:34:05.076Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:34:05.218Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:34:23.816Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:46:50.993Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:46:51.087Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:46:58.266Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:46:58.576Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:02.884Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:03.103Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:07.528Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:07.780Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:23.738Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:23.965Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:39.766Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:40.045Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:56.165Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:47:56.529Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:03.040Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:03.622Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:09.701Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:10.288Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:16.250Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:16.591Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:27.835Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:28.004Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:39.751Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:39.956Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:53.070Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:48:53.917Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:49:04.917Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:49:07.522Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:49:19.193Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:49:19.204Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:49:56.045Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:49:56.144Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:01.100Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:01.217Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:03.985Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:04.140Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:06.838Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:07.082Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:12.468Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:13.096Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:17.925Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:18.098Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:23.749Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:24.033Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:27.852Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:28.070Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:31.833Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:32.703Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:35.693Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:35.995Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:38.486Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:38.631Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:41.318Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:41.474Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:44.108Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:44.937Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:48.084Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:48.365Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:51.959Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:50:52.284Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:51:31.179Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:51:37.718Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:51:37.935Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:51:42.203Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:51:42.410Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:51:46.609Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:51:46.831Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-03T19:55:35.265Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:04:49.585Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "openai",
+    "model": "gpt-4o",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:08:04.202Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "lm-studio",
+    "model": "llama3.2:latest",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:08:49.533Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:08:59.151Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:10:47.852Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:11:04.485Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:11:46.451Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:12:04.572Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:12:34.663Z",
+    "locale": "en",
+    "query": "cuantas tareas tenemos...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:15:06.769Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "llama-cpp",
+    "model": "qwen2.5-7b-instruct-q4_k_m",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:16:15.439Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "llama-cpp",
+    "model": "qwen2.5-7b-instruct-q4_k_m",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:16:34.114Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "llama-cpp",
+    "model": "qwen2.5-7b-instruct-q4_k_m",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:23:40.554Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "llama-cpp",
+    "model": "qwen2.5-7b-instruct-q4_k_m",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:24:10.751Z",
+    "locale": "en-US",
+    "query": "healthcheck...",
+    "providerId": "llama-cpp",
+    "model": "qwen2.5-7b-instruct-q4_k_m",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:29:08.254Z",
+    "locale": "es-ES",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "lm-studio",
+    "model": "llama3.2:latest",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:29:26.847Z",
+    "locale": "es-ES",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:29:46.964Z",
+    "locale": "es-ES",
+    "query": "cuantas tareas tenemos...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:30:07.056Z",
+    "locale": "es-ES",
+    "query": "cuantas tareas tenemos...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:31:46.277Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu?...",
+    "providerId": "lm-studio",
+    "model": "llama3.2:latest",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:32:13.151Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu?...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:42:41.993Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen2.5:7b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:43:48.565Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:43:55.647Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T07:44:15.070Z",
+    "locale": "es-ES",
+    "query": "responde solo ok...",
+    "providerId": "ollama",
+    "model": "llama3.2",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T13:09:45.376Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "ollama",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T13:13:10.165Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-9b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T13:13:56.394Z",
+    "locale": "en",
+    "query": "como se llama el presidente de eeuu...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:39:03.498Z",
+    "locale": "en",
+    "query": "etas?...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:39:29.140Z",
+    "locale": "en",
+    "query": "tete...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:39:37.341Z",
+    "locale": "en",
+    "query": "kdlnc...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-9b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:40:42.725Z",
+    "locale": "en",
+    "query": "quiero saber quien es el precidente de eeuu...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-9b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:41:22.950Z",
+    "locale": "en",
+    "query": "cuanto es 32234 +234...",
+    "providerId": "ollama",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T14:43:15.735Z",
+    "locale": "en",
+    "query": "dime que es 0202020 + 9393903...",
+    "providerId": "ollama",
+    "model": "qwen3.5:9b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:04:00.156Z",
+    "locale": "en",
+    "query": "dime como estas?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:30:37.631Z",
+    "locale": "en",
+    "query": "dime que?...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:33:45.970Z",
+    "locale": "en",
+    "query": "hola!!!...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:34:13.535Z",
+    "locale": "en",
+    "query": "hota que tal ?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:45:58.990Z",
+    "locale": "es",
+    "query": "¿quién es el presidente de los estados unidos? res...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:46:26.946Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:58:47.663Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:59:30.402Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T15:59:58.307Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:00:16.582Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:00:43.053Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:01.595Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:24.200Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:28.558Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:01:46.259Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:08.270Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:13.535Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:32.761Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:53.774Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:02:58.992Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:03:16.519Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:03:37.610Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:03:38.223Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:04:23.210Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:05:07.416Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:05:53.086Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:05.713Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:17.988Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:30.632Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:42.516Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:06:53.820Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:06.942Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:18.708Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:30.746Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:42.579Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:07:54.728Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:06.801Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:19.531Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:31.321Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:43.212Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:08:55.439Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:09:07.998Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T16:09:19.601Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:41:43.098Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:41:54.496Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:06.870Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:18.290Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:30.265Z",
+    "locale": "es",
+    "query": "quien es el presidente de estados unidos? responde...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-05T17:42:42.219Z",
+    "locale": "es",
+    "query": "cuantas tareas hay en total en el sistema y cuanta...",
+    "providerId": "lm-studio",
+    "model": "lmstudio:compat",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-06T08:15:41.472Z",
+    "locale": "es",
+    "query": "Say hello...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-06T08:43:15.410Z",
+    "locale": "es",
+    "query": "Di hola...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-06T10:44:26.919Z",
+    "locale": "en",
+    "query": "como creo una tarea?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:52:09.098Z",
+    "locale": "en-US",
+    "query": "Responde solo: ok...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:52:43.514Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:56:19.352Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T19:57:04.155Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:01:39.967Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:02:01.583Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "lm-studio",
+    "model": "llama-3.2-1b-instruct",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:02:32.798Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:03:20.167Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "lm-studio",
+    "model": "llama-3.2-1b-instruct",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:03:52.726Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:04:12.814Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:04:32.893Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:05:39.591Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-13T20:06:34.199Z",
+    "locale": "es-ES",
+    "query": "Responde solo con una frase corta en español confi...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T07:21:44.556Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T07:22:08.922Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T07:22:52.008Z",
+    "locale": "es-ES",
+    "query": "Responde solo con la palabra ok....",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:12:41.504Z",
+    "locale": "en",
+    "query": "Write an email draft...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:45:36.980Z",
+    "locale": "en",
+    "query": "ok, dime cual es el modelo que estas usando?...",
+    "providerId": "lm-studio",
+    "model": "text-embedding-nomic-embed-text-v1.5",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:46:02.694Z",
+    "locale": "en",
+    "query": "ok, dime cual es el modelo que estas usando?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:0.8b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:52:21.286Z",
+    "locale": "es-ES",
+    "query": "Responde SOLO OK...",
+    "providerId": "lm-studio",
+    "model": "qwen3.5-2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-14T17:56:53.775Z",
+    "locale": "es-ES",
+    "query": "Responde SOLO OK...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-17T09:33:19.077Z",
+    "locale": "en",
+    "query": "cual llm estas usando?...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-17T09:33:57.205Z",
+    "locale": "en",
+    "query": "ok, me puedes decir cuantas tareas tenemos activas...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-03-17T09:37:15.888Z",
+    "locale": "en",
+    "query": "ok perfecto, dame un resumen de las tareas para la...",
+    "providerId": "ollama",
+    "model": "qwen3.5:2b",
+    "contextLength": 0
+  },
+  {
+    "timestamp": "2026-04-06T15:20:14.403Z",
+    "locale": "en",
+    "query": "dame una descripción de 200 palabras para un budge...",
+    "providerId": "llama-cpp",
+    "model": "qwen3.5-2b-instruct-q4_k_m.gguf",
+    "contextLength": 0
+  }
+]

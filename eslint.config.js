@@ -111,7 +111,13 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/**/*.fn.ts', 'src/ai/**/*.ts', 'src/server/**/*.ts', 'src/shared/lib/db/index.ts'],
+    files: ['src/routes/**/*.tsx'],
+    rules: {
+      'react-refresh/only-export-components': 'off',
+    },
+  },
+  {
+    files: ['src/**/*.fn.ts', 'src/modules/ai/**/*.ts', 'src/shared/lib/db/index.ts'],
     rules: {
       'no-console': 'off',
     },
@@ -123,7 +129,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['src/features/Todos/components/views/KanbanBoard.tsx'],
+    files: ['src/modules/tasks/ui/views/KanbanBoard.tsx'],
     rules: {
       'react-hooks/incompatible-library': 'off',
     },

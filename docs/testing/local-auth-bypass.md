@@ -28,8 +28,8 @@ El bypass solo se activa cuando se cumplen **todas**:
 - `src/shared/lib/auth/bypass.server.ts`
 - `src/shared/lib/auth/bypass.client.ts`
 - `src/shared/lib/auth/server.ts`
-- `src/shared/layouts/DashboardLayout/DashboardLayout.tsx`
-- `src/features/Users/context/UserProvider.tsx`
+- `src/modules/dashboard/ui/shell/DashboardLayout.tsx`
+- `src/modules/users/context/UserProvider.tsx`
 
 ## Activar
 

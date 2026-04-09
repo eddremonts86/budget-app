@@ -3,7 +3,7 @@ const LOCAL_HOSTS = new Set(['localhost', '127.0.0.1', '::1', '0.0.0.0'])
 const isTruthy = (value?: string) => value === 'true' || value === '1'
 
 const isLocalServerHost = () => {
-  const host = process.env.HOST || process.env.HOSTNAME
+  const host = process.env.HOST
   if (!host) {
     return true
   }

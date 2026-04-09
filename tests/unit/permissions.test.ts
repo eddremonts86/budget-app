@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { canModifyTodo } from '@/features/Todos/model/permissions'
+import { canModifyTodo } from '@/modules/tasks'
 
 describe('canModifyTodo', () => {
   const baseTodo = { createdBy: 'user_1', assignedTo: 'user_2' }

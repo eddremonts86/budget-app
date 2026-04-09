@@ -1,0 +1,78 @@
+name: auth-local-e2e
+
+on:
+  pull_request:
+    branches:
+      - main
+      - master
+    paths:
+      - '.github/workflows/auth-local-e2e.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'playwright.auth-local.config.ts'
+      - 'scripts/testing/e2e-ci-local.sh'
+      - 'scripts/testing/prepare-auth-e2e-db.ts'
+      - 'src/shared/lib/auth/**'
+      - 'src/modules/auth/**'
+      - 'src/modules/users/**'
+      - 'src/modules/dashboard/ui/navigation/NavUser.tsx'
+      - 'tests/e2e/auth*.local.spec.ts'
+      - 'tests/e2e/utils/auth-local*.ts'
+      - 'src/shared/lib/db/schema.ts'
+      - 'drizzle/**'
+  push:
+    branches:
+      - main
+      - master
+    paths:
+      - '.github/workflows/auth-local-e2e.yml'
+      - 'package.json'
+      - 'pnpm-lock.yaml'
+      - 'playwright.auth-local.config.ts'
+      - 'scripts/testing/e2e-ci-local.sh'
+      - 'scripts/testing/prepare-auth-e2e-db.ts'
+      - 'src/shared/lib/auth/**'
+      - 'src/modules/auth/**'
+      - 'src/modules/users/**'
+      - 'src/modules/dashboard/ui/navigation/NavUser.tsx'
+      - 'tests/e2e/auth*.local.spec.ts'
+      - 'tests/e2e/utils/auth-local*.ts'
+      - 'src/shared/lib/db/schema.ts'
+      - 'drizzle/**'
+
+jobs:
+  auth-local:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: Run auth-local E2E suite
+        run: pnpm test:e2e:auth-local
+
+      - name: Upload Playwright report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-auth-local
+          path: playwright-report
+          if-no-files-found: ignore

@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { render, screen } from '@testing-library/react'
 import { describe, it, expect, vi, type Mock } from 'vitest'
-import { TaskDistribution } from '@/features/Analytics/components/TaskDistribution'
+import { TaskDistribution } from '@/modules/analytics/components/TaskDistribution'
 
 // Mock useQuery
 vi.mock('@tanstack/react-query', async () => {

@@ -1,7 +1,7 @@
 // @vitest-environment node
 import fs from 'node:fs/promises'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import { readAiConfig } from '../../src/ai/config/file-store'
+import { readAiConfig } from '../../src/modules/ai/config/file-store'
 
 // Mock dependencies before import
 vi.mock('node:fs/promises')

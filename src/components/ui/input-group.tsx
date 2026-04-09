@@ -1,6 +1,8 @@
 import { cva, type VariantProps } from 'class-variance-authority'
 import * as React from 'react'
-import { Button, Input, Textarea } from '@/components/ui'
+import { Button } from '@/components/ui/button'
+import { Input } from '@/components/ui/input'
+import { Textarea } from '@/components/ui/textarea'
 import { cn } from '@/shared/utils/index'
 
 function InputGroup({ className, ...props }: React.ComponentProps<'div'>) {
@@ -55,6 +57,14 @@ function InputGroupAddon({
   align = 'inline-start',
   ...props
 }: React.ComponentProps<'div'> & VariantProps<typeof inputGroupAddonVariants>) {
+  function focusGroupControl(currentTarget: HTMLDivElement, target: EventTarget | null) {
+    if ((target as HTMLElement | null)?.closest('button')) {
+      return
+    }
+
+    currentTarget.parentElement?.querySelector<HTMLElement>('input, textarea')?.focus()
+  }
+
   return (
     <div
       role="group"
@@ -62,11 +72,17 @@ function InputGroupAddon({
       data-align={align}
       className={cn(inputGroupAddonVariants({ align }), className)}
       onClick={(e) => {
-        if ((e.target as HTMLElement).closest('button')) {
+        focusGroupControl(e.currentTarget, e.target)
+      }}
+      onKeyDown={(e) => {
+        if (e.key !== 'Enter' && e.key !== ' ') {
           return
         }
-        e.currentTarget.parentElement?.querySelector<HTMLElement>('input, textarea')?.focus()
+
+        e.preventDefault()
+        focusGroupControl(e.currentTarget, e.target)
       }}
+      tabIndex={0}
       {...props}
     />
   )

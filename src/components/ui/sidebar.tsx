@@ -16,8 +16,8 @@ import {
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useIsMobile } from '@/hooks/use-mobile'
-import { SidebarContext, type SidebarContextProps, useSidebar } from '@/hooks/use-sidebar'
+import { useIsMobile } from '@/shared/hooks/use-mobile'
+import { SidebarContext, type SidebarContextProps, useSidebar } from '@/shared/hooks/use-sidebar'
 import { cn } from '@/shared/utils'
 
 const SIDEBAR_COOKIE_NAME = 'sidebar_state'

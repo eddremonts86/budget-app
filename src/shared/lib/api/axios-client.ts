@@ -1,11 +1,12 @@
 import axios from 'axios'
-import { setupAuthInterceptor, setupErrorInterceptor } from './interceptors'
+import { setupAuthInterceptor } from './interceptors/auth.interceptor'
+import { setupErrorInterceptor } from './interceptors/error.interceptor'
 
 /**
  * Pre-configured Axios instance for API requests
  *
  * Features:
- * - Automatic auth token injection (Clerk)
+ * - Cookie-based session support for local and hybrid auth
  * - Error handling with Sentry logging
  * - Toast notifications for errors
  *
@@ -23,6 +24,7 @@ import { setupAuthInterceptor, setupErrorInterceptor } from './interceptors'
 export const apiClient = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   timeout: import.meta.env.PROD ? 10000 : 30000,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },

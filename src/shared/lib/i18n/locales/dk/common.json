@@ -13,6 +13,52 @@
     "signIn": "Log ind",
     "signOut": "Log ud"
   },
+  "auth": {
+    "topbarCta": "Log ind",
+    "localCta": "Adgang med e-mail",
+    "workspaceAccess": "Workspace-adgang",
+    "eyebrow": "Hybrid godkendelse",
+    "title": "Vælg hvordan du vil logge ind.",
+    "description": "Brug din e-mail og adgangskode, eller fortsæt med din eksterne konto fra den samme skærm.",
+    "singleEntryTitle": "Log ind én gang. Fortsæt videre.",
+    "singleEntryDescription": "Brug den mulighed du allerede kender. Begge veje fører til det samme workspace uden ekstra trin.",
+    "localOnly": "Login med e-mail er ikke tilgængeligt lige nu.",
+    "localOnlyDescription": "Brug den alternative loginmulighed nedenfor for at fortsætte.",
+    "signInTab": "Log ind",
+    "signUpTab": "Opret konto",
+    "emailLabel": "E-mail",
+    "passwordLabel": "Adgangskode",
+    "nameLabel": "Fuldt navn",
+    "emailPlaceholder": "dig@firma.dk",
+    "passwordPlaceholder": "Din adgangskode",
+    "passwordRequirementHint": "Brug mindst {{min}} tegn med bogstaver, tal og et symbol.",
+    "namePlaceholder": "Ada Lovelace",
+    "signInAction": "Gå til workspace",
+    "signUpAction": "Opret konto",
+    "submitting": "Arbejder...",
+    "recommendedLocal": "Den hurtigste vej ind",
+    "recommendedExternal": "En anden mulighed",
+    "signInHint": "Brug den e-mailkonto du allerede bruger til dette workspace.",
+    "signUpHint": "Opret en ny konto og kom i gang på få minutter.",
+    "localPanelTitle": "E-mail og adgangskode",
+    "localPanelDescription": "Log ind med den konto du bruger til daglig.",
+    "clerkPanelTitle": "En anden måde at logge ind på",
+    "clerkPanelDescription": "Brug din organisationskonto eller eksterne konto, hvis det er sådan du plejer at logge ind.",
+    "clerkAction": "Fortsæt",
+    "clerkUnavailable": "Denne loginmulighed er ikke tilgængelig lige nu.",
+    "clerkUnavailableLabel": "Ikke tilgængelig",
+    "clerkOffline": "Midlertidigt utilgængelig",
+    "sideTitle": "Ét workspace, din sædvanlige vej ind.",
+    "sideDescription": "Vælg den metode der føles mest naturlig. Du ender samme sted uanset hvad.",
+    "pointOne": "Brug den konto du allerede kender.",
+    "pointTwo": "Skift metode uden at skifte destination.",
+    "pointThree": "Log ind og fortsæt direkte med dit arbejde.",
+    "backHome": "Tilbage til forsiden",
+    "goDashboard": "Gå til dashboard",
+    "sessionVerificationError": "Serveren har endnu ikke bekræftet din session. Prøv igen om et øjeblik.",
+    "nameRequiredError": "Indtast dit fulde navn for at oprette en konto.",
+    "passwordWeakError": "Brug mindst {{min}} tegn med bogstaver, tal og et symbol."
+  },
   "common": {
     "loading": "Indlæser...",
     "loadingMore": "Indlæser mere...",
@@ -73,6 +119,7 @@
       "transactions": "Transaktioner",
       "categories": "Kategorier",
       "projects": "Projekter",
+      "budgets": "Budgetter",
       "team": "Team",
       "settings": "Indstillinger"
     },
@@ -242,6 +289,58 @@
       "status": "Status",
       "date": "Dato",
       "amount": "Beløb"
+    },
+    "widgets": {
+      "projectsStatus": "Projektstatus",
+      "projectsStatusDesc": "Oversigt over projekter efter aktuel status.",
+      "totalProjects": "Projekter i alt",
+      "pendingApprovals": "Afventende Godkendelser",
+      "pendingApprovalsDesc": "Transaktioner der afventer gennemgang.",
+      "awaitingReview": "afventer gennemgang",
+      "reviewTransactions": "Gennemse transaktioner →",
+      "recentTransactions": "Seneste Transaktioner",
+      "recentTransactionsDesc": "Nyeste finansielle aktivitet.",
+      "teamOverview": "Teamoversigt",
+      "teamOverviewDesc": "Alle teams og deres antal medlemmer.",
+      "totalTeams": "Teams",
+      "totalMembers": "Medlemmer",
+      "avgTeamSize": "Gns. størrelse",
+      "largestTeams": "Største teams",
+      "noDescription": "Ingen beskrivelse",
+      "members": "medlemmer",
+      "userStats": "Brugermappe",
+      "userStatsDesc": "Samlet antal medarbejdere og topafdelinger.",
+      "totalUsers": "Brugere i alt",
+      "topDepartments": "Topafdelinger",
+      "quickSettings": "Hurtige Indstillinger",
+      "quickSettingsDesc": "Juster udseende og sprog øjeblikkeligt.",
+      "aiStatus": "AI Udbydere",
+      "aiStatusDesc": "Forbindelsesstatus for konfigurerede AI-udbydere.",
+      "aiOnline": "online",
+      "models": "modeller",
+      "categoriesList": "Kategorier",
+      "categoriesListDesc": "Alle tilgængelige kategorier på et øjekast.",
+      "totalCategories": "i alt",
+      "quickLinks": "Hurtige Links",
+      "quickLinksDesc": "Hurtig adgang til vigtige sektioner i arbejdsrummet.",
+      "linkProjects": "Projekter",
+      "linkTransactions": "Transaktioner",
+      "linkTasks": "Opgaver",
+      "linkTeam": "Team",
+      "linkSettings": "Indstillinger",
+      "linkHelp": "Hjælp"
+    },
+    "actions": {
+      "refreshProjectsStatus": "Opdater projektstatus",
+      "refreshPendingApprovals": "Opdater afventende godkendelser",
+      "refreshRecentTransactions": "Opdater transaktioner",
+      "refreshTeamOverview": "Opdater teams",
+      "refreshUserStats": "Opdater brugerstatistik",
+      "refreshAiStatus": "Opdater AI-status",
+      "refreshCategories": "Opdater kategorier",
+      "refreshUpcomingTasks": "Opdater kommende opgaver",
+      "refreshExpenseDistribution": "Opdater udgiftsfordeling",
+      "refreshWorkload": "Opdater arbejdsbelastning"
     }
   },
   "analytics": {
@@ -429,6 +528,9 @@
     },
     "confirm": {
       "delete": "Er du sikker på, at du vil slette projektet '{{name}}'?"
+    },
+    "members": {
+      "removeConfirm": "Er du sikker på, at du vil fjerne {{name}} fra dette projekt?"
     }
   },
   "team": {
@@ -841,6 +943,275 @@
           "title": "Juridisk",
           "items": ["Etisk Privatliv", "Brugsvilkår", "Cookies", "Licenser"]
         }
+      }
+    }
+  },
+  "budgets": {
+    "title": "Budgetter",
+    "description": "Administrer og følg dine finansielle budgetter.",
+    "empty": {
+      "title": "Ingen budgetter endnu",
+      "description": "Opret dit første budget for at begynde at spore indtægter og udgifter."
+    },
+    "actions": {
+      "create": "Nyt Budget",
+      "edit": "Rediger Budget",
+      "save": "Gem Budget",
+      "delete": "Slet Budget",
+      "deleteConfirm": "Er du sikker på, at du vil slette dette budget?"
+    },
+    "create": {
+      "title": "Nyt Budget",
+      "description": "Opret et nyt budget for at spore dine indtægter og udgifter."
+    },
+    "edit": {
+      "title": "Rediger Budget",
+      "description": "Opdater dine budgetdetaljer."
+    },
+    "fields": {
+      "name": "Budgetnavn",
+      "namePlaceholder": "f.eks. Marketing K1",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hvad er dette budget til?",
+      "scope": "Omfang",
+      "project": "Projekt",
+      "projectPlaceholder": "Vælg projekt",
+      "targetAmount": "Forbrugsgrænse",
+      "noLimit": "Ingen grænse",
+      "currency": "Valuta",
+      "periodType": "Periode",
+      "startDate": "Startdato",
+      "endDate": "Slutdato (valgfri)"
+    },
+    "scopes": {
+      "personal": "Personlig",
+      "project": "Projekt",
+      "department": "Afdeling",
+      "company": "Virksomhed"
+    },
+    "periods": {
+      "monthly": "Månedlig",
+      "quarterly": "Kvartalsvis",
+      "semiannual": "Halvårlig",
+      "annual": "Årlig",
+      "one_time": "Engangsbetaling"
+    },
+    "health": {
+      "healthy": "Sund",
+      "on_track": "På sporet",
+      "warning": "Advarsel",
+      "approaching": "Nærmer sig grænse",
+      "overBudget": "Over budget",
+      "noLimit": "Ingen grænse"
+    },
+    "summary": {
+      "income": "Indtægt",
+      "expenses": "Udgifter",
+      "balance": "Balance",
+      "remaining": "Resterende",
+      "overBy": "Overskredet med",
+      "noLimit": "Ingen grænse",
+      "used": "brugt"
+    },
+    "detail": {
+      "notFound": "Budget ikke fundet.",
+      "overBudget": "Over budget",
+      "spent": "brugt",
+      "overBy": "Over med {{amount}}",
+      "totalSpent": "Samlet forbrug",
+      "balance": "Balance",
+      "tabs": {
+        "transactions": "Transaktioner",
+        "categories": "Kategorier",
+        "members": "Medlemmer",
+        "recurring": "Tilbagevendende",
+        "report": "Rapport"
+      }
+    },
+    "report": {
+      "title": "Årsrapport",
+      "subtitle": "Udgifter og indtægter efter kategori på tværs af måneder",
+      "item": "Transaktioner",
+      "year": "År",
+      "category": "Kategori",
+      "totalExpenses": "Samlede udgifter",
+      "totalIncome": "Samlede indtægter",
+      "expensesTable": "Udgifter efter kategori",
+      "incomeTable": "Indtægter efter kategori",
+      "balance": "Saldo",
+      "total": "Total",
+      "month": "Måned",
+      "accumExpenses": "Akk. udgifter",
+      "summarySection": "Oversigt",
+      "noData": "Ingen transaktioner fundet for {{year}}",
+      "showIncome": "Vis indtægtsrækker",
+      "hideIncome": "Skjul indtægtsrækker",
+      "directLabel": "ikke planlagt",
+      "directExpenseLabel": "ikke planlagt"
+    },
+    "alerts": {
+      "overBudget": "budget(ter) over grænsen"
+    },
+    "toast": {
+      "created": "Budget oprettet",
+      "updated": "Budget opdateret",
+      "deleted": "Budget slettet"
+    },
+    "messages": {
+      "created": "Budget oprettet",
+      "updated": "Budget opdateret",
+      "deleted": "Budget slettet",
+      "memberAdded": "Medlem tilføjet til budget",
+      "memberRemoved": "Medlem fjernet fra budget",
+      "limitSet": "Kategorigrænse gemt",
+      "recurrenceCreated": "Tilbagevendende transaktion oprettet",
+      "recurrenceDeleted": "Tilbagevendende transaktion slettet"
+    },
+    "transactions": {
+      "count": "transaktioner",
+      "add": "Tilføj transaktion",
+      "addTitle": "Tilføj transaktion til budget",
+      "editTitle": "Rediger transaktion",
+      "deleteConfirm": "Slet denne transaktion?",
+      "empty": "Ingen transaktioner knyttet til dette budget.",
+      "noDescription": "Ingen beskrivelse",
+      "type": "Type",
+      "expense": "Udgift",
+      "income": "Indtægt",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "Hvad er dette til?",
+      "amount": "Beløb",
+      "date": "Dato",
+      "category": "Kategori",
+      "categoryPlaceholder": "Vælg kategori"
+    },
+    "limits": {
+      "count": "kategorigrænser",
+      "add": "Tilføj grænse",
+      "addTitle": "Sæt kategorigrænse",
+      "editTitle": "Rediger kategorigrænse",
+      "empty": "Ingen kategorigrænser konfigureret.",
+      "category": "Kategori",
+      "selectCategory": "Vælg kategori",
+      "amount": "Grænsebeløb",
+      "spent": "Brugt",
+      "allocated": "grænse",
+      "toast": {
+        "upserted": "Kategorigrænse gemt",
+        "deleted": "Kategorigrænse fjernet"
+      }
+    },
+    "members": {
+      "count": "medlemmer",
+      "add": "Tilføj medlem",
+      "addTitle": "Tilføj medlem til budget",
+      "empty": "Ingen medlemmer endnu.",
+      "owner": "Ejer",
+      "role": "Rolle",
+      "searchUser": "Søg brugere",
+      "searchPlaceholder": "Skriv et navn eller email...",
+      "selectUser": "Vælg bruger",
+      "userPlaceholder": "Vælg en bruger",
+      "addBtn": "Tilføj Medlem",
+      "toast": {
+        "added": "Medlem tilføjet",
+        "roleUpdated": "Rolle opdateret",
+        "removed": "Medlem fjernet"
+      }
+    },
+    "roles": {
+      "admin": "Administrator",
+      "contributor": "Bidragyder",
+      "viewer": "Læser"
+    },
+    "recurrences": {
+      "count": "regler",
+      "add": "Tilføj regel",
+      "createTitle": "Opret tilbagevendende regel",
+      "empty": "Ingen tilbagevendende regler endnu.",
+      "noDescription": "Unavngiven regel",
+      "description": "Beskrivelse",
+      "descriptionPlaceholder": "f.eks. Månedlig husleje",
+      "amount": "Beløb",
+      "frequencyLabel": "Frekvens",
+      "interval": "Hver (n)",
+      "startDate": "Startdato",
+      "category": "Kategori",
+      "categoryPlaceholder": "Ingen kategori",
+      "nextOn": "næste",
+      "pause": "Pause",
+      "resume": "Genoptag",
+      "manualPause": "Manuelt sat på pause",
+      "type": "Type",
+      "typeExpense": "Udgift",
+      "typeIncome": "Indtægt",
+      "status": {
+        "active": "Aktiv",
+        "paused": "På pause",
+        "completed": "Afsluttet"
+      },
+      "frequency": {
+        "daily": "Daglig",
+        "weekly": "Ugentlig",
+        "monthly": "Månedlig",
+        "quarterly": "Kvartalsvis",
+        "semiannual": "Halvårlig",
+        "annual": "Årlig"
+      },
+      "toast": {
+        "created": "Tilbagevendende regel oprettet",
+        "updated": "Tilbagevendende regel opdateret",
+        "deleted": "Tilbagevendende regel slettet"
+      }
+    },
+    "categories": {
+      "uncategorized": "Ukategoriseret"
+    },
+    "widgets": {
+      "refreshBalance": "Opdater balance",
+      "refreshOverview": "Opdater oversigt",
+      "refreshCategories": "Opdater kategorier"
+    },
+    "import": {
+      "title": "Importer Budget",
+      "description": "Upload et kontoudtog for at analysere og oprette et budget med rigtige data.",
+      "upload": {
+        "dropLabel": "Slip filen her, eller klik for at vælge",
+        "dropSub": "Understøttet: CSV, XLSX, PDF kontoudtog",
+        "maxSize": "Maks {{size}}",
+        "supportedHint": "Kompatibel med alle bankformater",
+        "supportedDesc": "Kolonner registreres automatisk på engelsk, spansk og dansk. Datoer og beløb håndteres automatisk."
+      },
+      "analysis": {
+        "title": "Analyseresultater",
+        "processing": "Analyserer transaktioner…",
+        "parsed": "Behandlet",
+        "transactions": "transaktioner",
+        "recurringFound": "{{count}} tilbagevendende transaktioner fundet",
+        "confidence": "Sikkerhed",
+        "noRecurring": "Ingen tilbagevendende transaktioner fundet.",
+        "dateRange": "Periode: {{from}} — {{to}}"
+      },
+      "confirm": {
+        "title": "Klar til at oprette budget",
+        "readyTitle": "Import klar",
+        "readyDesc": "{{recurrences}} tilbagevendende regler og {{transactions}} transaktioner i alt. Opret budgettet for at anvende dem.",
+        "incomeRecurrences": "Tilbagevendende indkomst",
+        "expenseRecurrences": "Tilbagevendende udgifter",
+        "nextStepHint": "Tilbagevendende regler tilføjes til det nye budget. Du kan gennemgå og justere dem efter oprettelsen."
+      },
+      "actions": {
+        "import": "Importer",
+        "next": "Fortsæt",
+        "back": "Tilbage",
+        "retry": "Prøv igen",
+        "createBudget": "Opret Budget",
+        "downloadOriginal": "Download original fil"
+      },
+      "errors": {
+        "fileTooLarge": "Filen overstiger grænsen på 10 MB.",
+        "unsupportedType": "Kun CSV, XLSX og PDF-filer er understøttet.",
+        "parseFailed": "Kunne ikke læse filen. Kontroller at det er et gyldigt kontoudtog."
       }
     }
   }

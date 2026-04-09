@@ -13,6 +13,52 @@
     "signIn": "Sign In",
     "signOut": "Sign Out"
   },
+  "auth": {
+    "topbarCta": "Sign in",
+    "localCta": "Email access",
+    "workspaceAccess": "Workspace access",
+    "eyebrow": "Hybrid authentication",
+    "title": "Choose how you want to sign in.",
+    "description": "Use your email and password, or continue with your external account from the same screen.",
+    "singleEntryTitle": "Sign in once. Keep moving.",
+    "singleEntryDescription": "Use the option you already know. Both paths take you to the same workspace without extra steps.",
+    "localOnly": "Email sign-in is unavailable right now.",
+    "localOnlyDescription": "Use the alternative sign-in option below to continue.",
+    "signInTab": "Sign in",
+    "signUpTab": "Create account",
+    "emailLabel": "Email",
+    "passwordLabel": "Password",
+    "nameLabel": "Full name",
+    "emailPlaceholder": "you@company.com",
+    "passwordPlaceholder": "Your password",
+    "passwordRequirementHint": "Use at least {{min}} characters with letters, numbers, and a symbol.",
+    "namePlaceholder": "Ada Lovelace",
+    "signInAction": "Enter workspace",
+    "signUpAction": "Create account",
+    "submitting": "Working...",
+    "recommendedLocal": "Fastest way to enter",
+    "recommendedExternal": "Another option",
+    "signInHint": "Use the email account you already have for this workspace.",
+    "signUpHint": "Create a new account and start using the workspace in minutes.",
+    "localPanelTitle": "Email and password",
+    "localPanelDescription": "Sign in with the account you use every day.",
+    "clerkPanelTitle": "Another way to sign in",
+    "clerkPanelDescription": "Use your organization or external account if that is how you usually enter.",
+    "clerkAction": "Continue",
+    "clerkUnavailable": "This sign-in option is not available right now.",
+    "clerkUnavailableLabel": "Unavailable",
+    "clerkOffline": "Temporarily unavailable",
+    "sideTitle": "One workspace, your usual way in.",
+    "sideDescription": "Choose the sign-in method that feels familiar. You will arrive in the same place either way.",
+    "pointOne": "Use the same account you already recognize.",
+    "pointTwo": "Switch methods without changing your destination.",
+    "pointThree": "Sign in and continue right where you need to work.",
+    "backHome": "Back to home",
+    "goDashboard": "Go to dashboard",
+    "sessionVerificationError": "Your sign-in was not confirmed by the server yet. Try again in a moment.",
+    "nameRequiredError": "Enter your full name to create an account.",
+    "passwordWeakError": "Use at least {{min}} characters with letters, numbers, and a symbol."
+  },
   "common": {
     "loading": "Loading...",
     "loadingMore": "Loading more...",
@@ -51,7 +97,9 @@
     "send": "Send",
     "backToHome": "Go to Homepage",
     "retry": "Retry",
-    "unknownError": "An unexpected error occurred."
+    "unknownError": "An unexpected error occurred.",
+    "none": "None",
+    "saving": "Saving..."
   },
   "theme": {
     "light": "Light",
@@ -78,6 +126,7 @@
       "transactions": "Transactions",
       "categories": "Categories",
       "projects": "Projects",
+      "budgets": "Budgets",
       "team": "Team",
       "settings": "Settings"
     },
@@ -262,6 +311,58 @@
       "filterByResponsible": "Responsible",
       "noTasks": "No upcoming tasks for this week.",
       "noFilteredResults": "No tasks found for selected filters."
+    },
+    "widgets": {
+      "projectsStatus": "Project Status",
+      "projectsStatusDesc": "Overview of projects by current status.",
+      "totalProjects": "Total Projects",
+      "pendingApprovals": "Pending Approvals",
+      "pendingApprovalsDesc": "Transactions awaiting review.",
+      "awaitingReview": "awaiting review",
+      "reviewTransactions": "Review transactions →",
+      "recentTransactions": "Recent Transactions",
+      "recentTransactionsDesc": "Latest financial activity.",
+      "teamOverview": "Team Overview",
+      "teamOverviewDesc": "All teams and their member counts.",
+      "totalTeams": "Teams",
+      "totalMembers": "Members",
+      "avgTeamSize": "Avg size",
+      "largestTeams": "Largest teams",
+      "noDescription": "No description",
+      "members": "members",
+      "userStats": "User Directory",
+      "userStatsDesc": "Team headcount and top departments.",
+      "totalUsers": "Total users",
+      "topDepartments": "Top Departments",
+      "quickSettings": "Quick Settings",
+      "quickSettingsDesc": "Adjust appearance and language instantly.",
+      "aiStatus": "AI Providers",
+      "aiStatusDesc": "Connection status of configured AI providers.",
+      "aiOnline": "online",
+      "models": "models",
+      "categoriesList": "Categories",
+      "categoriesListDesc": "All available categories at a glance.",
+      "totalCategories": "total",
+      "quickLinks": "Quick Links",
+      "quickLinksDesc": "Fast access to key workspace sections.",
+      "linkProjects": "Projects",
+      "linkTransactions": "Transactions",
+      "linkTasks": "Tasks",
+      "linkTeam": "Team",
+      "linkSettings": "Settings",
+      "linkHelp": "Help"
+    },
+    "actions": {
+      "refreshProjectsStatus": "Refresh project status",
+      "refreshPendingApprovals": "Refresh pending approvals",
+      "refreshRecentTransactions": "Refresh transactions",
+      "refreshTeamOverview": "Refresh teams",
+      "refreshUserStats": "Refresh user stats",
+      "refreshAiStatus": "Refresh AI status",
+      "refreshCategories": "Refresh categories",
+      "refreshUpcomingTasks": "Refresh upcoming tasks",
+      "refreshExpenseDistribution": "Refresh expense distribution",
+      "refreshWorkload": "Refresh workload"
     }
   },
   "analytics": {
@@ -433,6 +534,7 @@
       "searchMembers": "Search team members...",
       "noAvailableUsers": "No more users available.",
       "empty": "No members in this project.",
+      "removeConfirm": "Are you sure you want to remove {{name}} from this project?",
       "success": {
         "added": "Member added successfully",
         "updated": "Role updated successfully",
@@ -947,6 +1049,275 @@
           "title": "Legal",
           "items": ["Ethical Privacy", "Terms of Use", "Cookies", "Licenses"]
         }
+      }
+    }
+  },
+  "budgets": {
+    "title": "Budgets",
+    "description": "Manage and track your financial budgets.",
+    "empty": {
+      "title": "No budgets yet",
+      "description": "Create your first budget to start tracking income and expenses."
+    },
+    "actions": {
+      "create": "New Budget",
+      "edit": "Edit Budget",
+      "save": "Save Budget",
+      "delete": "Delete Budget",
+      "deleteConfirm": "Are you sure you want to delete this budget?"
+    },
+    "create": {
+      "title": "New Budget",
+      "description": "Create a new budget to track your income and spending."
+    },
+    "edit": {
+      "title": "Edit Budget",
+      "description": "Update your budget details."
+    },
+    "fields": {
+      "name": "Budget Name",
+      "namePlaceholder": "e.g. Marketing Q1",
+      "description": "Description",
+      "descriptionPlaceholder": "What is this budget for?",
+      "scope": "Scope",
+      "project": "Project",
+      "projectPlaceholder": "Select project",
+      "targetAmount": "Spending Limit",
+      "noLimit": "No limit",
+      "currency": "Currency",
+      "periodType": "Period",
+      "startDate": "Start Date",
+      "endDate": "End Date (optional)"
+    },
+    "scopes": {
+      "personal": "Personal",
+      "project": "Project",
+      "department": "Department",
+      "company": "Company"
+    },
+    "periods": {
+      "monthly": "Monthly",
+      "quarterly": "Quarterly",
+      "semiannual": "Semiannual",
+      "annual": "Annual",
+      "one_time": "One-time"
+    },
+    "health": {
+      "healthy": "Healthy",
+      "on_track": "On Track",
+      "warning": "Warning",
+      "approaching": "Approaching",
+      "overBudget": "Over Budget",
+      "noLimit": "No Limit"
+    },
+    "summary": {
+      "income": "Income",
+      "expenses": "Expenses",
+      "balance": "Balance",
+      "remaining": "Remaining",
+      "overBy": "Over by",
+      "noLimit": "No limit",
+      "used": "used"
+    },
+    "detail": {
+      "notFound": "Budget not found.",
+      "overBudget": "Over Budget",
+      "spent": "spent",
+      "overBy": "Over by {{amount}}",
+      "totalSpent": "Total Spent",
+      "balance": "Balance",
+      "tabs": {
+        "transactions": "Transactions",
+        "categories": "Categories",
+        "members": "Members",
+        "recurring": "Recurring",
+        "report": "Report"
+      }
+    },
+    "report": {
+      "title": "Annual Report",
+      "subtitle": "Expenses and income by category across months",
+      "item": "Transactions",
+      "year": "Year",
+      "category": "Category",
+      "totalExpenses": "Total Expenses",
+      "totalIncome": "Total Income",
+      "expensesTable": "Expenses by Category",
+      "incomeTable": "Income by Category",
+      "balance": "Balance",
+      "total": "Total",
+      "month": "Month",
+      "accumExpenses": "Acum. Expenses",
+      "summarySection": "Summary",
+      "noData": "No transactions found for {{year}}",
+      "showIncome": "Show income rows",
+      "hideIncome": "Hide income rows",
+      "directLabel": "unplanned",
+      "directExpenseLabel": "unplanned"
+    },
+    "alerts": {
+      "overBudget": "budget(s) over limit"
+    },
+    "toast": {
+      "created": "Budget created successfully",
+      "updated": "Budget updated successfully",
+      "deleted": "Budget deleted successfully"
+    },
+    "messages": {
+      "created": "Budget created successfully",
+      "updated": "Budget updated successfully",
+      "deleted": "Budget deleted successfully",
+      "memberAdded": "Member added to budget",
+      "memberRemoved": "Member removed from budget",
+      "limitSet": "Category limit saved",
+      "recurrenceCreated": "Recurring transaction created",
+      "recurrenceDeleted": "Recurring transaction deleted"
+    },
+    "transactions": {
+      "count": "transactions",
+      "add": "Add Transaction",
+      "addTitle": "Add Transaction to Budget",
+      "editTitle": "Edit Transaction",
+      "deleteConfirm": "Delete this transaction?",
+      "empty": "No transactions linked to this budget.",
+      "noDescription": "No description",
+      "type": "Type",
+      "expense": "Expense",
+      "income": "Income",
+      "description": "Description",
+      "descriptionPlaceholder": "What is this for?",
+      "amount": "Amount",
+      "date": "Date",
+      "category": "Category",
+      "categoryPlaceholder": "Select category"
+    },
+    "limits": {
+      "count": "category limits",
+      "add": "Add Limit",
+      "addTitle": "Set Category Limit",
+      "editTitle": "Edit Category Limit",
+      "empty": "No category limits set.",
+      "category": "Category",
+      "selectCategory": "Select category",
+      "amount": "Limit Amount",
+      "spent": "Spent",
+      "allocated": "limit",
+      "toast": {
+        "upserted": "Category limit saved",
+        "deleted": "Category limit removed"
+      }
+    },
+    "members": {
+      "count": "members",
+      "add": "Add Member",
+      "addTitle": "Add Member to Budget",
+      "empty": "No members yet.",
+      "owner": "Owner",
+      "role": "Role",
+      "searchUser": "Search users",
+      "searchPlaceholder": "Type a name or email...",
+      "selectUser": "Select user",
+      "userPlaceholder": "Choose a user",
+      "addBtn": "Add Member",
+      "toast": {
+        "added": "Member added",
+        "roleUpdated": "Role updated",
+        "removed": "Member removed"
+      }
+    },
+    "roles": {
+      "admin": "Admin",
+      "contributor": "Contributor",
+      "viewer": "Viewer"
+    },
+    "recurrences": {
+      "count": "rules",
+      "add": "Add Rule",
+      "createTitle": "Create Recurrence Rule",
+      "empty": "No recurring rules yet.",
+      "noDescription": "Unnamed rule",
+      "description": "Description",
+      "descriptionPlaceholder": "e.g. Monthly rent",
+      "amount": "Amount",
+      "frequencyLabel": "Frequency",
+      "interval": "Every (n)",
+      "startDate": "Start Date",
+      "category": "Category",
+      "categoryPlaceholder": "No category",
+      "nextOn": "next",
+      "pause": "Pause",
+      "resume": "Resume",
+      "manualPause": "Manually paused",
+      "type": "Type",
+      "typeExpense": "Expense",
+      "typeIncome": "Income",
+      "status": {
+        "active": "Active",
+        "paused": "Paused",
+        "completed": "Completed"
+      },
+      "frequency": {
+        "daily": "Daily",
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "quarterly": "Quarterly",
+        "semiannual": "Semiannual",
+        "annual": "Annual"
+      },
+      "toast": {
+        "created": "Recurrence rule created",
+        "updated": "Recurrence rule updated",
+        "deleted": "Recurrence rule deleted"
+      }
+    },
+    "categories": {
+      "uncategorized": "Uncategorized"
+    },
+    "widgets": {
+      "refreshBalance": "Refresh balance",
+      "refreshOverview": "Refresh overview",
+      "refreshCategories": "Refresh categories"
+    },
+    "import": {
+      "title": "Import Budget",
+      "description": "Upload a bank statement to analyze and create a budget from real data.",
+      "upload": {
+        "dropLabel": "Drop your file here, or click to browse",
+        "dropSub": "Supported: CSV, XLSX, PDF bank statements",
+        "maxSize": "Max {{size}}",
+        "supportedHint": "Compatible with any bank format",
+        "supportedDesc": "Columns are auto-detected in English, Spanish, and Danish. Date and amount formats are handled automatically."
+      },
+      "analysis": {
+        "title": "Analysis Results",
+        "processing": "Parsing and analysing transactions…",
+        "parsed": "Parsed",
+        "transactions": "transactions",
+        "recurringFound": "{{count}} recurring transactions detected",
+        "confidence": "Confidence",
+        "noRecurring": "No recurring transactions detected.",
+        "dateRange": "Period: {{from}} — {{to}}"
+      },
+      "confirm": {
+        "title": "Ready to Create Budget",
+        "readyTitle": "Import ready",
+        "readyDesc": "{{recurrences}} recurring rules and {{transactions}} total transactions found. Create the budget to apply them.",
+        "incomeRecurrences": "Recurring income",
+        "expenseRecurrences": "Recurring expenses",
+        "nextStepHint": "Recurring rules will be added to the new budget. You can review and adjust them after creation."
+      },
+      "actions": {
+        "import": "Import",
+        "next": "Continue",
+        "back": "Back",
+        "retry": "Try again",
+        "createBudget": "Create Budget",
+        "downloadOriginal": "Download original file"
+      },
+      "errors": {
+        "fileTooLarge": "File exceeds the 10 MB limit.",
+        "unsupportedType": "Only CSV, XLSX, and PDF files are supported.",
+        "parseFailed": "Could not read the file. Make sure it's a valid bank statement."
       }
     }
   }

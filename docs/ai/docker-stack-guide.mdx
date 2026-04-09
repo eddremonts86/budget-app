@@ -1,0 +1,341 @@
+# Docker + AI Stack Guide
+
+## Objetivo
+
+Este proyecto está preparado para levantar **aplicación + mock API + ChromaDB + LM Studio** con una experiencia de operación simple y repetible.
+
+Este documento es la referencia principal para:
+
+- levantar el entorno local en Docker
+- cargar y validar modelos AI en LM Studio
+- verificar salud end-to-end del sistema
+- recuperar el stack ante fallos
+- estandarizar la operación para todo el equipo
+
+## Qué incluye el stack
+
+- **app**: TanStack Start / Vite (puerto `3000`)
+- **chromadb**: base vectorial para RAG (puerto `8000`)
+- **lmstudio**: LM Studio headless (`llmster`) para inferencia local (puerto `1234`)
+
+## Arquitectura resumida
+
+```text
+Browser/UI (localhost:3000)
+	└─ App TanStack Start (service: app)
+			├─ ChromaDB (service: chromadb, localhost:8000)
+			└─ LM Studio / OpenAI-compatible API (service: lmstudio, localhost:1234)
+```
+
+Rutas AI principales:
+
+- `GET /api/ai/status`
+- `POST /api/ai/search`
+- `POST /api/ai/chat` (SSE)
+
+## Arranque rápido
+
+### 1) Levantar todo
+
+```bash
+pnpm docker:up:detached
+```
+
+### 2) Inicializar AI (descargar/cargar modelo)
+
+```bash
+pnpm docker:ai:init
+```
+
+### 3) Verificar stack completo
+
+```bash
+pnpm docker:verify
+```
+
+> También puedes hacerlo en una sola secuencia:
+
+```bash
+pnpm docker:up:full
+```
+
+## Runbook recomendado (primera vez)
+
+```bash
+pnpm docker:up:full
+pnpm docker:verify
+```
+
+Si `docker:verify` está en verde, abre `http://localhost:3000`.
+
+## Runbook diario
+
+Inicio del día:
+
+```bash
+pnpm docker:up:detached
+pnpm docker:check
+```
+
+Antes de terminar:
+
+```bash
+pnpm docker:down
+```
+
+## URLs de prueba
+
+- App: `http://localhost:3000`
+- ChromaDB heartbeat: `http://localhost:8000/api/v2/heartbeat`
+- LM Studio models: `http://localhost:1234/v1/models`
+
+## Comandos operativos
+
+### Stack
+
+```bash
+pnpm docker:up
+pnpm docker:up:detached
+pnpm docker:down
+pnpm docker:logs
+pnpm docker:check
+pnpm docker:verify
+```
+
+### AI / LM Studio
+
+```bash
+pnpm docker:ai:status
+pnpm docker:ai:cors
+pnpm docker:ai:init
+pnpm docker:ai:load
+pnpm docker:ai:smoke
+pnpm docker:ai:smoke:chat
+```
+
+### Reset
+
+```bash
+pnpm docker:reset
+pnpm docker:reset:hard
+```
+
+- `docker:reset`: detiene y limpia contenedores/red (conserva volúmenes).
+- `docker:reset:hard`: además borra volúmenes nombrados (incluye modelos descargados de LM Studio).
+
+### Comando paraguas de calidad
+
+```bash
+pnpm docker:verify
+```
+
+Ejecuta, en orden:
+
+1. `docker:check` (infraestructura)
+2. `docker:ai:smoke` (status + search)
+3. `docker:ai:smoke:chat` (streaming SSE)
+
+## Variables de entorno clave
+
+Archivo recomendado para Docker local: `.env.docker`.
+
+Variables relevantes:
+
+- `CHROMADB_URL=http://chromadb:8000`
+- `VITE_AI_BASE_URL=http://lmstudio:1234/v1`
+- `VITE_AI_LMSTUDIO_BASE_URL=http://lmstudio:1234/v1`
+- `AI_LMSTUDIO_MODEL=local-model`
+- `LMSTUDIO_PLATFORM=linux/amd64`
+
+Notas:
+
+- En Docker, los servicios se comunican por nombre (`chromadb`, `lmstudio`).
+- El frontend se expone por `localhost`, pero internamente usa la red de Compose.
+- `AI_LMSTUDIO_MODEL=local-model` debe coincidir con el identificador cargado en LM Studio.
+
+## Flujo de modelos en LM Studio
+
+### Estado actual
+
+```bash
+pnpm docker:ai:status
+```
+
+### Cargar modelo por defecto
+
+```bash
+pnpm docker:ai:load
+```
+
+### Cargar modelo específico
+
+```bash
+LMSTUDIO_MODEL=Qwen/Qwen2.5-Coder-7B-Instruct-GGUF LMSTUDIO_IDENTIFIER=local-model pnpm docker:ai:load
+```
+
+> Si el identificador exacto no existe en catálogo, los scripts intentan fallback automático de búsqueda GGUF.
+
+## Checklist de aceptación
+
+Para considerar el entorno "listo":
+
+- [ ] `pnpm docker:check` pasa sin errores
+- [ ] `pnpm docker:ai:status` muestra al menos 1 modelo cargado (`local-model`)
+- [ ] `pnpm docker:ai:smoke` responde 200
+- [ ] `pnpm docker:ai:smoke:chat` responde SSE sin `RUN_ERROR`
+- [ ] la UI abre en `http://localhost:3000`
+
+## Validación end-to-end
+
+### Verificación rápida de infraestructura
+
+```bash
+pnpm docker:check
+```
+
+Valida:
+
+- servicios running
+- health de endpoints críticos
+
+### Verificación funcional AI
+
+```bash
+pnpm docker:ai:smoke
+pnpm docker:ai:smoke:chat
+```
+
+Valida:
+
+- disponibilidad del proveedor AI (`/api/ai/status`)
+- respuesta de búsqueda (`/api/ai/search`)
+- streaming SSE de chat (`/api/ai/chat`)
+
+## Escenarios de recuperación
+
+### Escenario A: app no responde en `3000`
+
+```bash
+pnpm docker:logs
+pnpm docker:check
+```
+
+Si sigue fallando:
+
+```bash
+pnpm docker:reset
+pnpm docker:up:detached
+pnpm docker:check
+```
+
+### Escenario B: AI status OK pero chat/search fallan
+
+```bash
+pnpm docker:ai:status
+pnpm docker:ai:init
+pnpm docker:verify
+```
+
+### Escenario C: estado inconsistente por cambios de modelo/config
+
+```bash
+pnpm docker:reset:hard
+pnpm docker:up:full
+pnpm docker:verify
+```
+
+## Troubleshooting
+
+### 1) `lmstudio` sin modelo cargado
+
+Ejecuta:
+
+```bash
+pnpm docker:ai:init
+```
+
+### 1.1) CORS bloqueando llamadas directas a `http://localhost:1234`
+
+Habilita CORS en el servidor LM Studio (server-side):
+
+```bash
+pnpm docker:ai:cors
+```
+
+Esto ejecuta `lms server start --cors` dentro del contenedor.
+
+### 2) Quiero empezar limpio
+
+```bash
+pnpm docker:reset:hard
+pnpm docker:up:full
+```
+
+### 3) Apple Silicon / warning de plataforma
+
+Con la imagen actual de LM Studio es normal usar `linux/amd64` en hosts ARM (emulación). Si en el futuro usas imagen ARM nativa, ajusta `LMSTUDIO_PLATFORM`.
+
+### 4) Fallos de servicios
+
+```bash
+pnpm docker:logs
+```
+
+### 5) Endpoint de Chroma responde 410 en `/api/v1/heartbeat`
+
+Usa `/api/v2/heartbeat` (ya estandarizado en scripts de verificación).
+
+## Persistencia
+
+- Chroma persiste en `./chroma_data`.
+- LM Studio persiste en volumen nombrado `lmstudio_data`.
+
+Implicación práctica:
+
+- Reiniciar contenedores **no** borra tus modelos.
+- `docker:reset:hard` **sí** borra modelos y estado persistente.
+
+## Archivos clave del setup
+
+- `Dockerfile`
+- `docker-compose.yml`
+- `.dockerignore`
+- `.env.docker`
+- `scripts/ai/bootstrap-lmstudio.sh`
+- `scripts/ai/lmstudio/load-model.sh`
+- `scripts/ai/lmstudio/status.sh`
+- `scripts/ai/smoke.sh`
+- `scripts/ai/smoke-chat.sh`
+- `scripts/docker/verify-stack.sh`
+- `scripts/docker/reset-stack.sh`
+
+## Cambios importantes implementados
+
+- Integración de LM Studio dentro de `docker-compose`.
+- Persistencia de LM Studio por volumen (`lmstudio_data`).
+- Normalización de defaults AI para entorno Docker.
+- Smoke tests AI para status/search/chat.
+- Verificación integral unificada (`docker:verify`).
+- Ruta de chat/search ajustada para compatibilidad OpenAI con LM Studio.
+
+## Estado final esperado
+
+Con `pnpm docker:verify` en verde, deberías poder:
+
+1. abrir la app en `http://localhost:3000`
+2. usar búsqueda AI desde la UI
+3. usar chat AI con streaming SSE
+4. mantener el modelo cargado entre reinicios del stack
+
+## Referencia rápida (TL;DR)
+
+```bash
+# 1) levantar todo
+pnpm docker:up:full
+
+# 2) validar todo
+pnpm docker:verify
+
+# 3) abrir app
+open http://localhost:3000
+```
