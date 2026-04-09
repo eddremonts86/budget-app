@@ -53,7 +53,7 @@ export const createRecurrenceRuleSchema = z.object({
   categoryId: z.string().optional().nullable(),
   amount: z.number().int().min(-99_999_999).max(99_999_999),
   frequency: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'semiannual', 'annual']),
-  interval: z.number().int().min(1).max(12).default(1),
+  interval: z.number().int().min(1).max(99).default(1),
   description: z.string().max(200).optional().nullable(),
   startDate: z.string(),
 })
@@ -64,7 +64,7 @@ export const updateRecurrenceRuleSchema = z.object({
   description: z.string().max(200).optional().nullable(),
   amount: z.number().int().optional(),
   frequency: z.enum(['daily', 'weekly', 'monthly', 'quarterly', 'semiannual', 'annual']).optional(),
-  interval: z.number().int().min(1).max(12).optional(),
+  interval: z.number().int().min(1).max(99).optional(),
   categoryId: z.string().optional().nullable(),
   pausedReason: z.string().optional().nullable(),
 })

@@ -175,16 +175,24 @@ export function EditRecurrenceSheet({
                   </Select>
                 </div>
                 <div className="space-y-1">
-                  <Label>{t('budgets.recurrences.interval')}</Label>
+                  <Label>{t('budgets.recurrences.interval', 'Every N')}</Label>
                   <Input
                     type="number"
                     min={1}
-                    max={12}
+                    max={99}
                     value={form.interval}
                     onChange={(e) => updateField('interval', e.target.value)}
                   />
                 </div>
               </div>
+              {/* Preview */}
+              <p className="text-[11px] text-muted-foreground bg-muted/40 rounded-md px-3 py-1.5">
+                → {t('budgets.recurrences.repeatPreview', 'Repeats every')}{' '}
+                <span className="font-semibold text-foreground">
+                  {parseInt(form.interval, 10) || 1}{' '}
+                  {t(`budgets.recurrences.frequency.${form.frequency}`)}
+                </span>
+              </p>
 
               {categories.length > 0 && (
                 <div className="space-y-1">
