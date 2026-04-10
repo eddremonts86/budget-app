@@ -18,6 +18,12 @@ export const languageNames: Record<SupportedLanguage, string> = {
   dk: 'Dansk',
 }
 
+export const languageFlags: Record<SupportedLanguage, string> = {
+  en: '🇺🇸',
+  es: '🇪🇸',
+  dk: '🇩🇰',
+}
+
 const resources = {
   en: {
     common: enCommon,

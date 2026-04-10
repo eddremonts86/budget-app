@@ -1,9 +1,9 @@
-import { IconMoon, IconSun, IconDeviceDesktop, IconLanguage } from '@tabler/icons-react'
+import { IconMoon, IconSun, IconDeviceDesktop } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
-import { languageNames, supportedLanguages } from '@/shared/lib/i18n'
+import { languageFlags, languageNames, supportedLanguages } from '@/shared/lib/i18n'
 import { useTheme } from '@/shared/providers/theme-context'
-import { cn } from '@/shared/utils'
+import { ToggleSelector } from '@/shared/ui/ToggleSelector'
 
 const THEME_OPTIONS = [
   { value: 'light' as const, icon: IconSun, labelKey: 'theme.light' },
@@ -34,49 +34,31 @@ export function QuickSettingsWidget() {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t('settings.theme.label', 'Theme')}
             </p>
-            <div className="flex items-center gap-1 rounded-lg border border-border p-1 bg-muted/30">
-              {THEME_OPTIONS.map(({ value, icon: Icon, labelKey }) => (
-                <button
-                  key={value}
-                  type="button"
-                  onClick={() => setTheme(value)}
-                  className={cn(
-                    'flex flex-1 items-center justify-center gap-1.5 rounded-md px-2 py-1.5 text-xs font-medium transition-colors',
-                    theme === value
-                      ? 'bg-background text-foreground shadow-sm'
-                      : 'text-muted-foreground hover:text-foreground',
-                  )}
-                >
-                  <Icon className="h-3.5 w-3.5" />
-                  <span className="hidden @sm:inline">{t(labelKey)}</span>
-                </button>
-              ))}
-            </div>
+            <ToggleSelector
+              items={THEME_OPTIONS.map(({ value, icon, labelKey }) => ({
+                id: value,
+                name: t(labelKey),
+                icon,
+              }))}
+              value={theme}
+              onChange={(v) => setTheme(v as typeof theme)}
+            />
           </div>
 
           {/* Language selector */}
           <div className="flex flex-col gap-2">
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide flex items-center gap-1.5">
-              <IconLanguage className="h-3.5 w-3.5" />
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               {t('language.select', 'Language')}
             </p>
-            <div className="flex flex-wrap gap-1.5">
-              {supportedLanguages.map((lang) => (
-                <button
-                  key={lang}
-                  type="button"
-                  onClick={() => handleLanguage(lang)}
-                  className={cn(
-                    'rounded-md border px-3 py-1 text-sm transition-colors',
-                    i18n.language === lang
-                      ? 'border-primary bg-primary text-primary-foreground'
-                      : 'border-border bg-background text-muted-foreground hover:text-foreground hover:bg-muted',
-                  )}
-                >
-                  {languageNames[lang]}
-                </button>
-              ))}
-            </div>
+            <ToggleSelector
+              items={supportedLanguages.map((lang) => ({
+                id: lang,
+                name: languageNames[lang],
+                flag: languageFlags[lang],
+              }))}
+              value={i18n.language}
+              onChange={handleLanguage}
+            />
           </div>
         </div>
       </CardContent>

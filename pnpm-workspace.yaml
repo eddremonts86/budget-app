@@ -1,6 +1,9 @@
 onlyBuiltDependencies:
   - '@clerk/shared'
   - '@parcel/watcher'
+  - '@percy/core'
   - esbuild
+  - onnxruntime-node
+  - protobufjs
   - sharp
   - unrs-resolver

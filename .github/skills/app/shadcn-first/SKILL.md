@@ -120,6 +120,51 @@ El componente se instalará en `src/components/ui/` siguiendo las convenciones d
 
 ---
 
+## 🚫 REGLA CRÍTICA — No Modificar `src/components/ui/`
+
+> **NUNCA edites archivos dentro de `src/components/ui/`.**
+
+Estos archivos son gestionados por la CLI de shadcn/ui:
+
+```bash
+pnpm dlx shadcn@latest add <component>   # instala / sobreescribe
+pnpm dlx shadcn@latest diff              # detecta cambios upstream
+```
+
+Cualquier modificación directa **se perderá** en la próxima actualización de la librería.
+
+### ✅ Patrón correcto — crear un wrapper en `src/shared/ui/` o `src/components/composite/`
+
+```tsx
+// ❌ MAL — editar directamente src/components/ui/toggle-group.tsx
+// (se perderá al actualizar shadcn)
+
+// ✅ BIEN — crear un wrapper que envuelve el componente de shadcn
+// src/shared/ui/ToggleSelector.tsx
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group'
+
+export function ToggleSelector({ items, value, onChange }: ToggleSelectorProps) {
+  return (
+    <div className="inline-flex rounded-lg border border-border bg-muted/30 p-1">
+      <ToggleGroup type="single" value={value} onValueChange={...}>
+        {/* lógica custom aquí */}
+      </ToggleGroup>
+    </div>
+  )
+}
+```
+
+### Regla de oro
+
+| Necesidad                          | Acción correcta                                                 |
+| ---------------------------------- | --------------------------------------------------------------- |
+| Añadir lógica/estilo al componente | Crear wrapper en `src/shared/ui/` o `src/components/composite/` |
+| Componente no existe en shadcn     | `pnpm dlx shadcn@latest add <nombre>`                           |
+| Bug en el componente de shadcn     | Abrir issue upstream o crear wrapper que lo parchee             |
+| Actualizar un componente           | `pnpm dlx shadcn@latest add <nombre>` — nunca editar a mano     |
+
+---
+
 ## Anti-Patterns — Lo Que NO Hacer
 
 ```tsx
