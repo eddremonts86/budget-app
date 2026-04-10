@@ -589,7 +589,19 @@
     "status": {
       "pending": "Afventer",
       "inProgress": "I gang",
-      "completed": "Gennemført"
+      "in_progress": "I gang",
+      "completed": "Gennemført",
+      "on_hold": "På hold",
+      "testing": "Afprøvning",
+      "blocked": "Blokeret",
+      "cancelled": "Annulleret"
+    },
+    "filters": {
+      "label": "Filtre",
+      "onlyMyTasks": "Kun mine opgaver",
+      "allStatuses": "Alle statusser",
+      "allUsers": "Alle brugere",
+      "myTasks": "Mine opgaver"
     },
     "priority": {
       "low": "Lav",

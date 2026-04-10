@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { and, desc, eq, count, like, or, inArray, sql, type SQL } from 'drizzle-orm'
+import { and, desc, eq, count, ilike, or, inArray, sql, type SQL } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   departments,
@@ -87,7 +87,7 @@ export const getUsersFn = createServerFn({ method: 'GET' })
       const whereClauses: SQL[] = []
 
       if (search) {
-        whereClauses.push(or(like(users.name, `%${search}%`), like(users.email, `%${search}%`))!)
+        whereClauses.push(or(ilike(users.name, `%${search}%`), ilike(users.email, `%${search}%`))!)
       }
 
       if (projectId) {

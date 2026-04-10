@@ -19,6 +19,7 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
+import { useDebounce } from '@uidotdev/usehooks'
 import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -50,6 +51,8 @@ import { useProjectMembers, useInfiniteProjects } from '@/modules/projects'
 import { useInfiniteUsers } from '@/modules/users'
 import type { User } from '@/modules/users'
 import { cn } from '@/shared/lib/utils'
+import { InfiniteSelect, type InfiniteSelectOption } from '@/shared/ui/InfiniteSelect'
+import { useSearchTodos, useTodos } from '../api/todos.queries'
 import type { Todo } from '../model/types'
 
 const createTodoSchema = (t: (key: string) => string) =>
@@ -84,10 +87,7 @@ type TodoFormProps = {
   onSubmit: (values: TodoFormValues) => void | Promise<void>
   onCancel: () => void
   isLoading?: boolean
-  availableTodos?: Todo[]
 }
-
-const EMPTY_TODOS: Todo[] = []
 
 export function TodoForm({
   defaultValues,
@@ -95,41 +95,11 @@ export function TodoForm({
   onSubmit,
   onCancel,
   isLoading,
-  availableTodos = EMPTY_TODOS,
 }: TodoFormProps) {
   const { t, i18n } = useTranslation()
   const todoSchema = React.useMemo(() => createTodoSchema(t), [t])
-  const {
-    data: infiniteProjects,
-    fetchNextPage: fetchNextProjects,
-    hasNextPage: hasNextProjects,
-    isFetchingNextPage: isFetchingNextProjects,
-  } = useInfiniteProjects(50)
 
-  const {
-    data: infiniteUsers,
-    fetchNextPage: fetchNextUsers,
-    hasNextPage: hasNextUsers,
-    isFetchingNextPage: isFetchingNextUsers,
-  } = useInfiniteUsers(50)
-
-  const projects = React.useMemo(
-    () => (infiniteProjects?.pages.flatMap((page) => page.data) as Project[]) ?? [],
-    [infiniteProjects],
-  )
-  const users = React.useMemo(
-    () => (infiniteUsers?.pages.flatMap((page) => page.data) as User[]) ?? [],
-    [infiniteUsers],
-  )
-
-  const locale = React.useMemo(() => {
-    const language = i18n.language?.toLowerCase() ?? 'en'
-    const normalized = language.split('-')[0]
-    if (normalized === 'es') return es
-    if (normalized === 'dk' || normalized === 'da') return da
-    return enUS
-  }, [i18n.language])
-
+  // --- Form (declared early so we can subscribe to projectId) ---
   const form = useForm({
     defaultValues: {
       title: defaultValues?.title ?? '',
@@ -150,22 +120,79 @@ export function TodoForm({
     },
   })
 
-  // Subscribe to projectId to filter members
+  // Subscribe to projectId so we can filter users server-side
   const selectedProjectId = useStore(form.store, (state) => state.values.projectId)
-  const { data: projectMembers, isLoading: isLoadingMembers } = useProjectMembers(selectedProjectId)
 
-  const selectableProjects = React.useMemo(() => {
-    if (!projects) return []
-    return projects.filter((p) => p.status === 'active' || p.id === defaultValues?.projectId)
-  }, [projects, defaultValues?.projectId])
+  // --- Project search + infinite query ---
+  const [projectSearch, setProjectSearch] = React.useState<string | undefined>()
+  const {
+    data: infiniteProjects,
+    fetchNextPage: fetchNextProjects,
+    hasNextPage: hasNextProjects,
+    isFetchingNextPage: isFetchingNextProjects,
+    isLoading: isLoadingProjects,
+  } = useInfiniteProjects(20, projectSearch, 'active')
 
-  const filteredUsers = React.useMemo(() => {
-    if (!selectedProjectId) return users || []
-    if (!projectMembers || !users) return []
+  // --- User search + infinite query (filtered by selected project) ---
+  const [userSearch, setUserSearch] = React.useState<string | undefined>()
+  const {
+    data: infiniteUsers,
+    fetchNextPage: fetchNextUsers,
+    hasNextPage: hasNextUsers,
+    isFetchingNextPage: isFetchingNextUsers,
+    isLoading: isLoadingUsers,
+  } = useInfiniteUsers(20, userSearch, {
+    projectId: selectedProjectId || undefined,
+  })
 
-    const memberUserIds = new Set(projectMembers.map((m) => m.userId))
-    return users.filter((user) => memberUserIds.has(user.id))
-  }, [selectedProjectId, projectMembers, users])
+  // --- Dependencies search ---
+  const [rawDepsInput, setRawDepsInput] = React.useState('')
+  const debouncedDepsInput = useDebounce(rawDepsInput, 300)
+  const depsSearch = debouncedDepsInput.length >= 2 ? debouncedDepsInput : undefined
+  const { data: searchedTodosData } = useSearchTodos(depsSearch, 20)
+  const { data: initialTodosData } = useTodos({ limit: 50 })
+
+  const availableTodos: Todo[] = React.useMemo(() => {
+    if (depsSearch && searchedTodosData?.data) {
+      return searchedTodosData.data as Todo[]
+    }
+    return (initialTodosData?.data as Todo[]) ?? []
+  }, [depsSearch, searchedTodosData, initialTodosData])
+
+  const projects = React.useMemo(
+    () => (infiniteProjects?.pages.flatMap((page) => page.data) as Project[]) ?? [],
+    [infiniteProjects],
+  )
+  const users = React.useMemo(
+    () => (infiniteUsers?.pages.flatMap((page) => page.data) as User[]) ?? [],
+    [infiniteUsers],
+  )
+
+  // --- InfiniteSelect options ---
+  const projectOptions: InfiniteSelectOption<Project>[] = React.useMemo(
+    () => projects.map((p) => ({ value: p.id, label: p.name, data: p })),
+    [projects],
+  )
+
+  const userOptions: InfiniteSelectOption<User>[] = React.useMemo(
+    () => users.map((u) => ({ value: u.id, label: u.name, data: u })),
+    [users],
+  )
+
+  const locale = React.useMemo(() => {
+    const language = i18n.language?.toLowerCase() ?? 'en'
+    const normalized = language.split('-')[0]
+    if (normalized === 'es') return es
+    if (normalized === 'dk' || normalized === 'da') return da
+    return enUS
+  }, [i18n.language])
+
+  // Check project membership for "Me" pinned option
+  const { data: projectMembersData } = useProjectMembers(selectedProjectId)
+  const isMeAMember = React.useMemo(() => {
+    if (!currentUserId || !selectedProjectId) return false
+    return projectMembersData?.some((m) => m.userId === currentUserId) ?? false
+  }, [currentUserId, selectedProjectId, projectMembersData])
 
   const containerVariants = {
     hidden: { opacity: 0, y: 20 },
@@ -425,46 +452,24 @@ export function TodoForm({
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <Folder className="w-3.5 h-3.5" /> {t('todos.form.projectLabel')}
                     </FieldLabel>
-                    <Select
-                      value={field.state.value}
+                    <InfiniteSelect<Project>
+                      value={field.state.value || undefined}
                       onValueChange={(value) => {
-                        field.handleChange(value)
+                        field.handleChange(value ?? '')
                         form.setFieldValue('assignedTo', '')
                       }}
-                    >
-                      <SelectTrigger className="h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4">
-                        <SelectValue placeholder={t('todos.form.projectPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl max-h-[300px] overflow-y-auto">
-                        {selectableProjects?.map((project) => (
-                          <SelectItem
-                            key={project.id}
-                            value={project.id}
-                            className="rounded-lg m-1"
-                          >
-                            {project.name}
-                          </SelectItem>
-                        ))}
-                        {hasNextProjects && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-full text-xs"
-                            onClick={(e) => {
-                              e.preventDefault()
-                              e.stopPropagation()
-                              fetchNextProjects()
-                            }}
-                            disabled={isFetchingNextProjects}
-                          >
-                            {isFetchingNextProjects ? (
-                              <Loader2 className="h-3 w-3 animate-spin mr-2" />
-                            ) : null}
-                            {t('common.loadMore', 'Load More')}
-                          </Button>
-                        )}
-                      </SelectContent>
-                    </Select>
+                      options={projectOptions}
+                      hasNextPage={hasNextProjects}
+                      fetchNextPage={fetchNextProjects}
+                      isFetchingNextPage={isFetchingNextProjects}
+                      isLoading={isLoadingProjects}
+                      onSearchChange={setProjectSearch}
+                      searchPlaceholder={t('todos.form.searchProjects', 'Search projects…')}
+                      placeholder={t('todos.form.projectPlaceholder')}
+                      icon={<Folder className="h-3.5 w-3.5" />}
+                      triggerClassName="h-10 w-full rounded-lg bg-secondary/30 border-transparent hover:border-primary/30 text-sm px-4 justify-start"
+                      contentClassName="w-[var(--radix-popover-trigger-width)]"
+                    />
                     <FieldError
                       errors={field.state.meta.errors.map((e) => {
                         if (typeof e === 'string') return e
@@ -485,65 +490,64 @@ export function TodoForm({
                     <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                       <UserCircle className="w-3.5 h-3.5" /> {t('todos.form.assignedToLabel')}
                     </FieldLabel>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(value) => field.handleChange(value)}
-                    >
-                      <SelectTrigger className="h-10 w-full bg-secondary/30 border-transparent hover:border-primary/30 transition-all rounded-lg text-sm px-4">
-                        <SelectValue placeholder={t('todos.form.assignedToPlaceholder')} />
-                      </SelectTrigger>
-                      <SelectContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl max-h-[300px] overflow-y-auto">
-                        {isLoadingMembers ? (
-                          <div className="p-4 text-center text-sm text-muted-foreground">
-                            {t('common.loading')}
-                          </div>
-                        ) : filteredUsers.length === 0 ? (
-                          <div className="p-4 text-center text-sm text-muted-foreground">
-                            {selectedProjectId
-                              ? t('projects.members.empty')
-                              : t('todos.form.selectProjectFirst', 'Select a project first')}
-                          </div>
-                        ) : (
-                          <>
-                            {filteredUsers.map((user) => (
-                              <SelectItem key={user.id} value={user.id} className="rounded-lg m-1">
-                                <div className="flex items-center gap-2">
-                                  <Avatar className="h-5 w-5">
-                                    <AvatarImage src={user.avatar || undefined} alt={user.name} />
-                                    <AvatarFallback className="text-[10px]">
-                                      {user.name.substring(0, 2).toUpperCase()}
-                                    </AvatarFallback>
-                                  </Avatar>
-                                  <span>
-                                    {user.id === currentUserId
-                                      ? `${user.name} (${t('todos.form.assignedToSelf')})`
-                                      : user.name}
-                                  </span>
-                                </div>
-                              </SelectItem>
-                            ))}
-                            {hasNextUsers && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="w-full text-xs"
-                                onClick={(e) => {
-                                  e.preventDefault()
-                                  e.stopPropagation()
-                                  fetchNextUsers()
-                                }}
-                                disabled={isFetchingNextUsers}
-                              >
-                                {isFetchingNextUsers ? (
-                                  <Loader2 className="h-3 w-3 animate-spin mr-2" />
-                                ) : null}
-                                {t('common.loadMore', 'Load More')}
-                              </Button>
-                            )}
-                          </>
-                        )}
-                      </SelectContent>
-                    </Select>
+                    <InfiniteSelect<User>
+                      value={field.state.value || undefined}
+                      onValueChange={(value) => field.handleChange(value ?? '')}
+                      options={userOptions}
+                      hasNextPage={hasNextUsers}
+                      fetchNextPage={fetchNextUsers}
+                      isFetchingNextPage={isFetchingNextUsers}
+                      isLoading={isLoadingUsers}
+                      onSearchChange={setUserSearch}
+                      searchPlaceholder={t('todos.filters.searchUsers', 'Search users…')}
+                      placeholder={
+                        !selectedProjectId
+                          ? t('todos.form.selectProjectFirst', 'Select a project first')
+                          : t('todos.form.assignedToPlaceholder')
+                      }
+                      icon={<UserCircle className="h-3.5 w-3.5" />}
+                      disabled={!selectedProjectId}
+                      pinnedOptions={
+                        currentUserId && isMeAMember
+                          ? [
+                              {
+                                value: currentUserId,
+                                label: t('todos.form.assignedToSelf', 'Me'),
+                              },
+                            ]
+                          : undefined
+                      }
+                      renderOption={(opt) => (
+                        <span className="flex items-center gap-2">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage
+                              src={(opt.data as User)?.avatar || undefined}
+                              alt={opt.label}
+                            />
+                            <AvatarFallback className="text-[10px]">
+                              {opt.label.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          {opt.label}
+                        </span>
+                      )}
+                      renderValue={(opt) => (
+                        <span className="flex items-center gap-2">
+                          <Avatar className="h-5 w-5">
+                            <AvatarImage
+                              src={(opt.data as User)?.avatar || undefined}
+                              alt={opt.label}
+                            />
+                            <AvatarFallback className="text-[10px]">
+                              {opt.label.substring(0, 2).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          {opt.label}
+                        </span>
+                      )}
+                      triggerClassName="h-10 w-full rounded-lg bg-secondary/30 border-transparent hover:border-primary/30 text-sm px-4 justify-start"
+                      contentClassName="w-[var(--radix-popover-trigger-width)]"
+                    />
                     <FieldError
                       errors={field.state.meta.errors.map((e) => {
                         if (typeof e === 'string') return e
@@ -786,6 +790,9 @@ export function TodoForm({
                           field.state.value?.length ? '' : t('todos.form.dependenciesPlaceholder')
                         }
                         className="bg-transparent text-sm"
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                          setRawDepsInput(e.target.value)
+                        }
                       />
                       <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
                     </ComboboxChips>
@@ -797,17 +804,12 @@ export function TodoForm({
                             <ComboboxItem
                               key={todo.id}
                               value={todo.id}
-                              onClick={() => {
-                                const current = field.state.value || []
-                                if (current.includes(todo.id)) {
-                                  field.handleChange(current.filter((id: string) => id !== todo.id))
-                                } else {
-                                  field.handleChange([...current, todo.id])
-                                }
-                              }}
                               className="rounded-lg m-1 flex items-center gap-2"
                             >
-                              <Checkbox checked={field.state.value?.includes(todo.id)} />
+                              <Checkbox
+                                checked={field.state.value?.includes(todo.id)}
+                                className="pointer-events-none"
+                              />
                               <div className="flex flex-col">
                                 <span className="font-medium">{todo.title}</span>
                                 <span className="text-[10px] text-muted-foreground">

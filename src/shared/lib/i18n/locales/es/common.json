@@ -426,11 +426,19 @@
     "status": {
       "pending": "Pendiente",
       "in_progress": "En Progreso",
+      "inProgress": "En Progreso",
       "completed": "Completado",
       "on_hold": "En espera",
       "testing": "Pruebas",
       "blocked": "Bloqueado",
       "cancelled": "Cancelado"
+    },
+    "filters": {
+      "label": "Filtros",
+      "onlyMyTasks": "Solo mis tareas",
+      "allStatuses": "Todos los estados",
+      "allUsers": "Todos los usuarios",
+      "myTasks": "Mis tareas"
     },
     "priority": {
       "low": "Baja",

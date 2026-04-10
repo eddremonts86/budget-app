@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq, and, inArray, count, like } from 'drizzle-orm'
+import { desc, eq, and, inArray, count, ilike } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   projects,
@@ -81,12 +81,13 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
         pageParam: z.number().optional(),
         limit: z.number().optional(),
         search: z.string().optional(),
+        status: z.string().optional(),
       })
       .optional(),
   )
   .handler(async ({ data }): Promise<ProjectListResponse> => {
     try {
-      const { pageParam, limit: limitParam, search } = data || {}
+      const { pageParam, limit: limitParam, search, status } = data || {}
       const page = pageParam || 1
       const limit = limitParam || 100
       const offset = (page - 1) * limit
@@ -94,7 +95,10 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
 
-      const whereClause = search ? like(projects.name, `%${search}%`) : undefined
+      const conditions: ReturnType<typeof ilike>[] = []
+      if (search) conditions.push(ilike(projects.name, `%${search}%`))
+      if (status) conditions.push(eq(projects.status, status))
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       const [items, totalResult] = await Promise.all([
         db

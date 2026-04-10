@@ -1,5 +1,6 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
+import type { User } from '../model/types'
 import { getRolesFn, getSkillsFn, getJobTitlesFn, getExperienceLevelsFn } from './master-data.fn'
 import {
   type UserInput,
@@ -10,7 +11,6 @@ import {
   getUsersFn,
   updateUserFn,
 } from './users.fn'
-import type { User } from '../model/types'
 
 export interface UserDirectoryFilters {
   projectId?: string
@@ -71,15 +71,17 @@ export const useInfiniteUsers = (limit = 10, search?: string, filters?: UserDire
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,
+      placeholderData: (prev) => prev,
     },
   )
 }
 
-export const useUsers = (limit = 1000) => {
-  return useTQuery(userKeys.lookup({ limit }), () =>
-    getUsersFn({ data: { limit } }).then((res) => res?.data || []),
+export const useUsers = (limit = 1000, options?: { enabled?: boolean }) =>
+  useTQuery(
+    userKeys.lookup({ limit }),
+    () => getUsersFn({ data: { limit } }).then((res) => res?.data || []),
+    { cache: 'stable' as const, enabled: options?.enabled !== false },
   )
-}
 
 export const useUserDirectory = (search?: string, limit = 50, filters?: UserDirectoryFilters) => {
   const params = normalizeDirectoryFilters(limit, search, filters)

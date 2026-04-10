@@ -358,12 +358,10 @@ export function UnifiedDataTable<TData, TValue>({
       )}
 
       {showToolbar && (
-        <div
-          className={cn('flex flex-col gap-4 shrink-0', hasFilterControls && 'md:items-stretch')}
-        >
-          {hasFilterControls && (
-            <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
-              <div className="relative w-full md:max-w-sm group">
+        <div className="flex flex-col gap-4 shrink-0">
+          <div className="flex flex-wrap items-center gap-3">
+            {hasFilterControls && (
+              <div className="relative flex-1 min-w-0 md:max-w-sm group">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
                 <Input
                   placeholder={
@@ -376,19 +374,17 @@ export function UnifiedDataTable<TData, TValue>({
                   className="pl-10 h-11 bg-secondary/20 border-transparent focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all"
                 />
               </div>
-              {filters.length > 0 && (
-                <Button
-                  variant="outline"
-                  className="h-11 rounded-2xl border-dashed border-border/60"
-                  onClick={() => setShowAdvancedFilters((current) => !current)}
-                >
-                  <SlidersHorizontal className="mr-2 h-4 w-4" />
-                  Filtros avanzados
-                </Button>
-              )}
-            </div>
-          )}
-          <div className="flex flex-wrap items-center gap-2">
+            )}
+            {filters.length > 0 && (
+              <Button
+                variant="outline"
+                className="h-11 rounded-2xl border-dashed border-border/60"
+                onClick={() => setShowAdvancedFilters((current) => !current)}
+              >
+                <SlidersHorizontal className="mr-2 h-4 w-4" />
+                Filtros avanzados
+              </Button>
+            )}
             {enableGrouping && allGroupableColumns.length > 0 && (
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>

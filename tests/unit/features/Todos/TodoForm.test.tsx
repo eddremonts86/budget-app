@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react'
 import React from 'react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import { useInfiniteProjects, useProjectMembers } from '@/modules/projects'
-import { TodoForm } from '@/modules/tasks/components/TodoForm'
+import { TodoForm } from '@/modules/tasks/ui/TodoForm'
 import { useInfiniteUsers } from '@/modules/users'
 
 // Mock dependencies

@@ -35,7 +35,7 @@ export const tasksModule: AppModuleManifest = {
       defaultOrder: 40,
       size: 'full',
       component: () =>
-        import('./components/UpcomingTodosWidget').then((m) => ({
+        import('./ui/widgets/UpcomingTodosWidget').then((m) => ({
           default: m.UpcomingTodosList,
         })),
     },

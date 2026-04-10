@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
 import * as todosQueries from '@/modules/tasks/api/todos.queries'
-import { UpcomingTodosList } from '@/modules/tasks/components/UpcomingTodosWidget'
+import { UpcomingTodosList } from '@/modules/tasks/ui/widgets/UpcomingTodosWidget'
 import * as userQueries from '@/modules/users'
 
 // Mock translations

@@ -16,19 +16,34 @@ import { KanbanBoard } from './KanbanBoard'
 interface KanbanViewProps {
   onEdit: (todo: Todo) => void
   assignedTo?: string
+  status?: TodoStatus
 }
 
-export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
+export function KanbanView({ onEdit, assignedTo, status }: KanbanViewProps) {
   const queryClient = useQueryClient()
   const { syncedUserId, userRole } = useCurrentUser()
   const updateMutation = useUpdateTodo({ invalidateKeys: [todoKeys.all] })
   const deleteMutation = useDeleteTodo()
 
-  const pendingQuery = useInfiniteTodos(10, 'pending', assignedTo)
-  const inProgressQuery = useInfiniteTodos(10, 'in_progress', assignedTo)
-  const testingQuery = useInfiniteTodos(10, 'testing', assignedTo)
-  const onHoldQuery = useInfiniteTodos(10, 'on_hold', assignedTo)
-  const completedQuery = useInfiniteTodos(10, 'completed', assignedTo)
+  // When a status filter is active, only fetch the matching column
+  const ALL_STATUSES: TodoStatus[] = ['pending', 'in_progress', 'testing', 'on_hold', 'completed']
+  const visibleStatuses = status ? ALL_STATUSES.filter((s) => s === status) : ALL_STATUSES
+
+  const pendingQuery = useInfiniteTodos(10, 'pending', assignedTo, {
+    enabled: visibleStatuses.includes('pending'),
+  })
+  const inProgressQuery = useInfiniteTodos(10, 'in_progress', assignedTo, {
+    enabled: visibleStatuses.includes('in_progress'),
+  })
+  const testingQuery = useInfiniteTodos(10, 'testing', assignedTo, {
+    enabled: visibleStatuses.includes('testing'),
+  })
+  const onHoldQuery = useInfiniteTodos(10, 'on_hold', assignedTo, {
+    enabled: visibleStatuses.includes('on_hold'),
+  })
+  const completedQuery = useInfiniteTodos(10, 'completed', assignedTo, {
+    enabled: visibleStatuses.includes('completed'),
+  })
 
   const [activeTodo, setActiveTodo] = React.useState<Todo | null>(null)
 
@@ -124,11 +139,11 @@ export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
       const previousStatus = todo.status
       const sourceQueryKey = [
         ...todoKeys.infinite(),
-        { limit: 10, status: previousStatus as TodoStatus },
+        { limit: 10, status: previousStatus as TodoStatus, assignedTo },
       ]
       const targetQueryKey = [
         ...todoKeys.infinite(),
-        { limit: 10, status: newStatus as TodoStatus },
+        { limit: 10, status: newStatus as TodoStatus, assignedTo },
       ]
 
       // Optimistic update: remove from source, add to target
@@ -200,10 +215,19 @@ export function KanbanView({ onEdit, assignedTo }: KanbanViewProps) {
 
   const canModify = (todo: Todo) => canModifyTodo(todo, syncedUserId, userRole)
 
+  // When a status filter is active, only render the matching column — queries are already gated
+  const filteredColumns = Object.fromEntries(
+    Object.entries(columns).filter(([key]) => visibleStatuses.includes(key as TodoStatus)),
+  ) as typeof columns
+
+  const filteredTotalCounts = Object.fromEntries(
+    Object.entries(totalCounts).filter(([key]) => visibleStatuses.includes(key as TodoStatus)),
+  ) as typeof totalCounts
+
   return (
     <KanbanBoard
-      columns={columns}
-      totalCounts={totalCounts}
+      columns={filteredColumns}
+      totalCounts={filteredTotalCounts}
       userMap={userMap}
       onEdit={onEdit}
       onDelete={handleDelete}

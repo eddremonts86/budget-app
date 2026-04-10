@@ -38,19 +38,20 @@ import type { Todo } from '../../model/types'
 interface ListViewProps {
   onEdit: (todo: Todo) => void
   assignedTo?: string
+  status?: string
   onTotalCountChange?: (count: number) => void
 }
 
-export function ListView({ onEdit, assignedTo, onTotalCountChange }: ListViewProps) {
+export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: ListViewProps) {
   const { t } = useTranslation()
   const { syncedUserId, userRole } = useCurrentUser()
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteTodos(30, undefined, assignedTo)
+    useInfiniteTodos(30, status as Parameters<typeof useInfiniteTodos>[1], assignedTo)
 
+  const firstPageCount = data?.pages[0]?.totalCount ?? 0
   React.useEffect(() => {
-    const count = data?.pages[0]?.totalCount ?? 0
-    onTotalCountChange?.(count)
-  }, [data?.pages[0]?.totalCount, onTotalCountChange])
+    onTotalCountChange?.(firstPageCount)
+  }, [firstPageCount, onTotalCountChange])
 
   const visibleTodos = React.useMemo(() => {
     return (data?.pages.flatMap((page) => page.data) ?? []) as Todo[]
@@ -201,7 +202,7 @@ export function ListView({ onEdit, assignedTo, onTotalCountChange }: ListViewPro
                         {assignee.name.substring(0, 2).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-xs font-medium text-foreground truncate max-w-[100px]">
+                    <span className="text-xs font-medium text-foreground truncate max-w-25">
                       {assignee.name}
                     </span>
                   </div>
@@ -305,7 +306,7 @@ export function ListView({ onEdit, assignedTo, onTotalCountChange }: ListViewPro
 
   if (isError) {
     return (
-      <div className="flex items-center justify-center h-[400px] animate-in fade-in">
+      <div className="flex items-center justify-center h-100 animate-in fade-in">
         <div className="text-center space-y-4 max-w-sm">
           <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
             <Trash2 className="w-6 h-6 text-destructive" />
@@ -322,21 +323,19 @@ export function ListView({ onEdit, assignedTo, onTotalCountChange }: ListViewPro
     )
   }
 
-  const allTodos = (data?.pages.flatMap((page) => page.data) ?? []) as Todo[]
-
   if (isLoading) {
     return (
       <FieldGroup className="space-y-4">
-        <Skeleton className="h-[64px] w-full rounded-3xl" />
-        <Skeleton className="h-[64px] w-full rounded-3xl" />
-        <Skeleton className="h-[64px] w-full rounded-3xl" />
+        <Skeleton className="h-16 w-full rounded-3xl" />
+        <Skeleton className="h-16 w-full rounded-3xl" />
+        <Skeleton className="h-16 w-full rounded-3xl" />
       </FieldGroup>
     )
   }
 
   return (
     <Field className="relative group h-full">
-      <DataTable columns={columns} data={allTodos} filterColumn="title" fullHeight>
+      <DataTable columns={columns} data={visibleTodos} filterColumn="title" fullHeight>
         {hasNextPage && loadedPages < 50 && (
           <TableRow className="border-none hover:bg-transparent">
             <TableCell colSpan={columns.length} className="p-0">

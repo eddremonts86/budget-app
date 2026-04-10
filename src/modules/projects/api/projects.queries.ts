@@ -34,14 +34,15 @@ export function useSkills() {
   return useTQuery(projectsKeys.skills(), () => getSkillsFn())
 }
 
-export function useInfiniteProjects(limit = 10, search?: string) {
+export function useInfiniteProjects(limit = 10, search?: string, status?: string) {
   return useTQInfinite<ProjectListResponse, Error, InfiniteData<ProjectListResponse>, number>(
-    [...projectsKeys.infinite(), { limit, search }],
-    ({ pageParam }) => getProjectsFn({ data: { pageParam, limit, search } }),
+    [...projectsKeys.infinite(), { limit, search, status }],
+    ({ pageParam }) => getProjectsFn({ data: { pageParam, limit, search, status } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage: ProjectListResponse) => lastPage.nextPage,
-      cache: 'realtime',
+      cache: 'standard',
+      placeholderData: (prev) => prev,
     },
   )
 }
@@ -68,8 +69,10 @@ export function useProject(id: string) {
 }
 
 export function useProjectMembers(projectId: string) {
-  return useTQuery<ProjectMember[]>(projectsKeys.members(projectId), () =>
-    getProjectMembersFn({ data: projectId }),
+  return useTQuery<ProjectMember[]>(
+    projectsKeys.members(projectId),
+    () => getProjectMembersFn({ data: projectId }),
+    { enabled: Boolean(projectId) },
   )
 }
 

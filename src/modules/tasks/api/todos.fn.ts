@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, desc, count, and, gte, inArray, lt } from 'drizzle-orm'
+import { eq, desc, count, and, gte, inArray, ilike, lt, lte } from 'drizzle-orm'
 import { z } from 'zod'
 import { todos } from '@/shared/lib/db/schema'
 
@@ -39,6 +39,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
         .enum(['pending', 'in_progress', 'completed', 'on_hold', 'testing', 'blocked', 'cancelled'])
         .optional(),
       assignedTo: z.string().optional(),
+      search: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -46,18 +47,15 @@ export const getTodosFn = createServerFn({ method: 'GET' })
 
     try {
       const db = await loadDb()
-      const { pageParam, limit, status, assignedTo } = data
+      const { pageParam, limit, status, assignedTo, search } = data
       const page = pageParam
       const offset = (page - 1) * limit
 
-      let whereClause = undefined
-      if (status && assignedTo) {
-        whereClause = and(eq(todos.status, status), eq(todos.assignedTo, assignedTo))
-      } else if (status) {
-        whereClause = eq(todos.status, status)
-      } else if (assignedTo) {
-        whereClause = eq(todos.assignedTo, assignedTo)
-      }
+      const conditions = []
+      if (status) conditions.push(eq(todos.status, status))
+      if (assignedTo) conditions.push(eq(todos.assignedTo, assignedTo))
+      if (search) conditions.push(ilike(todos.title, `%${search}%`))
+      const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       const [items, totalResult] = await Promise.all([
         db
@@ -306,7 +304,8 @@ export const createTodoFn = createServerFn({ method: 'POST' })
 
       // Sync to RAG
       const doc = `Task: ${newItem.title}. Status: ${newItem.status}. Priority: ${newItem.priority}. Assigned to: ${newItem.assignedTo || 'Unassigned'}. Due: ${newItem.dueDate || 'No date'}. Description: ${newItem.description || ''}`
-      await syncRagDocument('todo', newItem.id, doc)
+      // Fire-and-forget: RAG sync must not block the response
+      void syncRagDocument('todo', newItem.id, doc)
 
       return {
         ...newItem,
@@ -355,10 +354,10 @@ export const updateTodoFn = createServerFn({ method: 'POST' })
         .where(eq(todos.id, id))
         .returning()
 
-      // Sync to RAG
+      // Fire-and-forget: RAG sync must not block the response
       if (updatedItem) {
         const doc = `Task: ${updatedItem.title}. Status: ${updatedItem.status}. Priority: ${updatedItem.priority}. Assigned to: ${updatedItem.assignedTo || 'Unassigned'}. Due: ${updatedItem.dueDate || 'No date'}. Description: ${updatedItem.description || ''}`
-        await syncRagDocument('todo', updatedItem.id, doc)
+        void syncRagDocument('todo', updatedItem.id, doc)
       }
 
       return {
@@ -397,11 +396,65 @@ export const deleteTodoFn = createServerFn({ method: 'POST' })
       const db = await loadDb()
       const { deleteRagDocument } = await import('@/modules/ai/rag/sync')
       await db.delete(todos).where(eq(todos.id, id))
-      await deleteRagDocument('todo', id)
+      // Fire-and-forget: RAG delete must not block the response
+      void deleteRagDocument('todo', id)
       return { success: true }
     } catch (error) {
       if (isE2E) {
         return { success: true }
+      }
+      throw error
+    }
+  })
+
+// ---------------------------------------------------------------------------
+// Calendar date-range fetch — replaces unbounded infinite waterfall
+// ---------------------------------------------------------------------------
+export const getTodosByDateRangeFn = createServerFn({ method: 'GET' })
+  .inputValidator(
+    z.object({
+      startDate: z.string(), // ISO date string
+      endDate: z.string(), // ISO date string
+      assignedTo: z.string().optional(),
+      status: z
+        .enum(['pending', 'in_progress', 'completed', 'on_hold', 'testing', 'blocked', 'cancelled'])
+        .optional(),
+    }),
+  )
+  .handler(async ({ data }) => {
+    const isE2E = process.env.VITE_E2E === 'true'
+
+    try {
+      const db = await loadDb()
+      const start = new Date(data.startDate)
+      const end = new Date(data.endDate)
+
+      const conditions = [gte(todos.dueDate, start), lte(todos.dueDate, end)]
+      if (data.assignedTo) {
+        conditions.push(eq(todos.assignedTo, data.assignedTo))
+      }
+      if (data.status) {
+        conditions.push(eq(todos.status, data.status))
+      }
+
+      const items = await db
+        .select()
+        .from(todos)
+        .where(and(...conditions))
+        .orderBy(todos.dueDate)
+        .limit(500) // hard cap — calendar can't show more anyway
+
+      return items.map((item) => ({
+        ...item,
+        dueDate: item.dueDate ? item.dueDate.toISOString() : '',
+        createdAt: item.createdAt.toISOString(),
+        updatedAt: item.updatedAt.toISOString(),
+        completedAt: item.completedAt ? item.completedAt.toISOString() : null,
+        dependencies: [],
+      }))
+    } catch (error) {
+      if (isE2E) {
+        return []
       }
       throw error
     }
