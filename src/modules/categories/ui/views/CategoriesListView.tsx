@@ -1,16 +1,16 @@
 import * as React from 'react'
+import {
+  SEARCH_MIN_CHARS,
+  TableEmptyState,
+  TableErrorState,
+  TableSearchBar,
+  TableSkeleton,
+  VirtualTable,
+} from '@/shared/ui/tables'
 import { useCategoryActions } from '../../hooks/useCategoryActions'
 import { useCategoryColumns } from '../../hooks/useCategoryColumns'
 import { useInfiniteCategoryList } from '../../hooks/useInfiniteCategoryList'
-import { SEARCH_MIN_CHARS } from '../../model/constants'
 import type { Category } from '../../model/types'
-import {
-  CategoryListEmptyState,
-  CategoryListErrorState,
-  CategoryListSkeleton,
-  CategorySearchBar,
-  VirtualCategoryTable,
-} from '../components'
 
 interface CategoriesListViewProps {
   onEdit: (category: Category) => void
@@ -40,14 +40,20 @@ export function CategoriesListView({ onEdit }: CategoriesListViewProps) {
     return categories.filter((c) => c.name.toLowerCase().includes(activeSearch))
   }, [categories, activeSearch])
 
-  if (isError) return <CategoryListErrorState />
-  if (isLoading) return <CategoryListSkeleton />
+  if (isError)
+    return (
+      <TableErrorState
+        titleKey="categories.error.title"
+        descriptionKey="categories.error.description"
+      />
+    )
+  if (isLoading) return <TableSkeleton />
 
   const showSearchSpinner = isFetching && !isFetchingNextPage
 
   return (
     <div className="h-full flex flex-col gap-4">
-      <CategorySearchBar
+      <TableSearchBar
         searchInput={searchInput}
         onSearchChange={setSearchInput}
         onClear={clearSearch}
@@ -57,7 +63,7 @@ export function CategoriesListView({ onEdit }: CategoriesListViewProps) {
       />
 
       {filteredCategories.length > 0 ? (
-        <VirtualCategoryTable
+        <VirtualTable
           columns={columns}
           data={filteredCategories}
           hasNextPage={!activeSearch && hasNextPage}
@@ -66,7 +72,7 @@ export function CategoriesListView({ onEdit }: CategoriesListViewProps) {
           scrollResetKey={activeSearch}
         />
       ) : (
-        <CategoryListEmptyState isSearchActive={!!activeSearch} onClearSearch={clearSearch} />
+        <TableEmptyState isSearchActive={!!activeSearch} onClearSearch={clearSearch} />
       )}
     </div>
   )

@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { useUsersByIds } from '@/modules/users'
 import { toast } from '@/shared/lib/toast'
-import { DataTable } from '@/shared/ui/DataTable'
+import { DataTable } from '@/shared/ui/tables/DataTable'
 import { useUpdateTransaction } from '../api/transactions.queries'
 import type { Transaction } from '../model/types'
 

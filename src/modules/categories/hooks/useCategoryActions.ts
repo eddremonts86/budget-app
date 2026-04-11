@@ -1,9 +1,9 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
+import { DELETE_TOAST_DURATION } from '@/shared/ui/tables'
 import { toast } from '@/shared/lib/toast'
 import { useDeleteCategory } from '../api/categories.queries'
 import type { Category } from '../model/types'
-import { DELETE_TOAST_DURATION } from '../model/constants'
 
 export function useCategoryActions(onEdit: (category: Category) => void) {
   const { t } = useTranslation()

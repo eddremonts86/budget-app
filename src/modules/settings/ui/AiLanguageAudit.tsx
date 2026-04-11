@@ -1,12 +1,12 @@
+import type { ColumnDef } from '@tanstack/react-table'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { format } from 'date-fns'
 import { Activity, Clock, Cpu, Globe, MessageSquare, RefreshCw, Settings2 } from 'lucide-react'
-import { useMemo } from 'react'
+import * as React from 'react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Label } from '@/components/ui/label'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
 import {
   Select,
   SelectContent,
@@ -14,15 +14,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
 import { cn } from '@/shared/lib/utils'
+import { DataTable } from '@/shared/ui/tables/DataTable'
 
 interface AuditLog {
   timestamp: string
@@ -36,6 +29,14 @@ interface AiLanguageAuditProps {
   className?: string
 }
 
+function tryFormatDate(iso: string) {
+  try {
+    return format(new Date(iso), 'MMM d, HH:mm:ss')
+  } catch {
+    return iso
+  }
+}
+
 export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
   const queryClient = useQueryClient()
   const { data, refetch, isRefetching } = useQuery({
@@ -44,17 +45,15 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
       const res = await fetch('/api/ai/audit')
       if (!res.ok) return { logs: [], settings: {} }
       const json = await res.json()
-      // Handle legacy format (array only) or new format ({ logs, settings })
       if (Array.isArray(json)) return { logs: json, settings: { forceLocale: undefined } }
       return json as { logs: AuditLog[]; settings: { forceLocale?: string } }
     },
-    refetchInterval: 5000, // Refresh every 5s
+    refetchInterval: 5000,
   })
 
   const settings = data?.settings
 
-  // Memoize sorted logs to prevent re-sorting on every render
-  const sortedLogs = useMemo(() => {
+  const sortedLogs = React.useMemo(() => {
     return [...(data?.logs ?? [])].reverse()
   }, [data?.logs])
 
@@ -70,6 +69,84 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
       queryClient.invalidateQueries({ queryKey: ['ai-audit'] })
     },
   })
+
+  const columns: ColumnDef<AuditLog>[] = React.useMemo(
+    () => [
+      {
+        accessorKey: 'timestamp',
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Clock className="h-3.5 w-3.5" />
+            Timestamp
+          </div>
+        ),
+        cell: ({ row }) => (
+          <span className="whitespace-nowrap font-mono text-xs text-muted-foreground">
+            {tryFormatDate(row.original.timestamp)}
+          </span>
+        ),
+      },
+      {
+        accessorKey: 'locale',
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Globe className="h-3.5 w-3.5" />
+            Locale
+          </div>
+        ),
+        cell: ({ row }) => (
+          <Badge
+            variant="secondary"
+            className={cn(
+              'font-mono text-[10px] uppercase tracking-wider shadow-sm border-transparent',
+              row.original.locale === 'en'
+                ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 hover:bg-blue-500/20'
+                : row.original.locale === 'es'
+                  ? 'bg-orange-500/10 text-orange-700 dark:text-orange-300 hover:bg-orange-500/20'
+                  : 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-500/20',
+            )}
+          >
+            {row.original.locale}
+          </Badge>
+        ),
+      },
+      {
+        accessorKey: 'providerId',
+        header: () => (
+          <div className="flex items-center gap-2">
+            <Cpu className="h-3.5 w-3.5" />
+            Provider
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div className="flex flex-col gap-0.5 text-xs">
+            <span className="font-medium text-foreground">{row.original.providerId}</span>
+            <span className="text-[10px] text-muted-foreground font-mono opacity-80">
+              {row.original.model}
+            </span>
+          </div>
+        ),
+      },
+      {
+        accessorKey: 'query',
+        header: () => (
+          <div className="flex items-center gap-2">
+            <MessageSquare className="h-3.5 w-3.5" />
+            Query Snippet
+          </div>
+        ),
+        cell: ({ row }) => (
+          <div
+            className="truncate max-w-75 text-xs text-muted-foreground bg-muted/20 px-2.5 py-1.5 rounded-md border border-transparent hover:border-border/50 hover:bg-background shadow-sm transition-colors"
+            title={row.original.query}
+          >
+            {row.original.query}
+          </div>
+        ),
+      },
+    ],
+    [],
+  )
 
   return (
     <Card
@@ -138,115 +215,16 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="p-0">
-        <ScrollArea className="h-100 w-full">
-          <Table>
-            <TableHeader className="bg-muted/20 sticky top-0 z-10 backdrop-blur-md">
-              <TableRow className="hover:bg-transparent">
-                <TableHead className="w-45 pl-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-3.5 w-3.5" />
-                    Timestamp
-                  </div>
-                </TableHead>
-                <TableHead className="w-30 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-                  <div className="flex items-center gap-2">
-                    <Globe className="h-3.5 w-3.5" />
-                    Locale
-                  </div>
-                </TableHead>
-                <TableHead className="w-50 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-                  <div className="flex items-center gap-2">
-                    <Cpu className="h-3.5 w-3.5" />
-                    Provider
-                  </div>
-                </TableHead>
-                <TableHead className="pr-6 text-xs font-semibold uppercase tracking-wider text-muted-foreground/80">
-                  <div className="flex items-center gap-2">
-                    <MessageSquare className="h-3.5 w-3.5" />
-                    Query Snippet
-                  </div>
-                </TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {sortedLogs.length > 0 ? (
-                sortedLogs.map((log) => (
-                  <TableRow
-                    key={`${log.timestamp}-${log.providerId}`}
-                    className="group border-b last:border-0 hover:bg-muted/30 transition-colors data-[state=selected]:bg-muted"
-                  >
-                    <TableCell className="whitespace-nowrap font-mono text-xs text-muted-foreground pl-6">
-                      {tryFormatDate(log.timestamp)}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="secondary"
-                        className={cn(
-                          'font-mono text-[10px] uppercase tracking-wider shadow-sm border-transparent',
-                          log.locale === 'en'
-                            ? 'bg-blue-500/10 text-blue-700 dark:text-blue-300 hover:bg-blue-500/20'
-                            : log.locale === 'es'
-                              ? 'bg-orange-500/10 text-orange-700 dark:text-orange-300 hover:bg-orange-500/20'
-                              : 'bg-zinc-500/10 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-500/20',
-                        )}
-                      >
-                        {log.locale}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-xs">
-                      <div className="flex flex-col gap-0.5">
-                        <span className="font-medium text-foreground flex items-center gap-1.5">
-                          {log.providerId}
-                        </span>
-                        <span className="text-[10px] text-muted-foreground font-mono opacity-80">
-                          {log.model}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="max-w-75 pr-6">
-                      <div
-                        className="truncate text-xs text-muted-foreground group-hover:text-foreground transition-colors bg-muted/20 px-2.5 py-1.5 rounded-md border border-transparent group-hover:border-border/50 group-hover:bg-background shadow-sm"
-                        title={log.query}
-                      >
-                        {log.query}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell colSpan={4} className="h-64 text-center">
-                    <div className="flex flex-col items-center justify-center gap-3 text-muted-foreground animate-in fade-in-50 duration-500">
-                      <div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted/30 ring-1 ring-border/50">
-                        <Activity className="h-8 w-8 opacity-40" />
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium text-foreground">
-                          No audit logs found yet
-                        </p>
-                        <p className="mx-auto max-w-60 text-xs opacity-60">
-                          Start chatting with the AI to see language enforcement logs appear here in
-                          real-time.
-                        </p>
-                      </div>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-          <ScrollBar orientation="horizontal" />
-        </ScrollArea>
+      <CardContent className="p-4">
+        <DataTable
+          columns={columns}
+          data={sortedLogs}
+          filterColumn="query"
+          enablePagination
+          initialPageSize={20}
+          emptyStateLabel="No audit logs found yet. Start chatting with the AI to see language enforcement logs appear here."
+        />
       </CardContent>
     </Card>
   )
-}
-
-function tryFormatDate(iso: string) {
-  try {
-    return format(new Date(iso), 'MMM d, HH:mm:ss')
-  } catch {
-    return iso
-  }
 }

@@ -1,5 +1,5 @@
 import { languageFlags, languageNames, supportedLanguages } from '@/shared/lib/i18n'
-import { ToggleSelector } from '@/shared/ui/ToggleSelector'
+import { ToggleSelector } from '@/shared/ui/selectores/ToggleSelector'
 
 interface LanguageSelectorProps {
   value: string

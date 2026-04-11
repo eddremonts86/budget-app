@@ -1,6 +1,6 @@
 import { IconMoon, IconSun, IconDeviceDesktop } from '@tabler/icons-react'
 import { useTranslation } from 'react-i18next'
-import { ToggleSelector } from '@/shared/ui/ToggleSelector'
+import { ToggleSelector } from '@/shared/ui/selectores/ToggleSelector'
 import type { Theme } from '../model'
 
 interface ThemeSelectorProps {
@@ -17,11 +17,5 @@ export function ThemeSelector({ value, onChange }: ThemeSelectorProps) {
     { id: 'system', name: t('theme.system'), icon: IconDeviceDesktop },
   ]
 
-  return (
-    <ToggleSelector
-      items={items}
-      value={value}
-      onChange={(v) => onChange(v as Theme)}
-    />
-  )
+  return <ToggleSelector items={items} value={value} onChange={(v) => onChange(v as Theme)} />
 }

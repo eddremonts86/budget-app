@@ -27,7 +27,7 @@ import {
 } from '@/modules/users/model/permissions'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
-import { DataTable, UnifiedDataTable, type DataTableBulkAction } from '@/shared/ui/DataTable'
+import { DataTable, UnifiedDataTable, type DataTableBulkAction } from '@/shared/ui/tables/DataTable'
 import {
   useCreateTransaction,
   useDeleteTransaction,

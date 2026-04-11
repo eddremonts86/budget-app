@@ -93,13 +93,19 @@
     "clear": "Clear",
     "clearFilters": "Clear filters",
     "noResults": "No results found.",
+    "noData": "No data available.",
+    "clearSearch": "Clear search",
     "selected": "selected",
     "send": "Send",
     "backToHome": "Go to Homepage",
     "retry": "Retry",
     "unknownError": "An unexpected error occurred.",
     "none": "None",
-    "saving": "Saving..."
+    "saving": "Saving...",
+    "error": {
+      "title": "Something went wrong",
+      "description": "An error occurred while loading data. Please try again."
+    }
   },
   "theme": {
     "light": "Light",
@@ -707,6 +713,9 @@
       "delete": "Are you sure you want to delete this task?"
     },
     "searchPlaceholder": "Search tasks...",
+    "noSearchResults": "No tasks match your search",
+    "empty": "No tasks found",
+    "clearSearch": "Clear search",
     "loadingMore": "Loading more tasks...",
     "error": {
       "title": "Load Error",

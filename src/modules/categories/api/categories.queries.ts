@@ -1,5 +1,5 @@
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
-import { LIST_PAGE_SIZE } from '../model/constants'
+import { DEFAULT_PAGE_SIZE } from '@/shared/ui/tables'
 import type { Category } from '../model/types'
 import {
   createCategoryFn,
@@ -17,7 +17,7 @@ export const categoryKeys = {
   detail: (id: string) => [...categoryKeys.details(), id] as const,
 }
 
-export const useInfiniteCategories = (limit = LIST_PAGE_SIZE) => {
+export const useInfiniteCategories = (limit = DEFAULT_PAGE_SIZE) => {
   return useTQInfinite(
     categoryKeys.infinite(),
     ({ pageParam }) => getCategoriesFn({ data: { pageParam, limit } }),

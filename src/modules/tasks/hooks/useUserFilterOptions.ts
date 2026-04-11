@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { useInfiniteUsers } from '@/modules/users'
-import type { InfiniteSelectOption } from '@/shared/ui/InfiniteSelect'
+import type { InfiniteSelectOption } from '@/shared/ui/selectores/InfiniteSelect'
 
 export function useUserFilterOptions() {
   const [userSearch, setUserSearch] = React.useState('')

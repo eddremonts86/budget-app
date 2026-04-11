@@ -41,8 +41,8 @@ import { cn } from '@/shared/lib/utils'
 import {
   InfiniteMultiSelect,
   type InfiniteMultiSelectOption,
-} from '@/shared/ui/InfiniteMultiSelect'
-import { InfiniteSelect, type InfiniteSelectOption } from '@/shared/ui/InfiniteSelect'
+} from '@/shared/ui/selectores/InfiniteMultiSelect'
+import { InfiniteSelect, type InfiniteSelectOption } from '@/shared/ui/selectores/InfiniteSelect'
 import { useInfiniteDepsSearch } from '../api/todos.queries'
 import type { Todo } from '../model/types'
 

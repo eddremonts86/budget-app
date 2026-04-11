@@ -1,6 +1,6 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { describe, expect, it, vi, beforeEach } from 'vitest'
-import { UnifiedDataTable } from '@/shared/ui/DataTable'
+import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
 
 type TableItem = {
   id: string

@@ -93,11 +93,17 @@
     "clear": "Limpiar",
     "clearFilters": "Limpiar filtros",
     "noResults": "No se encontraron resultados.",
+    "noData": "No hay datos disponibles.",
+    "clearSearch": "Limpiar búsqueda",
     "selected": "seleccionado(s)",
     "send": "Enviar",
     "backToHome": "Volver al inicio",
     "retry": "Reintentar",
-    "unknownError": "Ha ocurrido un error inesperado."
+    "unknownError": "Ha ocurrido un error inesperado.",
+    "error": {
+      "title": "Algo salió mal",
+      "description": "Ocurrió un error al cargar los datos. Inténtalo de nuevo."
+    }
   },
   "theme": {
     "light": "Claro",
@@ -457,6 +463,9 @@
       "delete": "¿Estás seguro de que quieres eliminar esta tarea?"
     },
     "searchPlaceholder": "Buscar tareas...",
+    "noSearchResults": "No hay tareas que coincidan con tu búsqueda",
+    "empty": "No se encontraron tareas",
+    "clearSearch": "Limpiar búsqueda",
     "loadingMore": "Cargando más tareas...",
     "error": {
       "title": "Error de Carga",

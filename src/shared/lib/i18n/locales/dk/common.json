@@ -90,9 +90,17 @@
     "clear": "Ryd",
     "clearFilters": "Ryd filtre",
     "noResults": "Ingen resultater fundet.",
+    "noData": "Ingen data tilgængelig.",
+    "clearSearch": "Ryd søgning",
     "selected": "valgt",
     "send": "Send",
-    "backToHome": "Gå til startside"
+    "backToHome": "Gå til startside",
+    "retry": "Prøv igen",
+    "unknownError": "Der opstod en uventet fejl.",
+    "error": {
+      "title": "Noget gik galt",
+      "description": "Der opstod en fejl under indlæsning af data. Prøv venligst igen."
+    }
   },
   "theme": {
     "light": "Lys",
@@ -625,6 +633,9 @@
       "delete": "Er du sikker på, at du vil slette denne opgave?"
     },
     "searchPlaceholder": "Søg opgaver...",
+    "noSearchResults": "Ingen opgaver matcher din søgning",
+    "empty": "Ingen opgaver fundet",
+    "clearSearch": "Ryd søgning",
     "loadingMore": "Indlæser flere opgaver...",
     "error": {
       "title": "Indlæsningsfejl",
@@ -947,39 +958,19 @@
       "links": {
         "essence": {
           "title": "Vores Essens",
-          "items": [
-            "Filosofi",
-            "Succeshistorier",
-            "Metode",
-            "Menneskelig Blog"
-          ]
+          "items": ["Filosofi", "Succeshistorier", "Metode", "Menneskelig Blog"]
         },
         "company": {
           "title": "Virksomhed",
-          "items": [
-            "Om os",
-            "Kultur",
-            "Arbejd hos os",
-            "Presse"
-          ]
+          "items": ["Om os", "Kultur", "Arbejd hos os", "Presse"]
         },
         "community": {
           "title": "Fællesskab",
-          "items": [
-            "Events",
-            "Hjælpecenter",
-            "Partnere",
-            "Netværksstatus"
-          ]
+          "items": ["Events", "Hjælpecenter", "Partnere", "Netværksstatus"]
         },
         "legal": {
           "title": "Juridisk",
-          "items": [
-            "Etisk Privatliv",
-            "Brugsvilkår",
-            "Cookies",
-            "Licenser"
-          ]
+          "items": ["Etisk Privatliv", "Brugsvilkår", "Cookies", "Licenser"]
         }
       }
     }

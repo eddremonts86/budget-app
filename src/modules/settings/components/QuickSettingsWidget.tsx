@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui'
 import { languageFlags, languageNames, supportedLanguages } from '@/shared/lib/i18n'
 import { useTheme } from '@/shared/providers/theme-context'
-import { ToggleSelector } from '@/shared/ui/ToggleSelector'
+import { ToggleSelector } from '@/shared/ui/selectores/ToggleSelector'
 
 const THEME_OPTIONS = [
   { value: 'light' as const, icon: IconSun, labelKey: 'theme.light' },

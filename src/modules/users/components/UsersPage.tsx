@@ -1,8 +1,6 @@
-import { m } from 'framer-motion'
-import { Search, X, Trash2, UserPlus } from 'lucide-react'
+import { Search, X, UserPlus } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useInView } from 'react-intersection-observer'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
@@ -14,11 +12,11 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Sheet } from '@/components/ui/sheet'
-import { Skeleton } from '@/components/ui/skeleton'
 import { useCategories } from '@/modules/categories'
 import { useProjects } from '@/modules/projects'
 import { useTeams } from '@/modules/team'
 import { toast } from '@/shared/lib/toast'
+import { flattenInfinitePages, TableErrorState, TableSkeleton } from '@/shared/ui/tables'
 import { useCreateUser, useDeleteUser, useInfiniteUsers, useUpdateUser } from '../api/users.queries'
 import type { User } from '../model/types'
 import { UserForm } from './UserForm'
@@ -42,15 +40,7 @@ export function UsersPage() {
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
     useInfiniteUsers(10, deferredSearch, { projectId, teamId, categoryId })
 
-  const { ref, inView } = useInView()
-
   const hasActiveFilters = Boolean(search.trim() || projectId || teamId || categoryId)
-
-  React.useEffect(() => {
-    if (inView && hasNextPage && !isFetchingNextPage) {
-      fetchNextPage()
-    }
-  }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const createMutation = useCreateUser()
   const updateMutation = useUpdateUser()
@@ -69,28 +59,15 @@ export function UsersPage() {
 
   if (isError) {
     return (
-      <m.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="flex h-100 items-center justify-center"
-      >
-        <div className="text-center space-y-4 max-w-sm">
-          <div className="mx-auto w-12 h-12 rounded-full bg-destructive/10 flex items-center justify-center">
-            <Trash2 className="w-6 h-6 text-destructive" />
-          </div>
-          <div className="space-y-2">
-            <h2 className="text-xl font-bold tracking-tight">{t('users.error.title')}</h2>
-            <p className="text-muted-foreground text-sm">{t('users.error.description')}</p>
-          </div>
-          <Button variant="outline" onClick={() => window.location.reload()}>
-            {t('users.error.retry')}
-          </Button>
-        </div>
-      </m.div>
+      <TableErrorState
+        titleKey="users.error.title"
+        descriptionKey="users.error.description"
+        retryKey="users.error.retry"
+      />
     )
   }
 
-  const allUsers = data?.pages.flatMap((page) => page.data) ?? []
+  const allUsers = flattenInfinitePages<User>(data?.pages)
   const totalCount = data?.pages[0]?.totalCount ?? 0
 
   const clearFilters = () => {
@@ -226,21 +203,17 @@ export function UsersPage() {
       </div>
 
       {isLoading ? (
-        <div className="space-y-4">
-          <Skeleton className="h-16 w-full rounded-3xl" />
-          <Skeleton className="h-16 w-full rounded-3xl" />
-          <Skeleton className="h-16 w-full rounded-3xl" />
-        </div>
+        <TableSkeleton rows={5} />
       ) : (
         <div className="relative group flex-1 min-h-0 flex flex-col">
           <UserTable
             users={allUsers}
             onEdit={setEditingUser}
             onDelete={handleDelete}
-            hasNextPage={hasNextPage}
+            hasNextPage={hasNextPage ?? false}
             isFetchingNextPage={isFetchingNextPage}
             onFetchNextPage={fetchNextPage}
-            scrollRef={ref}
+            scrollResetKey={`${deferredSearch}-${projectId}-${teamId}-${categoryId}`}
           />
         </div>
       )}
