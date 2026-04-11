@@ -1,9 +1,9 @@
 import { LazyMotion, domAnimation } from 'framer-motion'
 import * as React from 'react'
-import type { Todo } from '../model/types'
 import { useTodosFilters } from '../hooks/useTodosFilters'
 import { useTodosView } from '../hooks/useTodosView'
 import { useUserFilterOptions } from '../hooks/useUserFilterOptions'
+import type { Todo } from '../model/types'
 import { TodoCreateSheet } from './sheets/TodoCreateSheet'
 import { TodoEditSheet } from './sheets/TodoEditSheet'
 import { TodosFilterBar } from './TodosFilterBar'
@@ -51,17 +51,15 @@ export function TodosPage() {
           userFilterOptions={userFilterOptions}
         />
 
-        {false && (
-          <TodosViewContainer
-            view={view}
-            isFilterReady={filters.isFilterReady}
-            assigneeFilter={filters.assigneeFilter}
-            statusFilter={filters.statusFilter}
-            onEdit={setEditingTodo}
-            onTotalCountChange={setTotalCount}
-            onCreateWithDate={(date) => handleCreate({ dueDate: date.toISOString().split('T')[0] })}
-          />
-        )}
+        <TodosViewContainer
+          view={view}
+          isFilterReady={filters.isFilterReady}
+          assigneeFilter={filters.assigneeFilter}
+          statusFilter={filters.statusFilter}
+          onEdit={setEditingTodo}
+          onTotalCountChange={setTotalCount}
+          onCreateWithDate={(date) => handleCreate({ dueDate: date.toISOString().split('T')[0] })}
+        />
 
         <TodoCreateSheet
           open={isCreateOpen}
@@ -73,13 +71,11 @@ export function TodosPage() {
           onCreated={handleCreateClose}
         />
 
-        {false && (
-          <TodoEditSheet
-            todo={editingTodo}
-            onClose={() => setEditingTodo(null)}
-            currentUserId={filters.syncedUserId || ''}
-          />
-        )}
+        <TodoEditSheet
+          todo={editingTodo}
+          onClose={() => setEditingTodo(null)}
+          currentUserId={filters.syncedUserId || ''}
+        />
       </div>
     </LazyMotion>
   )

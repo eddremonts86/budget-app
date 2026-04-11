@@ -4,7 +4,6 @@ import { da, enUS, es } from 'date-fns/locale'
 import { m } from 'framer-motion'
 import {
   Calendar,
-  ChevronDown,
   Clock,
   Flag,
   Folder,
@@ -19,22 +18,10 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { useDebounce } from '@uidotdev/usehooks'
 import { z } from 'zod'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import { Calendar as CalendarComponent } from '@/components/ui/calendar'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  Combobox,
-  ComboboxContent,
-  ComboboxList,
-  ComboboxItem,
-  ComboboxEmpty,
-  ComboboxChips,
-  ComboboxChip,
-  ComboboxChipsInput,
-} from '@/components/ui/combobox'
 import { Field, FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover'
@@ -51,8 +38,12 @@ import { useProjectMembers, useInfiniteProjects } from '@/modules/projects'
 import { useInfiniteUsers } from '@/modules/users'
 import type { User } from '@/modules/users'
 import { cn } from '@/shared/lib/utils'
+import {
+  InfiniteMultiSelect,
+  type InfiniteMultiSelectOption,
+} from '@/shared/ui/InfiniteMultiSelect'
 import { InfiniteSelect, type InfiniteSelectOption } from '@/shared/ui/InfiniteSelect'
-import { useSearchTodos, useTodos } from '../api/todos.queries'
+import { useInfiniteDepsSearch } from '../api/todos.queries'
 import type { Todo } from '../model/types'
 
 const createTodoSchema = (t: (key: string) => string) =>
@@ -145,19 +136,15 @@ export function TodoForm({
     projectId: selectedProjectId || undefined,
   })
 
-  // --- Dependencies search ---
-  const [rawDepsInput, setRawDepsInput] = React.useState('')
-  const debouncedDepsInput = useDebounce(rawDepsInput, 300)
-  const depsSearch = debouncedDepsInput.length >= 2 ? debouncedDepsInput : undefined
-  const { data: searchedTodosData } = useSearchTodos(depsSearch, 20)
-  const { data: initialTodosData } = useTodos({ limit: 50 })
-
-  const availableTodos: Todo[] = React.useMemo(() => {
-    if (depsSearch && searchedTodosData?.data) {
-      return searchedTodosData.data as Todo[]
-    }
-    return (initialTodosData?.data as Todo[]) ?? []
-  }, [depsSearch, searchedTodosData, initialTodosData])
+  // --- Dependencies infinite query ---
+  const [depsSearch, setDepsSearch] = React.useState<string | undefined>()
+  const {
+    data: infiniteDeps,
+    fetchNextPage: fetchNextDeps,
+    hasNextPage: hasNextDeps,
+    isFetchingNextPage: isFetchingNextDeps,
+    isLoading: isLoadingDeps,
+  } = useInfiniteDepsSearch(20, depsSearch)
 
   const projects = React.useMemo(
     () => (infiniteProjects?.pages.flatMap((page) => page.data) as Project[]) ?? [],
@@ -177,6 +164,26 @@ export function TodoForm({
   const userOptions: InfiniteSelectOption<User>[] = React.useMemo(
     () => users.map((u) => ({ value: u.id, label: u.name, data: u })),
     [users],
+  )
+
+  const depsTodos = React.useMemo(() => {
+    const all = (infiniteDeps?.pages.flatMap((page) => page.data) as Todo[]) ?? []
+    const seen = new Set<string>()
+    return all.filter((t) => {
+      if (seen.has(t.id)) return false
+      seen.add(t.id)
+      return true
+    })
+  }, [infiniteDeps])
+  const depsOptions: InfiniteMultiSelectOption<Todo>[] = React.useMemo(
+    () =>
+      depsTodos.map((t) => ({
+        value: t.id,
+        label: t.title,
+        description: `${t.status} • ${t.priority}`,
+        data: t,
+      })),
+    [depsTodos],
   )
 
   const locale = React.useMemo(() => {
@@ -668,7 +675,7 @@ export function TodoForm({
           </div>
 
           {/* 7. Complexity, Estimated Time, Actual Time */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 gap-6">
             <form.Field name="complexity">
               {(field) => (
                 <m.div variants={itemVariants}>
@@ -763,69 +770,33 @@ export function TodoForm({
                   <FieldLabel className="text-xs font-bold uppercase tracking-wider text-muted-foreground/80 flex items-center gap-2">
                     <LayoutList className="w-3.5 h-3.5" /> {t('todos.form.dependenciesLabel')}
                   </FieldLabel>
-                  <Combobox
-                    multiple
-                    value={field.state.value || []}
-                    onValueChange={(value) => field.handleChange(value)}
-                  >
-                    <ComboboxChips className="h-auto min-h-10 bg-secondary/30 border-transparent hover:border-primary/30 rounded-lg px-4 py-2 text-sm">
-                      {field.state.value?.map((id: string) => {
-                        const todo = availableTodos.find((t) => t.id === id)
-                        return (
-                          <ComboboxChip
-                            key={id}
-                            onRemove={() => {
-                              field.handleChange(
-                                field.state.value?.filter((v: string) => v !== id) || [],
-                              )
-                            }}
-                            className="bg-primary/10 text-primary border-primary/20"
-                          >
-                            {todo?.title || id}
-                          </ComboboxChip>
-                        )
-                      })}
-                      <ComboboxChipsInput
-                        placeholder={
-                          field.state.value?.length ? '' : t('todos.form.dependenciesPlaceholder')
-                        }
-                        className="bg-transparent text-sm"
-                        onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                          setRawDepsInput(e.target.value)
-                        }
-                      />
-                      <ChevronDown className="ml-auto h-4 w-4 opacity-50" />
-                    </ComboboxChips>
-                    <ComboboxContent className="rounded-lg border-border/50 shadow-2xl backdrop-blur-xl max-h-60 overflow-y-auto">
-                      <ComboboxList>
-                        {availableTodos
-                          .filter((todo) => todo.id !== defaultValues?.id)
-                          .map((todo) => (
-                            <ComboboxItem
-                              key={todo.id}
-                              value={todo.id}
-                              className="rounded-lg m-1 flex items-center gap-2"
-                            >
-                              <Checkbox
-                                checked={field.state.value?.includes(todo.id)}
-                                className="pointer-events-none"
-                              />
-                              <div className="flex flex-col">
-                                <span className="font-medium">{todo.title}</span>
-                                <span className="text-[10px] text-muted-foreground">
-                                  {todo.status} • {todo.priority}
-                                </span>
-                              </div>
-                            </ComboboxItem>
-                          ))}
-                        {availableTodos.length === 0 && (
-                          <ComboboxEmpty className="p-4 text-center text-sm text-muted-foreground">
-                            {t('todos.form.noDependenciesAvailable', 'No tasks available')}
-                          </ComboboxEmpty>
+                  <InfiniteMultiSelect<Todo>
+                    values={field.state.value || []}
+                    onValuesChange={(values) => field.handleChange(values)}
+                    options={depsOptions}
+                    hasNextPage={hasNextDeps}
+                    fetchNextPage={fetchNextDeps}
+                    isFetchingNextPage={isFetchingNextDeps}
+                    isLoading={isLoadingDeps}
+                    onSearchChange={setDepsSearch}
+                    searchPlaceholder={t('todos.form.searchDependencies', 'Search tasks…')}
+                    placeholder={t('todos.form.dependenciesPlaceholder')}
+                    emptyMessage={t('todos.form.noDependenciesAvailable', 'No tasks available')}
+                    excludeValues={defaultValues?.id ? [defaultValues.id] : undefined}
+                    icon={<LayoutList className="h-3.5 w-3.5" />}
+                    renderOption={(opt) => (
+                      <div className="flex flex-col min-w-0">
+                        <span className="truncate font-medium">{opt.label}</span>
+                        {opt.description && (
+                          <span className="text-[10px] text-muted-foreground">
+                            {opt.description}
+                          </span>
                         )}
-                      </ComboboxList>
-                    </ComboboxContent>
-                  </Combobox>
+                      </div>
+                    )}
+                    triggerClassName="bg-secondary/30 border-transparent hover:border-primary/30"
+                    contentClassName="w-[var(--radix-popover-trigger-width)]"
+                  />
                   <FieldError
                     errors={field.state.meta.errors.map((e) => {
                       if (typeof e === 'string') return e

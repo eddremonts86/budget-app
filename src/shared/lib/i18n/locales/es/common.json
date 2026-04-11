@@ -456,6 +456,7 @@
     "confirm": {
       "delete": "¿Estás seguro de que quieres eliminar esta tarea?"
     },
+    "searchPlaceholder": "Buscar tareas...",
     "loadingMore": "Cargando más tareas...",
     "error": {
       "title": "Error de Carga",

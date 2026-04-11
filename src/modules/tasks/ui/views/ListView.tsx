@@ -1,39 +1,36 @@
 import { type ColumnDef } from '@tanstack/react-table'
-import {
-  Calendar,
-  Clock,
-  Flag,
-  Loader2,
-  MoreHorizontal,
-  Pencil,
-  Trash2,
-  UserCircle,
-} from 'lucide-react'
+import { useDebounce } from '@uidotdev/usehooks'
+import { Calendar, Clock, Loader2, Search, Trash2, X } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { useInView } from 'react-intersection-observer'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { Field, FieldGroup } from '@/components/ui/field'
+import { Input } from '@/components/ui/input'
 import { Skeleton } from '@/components/ui/skeleton'
 import { TableCell, TableRow } from '@/components/ui/table'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
-import { useCurrentUser, useUsersByIds } from '@/modules/users'
-import { toast } from '@/shared/lib/toast'
-import { cn } from '@/shared/lib/utils'
+import { TooltipProvider } from '@/components/ui/tooltip'
 import { DataTable } from '@/shared/ui/DataTable'
-import { useDeleteTodo, useInfiniteTodos } from '../../api/todos.queries'
-import { canModifyTodo } from '../../model/permissions'
+import { useInfiniteTodos } from '../../api/todos.queries'
+import { useTodoActions } from '../../hooks/useTodoActions'
+import { useUserMap } from '../../hooks/useUserMap'
 import type { Todo } from '../../model/types'
+import { TodoActionsMenu, TodoAssignee, TodoPriorityBadge, TodoStatusBadge } from '../components'
+
+// ── Helpers ──────────────────────────────────────────────────────────────────
+
+/** Deduplicate todos across infinite pages (data can shift between fetches) */
+function deduplicateTodos(pages: Array<{ data: unknown[] }> | undefined): Todo[] {
+  const allItems = (pages?.flatMap((page) => page.data) ?? []) as Todo[]
+  const seen = new Set<string>()
+  return allItems.filter((todo) => {
+    if (seen.has(todo.id)) return false
+    seen.add(todo.id)
+    return true
+  })
+}
+
+// ── Component ────────────────────────────────────────────────────────────────
 
 interface ListViewProps {
   onEdit: (todo: Todo) => void
@@ -44,42 +41,36 @@ interface ListViewProps {
 
 export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: ListViewProps) {
   const { t } = useTranslation()
-  const { syncedUserId, userRole } = useCurrentUser()
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-    useInfiniteTodos(30, status as Parameters<typeof useInfiniteTodos>[1], assignedTo)
+  const { canModify, handleEdit, handleDelete } = useTodoActions(onEdit)
 
-  const firstPageCount = data?.pages[0]?.totalCount ?? 0
-  React.useEffect(() => {
-    onTotalCountChange?.(firstPageCount)
-  }, [firstPageCount, onTotalCountChange])
+  // Server-side search with debounce
+  const [searchInput, setSearchInput] = React.useState('')
+  const debouncedSearch = useDebounce(searchInput, 300)
+  const activeSearch = debouncedSearch.length >= 2 ? debouncedSearch : undefined
 
-  const visibleTodos = React.useMemo(() => {
-    return (data?.pages.flatMap((page) => page.data) ?? []) as Todo[]
-  }, [data])
-
-  const assigneeIds = React.useMemo(() => {
-    return Array.from(
-      new Set(
-        visibleTodos
-          .map((todo) => todo.assignedTo)
-          .filter((assignedUserId): assignedUserId is string => Boolean(assignedUserId)),
-      ),
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching, isError } =
+    useInfiniteTodos(
+      5,
+      status as Parameters<typeof useInfiniteTodos>[1],
+      assignedTo,
+      undefined,
+      activeSearch,
     )
-  }, [visibleTodos])
 
-  const { data: users = [] } = useUsersByIds(assigneeIds)
+  const totalCount = data?.pages[0]?.totalCount ?? 0
+  React.useEffect(() => {
+    onTotalCountChange?.(totalCount)
+  }, [totalCount, onTotalCountChange])
 
-  // Build a lookup map of userId → user for the assignee column
-  const userMap = React.useMemo(() => {
-    const map = new Map<string, { name: string; avatar: string }>()
-    for (const user of users) {
-      map.set(user.id, { name: user.name, avatar: user.avatar || '' })
-    }
-    return map
-  }, [users])
+  const visibleTodos = React.useMemo(() => deduplicateTodos(data?.pages), [data])
+  const userMap = useUserMap(visibleTodos)
 
+  // Ref so columns don't re-create when users load
+  const userMapRef = React.useRef(userMap)
+  userMapRef.current = userMap
+
+  // Infinite scroll trigger
   const { ref, inView } = useInView()
-
   const loadedPages = data?.pages.length ?? 0
 
   React.useEffect(() => {
@@ -88,7 +79,7 @@ export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: Lis
     }
   }, [inView, hasNextPage, isFetchingNextPage, fetchNextPage, loadedPages])
 
-  const deleteMutation = useDeleteTodo()
+  // ── Columns ──────────────────────────────────────────────────────────────
 
   const columns: ColumnDef<Todo>[] = React.useMemo(
     () => [
@@ -113,105 +104,20 @@ export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: Lis
       {
         accessorKey: 'status',
         header: t('todos.table.status'),
-        cell: ({ row }) => {
-          const status = row.getValue('status') as string
-          const variants: Record<string, string> = {
-            completed: 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20',
-            in_progress: 'bg-blue-500/10 text-blue-500 border-blue-500/20',
-            pending: 'bg-amber-500/10 text-amber-500 border-amber-500/20',
-            on_hold: 'bg-rose-500/10 text-rose-500 border-rose-500/20',
-            testing: 'bg-purple-500/10 text-purple-500 border-purple-500/20',
-            blocked: 'bg-destructive/10 text-destructive border-destructive/20',
-            cancelled: 'bg-zinc-500/10 text-zinc-500 border-zinc-500/20',
-          }
-          const labels: Record<string, string> = {
-            completed: t('todos.status.completed'),
-            in_progress: t('todos.status.inProgress'),
-            pending: t('todos.status.pending'),
-            on_hold: t('todos.status.onHold', 'On Hold'),
-            testing: t('todos.status.testing', 'Testing'),
-            blocked: t('todos.status.blocked', 'Blocked'),
-            cancelled: t('todos.status.cancelled', 'Cancelled'),
-          }
-          return (
-            <Badge
-              variant="outline"
-              className={cn(
-                'capitalize px-3 py-1 rounded-full border font-medium',
-                variants[status],
-              )}
-            >
-              {labels[status] || status}
-            </Badge>
-          )
-        },
+        cell: ({ row }) => <TodoStatusBadge status={row.getValue('status') as string} />,
       },
       {
         accessorKey: 'priority',
         header: t('todos.table.priority'),
-        cell: ({ row }) => {
-          const priority = row.getValue('priority') as string
-          const variants: Record<string, string> = {
-            high: 'bg-destructive/10 text-destructive border-destructive/20',
-            medium: 'bg-primary/10 text-primary border-primary/20',
-            low: 'bg-secondary text-secondary-foreground border-transparent',
-          }
-          const labels: Record<string, string> = {
-            high: t('todos.priority.high'),
-            medium: t('todos.priority.medium'),
-            low: t('todos.priority.low'),
-          }
-          return (
-            <Badge
-              variant="outline"
-              className={cn(
-                'capitalize px-3 py-1 rounded-full border font-medium',
-                variants[priority],
-              )}
-            >
-              <div className="flex items-center gap-1.5">
-                <Flag className="w-3 h-3" />
-                {labels[priority] || priority}
-              </div>
-            </Badge>
-          )
-        },
+        cell: ({ row }) => <TodoPriorityBadge priority={row.getValue('priority') as string} />,
       },
       {
         accessorKey: 'assignedTo',
         header: t('todos.table.assignedTo'),
         cell: ({ row }) => {
-          const assignedTo = row.getValue('assignedTo') as string | null
-          const assignee = assignedTo ? userMap.get(assignedTo) : undefined
-          if (!assignee) {
-            return (
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <UserCircle className="w-4 h-4 opacity-50" />
-                <span className="text-xs">—</span>
-              </div>
-            )
-          }
+          const assignedId = row.getValue('assignedTo') as string | null
           return (
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger>
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6">
-                      <AvatarImage src={assignee.avatar} alt={assignee.name} />
-                      <AvatarFallback className="text-[10px]">
-                        {assignee.name.substring(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span className="text-xs font-medium text-foreground truncate max-w-25">
-                      {assignee.name}
-                    </span>
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>{assignee.name}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            <TodoAssignee assignee={assignedId ? userMapRef.current.get(assignedId) : undefined} />
           )
         },
       },
@@ -234,75 +140,21 @@ export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: Lis
         id: 'actions',
         cell: ({ row }) => {
           const todo = row.original
-          const canModify = canModifyTodo(todo, syncedUserId, userRole)
-
           return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-9 w-9 p-0 rounded-full hover:bg-secondary/80">
-                  <span className="sr-only">{t('common.openMenu')}</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent
-                align="end"
-                className="w-48 p-2 rounded-2xl shadow-2xl backdrop-blur-xl border-border/40"
-              >
-                <DropdownMenuLabel className="px-3 py-2 text-xs font-bold uppercase tracking-wider text-muted-foreground/70">
-                  {t('common.actions')}
-                </DropdownMenuLabel>
-                <DropdownMenuItem
-                  onClick={() => {
-                    if (!canModify) {
-                      toast.warning(t('common.noPermission'), {
-                        description: t('common.noPermissionEdit'),
-                      })
-                      return
-                    }
-                    onEdit(todo)
-                  }}
-                  className={cn(
-                    'rounded-lg m-1 gap-2 cursor-pointer focus:bg-primary/5 focus:text-primary',
-                    !canModify && 'opacity-50',
-                  )}
-                >
-                  <Pencil className="h-4 w-4" />
-                  {t('todos.actions.edit')}
-                </DropdownMenuItem>
-                <DropdownMenuSeparator className="bg-border/40" />
-                <DropdownMenuItem
-                  className={cn(
-                    'text-destructive rounded-lg m-1 gap-2 cursor-pointer focus:bg-destructive/5 focus:text-destructive',
-                    !canModify && 'opacity-50',
-                  )}
-                  onClick={() => {
-                    if (!canModify) {
-                      toast.warning(t('common.noPermission'), {
-                        description: t('common.noPermissionDelete'),
-                      })
-                      return
-                    }
-                    toast.error(t('todos.confirm.delete'), {
-                      description: t('common.undoWarning'),
-                      action: {
-                        label: t('common.delete'),
-                        onClick: () => deleteMutation.mutate(todo.id),
-                      },
-                      duration: 10000,
-                    })
-                  }}
-                >
-                  <Trash2 className="h-4 w-4" />
-                  {t('todos.actions.delete')}
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <TodoActionsMenu
+              todo={todo}
+              canModify={canModify(todo)}
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+            />
           )
         },
       },
     ],
-    [t, userMap, syncedUserId, userRole, onEdit, deleteMutation],
+    [t, canModify, handleEdit, handleDelete],
   )
+
+  // ── Early returns ────────────────────────────────────────────────────────
 
   if (isError) {
     return (
@@ -326,6 +178,7 @@ export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: Lis
   if (isLoading) {
     return (
       <FieldGroup className="space-y-4">
+        <Skeleton className="h-11 w-full max-w-sm rounded-2xl" />
         <Skeleton className="h-16 w-full rounded-3xl" />
         <Skeleton className="h-16 w-full rounded-3xl" />
         <Skeleton className="h-16 w-full rounded-3xl" />
@@ -333,22 +186,59 @@ export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: Lis
     )
   }
 
+  // ── Render ───────────────────────────────────────────────────────────────
+
   return (
-    <Field className="relative group h-full">
-      <DataTable columns={columns} data={visibleTodos} filterColumn="title" fullHeight>
-        {hasNextPage && loadedPages < 50 && (
-          <TableRow className="border-none hover:bg-transparent">
-            <TableCell colSpan={columns.length} className="p-0">
-              <div ref={ref} className="flex justify-center py-8">
-                <div className="flex items-center gap-2 text-muted-foreground font-medium bg-secondary/20 px-6 py-3 rounded-2xl backdrop-blur-sm border border-border/40">
-                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
-                  {t('todos.loadingMore')}
+    <TooltipProvider>
+      <Field className="relative group h-full flex flex-col gap-4">
+        {/* Server-side search bar */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="relative flex-1 min-w-0 md:max-w-sm group/search">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within/search:text-primary transition-colors" />
+            <Input
+              placeholder={t('todos.searchPlaceholder', 'Search tasks...')}
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="pl-10 pr-10 h-11 bg-secondary/20 border-transparent focus:border-primary/30 focus:ring-4 focus:ring-primary/5 rounded-2xl transition-all"
+            />
+            {searchInput && (
+              <button
+                type="button"
+                onClick={() => setSearchInput('')}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+          <div className="text-sm text-muted-foreground tabular-nums shrink-0">
+            {isFetching && !isFetchingNextPage ? (
+              <Loader2 className="w-4 h-4 animate-spin text-primary" />
+            ) : (
+              <span>
+                {visibleTodos.length}
+                {totalCount > visibleTodos.length && ` / ${totalCount}`}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Data table (no client-side filterColumn — search is server-side) */}
+        <DataTable columns={columns} data={visibleTodos} fullHeight>
+          {hasNextPage && loadedPages < 50 && (
+            <TableRow className="border-none hover:bg-transparent">
+              <TableCell colSpan={columns.length} className="p-0">
+                <div ref={ref} className="flex justify-center py-8">
+                  <div className="flex items-center gap-2 text-muted-foreground font-medium bg-secondary/20 px-6 py-3 rounded-2xl backdrop-blur-sm border border-border/40">
+                    <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                    {t('todos.loadingMore')}
+                  </div>
                 </div>
-              </div>
-            </TableCell>
-          </TableRow>
-        )}
-      </DataTable>
-    </Field>
+              </TableCell>
+            </TableRow>
+          )}
+        </DataTable>
+      </Field>
+    </TooltipProvider>
   )
 }

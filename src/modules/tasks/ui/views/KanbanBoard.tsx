@@ -12,31 +12,24 @@ import {
   rectIntersection,
 } from '@dnd-kit/core'
 import { useVirtualizer } from '@tanstack/react-virtual'
-import { Calendar, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
+import { Calendar } from 'lucide-react'
 import * as React from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import { cn } from '@/shared/lib/utils'
 import { type TodoStatus } from '../../api/todos.queries'
+import { PRIORITY_BADGE_VARIANTS } from '../../model/constants'
 import type { Todo } from '../../model/types'
+import { TodoActionsMenu } from '../components'
 
 interface KanbanCardProps {
   todo: Todo
   user?: { name: string; avatar: string }
   onEdit: (todo: Todo) => void
-  onDelete: (id: string) => void
+  onDelete: (todo: Todo) => void
   isOverlay?: boolean
   canModify: boolean
 }
@@ -49,14 +42,6 @@ export const KanbanCard = React.memo(function KanbanCard({
   isOverlay = false,
   canModify,
 }: KanbanCardProps) {
-  const { t } = useTranslation()
-
-  const priorityColors = {
-    high: 'text-destructive bg-destructive/10 border-destructive/20',
-    medium: 'text-primary bg-primary/10 border-primary/20',
-    low: 'text-secondary-foreground bg-secondary border-transparent',
-  }
-
   return (
     <Card
       className={cn(
@@ -70,38 +55,18 @@ export const KanbanCard = React.memo(function KanbanCard({
             variant="outline"
             className={cn(
               'rounded-md px-1.5 py-0.5 text-[10px] font-medium border uppercase tracking-wider',
-              priorityColors[todo.priority as keyof typeof priorityColors],
+              PRIORITY_BADGE_VARIANTS[todo.priority],
             )}
           >
             {todo.priority}
           </Badge>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-6 w-6 -mr-1 -mt-1 text-muted-foreground hover:text-foreground"
-              >
-                <MoreHorizontal className="h-3 w-3" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuLabel>{t('common.actions')}</DropdownMenuLabel>
-              <DropdownMenuItem onClick={() => onEdit(todo)} disabled={!canModify}>
-                <Pencil className="h-4 w-4 mr-2" />
-                {t('todos.actions.edit')}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-destructive focus:text-destructive"
-                onClick={() => onDelete(todo.id)}
-                disabled={!canModify}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />
-                {t('todos.actions.delete')}
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <TodoActionsMenu
+            todo={todo}
+            canModify={canModify}
+            onEdit={onEdit}
+            onDelete={onDelete}
+            compact
+          />
         </div>
         <h4 className="text-sm font-semibold leading-tight line-clamp-2">{todo.title}</h4>
       </CardHeader>
@@ -132,7 +97,7 @@ const DraggableCard = React.memo(function DraggableCard(props: {
   todo: Todo
   user?: { name: string; avatar: string }
   onEdit: (todo: Todo) => void
-  onDelete: (id: string) => void
+  onDelete: (todo: Todo) => void
   canModify: boolean
 }) {
   const { attributes, listeners, setNodeRef, transform, isDragging } = useDraggable({
@@ -168,7 +133,7 @@ interface KanbanColumnProps {
   totalCount: number
   userMap: Map<string, { name: string; avatar: string }>
   onEdit: (todo: Todo) => void
-  onDelete: (id: string) => void
+  onDelete: (todo: Todo) => void
   onFetchNextPage: () => void
   hasNextPage: boolean
   isFetchingNextPage: boolean
@@ -298,7 +263,7 @@ interface KanbanBoardProps {
   }
   userMap: Map<string, { name: string; avatar: string }>
   onEdit: (todo: Todo) => void
-  onDelete: (id: string) => void
+  onDelete: (todo: Todo) => void
   onDragStart: (event: DragStartEvent) => void
   onDragEnd: (event: DragEndEvent) => void
   onFetchNextPage: (status: TodoStatus) => void
@@ -350,11 +315,23 @@ export function KanbanBoard({
     }),
   )
 
-  const fetchNextPagePending = React.useCallback(() => onFetchNextPage('pending'), [onFetchNextPage])
-  const fetchNextPageInProgress = React.useCallback(() => onFetchNextPage('in_progress'), [onFetchNextPage])
-  const fetchNextPageTesting = React.useCallback(() => onFetchNextPage('testing'), [onFetchNextPage])
+  const fetchNextPagePending = React.useCallback(
+    () => onFetchNextPage('pending'),
+    [onFetchNextPage],
+  )
+  const fetchNextPageInProgress = React.useCallback(
+    () => onFetchNextPage('in_progress'),
+    [onFetchNextPage],
+  )
+  const fetchNextPageTesting = React.useCallback(
+    () => onFetchNextPage('testing'),
+    [onFetchNextPage],
+  )
   const fetchNextPageOnHold = React.useCallback(() => onFetchNextPage('on_hold'), [onFetchNextPage])
-  const fetchNextPageCompleted = React.useCallback(() => onFetchNextPage('completed'), [onFetchNextPage])
+  const fetchNextPageCompleted = React.useCallback(
+    () => onFetchNextPage('completed'),
+    [onFetchNextPage],
+  )
 
   return (
     <div className="h-full flex gap-4 overflow-x-auto pb-4 snap-x">

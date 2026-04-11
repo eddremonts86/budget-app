@@ -37,10 +37,11 @@ export const useInfiniteTodos = (
   status?: TodoStatus,
   assignedTo?: string,
   options?: { enabled?: boolean },
+  search?: string,
 ) => {
   return useTQInfinite(
-    [...todoKeys.infinite(), { limit, status, assignedTo }],
-    ({ pageParam }) => getTodosFn({ data: { pageParam, limit, status, assignedTo } }),
+    [...todoKeys.infinite(), { limit, status, assignedTo, search }],
+    ({ pageParam }) => getTodosFn({ data: { pageParam, limit, status, assignedTo, search } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage?.nextPage,
@@ -58,6 +59,19 @@ export const useSearchTodos = (search?: string, limit = 20) => {
     {
       cache: 'standard' as const,
       enabled: (search?.length ?? 0) >= 2,
+    },
+  )
+}
+
+/** Infinite paginated todos with optional search – used by dependencies picker */
+export const useInfiniteDepsSearch = (limit = 20, search?: string) => {
+  return useTQInfinite(
+    [...todoKeys.infinite(), 'deps', { limit, search }],
+    ({ pageParam }) => getTodosFn({ data: { pageParam, limit, search } }),
+    {
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage?.nextPage,
+      placeholderData: keepPreviousData,
     },
   )
 }

@@ -1,7 +1,7 @@
 import { type DragEndEvent, type DragStartEvent } from '@dnd-kit/core'
 import { type InfiniteData, useQueryClient } from '@tanstack/react-query'
 import * as React from 'react'
-import { useCurrentUser, useUsersByIds } from '@/modules/users'
+import { useCurrentUser } from '@/modules/users'
 import {
   todoKeys,
   useDeleteTodo,
@@ -9,6 +9,7 @@ import {
   useUpdateTodo,
   type TodoStatus,
 } from '../../api/todos.queries'
+import { useUserMap } from '../../hooks/useUserMap'
 import { canModifyTodo } from '../../model/permissions'
 import type { Todo } from '../../model/types'
 import { KanbanBoard } from './KanbanBoard'
@@ -63,26 +64,11 @@ export function KanbanView({ onEdit, assignedTo, status }: KanbanViewProps) {
     completedQuery.data,
   ])
 
-  const assigneeIds = React.useMemo(() => {
-    return Array.from(
-      new Set(
-        Object.values(columns)
-          .flat()
-          .map((todo) => todo.assignedTo)
-          .filter((assignedUserId): assignedUserId is string => Boolean(assignedUserId)),
-      ),
-    )
+  const allTodosFlat = React.useMemo(() => {
+    return Object.values(columns).flat()
   }, [columns])
 
-  const { data: users = [] } = useUsersByIds(assigneeIds)
-
-  const userMap = React.useMemo(() => {
-    const map = new Map<string, { name: string; avatar: string }>()
-    for (const user of users) {
-      map.set(user.id, { name: user.name, avatar: user.avatar || '' })
-    }
-    return map
-  }, [users])
+  const userMap = useUserMap(allTodosFlat)
 
   const totalCounts = React.useMemo(() => {
     return {
@@ -209,8 +195,8 @@ export function KanbanView({ onEdit, assignedTo, status }: KanbanViewProps) {
     if (status === 'completed') completedQuery.fetchNextPage()
   }
 
-  const handleDelete = (id: string) => {
-    deleteMutation.mutate(id)
+  const handleDelete = (todo: Todo) => {
+    deleteMutation.mutate(todo.id)
   }
 
   const canModify = (todo: Todo) => canModifyTodo(todo, syncedUserId, userRole)

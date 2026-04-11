@@ -619,6 +619,7 @@
     "confirm": {
       "delete": "Er du sikker på, at du vil slette denne opgave?"
     },
+    "searchPlaceholder": "Søg opgaver...",
     "loadingMore": "Indlæser flere opgaver...",
     "error": {
       "title": "Indlæsningsfejl",
