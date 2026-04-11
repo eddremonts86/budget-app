@@ -1,5 +1,5 @@
-import type { ColumnDef } from '@tanstack/react-table'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import type { ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
 import { Activity, Clock, Cpu, Globe, MessageSquare, RefreshCw, Settings2 } from 'lucide-react'
 import * as React from 'react'
@@ -15,7 +15,12 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { cn } from '@/shared/lib/utils'
-import { DataTable } from '@/shared/ui/tables/DataTable'
+import {
+  VirtualTable,
+  useDebouncedSearch,
+  TableSearchBar,
+  TableEmptyState,
+} from '@/shared/ui/tables'
 
 interface AuditLog {
   timestamp: string
@@ -39,6 +44,7 @@ function tryFormatDate(iso: string) {
 
 export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
   const queryClient = useQueryClient()
+  const { searchInput, setSearchInput, activeSearch, clearSearch } = useDebouncedSearch()
   const { data, refetch, isRefetching } = useQuery({
     queryKey: ['ai-audit'],
     queryFn: async () => {
@@ -56,6 +62,18 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
   const sortedLogs = React.useMemo(() => {
     return [...(data?.logs ?? [])].reverse()
   }, [data?.logs])
+
+  const filteredLogs = React.useMemo(() => {
+    if (!activeSearch) return sortedLogs
+    const q = activeSearch.toLowerCase()
+    return sortedLogs.filter(
+      (log) =>
+        log.query.toLowerCase().includes(q) ||
+        log.providerId.toLowerCase().includes(q) ||
+        log.model.toLowerCase().includes(q) ||
+        log.locale.toLowerCase().includes(q),
+    )
+  }, [sortedLogs, activeSearch])
 
   const mutation = useMutation({
     mutationFn: async (newSettings: { forceLocale?: string }) => {
@@ -215,15 +233,29 @@ export function AiLanguageAudit({ className }: AiLanguageAuditProps) {
         </div>
       </CardHeader>
 
-      <CardContent className="p-4">
-        <DataTable
-          columns={columns}
-          data={sortedLogs}
-          filterColumn="query"
-          enablePagination
-          initialPageSize={20}
-          emptyStateLabel="No audit logs found yet. Start chatting with the AI to see language enforcement logs appear here."
+      <CardContent className="p-4 flex flex-col gap-4 h-150">
+        <TableSearchBar
+          searchInput={searchInput}
+          onSearchChange={setSearchInput}
+          onClear={clearSearch}
+          loadedCount={filteredLogs.length}
+          totalCount={sortedLogs.length}
+          showSpinner={isRefetching}
+          placeholderKey="common.search"
         />
+        {filteredLogs.length > 0 ? (
+          <VirtualTable
+            columns={columns}
+            data={filteredLogs}
+            hasNextPage={false}
+            isFetchingNextPage={false}
+            onFetchNextPage={() => {}}
+            scrollResetKey={activeSearch}
+            rowHeight={52}
+          />
+        ) : (
+          <TableEmptyState isSearchActive={!!activeSearch} onClearSearch={clearSearch} />
+        )}
       </CardContent>
     </Card>
   )
