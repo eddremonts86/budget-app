@@ -794,5 +794,29 @@
         "parseFailed": "No se pudo leer el archivo. Asegúrate de que sea un extracto bancario válido."
       }
     }
+  },
+  "categories": {
+    "mutations": {
+      "created": "Categoría creada correctamente",
+      "updated": "Categoría actualizada correctamente",
+      "deleted": "Categoría eliminada correctamente"
+    },
+    "title": "Categorías",
+    "add": "Añadir Categoría",
+    "columns": {
+      "name": "Nombre",
+      "color": "Color"
+    },
+    "description": {
+      "create": "Añade una nueva categoría.",
+      "edit": "Actualizar detalles de la categoría."
+    },
+    "confirm": {
+      "delete": "¿Estás seguro de querer eliminar esta categoría?"
+    },
+    "error": {
+      "title": "Error",
+      "description": "Ocurrió un error al cargar las categorías."
+    }
   }
 }

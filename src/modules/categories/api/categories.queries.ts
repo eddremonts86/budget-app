@@ -1,4 +1,5 @@
 import { useTQuery, useTQInfinite, useTQMutation } from '@/shared/lib/query'
+import { LIST_PAGE_SIZE } from '../model/constants'
 import type { Category } from '../model/types'
 import {
   createCategoryFn,
@@ -16,7 +17,7 @@ export const categoryKeys = {
   detail: (id: string) => [...categoryKeys.details(), id] as const,
 }
 
-export const useInfiniteCategories = (limit = 10) => {
+export const useInfiniteCategories = (limit = LIST_PAGE_SIZE) => {
   return useTQInfinite(
     categoryKeys.infinite(),
     ({ pageParam }) => getCategoriesFn({ data: { pageParam, limit } }),
@@ -45,7 +46,7 @@ export const useCreateCategory = () => {
     (data: Omit<Category, 'id'>) => createCategoryFn({ data }),
     {
       invalidateKeys: [categoryKeys.all],
-      successMessage: 'Categoría creada correctamente',
+      successMessage: 'categories.mutations.created',
     },
   )
 }
@@ -57,7 +58,7 @@ export const useUpdateCategory = () => {
       updateCategoryFn({ data: { id, data } }),
     {
       invalidateKeys: [categoryKeys.all],
-      successMessage: 'Categoría actualizada correctamente',
+      successMessage: 'categories.mutations.updated',
     },
   )
 }
@@ -65,6 +66,6 @@ export const useUpdateCategory = () => {
 export const useDeleteCategory = () => {
   return useTQMutation(['categories', 'delete'], (id: string) => deleteCategoryFn({ data: id }), {
     invalidateKeys: [categoryKeys.all],
-    successMessage: 'Categoría eliminada correctamente',
+    successMessage: 'categories.mutations.deleted',
   })
 }

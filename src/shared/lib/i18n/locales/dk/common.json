@@ -456,6 +456,11 @@
     "error": {
       "title": "Fejl",
       "description": "Der opstod en fejl ved indlæsning af kategorier."
+    },
+    "mutations": {
+      "created": "Kategori oprettet",
+      "updated": "Kategori opdateret",
+      "deleted": "Kategori slettet"
     }
   },
   "projects": {
@@ -942,19 +947,39 @@
       "links": {
         "essence": {
           "title": "Vores Essens",
-          "items": ["Filosofi", "Succeshistorier", "Metode", "Menneskelig Blog"]
+          "items": [
+            "Filosofi",
+            "Succeshistorier",
+            "Metode",
+            "Menneskelig Blog"
+          ]
         },
         "company": {
           "title": "Virksomhed",
-          "items": ["Om os", "Kultur", "Arbejd hos os", "Presse"]
+          "items": [
+            "Om os",
+            "Kultur",
+            "Arbejd hos os",
+            "Presse"
+          ]
         },
         "community": {
           "title": "Fællesskab",
-          "items": ["Events", "Hjælpecenter", "Partnere", "Netværksstatus"]
+          "items": [
+            "Events",
+            "Hjælpecenter",
+            "Partnere",
+            "Netværksstatus"
+          ]
         },
         "legal": {
           "title": "Juridisk",
-          "items": ["Etisk Privatliv", "Brugsvilkår", "Cookies", "Licenser"]
+          "items": [
+            "Etisk Privatliv",
+            "Brugsvilkår",
+            "Cookies",
+            "Licenser"
+          ]
         }
       }
     }

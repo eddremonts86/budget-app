@@ -60,3 +60,11 @@ export function getPriorityLabels(t: TFunction): Record<string, string> {
     low: t('todos.priority.low'),
   }
 }
+
+// ── List view constants ──────────────────────────────────────────────────────
+
+export const LIST_PAGE_SIZE = 30
+export const SEARCH_MIN_CHARS = 2
+export const SEARCH_DEBOUNCE_MS = 300
+export const VIRTUAL_ROW_HEIGHT = 64
+export const VIRTUAL_OVERSCAN = 10

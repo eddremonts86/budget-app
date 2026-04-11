@@ -478,6 +478,11 @@
     "error": {
       "title": "Error",
       "description": "An error occurred while loading categories."
+    },
+    "mutations": {
+      "created": "Category created successfully",
+      "updated": "Category updated successfully",
+      "deleted": "Category deleted successfully"
     }
   },
   "projects": {
