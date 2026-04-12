@@ -7,16 +7,30 @@ import { Button } from '@/components/ui'
 import { getTodosByProjectIdFn } from '@/modules/tasks'
 import { useUsersByIds } from '@/modules/users'
 import { toast } from '@/shared/lib/toast'
+import {
+  flattenInfinitePages,
+  TableSearchBar,
+  TableErrorState,
+  TableSkeleton,
+  useDebouncedSearch,
+} from '@/shared/ui/tables'
 import { deleteProjectFn } from '../api/projects.fn'
-import { useProjects, projectsKeys } from '../api/projects.queries'
+import { useInfiniteProjects, projectsKeys } from '../api/projects.queries'
 import type { Project } from '../model/types'
 import { CreateProjectSheet } from './CreateProjectSheet'
 import { EditProjectSheet } from './EditProjectSheet'
 import { ProjectCard } from './ProjectCard'
 
+const PAGE_SIZE = 20
+
 export function ProjectsPage() {
   const { t } = useTranslation()
-  const { data: projects, isLoading, error } = useProjects()
+  const { searchInput, setSearchInput, activeSearch } = useDebouncedSearch()
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+    useInfiniteProjects(PAGE_SIZE, activeSearch)
+
+  const projects = React.useMemo(() => flattenInfinitePages<Project>(data?.pages), [data?.pages])
+
   const projectMemberIds = React.useMemo(() => {
     return Array.from(
       new Set(
@@ -29,6 +43,23 @@ export function ProjectsPage() {
   const queryClient = useQueryClient()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingProject, setEditingProject] = React.useState<Project | null>(null)
+
+  // Infinite scroll sentinel
+  const sentinelRef = React.useRef<HTMLDivElement>(null)
+  React.useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const handleDelete = async (id: string, name: string) => {
     try {
@@ -61,31 +92,13 @@ export function ProjectsPage() {
     }
   }
 
-  if (isLoading) {
+  if (isError) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="flex flex-col items-center gap-2">
-          <Loader2 className="h-8 w-8 animate-spin text-primary" />
-          <p className="text-sm text-muted-foreground">{t('common.loading')}</p>
-        </div>
-      </div>
-    )
-  }
-
-  if (error) {
-    return (
-      <div className="flex items-center justify-center h-full">
-        <div className="flex flex-col items-center gap-4 max-w-md text-center">
-          <AlertCircle className="h-12 w-12 text-destructive" />
-          <h3 className="text-lg font-semibold">{t('projects.error.fetch')}</h3>
-          <p className="text-sm text-muted-foreground">
-            {error instanceof Error ? error.message : t('common.unknownError')}
-          </p>
-          <Button onClick={() => window.location.reload()} variant="outline">
-            {t('common.retry')}
-          </Button>
-        </div>
-      </div>
+      <TableErrorState
+        titleKey="projects.error.title"
+        descriptionKey="projects.error.fetch"
+        retryKey="common.retry"
+      />
     )
   }
 
@@ -98,7 +111,10 @@ export function ProjectsPage() {
           {t('projects.actions.create')}
         </Button>
       </div>
-      {!projects || projects.length === 0 ? (
+      <TableSearchBar value={searchInput} onChange={setSearchInput} />
+      {isLoading ? (
+        <TableSkeleton />
+      ) : !projects || projects.length === 0 ? (
         <div className="flex flex-col items-center justify-center flex-1 text-center p-8 border-2 border-dashed rounded-lg">
           <IconFolder className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
           <h3 className="text-lg font-medium">
@@ -115,16 +131,23 @@ export function ProjectsPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 flex-1 content-start min-h-0 overflow-y-auto">
-          {projects.map((project: Project) => (
-            <ProjectCard
-              key={project.id}
-              project={project}
-              usersById={usersById}
-              onEdit={setEditingProject}
-              onDelete={handleDelete}
-            />
-          ))}
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 content-start">
+            {projects.map((project: Project) => (
+              <ProjectCard
+                key={project.id}
+                project={project}
+                usersById={usersById}
+                onEdit={setEditingProject}
+                onDelete={handleDelete}
+              />
+            ))}
+          </div>
+          <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+            {isFetchingNextPage && (
+              <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+            )}
+          </div>
         </div>
       )}
       <CreateProjectSheet open={isCreateOpen} onOpenChange={setIsCreateOpen} />

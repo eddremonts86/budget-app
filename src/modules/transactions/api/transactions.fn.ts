@@ -40,6 +40,8 @@ export const getTransactionsFn = createServerFn({ method: 'GET' })
     z.object({
       pageParam: z.number().optional().default(1),
       limit: z.number().optional().default(10),
+      status: z.enum(['Approved', 'Pending', 'Rejected']).optional(),
+      search: z.string().optional(),
     }),
   )
   .handler(async ({ data }) => {
@@ -47,13 +49,25 @@ export const getTransactionsFn = createServerFn({ method: 'GET' })
 
     try {
       const db = await loadDb()
-      const { pageParam, limit } = data
+      const { pageParam, limit, status, search } = data
       const page = pageParam
       const offset = (page - 1) * limit
 
+      const { and: andOp, ilike } = await import('drizzle-orm')
+      const conditions: ReturnType<typeof eq>[] = []
+      if (status) conditions.push(eq(transactions.status, status))
+      if (search) conditions.push(ilike(transactions.customerName, `%${search}%`))
+      const whereClause = conditions.length > 0 ? andOp(...conditions) : undefined
+
       const [items, total] = await Promise.all([
-        db.select().from(transactions).limit(limit).offset(offset).orderBy(desc(transactions.date)),
-        db.$count(transactions),
+        db
+          .select()
+          .from(transactions)
+          .where(whereClause)
+          .limit(limit)
+          .offset(offset)
+          .orderBy(desc(transactions.date)),
+        db.$count(transactions, whereClause),
       ])
 
       const totalPages = Math.ceil(total / limit)

@@ -32,7 +32,7 @@ import {
   useCreateTransaction,
   useDeleteTransaction,
   useUpdateTransaction,
-  useTransactions,
+  useInfiniteTransactions,
 } from '../api/transactions.queries'
 import type { Transaction } from '../model/types'
 import { TransactionForm } from './TransactionForm'
@@ -278,13 +278,47 @@ export function TransactionsPage() {
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null)
 
-  // We need to fetch all transactions to filter pending ones for the current user
-  // In a real app, this would be a separate specific query
-  const { data: allTransactions = [], isLoading, isError } = useTransactions()
+  // Infinite scroll for history (all transactions)
+  const {
+    data: infiniteData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+  } = useInfiniteTransactions(20)
 
-  // Infinite scroll removed in favor of client-side role filtering
-  // const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
-  //   useInfiniteTransactions(10)
+  const allTransactions = React.useMemo(() => {
+    if (!infiniteData?.pages) return []
+    const seen = new Set<string>()
+    const result: Transaction[] = []
+    for (const page of infiniteData.pages) {
+      for (const item of (page as { data: Transaction[] }).data) {
+        if (!seen.has(item.id)) {
+          seen.add(item.id)
+          result.push(item)
+        }
+      }
+    }
+    return result
+  }, [infiniteData?.pages])
+
+  // Separate query for pending transactions (small dataset)
+  const { data: pendingData } = useInfiniteTransactions(50, 'Pending')
+  const pendingTransactions = React.useMemo(() => {
+    if (!pendingData?.pages) return []
+    const seen = new Set<string>()
+    const result: Transaction[] = []
+    for (const page of pendingData.pages) {
+      for (const item of (page as { data: Transaction[] }).data) {
+        if (!seen.has(item.id)) {
+          seen.add(item.id)
+          result.push(item)
+        }
+      }
+    }
+    return result
+  }, [pendingData?.pages])
 
   const { data: projects = [] } = useProjects()
   const transactionUserIds = React.useMemo(
@@ -304,10 +338,6 @@ export function TransactionsPage() {
   const usersById = React.useMemo(() => new Map(users.map((user) => [user.id, user])), [users])
 
   const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
-
-  const displayedTransactions = React.useMemo(() => {
-    return allTransactions
-  }, [allTransactions])
 
   const createMutation = useCreateTransaction()
   const updateMutation = useUpdateTransaction()
@@ -558,7 +588,7 @@ export function TransactionsPage() {
             <div className="h-full min-h-0 overflow-hidden">
               {currentUserId ? (
                 <PendingTransactionsTable
-                  transactions={allTransactions}
+                  transactions={pendingTransactions}
                   currentUserId={currentUserId}
                   roleKey={roleKey}
                   usersById={usersById}
@@ -584,23 +614,39 @@ export function TransactionsPage() {
                 <Skeleton className="h-10 w-full" />
               </div>
             ) : (
-              <UnifiedDataTable
-                columns={columns}
-                data={displayedTransactions}
-                filterColumn="customer_name"
-                filters={historyFilters}
-                bulkActions={historyBulkActions}
-                enableSelection={isAdminRole(roleKey)}
-                enableGrouping
-                groupableColumns={['status', 'userId', 'projectId']}
-                enablePagination
-                pageSizeOptions={[10, 20, 50]}
-                initialPageSize={10}
-                enableExport
-                exportFileName="transactions-history.csv"
-                className="pb-4"
-                fullHeight
-              />
+              <>
+                <UnifiedDataTable
+                  columns={columns}
+                  data={allTransactions}
+                  filterColumn="customer_name"
+                  filters={historyFilters}
+                  bulkActions={historyBulkActions}
+                  enableSelection={isAdminRole(roleKey)}
+                  enableGrouping
+                  groupableColumns={['status', 'userId', 'projectId']}
+                  enablePagination
+                  pageSizeOptions={[10, 20, 50]}
+                  initialPageSize={20}
+                  enableExport
+                  exportFileName="transactions-history.csv"
+                  className="pb-4"
+                  fullHeight
+                />
+                <div className="h-10 flex items-center justify-center shrink-0">
+                  {hasNextPage && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fetchNextPage()}
+                      disabled={isFetchingNextPage}
+                    >
+                      {isFetchingNextPage
+                        ? t('common.loading')
+                        : t('common.loadMore', { defaultValue: 'Load more' })}
+                    </Button>
+                  )}
+                </div>
+              </>
             )}
           </div>
         </TabsContent>

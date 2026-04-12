@@ -18,13 +18,18 @@ export const transactionKeys = {
   detail: (id: string) => [...transactionKeys.details(), id] as const,
 }
 
-export const useInfiniteTransactions = (limit = 10) => {
+export const useInfiniteTransactions = (
+  limit = 10,
+  status?: 'Approved' | 'Pending' | 'Rejected',
+  search?: string,
+) => {
   return useTQInfinite(
-    [...transactionKeys.infinite(), { limit }],
-    ({ pageParam }) => getTransactionsFn({ data: { pageParam, limit } }),
+    [...transactionKeys.infinite(), { limit, status, search }],
+    ({ pageParam }) => getTransactionsFn({ data: { pageParam, limit, status, search } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,
+      maxPages: 20,
     },
   )
 }

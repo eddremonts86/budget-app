@@ -112,31 +112,24 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' })
       const startDate = new Date(now)
       startDate.setDate(startDate.getDate() - days)
 
-      const results = await db
+      // Use SQL GROUP BY to aggregate by date — avoids loading all raw rows
+      const aggregated = await db
         .select({
-          date: transactions.date,
-          amount: transactions.amount,
+          dateStr: sql<string>`TO_CHAR(${transactions.date}, 'YYYY-MM-DD')`,
+          income: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.amount} > 0 THEN ${transactions.amount} ELSE 0 END), 0)`,
+          expenses: sql<number>`COALESCE(SUM(CASE WHEN ${transactions.amount} < 0 THEN ABS(${transactions.amount}) ELSE 0 END), 0)`,
         })
         .from(transactions)
         .where(and(eq(transactions.status, 'Approved'), gte(transactions.date, startDate)))
+        .groupBy(sql`TO_CHAR(${transactions.date}, 'YYYY-MM-DD')`)
 
-      results.sort((a, b) => a.date.getTime() - b.date.getTime())
-
-      const grouped = results.reduce(
-        (acc, curr) => {
-          const dateStr = curr.date.toISOString().split('T')[0]
-          if (!acc[dateStr]) {
-            acc[dateStr] = { income: 0, expenses: 0 }
-          }
-          if (curr.amount > 0) {
-            acc[dateStr].income += curr.amount
-          } else {
-            acc[dateStr].expenses += Math.abs(curr.amount)
-          }
-          return acc
-        },
-        {} as Record<string, { income: number; expenses: number }>,
-      )
+      const grouped: Record<string, { income: number; expenses: number }> = {}
+      for (const row of aggregated) {
+        grouped[row.dateStr] = {
+          income: Number(row.income),
+          expenses: Number(row.expenses),
+        }
+      }
 
       // Ensure all days are represented
       const fullData = []
@@ -202,27 +195,16 @@ export const getTaskCompletionTrendFn = createServerFn({ method: 'GET' })
       const startDate = new Date(now)
       startDate.setDate(startDate.getDate() - days)
 
-      const results = await db
+      // Use SQL GROUP BY to aggregate by date — avoids loading all raw rows
+      const formattedData = await db
         .select({
-          updatedAt: todos.updatedAt,
+          date: sql<string>`TO_CHAR(${todos.updatedAt}, 'YYYY-MM-DD')`,
+          count: count(),
         })
         .from(todos)
         .where(and(eq(todos.status, 'completed'), gte(todos.updatedAt, startDate)))
-
-      results.sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime())
-
-      const grouped = results.reduce(
-        (acc, curr) => {
-          const dateStr = curr.updatedAt.toISOString().split('T')[0]
-          acc[dateStr] = (acc[dateStr] || 0) + 1
-          return acc
-        },
-        {} as Record<string, number>,
-      )
-
-      const formattedData = Object.entries(grouped)
-        .map(([date, count]) => ({ date, count }))
-        .sort((a, b) => a.date.localeCompare(b.date))
+        .groupBy(sql`TO_CHAR(${todos.updatedAt}, 'YYYY-MM-DD')`)
+        .orderBy(sql`TO_CHAR(${todos.updatedAt}, 'YYYY-MM-DD')`)
 
       if (isE2E && formattedData.length === 0) {
         const mockData = []
@@ -701,11 +683,7 @@ export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
 
       if (filteredUserIds && filteredUserIds.length === 0) return []
 
-      const userWhere =
-        filteredUserIds && filteredUserIds.length > 0
-          ? inArray(users.id, filteredUserIds)
-          : undefined
-
+      // Use SQL GROUP BY to aggregate todo counts per user — avoids loading all rows
       const todoClauses = []
       if (projectId) todoClauses.push(eq(todos.projectId, projectId))
       if (filteredUserIds?.length) todoClauses.push(inArray(todos.assignedTo, filteredUserIds))
@@ -716,12 +694,21 @@ export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
             ? todoClauses[0]
             : and(...todoClauses)
 
-      const [allUsers, allTodos] = await Promise.all([
-        db.select().from(users).where(userWhere),
-        db.select().from(todos).where(todoWhere),
-      ])
+      const workloadStats = await db
+        .select({
+          userId: todos.assignedTo,
+          total: count(),
+          completed: sql<number>`COUNT(*) FILTER (WHERE ${todos.status} = 'completed')`,
+          pending: sql<number>`COUNT(*) FILTER (WHERE ${todos.status} = 'pending')`,
+          inProgress: sql<number>`COUNT(*) FILTER (WHERE ${todos.status} = 'in_progress')`,
+        })
+        .from(todos)
+        .where(todoWhere)
+        .groupBy(todos.assignedTo)
+        .having(sql`${todos.assignedTo} IS NOT NULL`)
+        .limit(50)
 
-      if (isE2E && allUsers.length === 0) {
+      if (isE2E && workloadStats.length === 0) {
         return Array.from({ length: 5 }).map((_, i) => ({
           user: {
             id: i.toString(),
@@ -737,16 +724,26 @@ export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
         }))
       }
 
-      return allUsers.map((user) => {
-        const userTodos = allTodos.filter((t) => t.assignedTo === user.id)
-        return {
-          user: { ...user, createdAt: user.createdAt.toISOString() },
-          total: userTodos.length,
-          completed: userTodos.filter((t) => t.status === 'completed').length,
-          pending: userTodos.filter((t) => t.status === 'pending').length,
-          inProgress: userTodos.filter((t) => t.status === 'in_progress').length,
-        }
-      })
+      if (workloadStats.length === 0) return []
+
+      // Fetch only the users we need
+      const userIds = workloadStats.map((s) => s.userId).filter((id): id is string => id !== null)
+      const userRows = await db.select().from(users).where(inArray(users.id, userIds))
+
+      const usersMap = new Map(userRows.map((u) => [u.id, u]))
+
+      return workloadStats
+        .filter((s) => s.userId && usersMap.has(s.userId))
+        .map((s) => {
+          const user = usersMap.get(s.userId!)!
+          return {
+            user: { ...user, createdAt: user.createdAt.toISOString() },
+            total: Number(s.total),
+            completed: Number(s.completed),
+            pending: Number(s.pending),
+            inProgress: Number(s.inProgress),
+          }
+        })
     } catch (error) {
       console.error('Error in getUsersWorkloadFn:', error)
       if (isE2E) {

@@ -20,12 +20,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { useUserDirectory, useUsersByIds } from '@/modules/users'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
-import {
-  useCreateTeam,
-  useDeleteTeam,
-  useTeamsWithMembers,
-  useUpdateTeam,
-} from '../api/teams.queries'
+import { useCreateTeam, useDeleteTeam, useInfiniteTeams, useUpdateTeam } from '../api/teams.queries'
 import type { TeamWithUsers } from '../model/types'
 
 interface TeamFormState {
@@ -42,7 +37,58 @@ const initialFormState: TeamFormState = {
 
 export function TeamPage() {
   const { t } = useTranslation()
-  const { data: teams, isLoading } = useTeamsWithMembers()
+  const {
+    data: infiniteData,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading: isTeamsLoading,
+  } = useInfiniteTeams(20)
+  const rawTeams = React.useMemo(() => {
+    if (!infiniteData?.pages) return []
+    const seen = new Set<string>()
+    const result: Array<{
+      id: string
+      name: string
+      description: string | null
+      members: string[] | null
+      createdAt: string
+      updatedAt: string
+    }> = []
+    for (const page of infiniteData.pages) {
+      for (const item of (page as { data: typeof result }).data) {
+        if (!seen.has(item.id)) {
+          seen.add(item.id)
+          result.push(item)
+        }
+      }
+    }
+    return result
+  }, [infiniteData?.pages])
+
+  const memberIds = React.useMemo(
+    () => Array.from(new Set(rawTeams.flatMap((team) => team.members || []))),
+    [rawTeams],
+  )
+  const { data: memberUsers = [], isLoading: isUsersLoading } = useUsersByIds(memberIds)
+  const usersById = React.useMemo(
+    () => new Map(memberUsers.map((user) => [user.id, user])),
+    [memberUsers],
+  )
+
+  const teams: TeamWithUsers[] = React.useMemo(
+    () =>
+      rawTeams.map((team) => ({
+        ...team,
+        members: (team.members || [])
+          .map((memberId) => usersById.get(memberId as string))
+          .filter((u): u is import('@/modules/users').User => !!u),
+      })),
+    [rawTeams, usersById],
+  )
+
+  const isLoading = isTeamsLoading || isUsersLoading
+
   const createTeam = useCreateTeam()
   const updateTeam = useUpdateTeam()
   const deleteTeam = useDeleteTeam()
@@ -50,6 +96,23 @@ export function TeamPage() {
   const [editingTeamId, setEditingTeamId] = React.useState<string | null>(null)
   const [memberSearch, setMemberSearch] = React.useState('')
   const [formData, setFormData] = React.useState<TeamFormState>(initialFormState)
+
+  // Infinite scroll sentinel
+  const sentinelRef = React.useRef<HTMLDivElement>(null)
+  React.useEffect(() => {
+    const el = sentinelRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && hasNextPage && !isFetchingNextPage) {
+          fetchNextPage()
+        }
+      },
+      { threshold: 0.1 },
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage])
 
   const isEditing = !!editingTeamId
   const selectedTeam = React.useMemo(
@@ -186,83 +249,93 @@ export function TeamPage() {
           </Button>
         </div>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 flex-1 content-start min-h-0 overflow-y-auto">
-          {teams.map((team) => (
-            <Card key={team.id} className="flex flex-col h-full hover:shadow-md transition-shadow">
-              <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
-                <div className="space-y-1.5 pr-2">
-                  <CardTitle className="text-base font-semibold leading-tight">
-                    {team.name}
-                  </CardTitle>
-                  <CardDescription className="line-clamp-2">
-                    {team.description || t('common.optional')}
-                  </CardDescription>
-                </div>
-                <div className="flex items-center gap-1 shrink-0">
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-primary"
-                    onClick={() => handleEditOpen(team)}
-                  >
-                    <IconEdit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-8 w-8 text-muted-foreground hover:text-destructive"
-                    onClick={() => handleDelete(team)}
-                  >
-                    <IconTrash className="h-4 w-4" />
-                  </Button>
-                  <div className="h-8 w-8 flex items-center justify-center">
-                    <IconUsers className="h-4 w-4 text-muted-foreground" />
+        <div className="flex-1 min-h-0 overflow-y-auto">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 content-start">
+            {teams.map((team) => (
+              <Card
+                key={team.id}
+                className="flex flex-col h-full hover:shadow-md transition-shadow"
+              >
+                <CardHeader className="flex flex-row items-start justify-between space-y-0 pb-4">
+                  <div className="space-y-1.5 pr-2">
+                    <CardTitle className="text-base font-semibold leading-tight">
+                      {team.name}
+                    </CardTitle>
+                    <CardDescription className="line-clamp-2">
+                      {team.description || t('common.optional')}
+                    </CardDescription>
                   </div>
-                </div>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <h4 className="mb-4 text-sm font-medium text-muted-foreground">
-                  {t('team.members', { defaultValue: 'Members' })}
-                </h4>
-                <div className="flex items-center justify-between pt-2 border-t border-border/40">
-                  <div className="flex -space-x-2 overflow-hidden">
-                    <TooltipProvider>
-                      {team.members.slice(0, 5).map((member) => (
-                        <Tooltip key={member.id}>
-                          <TooltipTrigger asChild>
-                            <Avatar className="inline-block h-7 w-7 rounded-full ring-2 ring-background">
-                              <AvatarImage src={member.avatar || undefined} alt={member.name} />
-                              <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
-                                {member.name.charAt(0)}
-                              </AvatarFallback>
-                            </Avatar>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p className="text-xs font-medium">{member.name}</p>
-                            <p className="text-[10px] text-muted-foreground">{member.email}</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      ))}
-                      {team.members.length > 5 && (
-                        <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium ring-2 ring-background">
-                          +{team.members.length - 5}
-                        </div>
+                  <div className="flex items-center gap-1 shrink-0">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-primary"
+                      onClick={() => handleEditOpen(team)}
+                    >
+                      <IconEdit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                      onClick={() => handleDelete(team)}
+                    >
+                      <IconTrash className="h-4 w-4" />
+                    </Button>
+                    <div className="h-8 w-8 flex items-center justify-center">
+                      <IconUsers className="h-4 w-4 text-muted-foreground" />
+                    </div>
+                  </div>
+                </CardHeader>
+                <CardContent className="flex-1">
+                  <h4 className="mb-4 text-sm font-medium text-muted-foreground">
+                    {t('team.members', { defaultValue: 'Members' })}
+                  </h4>
+                  <div className="flex items-center justify-between pt-2 border-t border-border/40">
+                    <div className="flex -space-x-2 overflow-hidden">
+                      <TooltipProvider>
+                        {team.members.slice(0, 5).map((member) => (
+                          <Tooltip key={member.id}>
+                            <TooltipTrigger asChild>
+                              <Avatar className="inline-block h-7 w-7 rounded-full ring-2 ring-background">
+                                <AvatarImage src={member.avatar || undefined} alt={member.name} />
+                                <AvatarFallback className="text-[10px] bg-muted text-muted-foreground">
+                                  {member.name.charAt(0)}
+                                </AvatarFallback>
+                              </Avatar>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p className="text-xs font-medium">{member.name}</p>
+                              <p className="text-[10px] text-muted-foreground">{member.email}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        ))}
+                        {team.members.length > 5 && (
+                          <div className="flex h-7 w-7 items-center justify-center rounded-full border-2 border-background bg-muted text-[10px] font-medium ring-2 ring-background">
+                            +{team.members.length - 5}
+                          </div>
+                        )}
+                      </TooltipProvider>
+                      {team.members.length === 0 && (
+                        <span className="text-xs text-muted-foreground italic">
+                          {t('team.emptyMembers', { defaultValue: 'No members assigned.' })}
+                        </span>
                       )}
-                    </TooltipProvider>
-                    {team.members.length === 0 && (
-                      <span className="text-xs text-muted-foreground italic">
-                        {t('team.emptyMembers', { defaultValue: 'No members assigned.' })}
-                      </span>
-                    )}
+                    </div>
+                    <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                      <IconUsers className="h-3.5 w-3.5" />
+                      <span>{team.members.length}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
-                    <IconUsers className="h-3.5 w-3.5" />
-                    <span>{team.members.length}</span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+          <div ref={sentinelRef} className="h-10 flex items-center justify-center">
+            {isFetchingNextPage && (
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            )}
+          </div>
         </div>
       )}
 

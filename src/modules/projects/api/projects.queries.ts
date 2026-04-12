@@ -43,6 +43,7 @@ export function useInfiniteProjects(limit = 10, search?: string, status?: string
       getNextPageParam: (lastPage: ProjectListResponse) => lastPage.nextPage,
       cache: 'standard',
       placeholderData: (prev) => prev,
+      maxPages: 20,
     },
   )
 }

@@ -74,12 +74,18 @@ export const getBudgetsFn = createServerFn({ method: 'GET' })
       .object({
         scope: z.enum(['personal', 'project', 'department', 'company']).optional(),
         status: z.enum(['active', 'closed', 'archived']).optional(),
+        pageParam: z.number().optional(),
+        limit: z.number().optional(),
       })
       .optional(),
   )
   .handler(async ({ data }) => {
     const user = await requireCurrentAppUser()
     const db = await loadDb()
+
+    const page = data?.pageParam || 1
+    const limit = data?.limit || 20
+    const offset = (page - 1) * limit
 
     // System admins can see all budgets regardless of membership
     const isSystemAdmin = user.roleKey === 'admin'
@@ -106,11 +112,23 @@ export const getBudgetsFn = createServerFn({ method: 'GET' })
     if (data?.scope) conditions.push(eq(budgets.scope, data.scope))
     if (data?.status) conditions.push(eq(budgets.status, data.status))
 
-    const rows = await db
-      .select()
-      .from(budgets)
-      .where(and(...conditions))
-      .orderBy(desc(budgets.createdAt))
+    const whereClause = conditions.length > 0 ? and(...conditions) : undefined
+
+    const [rows, totalResult] = await Promise.all([
+      db
+        .select()
+        .from(budgets)
+        .where(whereClause)
+        .orderBy(desc(budgets.createdAt))
+        .limit(limit)
+        .offset(offset),
+      db
+        .select({ count: sql<number>`COUNT(*)` })
+        .from(budgets)
+        .where(whereClause),
+    ])
+
+    const total = Number(totalResult[0]?.count ?? 0)
 
     // Batch-fetch member counts for all returned budgets
     const memberCountRows =
@@ -135,7 +153,7 @@ export const getBudgetsFn = createServerFn({ method: 'GET' })
       memberCountMap[m.budgetId] = Number(m.count)
     }
 
-    // Compute health for each budget
+    // Compute health for each budget (batch — only for the page)
     const result = await Promise.all(
       rows.map(async (row) => {
         const health = await computeBudgetHealth(db, row.id, row)
@@ -143,7 +161,14 @@ export const getBudgetsFn = createServerFn({ method: 'GET' })
       }),
     )
 
-    return result
+    const totalPages = Math.ceil(total / limit)
+    const nextPage = page < totalPages ? page + 1 : undefined
+
+    return {
+      data: result,
+      nextPage,
+      totalCount: total,
+    }
   })
 
 export const getBudgetByIdFn = createServerFn({ method: 'GET' })

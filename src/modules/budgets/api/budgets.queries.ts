@@ -1,5 +1,5 @@
 import { i18n } from '@/shared/lib/i18n'
-import { useTQuery, useTQMutation } from '@/shared/lib/query'
+import { useTQuery, useTQMutation, useTQInfinite } from '@/shared/lib/query'
 import type { CreateBudgetInput, UpdateBudgetInput } from '../model/schema'
 import type { Budget, BudgetDashboardData, BudgetHealthSummary } from '../model/types'
 import {
@@ -16,6 +16,7 @@ export const budgetKeys = {
   all: ['budgets'] as const,
   lists: () => [...budgetKeys.all, 'list'] as const,
   list: (filters?: object) => [...budgetKeys.lists(), filters] as const,
+  infinite: (filters?: object) => [...budgetKeys.lists(), 'infinite', filters] as const,
   detail: (id: string) => [...budgetKeys.all, 'detail', id] as const,
   health: (id: string) => [...budgetKeys.all, 'health', id] as const,
   dashboard: () => [...budgetKeys.all, 'dashboard'] as const,
@@ -43,8 +44,28 @@ export function useBudgets(filters?: { scope?: string; status?: string }) {
               status?: 'active' | 'closed' | 'archived'
             }
           | undefined,
-      }),
+      }).then((res) => res.data),
     { cache: 'realtime' },
+  )
+}
+
+export function useInfiniteBudgets(limit = 20, filters?: { scope?: string; status?: string }) {
+  return useTQInfinite(
+    budgetKeys.infinite(filters),
+    ({ pageParam }) =>
+      getBudgetsFn({
+        data: {
+          pageParam,
+          limit,
+          scope: filters?.scope as 'personal' | 'project' | 'department' | 'company' | undefined,
+          status: filters?.status as 'active' | 'closed' | 'archived' | undefined,
+        },
+      }),
+    {
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      maxPages: 20,
+    },
   )
 }
 

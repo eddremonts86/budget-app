@@ -1,13 +1,14 @@
 import { useUsersByIds } from '@/modules/users'
 import type { User } from '@/modules/users'
 import { i18n } from '@/shared/lib/i18n'
-import { useTQuery, useTQMutation } from '@/shared/lib/query'
+import { useTQuery, useTQMutation, useTQInfinite } from '@/shared/lib/query'
 import type { Team, TeamWithUsers } from '../model/types'
 import { type TeamInput, createTeamFn, deleteTeamFn, getTeamsFn, updateTeamFn } from './teams.fn'
 
 export const teamKeys = {
   all: ['teams'] as const,
   lists: () => [...teamKeys.all, 'list'] as const,
+  infinite: () => [...teamKeys.lists(), 'infinite'] as const,
   details: () => [...teamKeys.all, 'detail'] as const,
   detail: (id: string) => [...teamKeys.details(), id] as const,
 }
@@ -17,6 +18,18 @@ export const useTeams = () => {
     const response = await getTeamsFn({ data: { limit: 100 } })
     return response.data
   })
+}
+
+export const useInfiniteTeams = (limit = 20) => {
+  return useTQInfinite(
+    [...teamKeys.infinite(), { limit }],
+    ({ pageParam }) => getTeamsFn({ data: { pageParam, limit } }),
+    {
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      maxPages: 20,
+    },
+  )
 }
 
 export const useTeamsWithMembers = () => {
