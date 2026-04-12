@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
-import { isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
+import { isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass'
 import { ErrorStateView } from '@/shared/ui/feedback/ErrorStateView'
 
 export function RootErrorContent({ error }: { error: Error }) {

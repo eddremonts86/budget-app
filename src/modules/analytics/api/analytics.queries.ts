@@ -1,10 +1,11 @@
 import { queryOptions } from '@tanstack/react-query'
-import { useTQuery } from '@/shared/lib/query'
+import { useTQuery, useTQInfinite } from '@/shared/lib/query'
 import {
   getAnalyticsKPIsFn,
   getRevenueTrendFn,
   getTaskCompletionTrendFn,
   getProjectPerformanceFn,
+  getProjectPerformancePaginatedFn,
   getTaskDistributionFn,
   getExpenseDistributionFn,
   getUsersWorkloadFn,
@@ -18,6 +19,8 @@ export const analyticsKeys = {
   taskCompletionTrend: (days: number) =>
     [...analyticsKeys.all, 'task-completion-trend', days] as const,
   projectPerformance: () => [...analyticsKeys.all, 'project-performance'] as const,
+  projectPerformanceInfinite: (params: { limit: number; search?: string }) =>
+    [...analyticsKeys.all, 'project-performance-infinite', params] as const,
   taskDistribution: () => [...analyticsKeys.all, 'task-distribution'] as const,
 }
 
@@ -47,6 +50,20 @@ export const taskDistributionQueryOptions = queryOptions({
   queryKey: analyticsKeys.taskDistribution(),
   queryFn: () => getTaskDistributionFn({ data: undefined }),
 })
+
+export const useInfiniteProjectPerformance = (limit = 20, search?: string) => {
+  const params = { limit, search: search?.trim() || undefined }
+
+  return useTQInfinite(
+    analyticsKeys.projectPerformanceInfinite(params),
+    ({ pageParam }) => getProjectPerformancePaginatedFn({ data: { pageParam, ...params } }),
+    {
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+      maxPages: 10,
+    },
+  )
+}
 
 const ANALYTICS_CHART_REFRESH_INTERVAL = 90 * 1000
 

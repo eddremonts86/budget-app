@@ -1,13 +1,19 @@
 'use client'
 
-import { Twitter, Facebook, Instagram, Linkedin, Github } from 'lucide-react'
+import {
+  IconBrandX,
+  IconBrandFacebook,
+  IconBrandInstagram,
+  IconBrandLinkedin,
+  IconBrandGithub,
+} from '@tabler/icons-react'
 
 const socialLinks = [
-  { icon: Twitter, label: 'Twitter', href: '#' },
-  { icon: Facebook, label: 'Facebook', href: '#' },
-  { icon: Instagram, label: 'Instagram', href: '#' },
-  { icon: Linkedin, label: 'LinkedIn', href: '#' },
-  { icon: Github, label: 'GitHub', href: '#' },
+  { icon: IconBrandX, label: 'Twitter', href: '#' },
+  { icon: IconBrandFacebook, label: 'Facebook', href: '#' },
+  { icon: IconBrandInstagram, label: 'Instagram', href: '#' },
+  { icon: IconBrandLinkedin, label: 'LinkedIn', href: '#' },
+  { icon: IconBrandGithub, label: 'GitHub', href: '#' },
 ]
 
 export function SocialLinks() {

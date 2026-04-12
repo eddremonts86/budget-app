@@ -1,4 +1,3 @@
-import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
@@ -6,12 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import type { ChartConfig } from '@/components/ui/chart'
 import { Skeleton } from '@/components/ui/skeleton'
 import { taskDistributionQueryOptions } from '../api/analytics.queries'
-
-const LazyTaskDistributionContent = React.lazy(() =>
-  import('./TaskDistributionContent').then((module) => ({
-    default: module.TaskDistributionContent,
-  })),
-)
+import { TaskDistributionContent } from './TaskDistributionContent'
 
 export function TaskDistribution() {
   const { t } = useTranslation()
@@ -120,30 +114,21 @@ export function TaskDistribution() {
   }
 
   return (
-    <React.Suspense
-      fallback={
-        <div className="grid gap-4 md:grid-cols-2">
-          <Skeleton className="h-[300px]" />
-          <Skeleton className="h-[300px]" />
-        </div>
-      }
-    >
-      <LazyTaskDistributionContent
-        byStatus={translatedData?.byStatus ?? []}
-        byPriority={translatedData?.byPriority ?? []}
-        statusConfig={statusConfig}
-        priorityConfig={priorityConfig}
-        statusTitle={t('analytics.taskDistribution.byStatus', { defaultValue: 'Tasks by Status' })}
-        statusDescription={t('analytics.taskDistribution.byStatusDesc', {
-          defaultValue: 'Current distribution of tasks',
-        })}
-        priorityTitle={t('analytics.taskDistribution.byPriority', {
-          defaultValue: 'Tasks by Priority',
-        })}
-        priorityDescription={t('analytics.taskDistribution.byPriorityDesc', {
-          defaultValue: 'Priority breakdown',
-        })}
-      />
-    </React.Suspense>
+    <TaskDistributionContent
+      byStatus={translatedData?.byStatus ?? []}
+      byPriority={translatedData?.byPriority ?? []}
+      statusConfig={statusConfig}
+      priorityConfig={priorityConfig}
+      statusTitle={t('analytics.taskDistribution.byStatus', { defaultValue: 'Tasks by Status' })}
+      statusDescription={t('analytics.taskDistribution.byStatusDesc', {
+        defaultValue: 'Current distribution of tasks',
+      })}
+      priorityTitle={t('analytics.taskDistribution.byPriority', {
+        defaultValue: 'Tasks by Priority',
+      })}
+      priorityDescription={t('analytics.taskDistribution.byPriorityDesc', {
+        defaultValue: 'Priority breakdown',
+      })}
+    />
   )
 }

@@ -1,16 +1,10 @@
-import * as React from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import type { ChartConfig } from '@/components/ui/chart'
 import { Skeleton } from '@/components/ui/skeleton'
 import { revenueTrendQueryOptions } from '../api/analytics.queries'
-
-const LazyRevenueChartContent = React.lazy(() =>
-  import('./RevenueChartContent').then((module) => ({
-    default: module.RevenueChartContent,
-  })),
-)
+import { RevenueChartContent } from './RevenueChartContent'
 
 interface RevenueChartProps {
   days: number
@@ -71,9 +65,7 @@ export function RevenueChart({ days }: RevenueChartProps) {
         {isLoading ? (
           <Skeleton className="h-[300px] w-full" />
         ) : (
-          <React.Suspense fallback={<Skeleton className="h-[300px] w-full" />}>
-            <LazyRevenueChartContent data={data ?? []} chartConfig={chartConfig} />
-          </React.Suspense>
+          <RevenueChartContent data={data ?? []} chartConfig={chartConfig} />
         )}
       </CardContent>
     </Card>

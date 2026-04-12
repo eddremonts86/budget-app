@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq, and, gte, count, sum, sql, inArray } from 'drizzle-orm'
+import { eq, and, gte, count, sum, sql, inArray, ilike, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import {
   todos,
@@ -388,6 +388,153 @@ export const getProjectPerformanceFn = createServerFn({ method: 'GET' })
             completedTaskCount: 3,
           },
         ]
+      }
+      throw error
+    }
+  })
+
+export interface ProjectPerformanceRow {
+  id: string
+  name: string
+  status: string
+  budget: number | null
+  spent: number
+  progress: number
+  taskCount: number
+  completedTaskCount: number
+}
+
+export interface ProjectPerformanceResponse {
+  data: ProjectPerformanceRow[]
+  nextPage?: number
+  totalCount: number
+}
+
+export const getProjectPerformancePaginatedFn = createServerFn({ method: 'GET' })
+  .inputValidator(
+    z
+      .object({
+        pageParam: z.number().optional(),
+        limit: z.number().optional(),
+        search: z.string().optional(),
+      })
+      .optional(),
+  )
+  .handler(async ({ data }): Promise<ProjectPerformanceResponse> => {
+    const isE2E = process.env.VITE_E2E === 'true'
+
+    try {
+      const db = await loadDb()
+      const { pageParam, limit: limitParam, search } = data || {}
+      const page = pageParam || 1
+      const limit = limitParam || 20
+      const offset = (page - 1) * limit
+
+      const whereClause = search ? ilike(projects.name, `%${search}%`) : undefined
+
+      const [items, totalResult] = await Promise.all([
+        db
+          .select()
+          .from(projects)
+          .where(whereClause)
+          .limit(limit)
+          .offset(offset)
+          .orderBy(desc(projects.createdAt)),
+        db.select({ count: count() }).from(projects).where(whereClause),
+      ])
+
+      const total = totalResult[0]?.count ?? 0
+
+      if (isE2E && items.length === 0) {
+        return {
+          data: [
+            {
+              id: '1',
+              name: 'Website Redesign',
+              status: 'active',
+              budget: 15000,
+              spent: 8500,
+              progress: 65,
+              taskCount: 24,
+              completedTaskCount: 16,
+            },
+            {
+              id: '2',
+              name: 'Mobile App Launch',
+              status: 'active',
+              budget: 25000,
+              spent: 12000,
+              progress: 45,
+              taskCount: 32,
+              completedTaskCount: 14,
+            },
+          ],
+          nextPage: undefined,
+          totalCount: 2,
+        }
+      }
+
+      // Fetch todo stats only for this page's projects
+      const projectIds = items.map((p) => p.id)
+      const todoStats =
+        projectIds.length > 0
+          ? await db
+              .select({
+                projectId: todos.projectId,
+                total: count(),
+                completed: sql<number>`count(*) filter (where ${todos.status} = 'completed')`,
+                totalHours: sql<number>`coalesce(sum(${todos.actualTime}), 0)`,
+              })
+              .from(todos)
+              .where(inArray(todos.projectId, projectIds))
+              .groupBy(todos.projectId)
+          : []
+
+      const statsMap = new Map(todoStats.map((s) => [s.projectId, s]))
+
+      const rows: ProjectPerformanceRow[] = items.map((project) => {
+        const stats = statsMap.get(project.id)
+        const totalTasks = Number(stats?.total ?? 0)
+        const completed = Number(stats?.completed ?? 0)
+        const progress = totalTasks > 0 ? Math.round((completed / totalTasks) * 100) : 0
+        const totalHours = Number(stats?.totalHours ?? 0)
+
+        return {
+          id: project.id,
+          name: project.name,
+          status: project.status,
+          budget: project.budget,
+          spent: totalHours * 50,
+          progress,
+          taskCount: totalTasks,
+          completedTaskCount: completed,
+        }
+      })
+
+      return {
+        data: rows,
+        nextPage: offset + limit < total ? page + 1 : undefined,
+        totalCount: total,
+      }
+    } catch (error) {
+      console.error('Database connection failed for ProjectPerformancePaginated', error)
+      if (isE2E) {
+        return {
+          data: [
+            {
+              id: '1',
+              name: 'Website Redesign',
+              status: 'active',
+              budget: 15000,
+              spent: 8500,
+              progress: 65,
+              taskCount: 24,
+              completedTaskCount: 16,
+            },
+          ],
+          nextPage: undefined,
+          totalCount: 1,
+        }
       }
       throw error
     }

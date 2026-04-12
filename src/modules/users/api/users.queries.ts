@@ -72,6 +72,7 @@ export const useInfiniteUsers = (limit = 10, search?: string, filters?: UserDire
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,
       placeholderData: (prev) => prev,
+      maxPages: 50,
     },
   )
 }

@@ -3,7 +3,9 @@ import { getAllAiConfigs } from '@/modules/ai/config/store'
 import { detectBestProvider, probeProvider } from '@/modules/ai/providers'
 
 vi.mock('@/modules/ai/config/store', async () => {
-  const actual = await vi.importActual<typeof import('@/modules/ai/config/store')>('@/modules/ai/config/store')
+  const actual = await vi.importActual<typeof import('@/modules/ai/config/store')>(
+    '@/modules/ai/config/store',
+  )
   return {
     ...actual,
     getAllAiConfigs: vi.fn(),
@@ -29,7 +31,6 @@ describe('ai providers', () => {
       new Response(JSON.stringify({ data: [{ id: 'model-1' }] }), { status: 200 }),
     )
 
-     
     const status = await probeProvider({ ...mockConfig, provider: 'lm-studio' } as any)
 
     expect(status.available).toBe(true)
@@ -40,10 +41,9 @@ describe('ai providers', () => {
     const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>
     fetchMock.mockResolvedValueOnce(new Response(null, { status: 401 }))
 
-     
     const status = await probeProvider({ ...mockConfig, provider: 'openai' } as any)
 
-    expect(status.available).toBe(true)
+    expect(status.available).toBe(false)
     expect(status.status).toBe('auth_required')
   })
 
@@ -75,9 +75,15 @@ describe('ai providers', () => {
     const fetchMock = globalThis.fetch as ReturnType<typeof vi.fn>
     fetchMock
       .mockRejectedValueOnce(new TypeError('fetch failed'))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }))
-      .mockResolvedValueOnce(new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }))
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }),
+      )
+      .mockResolvedValueOnce(
+        new Response(JSON.stringify({ data: [{ id: 'llama-1' }] }), { status: 200 }),
+      )
 
     const status = await probeProvider({
       ...mockConfig,

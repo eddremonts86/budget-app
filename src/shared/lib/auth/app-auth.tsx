@@ -5,7 +5,7 @@ import {
 } from '@clerk/tanstack-react-start'
 import * as React from 'react'
 import { authClient, useSession as useBetterAuthSession } from './better-auth-client'
-import { getClientTestUserId, isClientAuthBypassEnabled } from './bypass.client'
+import { getClientTestUserId, isClientAuthBypassEnabled } from './bypass'
 import { getAuthMode, getClerkPublishableKey, isBetterAuthEnabled, isClerkEnabled } from './config'
 
 export type AppAuthProviderKind = 'bypass' | 'clerk' | 'better-auth' | null
@@ -185,6 +185,8 @@ function buildAppAuthValue({
   }
 }
 
+const emptySubscribe = () => () => {}
+
 function AppAuthContextProvider({
   children,
   betterAuth,
@@ -194,11 +196,11 @@ function AppAuthContextProvider({
   betterAuth: BetterAuthHookResult
   clerk: ClerkAuthSnapshot | null
 }) {
-  const [isHydrated, setIsHydrated] = React.useState(false)
-
-  React.useEffect(() => {
-    setIsHydrated(true)
-  }, [])
+  const isHydrated = React.useSyncExternalStore(
+    emptySubscribe,
+    () => true,
+    () => false,
+  )
 
   const value = React.useMemo(
     () => buildAppAuthValue({ isHydrated, betterAuth, clerk }),

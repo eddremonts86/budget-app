@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { render, screen } from '@testing-library/react'
+import { render, screen, waitFor } from '@testing-library/react'
 import { describe, it, expect, vi, type Mock } from 'vitest'
 import { TaskDistribution } from '@/modules/analytics/components/TaskDistribution'
 
@@ -11,6 +11,20 @@ vi.mock('@tanstack/react-query', async () => {
     useQuery: vi.fn(),
   }
 })
+
+// Mock react-i18next
+vi.mock('react-i18next', () => ({
+  useTranslation: () => ({
+    t: (_key: string, defaultValueOrOptions?: string | { defaultValue?: string }) => {
+      if (typeof defaultValueOrOptions === 'string') return defaultValueOrOptions
+      return defaultValueOrOptions?.defaultValue ?? _key
+    },
+  }),
+  initReactI18next: {
+    type: '3rdParty',
+    init: () => {},
+  },
+}))
 
 // Mock ResizeObserver for Recharts
 global.ResizeObserver = class ResizeObserver {
@@ -39,7 +53,7 @@ describe('TaskDistribution', () => {
     expect(screen.getAllByText('Error loading task data')).toHaveLength(2)
   })
 
-  it('renders charts with data', () => {
+  it('renders charts with data', async () => {
     ;(useQuery as Mock).mockReturnValue({
       isLoading: false,
       data: {
@@ -48,7 +62,9 @@ describe('TaskDistribution', () => {
       },
     })
     render(<TaskDistribution />)
-    expect(screen.getByText('Tasks by Status')).toBeDefined()
+    await waitFor(() => {
+      expect(screen.getByText('Tasks by Status')).toBeDefined()
+    })
     expect(screen.getByText('Tasks by Priority')).toBeDefined()
     expect(screen.queryByText('Error loading task data')).toBeNull()
   })

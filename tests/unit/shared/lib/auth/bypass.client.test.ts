@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { getClientTestUserId, isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass.client'
+import { getClientTestUserId, isClientAuthBypassEnabled } from '@/shared/lib/auth/bypass'
 
 describe('auth bypass client', () => {
   it('returns default test user id when missing env value', () => {

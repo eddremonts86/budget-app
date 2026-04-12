@@ -11,6 +11,10 @@ vi.mock('react-i18next', () => ({
     t: (key: string) => key,
     i18n: { language: 'en' },
   }),
+  initReactI18next: {
+    type: '3rdParty',
+    init: () => {},
+  },
 }))
 
 vi.mock('@/modules/projects', () => ({
@@ -22,15 +26,47 @@ vi.mock('@/modules/users', () => ({
   useInfiniteUsers: vi.fn(),
 }))
 
-vi.mock('framer-motion', () => ({
-  motion: {
-    div: ({ children, ...props }: React.ComponentProps<'div'>) => <div {...props}>{children}</div>,
-    form: ({ children, ...props }: React.ComponentProps<'form'>) => (
-      <form {...props}>{children}</form>
-    ),
-  },
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+vi.mock('@/modules/tasks/api/todos.queries', () => ({
+  useInfiniteDepsSearch: vi.fn().mockReturnValue({
+    data: { pages: [] },
+    fetchNextPage: vi.fn(),
+    hasNextPage: false,
+    isFetchingNextPage: false,
+    isLoading: false,
+  }),
 }))
+
+vi.mock('framer-motion', () => {
+  const motionProxy = new Proxy(
+    {},
+    {
+      get: (_target, prop) => {
+        return ({ children, ...props }: React.ComponentProps<any>) => {
+          const {
+            initial: _i,
+            animate: _a,
+            exit: _e,
+            transition: _t,
+            variants: _v,
+            whileHover: _wh,
+            whileTap: _wt,
+            layout: _l,
+            ...rest
+          } = props as Record<string, unknown>
+          const Tag = String(prop) as any
+          return <Tag {...(rest as any)}>{children}</Tag>
+        }
+      },
+    },
+  )
+  return {
+    motion: motionProxy,
+    m: motionProxy,
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    LazyMotion: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    domAnimation: {},
+  }
+})
 
 describe('TodoForm', () => {
   const mockProjects = [

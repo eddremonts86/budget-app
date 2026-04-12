@@ -1,13 +1,48 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
-import * as todosQueries from '@/modules/tasks/api/todos.queries'
 import { UpcomingTodosList } from '@/modules/tasks/ui/widgets/UpcomingTodosWidget'
-import * as userQueries from '@/modules/users'
+
+const mockTodos = [
+  {
+    id: '1',
+    title: 'Task 1',
+    status: 'pending',
+    priority: 'high',
+    dueDate: '2023-02-20',
+    assignedTo: 'user1',
+  },
+  {
+    id: '2',
+    title: 'Task 2',
+    status: 'completed',
+    priority: 'medium',
+    dueDate: '2023-02-21',
+    assignedTo: 'user2',
+  },
+]
+
+const mockUsers = [
+  { id: 'user1', name: 'John Doe', avatar: 'avatar1.png' },
+  { id: 'user2', name: 'Jane Smith', avatar: 'avatar2.png' },
+]
 
 // Mock translations
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
-    t: (_key: string, defaultValue: string) => defaultValue,
+    t: (_key: string, defaultValueOrOptions?: string | Record<string, unknown>) => {
+      if (typeof defaultValueOrOptions === 'string') return defaultValueOrOptions
+      if (defaultValueOrOptions && typeof defaultValueOrOptions === 'object') {
+        let result = (defaultValueOrOptions.defaultValue as string) ?? _key
+        // Replace interpolation placeholders like {{count}}
+        for (const [k, v] of Object.entries(defaultValueOrOptions)) {
+          if (k !== 'defaultValue') {
+            result = result.replace(new RegExp(`\\{\\{${k}\\}\\}`, 'g'), String(v))
+          }
+        }
+        return result
+      }
+      return _key
+    },
   }),
   initReactI18next: {
     type: '3rdParty',
@@ -19,6 +54,25 @@ vi.mock('react-i18next', () => ({
 vi.mock('date-fns', () => ({
   format: () => 'Feb 20',
 }))
+
+// Mock the hooks at module level so they never call useQuery
+vi.mock('@/modules/tasks/api/todos.queries', () => ({
+  useUpcomingTodos: vi.fn(),
+}))
+
+vi.mock('@/modules/users', () => ({
+  useUsersByIds: vi.fn(),
+}))
+
+// Mock widget components
+vi.mock('@/modules/core/widget', () => ({
+  WidgetRefreshButton: () => null,
+  WidgetRefreshingIndicator: () => null,
+}))
+
+// Import mocked modules to configure return values
+import { useUpcomingTodos } from '@/modules/tasks/api/todos.queries'
+import { useUsersByIds } from '@/modules/users'
 
 describe('UpcomingTodosList', () => {
   const mockTodos = [
@@ -46,15 +100,23 @@ describe('UpcomingTodosList', () => {
   ]
 
   beforeEach(() => {
-    vi.spyOn(todosQueries, 'useUpcomingTodos').mockReturnValue({
-      data: mockTodos,
+    vi.mocked(useUpcomingTodos).mockReturnValue({
+      data: {
+        items: mockTodos,
+        total: mockTodos.length,
+        nextWeekCount: mockTodos.length,
+        displayMode: 'upcoming',
+        displayCount: mockTodos.length,
+      },
       isLoading: false,
+      isFetching: false,
       isError: false,
       error: null,
       refetch: vi.fn(),
+      isRefetching: false,
     } as any)
 
-    vi.spyOn(userQueries, 'useUsers').mockReturnValue({
+    vi.mocked(useUsersByIds).mockReturnValue({
       data: mockUsers,
       isLoading: false,
       isError: false,

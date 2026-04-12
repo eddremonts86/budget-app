@@ -1,30 +1,34 @@
 import type { ColumnDef } from '@tanstack/react-table'
-import { useQuery } from '@tanstack/react-query'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Badge } from '@/components/ui/badge'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Progress } from '@/components/ui/progress'
-import { Skeleton } from '@/components/ui/skeleton'
-import { DataTable } from '@/shared/ui/tables/DataTable'
-import { projectPerformanceQueryOptions } from '../api/analytics.queries'
-
-interface ProjectRow {
-  id: string
-  name: string
-  status: string
-  budget: number | null
-  spent: number
-  progress: number
-  taskCount: number
-  completedTaskCount: number
-}
+import {
+  VirtualTable,
+  TableSearchBar,
+  TableEmptyState,
+  TableErrorState,
+  TableSkeleton,
+  flattenInfinitePages,
+  useDebouncedSearch,
+  DEFAULT_PAGE_SIZE,
+} from '@/shared/ui/tables'
+import { useInfiniteProjectPerformance } from '../api/analytics.queries'
+import type { ProjectPerformanceRow } from '../api/analytics.fn'
 
 export function ProjectPerformance() {
   const { t } = useTranslation()
-  const { data, isLoading } = useQuery(projectPerformanceQueryOptions)
+  const { search, debouncedSearch, setSearch, isDebouncing } = useDebouncedSearch()
 
-  const columns: ColumnDef<ProjectRow>[] = React.useMemo(
+  const query = useInfiniteProjectPerformance(DEFAULT_PAGE_SIZE, debouncedSearch)
+  const totalCount = query.data?.pages[0]?.totalCount ?? 0
+  const projects = React.useMemo(
+    () => flattenInfinitePages<ProjectPerformanceRow>(query.data?.pages),
+    [query.data?.pages],
+  )
+
+  const columns: ColumnDef<ProjectPerformanceRow, unknown>[] = React.useMemo(
     () => [
       {
         accessorKey: 'name',
@@ -74,8 +78,12 @@ export function ProjectPerformance() {
     [t],
   )
 
-  if (isLoading) {
-    return <Skeleton className="h-[400px] w-full" />
+  if (query.isLoading) {
+    return <TableSkeleton />
+  }
+
+  if (query.isError) {
+    return <TableErrorState onRetry={() => query.refetch()} />
   }
 
   return (
@@ -95,7 +103,28 @@ export function ProjectPerformance() {
         </div>
       </CardHeader>
       <CardContent>
-        <DataTable columns={columns} data={(data as ProjectRow[]) ?? []} filterColumn="name" />
+        <div className="space-y-4">
+          <TableSearchBar
+            value={search}
+            onChange={setSearch}
+            totalCount={totalCount}
+            isDebouncing={isDebouncing}
+          />
+          {projects.length === 0 && !query.isFetching ? (
+            <TableEmptyState />
+          ) : (
+            <div className="h-[400px] flex flex-col">
+              <VirtualTable
+                columns={columns}
+                data={projects}
+                hasNextPage={query.hasNextPage}
+                isFetchingNextPage={query.isFetchingNextPage}
+                onFetchNextPage={() => query.fetchNextPage()}
+                scrollResetKey={debouncedSearch}
+              />
+            </div>
+          )}
+        </div>
       </CardContent>
     </Card>
   )

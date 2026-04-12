@@ -10,25 +10,38 @@ vi.mock('react-i18next', () => ({
   }),
 }))
 
-vi.mock('framer-motion', () => ({
-  AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
-  motion: {
-    button: ({ children, ...props }: React.ComponentProps<'button'>) => {
-      const { initial: _initial, animate: _animate, ...rest } = props as Record<string, unknown>
-      return <button {...(rest as React.ComponentProps<'button'>)}>{children}</button>
-    },
-    div: ({ children, ...props }: React.ComponentProps<'div'>) => {
+vi.mock('framer-motion', () => {
+  const createMotionComponent = (tag: string) => {
+    return ({ children, ...props }: React.ComponentProps<any>) => {
       const {
-        initial: _initial,
-        animate: _animate,
-        exit: _exit,
-        transition: _transition,
+        initial: _i,
+        animate: _a,
+        exit: _e,
+        transition: _t,
+        variants: _v,
+        whileHover: _wh,
+        whileTap: _wt,
+        layout: _l,
         ...rest
       } = props as Record<string, unknown>
-      return <div {...(rest as React.ComponentProps<'div'>)}>{children}</div>
+      const Tag = tag as any
+      return <Tag {...(rest as any)}>{children}</Tag>
+    }
+  }
+  const motionProxy = new Proxy(
+    {},
+    {
+      get: (_target, prop) => createMotionComponent(String(prop)),
     },
-  },
-}))
+  )
+  return {
+    AnimatePresence: ({ children }: { children: React.ReactNode }) => children,
+    motion: motionProxy,
+    m: motionProxy,
+    LazyMotion: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    domAnimation: {},
+  }
+})
 
 vi.mock('@/shared/utils/index', () => ({
   cn: (...classes: Array<string | boolean | undefined>) => classes.filter(Boolean).join(' '),
