@@ -1,5 +1,5 @@
 import { createServerFn } from '@tanstack/react-start'
-import { desc, eq, inArray } from 'drizzle-orm'
+import { desc, eq, ilike, inArray } from 'drizzle-orm'
 import { z } from 'zod'
 import { teamMembers, teams, users } from '@/shared/lib/db/schema'
 
@@ -15,6 +15,7 @@ const teamListParamsSchema = z
   .object({
     pageParam: z.number().optional(),
     limit: z.number().optional(),
+    search: z.string().optional(),
   })
   .optional()
 
@@ -44,14 +45,22 @@ export const getTeamsFn = createServerFn({ method: 'GET' })
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const { pageParam, limit: limitParam } = data || {}
+      const { pageParam, limit: limitParam, search } = data || {}
       const page = pageParam || 1
-      const limit = limitParam || 10
+      const limit = Math.min(limitParam || 10, 100)
       const offset = (page - 1) * limit
 
+      const whereClause = search ? ilike(teams.name, `%${search}%`) : undefined
+
       const [items, total] = await Promise.all([
-        db.select().from(teams).limit(limit).offset(offset).orderBy(desc(teams.createdAt)),
-        db.$count(teams),
+        db
+          .select()
+          .from(teams)
+          .where(whereClause)
+          .limit(limit)
+          .offset(offset)
+          .orderBy(desc(teams.createdAt)),
+        db.$count(teams, whereClause),
       ])
 
       const teamIds = items.map((item) => item.id)
@@ -115,7 +124,7 @@ export const getTeamByIdFn = createServerFn({ method: 'GET' })
       if (!id) throw new Error('ID is required')
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const result = await db.select().from(teams).where(eq(teams.id, id))
+      const result = await db.select().from(teams).where(eq(teams.id, id)).limit(1)
       if (!result.length) return null
       const item = result[0]
       const memberRows = await db
@@ -184,23 +193,28 @@ export const createTeamFn = createServerFn({ method: 'POST' })
       }
 
       const teamId = crypto.randomUUID()
-      const [newItem] = await db
-        .insert(teams)
-        .values({
-          id: teamId,
-          name: normalizedName,
-          description: data.description,
-        })
-        .returning()
 
-      if (data.members.length > 0) {
-        await db.insert(teamMembers).values(
-          data.members.map((userId) => ({
-            teamId,
-            userId,
-          })),
-        )
-      }
+      const newItem = await db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(teams)
+          .values({
+            id: teamId,
+            name: normalizedName,
+            description: data.description,
+          })
+          .returning()
+
+        if (data.members.length > 0) {
+          await tx.insert(teamMembers).values(
+            data.members.map((userId) => ({
+              teamId,
+              userId,
+            })),
+          )
+        }
+
+        return created
+      })
 
       return {
         ...newItem,
@@ -282,15 +296,17 @@ export const updateTeamFn = createServerFn({ method: 'POST' })
 
       let members: string[] = []
       if (updateData.members !== undefined) {
-        await db.delete(teamMembers).where(eq(teamMembers.teamId, id))
-        if (updateData.members.length > 0) {
-          await db.insert(teamMembers).values(
-            updateData.members.map((userId) => ({
-              teamId: id,
-              userId,
-            })),
-          )
-        }
+        await db.transaction(async (tx) => {
+          await tx.delete(teamMembers).where(eq(teamMembers.teamId, id))
+          if (updateData.members!.length > 0) {
+            await tx.insert(teamMembers).values(
+              updateData.members!.map((userId) => ({
+                teamId: id,
+                userId,
+              })),
+            )
+          }
+        })
         members = updateData.members
       } else {
         const memberRows = await db
@@ -323,8 +339,10 @@ export const deleteTeamFn = createServerFn({ method: 'POST' })
       if (!id) throw new Error('ID is required')
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      await db.delete(teamMembers).where(eq(teamMembers.teamId, id))
-      await db.delete(teams).where(eq(teams.id, id))
+      await db.transaction(async (tx) => {
+        await tx.delete(teamMembers).where(eq(teamMembers.teamId, id))
+        await tx.delete(teams).where(eq(teams.id, id))
+      })
       return { success: true }
     } catch (error) {
       console.error('Error in deleteTeamFn:', error)

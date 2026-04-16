@@ -10,6 +10,50 @@ import {
   skills,
 } from '@/shared/lib/db/schema'
 
+/**
+ * Batch find-or-create skills by name. Returns a Map<skillName, skillId>.
+ */
+async function findOrCreateProjectSkills(
+  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
+  skillNames: string[],
+): Promise<Map<string, string>> {
+  if (skillNames.length === 0) return new Map()
+
+  const uniqueNames = [...new Set(skillNames)]
+  const existing = await db
+    .select({ id: skills.id, name: skills.name })
+    .from(skills)
+    .where(inArray(skills.name, uniqueNames))
+
+  const nameToId = new Map(existing.map((s) => [s.name, s.id]))
+
+  const missing = uniqueNames.filter((n) => !nameToId.has(n))
+  if (missing.length > 0) {
+    const newSkills = await db
+      .insert(skills)
+      .values(missing.map((name) => ({ id: crypto.randomUUID(), name })))
+      .onConflictDoNothing()
+      .returning()
+
+    for (const s of newSkills) {
+      nameToId.set(s.name, s.id)
+    }
+
+    const stillMissing = missing.filter((n) => !nameToId.has(n))
+    if (stillMissing.length > 0) {
+      const refetched = await db
+        .select({ id: skills.id, name: skills.name })
+        .from(skills)
+        .where(inArray(skills.name, stillMissing))
+      for (const s of refetched) {
+        nameToId.set(s.name, s.id)
+      }
+    }
+  }
+
+  return nameToId
+}
+
 export const projectSchema = z.object({
   name: z.string().min(1),
   description: z.string().nullable(),
@@ -89,7 +133,7 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
     try {
       const { pageParam, limit: limitParam, search, status } = data || {}
       const page = pageParam || 1
-      const limit = limitParam || 100
+      const limit = limitParam || 25
       const offset = (page - 1) * limit
 
       const { getDb } = await import('@/shared/lib/db')
@@ -142,7 +186,14 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
           .from(projectSkills)
           .innerJoin(skills, eq(projectSkills.skillId, skills.id))
           .where(inArray(projectSkills.projectId, projectIds)),
-        db.select().from(projectMembers).where(inArray(projectMembers.projectId, projectIds)),
+        db
+          .select({
+            projectId: projectMembers.projectId,
+            userId: projectMembers.userId,
+            role: projectMembers.role,
+          })
+          .from(projectMembers)
+          .where(inArray(projectMembers.projectId, projectIds)),
       ])
 
       const skillsMap = allSkills.reduce(
@@ -294,45 +345,53 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const [newItem] = await db
-        .insert(projects)
-        .values({
-          id: crypto.randomUUID(),
-          name: input.name,
-          description: input.description,
-          startDate: input.startDate ? new Date(input.startDate) : undefined,
-          endDate: input.endDate ? new Date(input.endDate) : undefined,
-          status: input.status,
-          type: input.type,
-          priority: input.priority,
-          budget: Math.round(input.budget),
-          departmentId: input.departmentId,
-        })
-        .returning()
 
-      if (input.skills && input.skills.length > 0) {
-        for (const skillName of input.skills) {
-          let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
-          if (!skill) {
-            ;[skill] = await db
-              .insert(skills)
-              .values({ id: crypto.randomUUID(), name: skillName })
-              .returning()
-          }
-          await db.insert(projectSkills).values({ projectId: newItem.id, skillId: skill.id })
+      // Pre-fetch or create all needed skills in batch (avoids N+1)
+      const skillMap =
+        input.skills && input.skills.length > 0
+          ? await findOrCreateProjectSkills(db, input.skills)
+          : new Map<string, string>()
+
+      const projectId = crypto.randomUUID()
+
+      const [newItem] = await db.transaction(async (tx) => {
+        const [created] = await tx
+          .insert(projects)
+          .values({
+            id: projectId,
+            name: input.name,
+            description: input.description,
+            startDate: input.startDate ? new Date(input.startDate) : undefined,
+            endDate: input.endDate ? new Date(input.endDate) : undefined,
+            status: input.status,
+            type: input.type,
+            priority: input.priority,
+            budget: Math.round(input.budget),
+            departmentId: input.departmentId,
+          })
+          .returning()
+
+        if (skillMap.size > 0 && input.skills) {
+          await tx.insert(projectSkills).values(
+            input.skills
+              .filter((name) => skillMap.has(name))
+              .map((name) => ({ projectId, skillId: skillMap.get(name)! })),
+          )
         }
-      }
 
-      if (input.team && input.team.length > 0) {
-        await db.insert(projectMembers).values(
-          input.team.map((m: { userId: string; role: ProjectMemberRole }) => ({
-            id: crypto.randomUUID(),
-            projectId: newItem.id,
-            userId: m.userId,
-            role: m.role,
-          })),
-        )
-      }
+        if (input.team && input.team.length > 0) {
+          await tx.insert(projectMembers).values(
+            input.team.map((m: { userId: string; role: ProjectMemberRole }) => ({
+              id: crypto.randomUUID(),
+              projectId,
+              userId: m.userId,
+              role: m.role,
+            })),
+          )
+        }
+
+        return [created]
+      })
 
       return {
         id: newItem.id,
@@ -363,55 +422,62 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const [updatedItem] = await db
-        .update(projects)
-        .set({
-          name: updateData.name,
-          description: updateData.description,
-          startDate: updateData.startDate ? new Date(updateData.startDate) : undefined,
-          endDate: updateData.endDate ? new Date(updateData.endDate) : undefined,
-          status: updateData.status,
-          type: updateData.type,
-          priority: updateData.priority,
-          budget: updateData.budget ? Math.round(updateData.budget) : undefined,
-          departmentId: updateData.departmentId,
-          updatedAt: new Date(),
-        })
-        .where(eq(projects.id, id))
-        .returning()
 
-      if (!updatedItem) {
-        throw new Error('Project not found for update')
-      }
+      // Pre-fetch or create all needed skills in batch (avoids N+1)
+      const skillMap =
+        updateData.skills && updateData.skills.length > 0
+          ? await findOrCreateProjectSkills(db, updateData.skills)
+          : null
 
-      if (updateData.skills) {
-        // Sync skills
-        await db.delete(projectSkills).where(eq(projectSkills.projectId, id))
-        for (const skillName of updateData.skills) {
-          let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
-          if (!skill) {
-            ;[skill] = await db
-              .insert(skills)
-              .values({ id: crypto.randomUUID(), name: skillName })
-              .returning()
+      const [updatedItem] = await db.transaction(async (tx) => {
+        const [updated] = await tx
+          .update(projects)
+          .set({
+            name: updateData.name,
+            description: updateData.description,
+            startDate: updateData.startDate ? new Date(updateData.startDate) : undefined,
+            endDate: updateData.endDate ? new Date(updateData.endDate) : undefined,
+            status: updateData.status,
+            type: updateData.type,
+            priority: updateData.priority,
+            budget: updateData.budget ? Math.round(updateData.budget) : undefined,
+            departmentId: updateData.departmentId,
+            updatedAt: new Date(),
+          })
+          .where(eq(projects.id, id))
+          .returning()
+
+        if (!updated) {
+          throw new Error('Project not found for update')
+        }
+
+        if (updateData.skills) {
+          await tx.delete(projectSkills).where(eq(projectSkills.projectId, id))
+          if (skillMap && skillMap.size > 0) {
+            await tx.insert(projectSkills).values(
+              updateData.skills
+                .filter((name) => skillMap.has(name))
+                .map((name) => ({ projectId: id, skillId: skillMap.get(name)! })),
+            )
           }
-          await db.insert(projectSkills).values({ projectId: id, skillId: skill.id })
         }
-      }
 
-      if (updateData.team) {
-        await db.delete(projectMembers).where(eq(projectMembers.projectId, id))
-        if (updateData.team.length > 0) {
-          await db.insert(projectMembers).values(
-            updateData.team.map((m: { userId: string; role: ProjectMemberRole }) => ({
-              id: crypto.randomUUID(),
-              projectId: id,
-              userId: m.userId,
-              role: m.role,
-            })),
-          )
+        if (updateData.team) {
+          await tx.delete(projectMembers).where(eq(projectMembers.projectId, id))
+          if (updateData.team.length > 0) {
+            await tx.insert(projectMembers).values(
+              updateData.team.map((m: { userId: string; role: ProjectMemberRole }) => ({
+                id: crypto.randomUUID(),
+                projectId: id,
+                userId: m.userId,
+                role: m.role,
+              })),
+            )
+          }
         }
-      }
+
+        return [updated]
+      })
 
       return {
         id: updatedItem.id,
@@ -441,8 +507,11 @@ export const deleteProjectFn = createServerFn({ method: 'POST' }).handler(
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      await db.delete(projectMembers).where(eq(projectMembers.projectId, id as string))
-      await db.delete(projects).where(eq(projects.id, id as string))
+      await db.transaction(async (tx) => {
+        await tx.delete(projectMembers).where(eq(projectMembers.projectId, id as string))
+        await tx.delete(projectSkills).where(eq(projectSkills.projectId, id as string))
+        await tx.delete(projects).where(eq(projects.id, id as string))
+      })
       return { success: true }
     } catch (error) {
       console.error('deleteProjectFn ERROR', error)

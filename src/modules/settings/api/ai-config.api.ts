@@ -55,8 +55,10 @@ export const aiConfigApi = {
       },
     }
 
-    await aiConfigApi.persistStore(nextStore)
-    await aiConfigApi.addAuditLog('update', nextConfig)
+    await Promise.all([
+      aiConfigApi.persistStore(nextStore),
+      aiConfigApi.addAuditLog('update', nextConfig),
+    ])
     return nextConfig
   },
 
@@ -88,8 +90,10 @@ export const aiConfigApi = {
       },
     }
 
-    await aiConfigApi.persistStore(nextStore)
-    await aiConfigApi.addAuditLog('reset', { provider })
+    await Promise.all([
+      aiConfigApi.persistStore(nextStore),
+      aiConfigApi.addAuditLog('reset', { provider }),
+    ])
   },
 
   persistStore: async (store: AiConfigStore): Promise<void> => {

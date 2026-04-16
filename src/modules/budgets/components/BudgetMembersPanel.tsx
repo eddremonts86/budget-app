@@ -23,6 +23,7 @@ import {
 import { Sheet } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
 import { useCurrentUser, useUserDirectory } from '@/modules/users'
+import { toast } from '@/shared/lib/toast'
 import {
   useBudgetMembers,
   useAddBudgetMember,
@@ -159,7 +160,16 @@ export function BudgetMembersPanel({ budgetId, ownerId }: BudgetMembersPanelProp
                     size="icon"
                     variant="ghost"
                     className="size-7 text-destructive"
-                    onClick={() => removeMutation.mutate({ budgetId, userId: member.userId })}
+                    onClick={() =>
+                      toast.error(t('budgets.members.removeConfirm'), {
+                        description: t('common.undoWarning'),
+                        action: {
+                          label: t('common.delete'),
+                          onClick: () => removeMutation.mutate({ budgetId, userId: member.userId }),
+                        },
+                        duration: 10000,
+                      })
+                    }
                     disabled={removeMutation.isPending}
                   >
                     <Trash2 className="size-3" />

@@ -1,5 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq, count, ilike, or, inArray, sql, type SQL } from 'drizzle-orm'
+import { alias } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
 import {
   departments,
@@ -16,6 +17,77 @@ import {
   users,
 } from '@/shared/lib/db/schema'
 import type { User as UserType } from '../model/types'
+
+/**
+ * Batch find-or-create skills by name. Returns a Map<skillName, skillId>.
+ * Uses a single SELECT + batch INSERT instead of N+1 queries.
+ */
+async function findOrCreateSkills(
+  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
+  skillNames: string[],
+): Promise<Map<string, string>> {
+  if (skillNames.length === 0) return new Map()
+
+  const uniqueNames = [...new Set(skillNames)]
+
+  // Single query to find all existing skills
+  const existing = await db
+    .select({ id: skills.id, name: skills.name })
+    .from(skills)
+    .where(inArray(skills.name, uniqueNames))
+
+  const nameToId = new Map(existing.map((s) => [s.name, s.id]))
+
+  // Batch-insert missing skills
+  const missing = uniqueNames.filter((n) => !nameToId.has(n))
+  if (missing.length > 0) {
+    const newSkills = await db
+      .insert(skills)
+      .values(missing.map((name) => ({ id: crypto.randomUUID(), name })))
+      .onConflictDoNothing()
+      .returning()
+
+    for (const s of newSkills) {
+      nameToId.set(s.name, s.id)
+    }
+
+    // In case of race condition (onConflictDoNothing), re-fetch any still missing
+    const stillMissing = missing.filter((n) => !nameToId.has(n))
+    if (stillMissing.length > 0) {
+      const refetched = await db
+        .select({ id: skills.id, name: skills.name })
+        .from(skills)
+        .where(inArray(skills.name, stillMissing))
+      for (const s of refetched) {
+        nameToId.set(s.name, s.id)
+      }
+    }
+  }
+
+  return nameToId
+}
+
+/**
+ * Sync user skills: delete existing, batch find-or-create, batch insert.
+ */
+async function syncUserSkills(
+  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
+  userId: string,
+  skillNames: string[],
+) {
+  await db.delete(userSkills).where(eq(userSkills.userId, userId))
+  if (skillNames.length === 0) return
+
+  const nameToId = await findOrCreateSkills(db, skillNames)
+
+  await db
+    .insert(userSkills)
+    .values(
+      skillNames
+        .filter((name) => nameToId.has(name))
+        .map((name) => ({ userId, skillId: nameToId.get(name)! })),
+    )
+}
 
 export const userSchema = z.object({
   id: z.string().optional(),
@@ -81,7 +153,7 @@ export const getUsersFn = createServerFn({ method: 'GET' })
       const db = getDb()
       const { pageParam, limit: limitParam, search, projectId, teamId, categoryId } = data || {}
       const page = pageParam || 1
-      const limit = limitParam || 10
+      const limit = Math.min(limitParam || 10, 100)
       const offset = (page - 1) * limit
 
       const whereClauses: SQL[] = []
@@ -136,6 +208,8 @@ export const getUsersFn = createServerFn({ method: 'GET' })
             ? whereClauses[0]
             : and(...whereClauses)
 
+      const managers = alias(users, 'managers')
+
       const [items, totalResult] = await Promise.all([
         db
           .select({
@@ -152,7 +226,7 @@ export const getUsersFn = createServerFn({ method: 'GET' })
             departmentId: users.departmentId,
             departmentName: departments.name,
             reportsTo: users.reportsTo,
-            reportsToName: sql<string>`(SELECT name FROM ${users} as u2 WHERE u2.id = ${users.reportsTo})`,
+            reportsToName: managers.name,
             salary: users.salary,
             createdAt: users.createdAt,
             updatedAt: users.updatedAt,
@@ -162,6 +236,7 @@ export const getUsersFn = createServerFn({ method: 'GET' })
           .leftJoin(jobTitles, eq(users.jobTitleId, jobTitles.id))
           .leftJoin(experienceLevels, eq(users.experienceLevelId, experienceLevels.id))
           .leftJoin(departments, eq(users.departmentId, departments.id))
+          .leftJoin(managers, eq(users.reportsTo, managers.id))
           .where(whereClause)
           .limit(limit)
           .offset(offset)
@@ -246,6 +321,7 @@ export const getUserByIdFn = createServerFn({ method: 'GET' })
       .leftJoin(experienceLevels, eq(users.experienceLevelId, experienceLevels.id))
       .leftJoin(departments, eq(users.departmentId, departments.id))
       .where(eq(users.id, id))
+      .limit(1)
 
     if (!result.length) return null
     const item = result[0]
@@ -298,6 +374,7 @@ export const getUsersByIdsFn = createServerFn({ method: 'POST' })
 
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
+    const managers = alias(users, 'managers')
 
     const result = await db
       .select({
@@ -314,7 +391,7 @@ export const getUsersByIdsFn = createServerFn({ method: 'POST' })
         departmentId: users.departmentId,
         departmentName: departments.name,
         reportsTo: users.reportsTo,
-        reportsToName: sql<string>`(SELECT name FROM ${users} as u2 WHERE u2.id = ${users.reportsTo})`,
+        reportsToName: managers.name,
         salary: users.salary,
         createdAt: users.createdAt,
         updatedAt: users.updatedAt,
@@ -324,14 +401,37 @@ export const getUsersByIdsFn = createServerFn({ method: 'POST' })
       .leftJoin(jobTitles, eq(users.jobTitleId, jobTitles.id))
       .leftJoin(experienceLevels, eq(users.experienceLevelId, experienceLevels.id))
       .leftJoin(departments, eq(users.departmentId, departments.id))
+      .leftJoin(managers, eq(users.reportsTo, managers.id))
       .where(inArray(users.id, uniqueIds))
+
+    // Fetch skills for these users (was previously always returning [])
+    const allSkills =
+      uniqueIds.length > 0
+        ? await db
+            .select({
+              userId: userSkills.userId,
+              skillName: skills.name,
+            })
+            .from(userSkills)
+            .innerJoin(skills, eq(userSkills.skillId, skills.id))
+            .where(inArray(userSkills.userId, uniqueIds))
+        : []
+
+    const skillsMap = allSkills.reduce(
+      (acc, curr) => {
+        if (!acc[curr.userId]) acc[curr.userId] = []
+        acc[curr.userId].push(curr.skillName)
+        return acc
+      },
+      {} as Record<string, string[]>,
+    )
 
     const usersById = new Map(
       result.map((item) => [
         item.id,
         {
           ...item,
-          skills: [] as string[],
+          skills: skillsMap[item.id] || [],
           createdAt: item.createdAt.toISOString(),
           updatedAt: item.updatedAt.toISOString(),
         },
@@ -355,7 +455,7 @@ export const getUserByEmailFn = createServerFn({ method: 'GET' })
   .handler(async ({ data: email }) => {
     const { getDb } = await import('@/shared/lib/db')
     const db = getDb()
-    const result = await db.select().from(users).where(eq(users.email, email))
+    const result = await db.select().from(users).where(eq(users.email, email)).limit(1)
     if (!result.length) return null
     const item = result[0]
     return {
@@ -389,17 +489,14 @@ export const createUserFn = createServerFn({ method: 'POST' })
       .returning()
 
     if (input.skills && input.skills.length > 0) {
-      // Find or create skills
-      for (const skillName of input.skills) {
-        let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
-        if (!skill) {
-          ;[skill] = await db
-            .insert(skills)
-            .values({ id: crypto.randomUUID(), name: skillName })
-            .returning()
-        }
-        await db.insert(userSkills).values({ userId: newItem.id, skillId: skill.id })
-      }
+      const nameToId = await findOrCreateSkills(db, input.skills)
+      await db
+        .insert(userSkills)
+        .values(
+          input.skills
+            .filter((name) => nameToId.has(name))
+            .map((name) => ({ userId: newItem.id, skillId: nameToId.get(name)! })),
+        )
     }
 
     return {
@@ -442,18 +539,7 @@ export const updateUserFn = createServerFn({ method: 'POST' })
     }
 
     if (updateData.skills) {
-      // Sync skills
-      await db.delete(userSkills).where(eq(userSkills.userId, id))
-      for (const skillName of updateData.skills) {
-        let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
-        if (!skill) {
-          ;[skill] = await db
-            .insert(skills)
-            .values({ id: crypto.randomUUID(), name: skillName })
-            .returning()
-        }
-        await db.insert(userSkills).values({ userId: id, skillId: skill.id })
-      }
+      await syncUserSkills(db, id, updateData.skills)
     }
 
     return {
@@ -514,18 +600,7 @@ export const upsertUserFn = createServerFn({ method: 'POST' })
       }
 
       if (input.skills) {
-        // Sync skills
-        await db.delete(userSkills).where(eq(userSkills.userId, upserted.id))
-        for (const skillName of input.skills) {
-          let [skill] = await db.select().from(skills).where(eq(skills.name, skillName))
-          if (!skill) {
-            ;[skill] = await db
-              .insert(skills)
-              .values({ id: crypto.randomUUID(), name: skillName })
-              .returning()
-          }
-          await db.insert(userSkills).values({ userId: upserted.id, skillId: skill.id })
-        }
+        await syncUserSkills(db, upserted.id, input.skills)
       }
 
       return {

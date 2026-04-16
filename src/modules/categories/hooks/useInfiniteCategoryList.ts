@@ -3,8 +3,8 @@ import { DEFAULT_PAGE_SIZE, flattenInfinitePages } from '@/shared/ui/tables'
 import { useInfiniteCategories } from '../api/categories.queries'
 import type { Category } from '../model/types'
 
-export function useInfiniteCategoryList() {
-  const query = useInfiniteCategories(DEFAULT_PAGE_SIZE)
+export function useInfiniteCategoryList(search?: string) {
+  const query = useInfiniteCategories(DEFAULT_PAGE_SIZE, search)
 
   const totalCount = query.data?.pages[0]?.totalCount ?? 0
   const categories = React.useMemo(

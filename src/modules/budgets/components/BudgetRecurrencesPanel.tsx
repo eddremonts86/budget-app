@@ -15,6 +15,7 @@ import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
+import { toast } from '@/shared/lib/toast'
 import {
   useBudgetRecurrenceRules,
   useUpdateRecurrenceRule,
@@ -196,7 +197,16 @@ export function BudgetRecurrencesPanel({ budgetId, currency }: BudgetRecurrences
                     size="icon"
                     variant="ghost"
                     className="size-8 rounded-lg text-destructive hover:text-destructive"
-                    onClick={() => deleteMutation.mutate(rule.id)}
+                    onClick={() =>
+                      toast.error(t('budgets.recurrences.deleteConfirm'), {
+                        description: t('common.undoWarning'),
+                        action: {
+                          label: t('common.delete'),
+                          onClick: () => deleteMutation.mutate(rule.id),
+                        },
+                        duration: 10000,
+                      })
+                    }
                     disabled={deleteMutation.isPending}
                   >
                     <Trash2 className="size-3.5" />

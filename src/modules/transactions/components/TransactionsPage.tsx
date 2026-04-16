@@ -14,7 +14,6 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Sheet } from '@/components/ui/sheet'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { Textarea } from '@/components/ui/textarea'
 import { useProjects } from '@/modules/projects'
@@ -27,6 +26,7 @@ import {
 } from '@/modules/users/model/permissions'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
+import { TableErrorState, TableSearchBar, TableSkeleton } from '@/shared/ui/tables'
 import { DataTable, UnifiedDataTable, type DataTableBulkAction } from '@/shared/ui/tables/DataTable'
 import {
   useCreateTransaction,
@@ -277,6 +277,9 @@ export function TransactionsPage() {
   const { t } = useTranslation()
   const [isCreateOpen, setIsCreateOpen] = React.useState(false)
   const [editingTransaction, setEditingTransaction] = React.useState<Transaction | null>(null)
+  const [historySearch, setHistorySearch] = React.useState('')
+  const deferredHistorySearch = React.useDeferredValue(historySearch)
+  const activeHistorySearch = deferredHistorySearch.length >= 2 ? deferredHistorySearch : undefined
 
   // Infinite scroll for history (all transactions)
   const {
@@ -285,8 +288,9 @@ export function TransactionsPage() {
     hasNextPage,
     isFetchingNextPage,
     isLoading,
+    isFetching,
     isError,
-  } = useInfiniteTransactions(20)
+  } = useInfiniteTransactions(20, undefined, activeHistorySearch)
 
   const allTransactions = React.useMemo(() => {
     if (!infiniteData?.pages) return []
@@ -550,15 +554,34 @@ export function TransactionsPage() {
   ]
 
   if (isError) {
-    return <div>{t('transactions.error.description')}</div>
+    return (
+      <TableErrorState
+        titleKey="transactions.error.title"
+        descriptionKey="transactions.error.description"
+      />
+    )
   }
 
+  const transactionsTotalCount = infiniteData?.pages[0]?.totalCount ?? 0
+
   return (
-    <div className="flex flex-col h-full min-h-0 gap-8">
-      <div className="flex items-center justify-between shrink-0">
-        <h2 className="text-3xl font-bold tracking-tight">{t('transactions.title')}</h2>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+    <div className="flex flex-col h-full min-h-0 gap-4">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t('transactions.title')}
+            {transactionsTotalCount > 0 && (
+              <span className="ml-2 text-muted-foreground font-normal text-2xl">
+                ({transactionsTotalCount})
+              </span>
+            )}
+          </h2>
+          <p className="text-muted-foreground">
+            {t('transactions.subtitle', 'Review, approve and manage all financial transactions.')}
+          </p>
+        </div>
+        <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
           {t('transactions.actions.create')}
         </Button>
       </div>
@@ -607,12 +630,17 @@ export function TransactionsPage() {
             <h3 className="text-xl font-semibold tracking-tight shrink-0">
               {t('transactions.history')}
             </h3>
+            <TableSearchBar
+              searchInput={historySearch}
+              onSearchChange={setHistorySearch}
+              onClear={() => setHistorySearch('')}
+              loadedCount={allTransactions.length}
+              totalCount={infiniteData?.pages[0]?.totalCount ?? 0}
+              showSpinner={isFetching && !isFetchingNextPage}
+              placeholderKey="transactions.searchPlaceholder"
+            />
             {isLoading ? (
-              <div className="space-y-2">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-              </div>
+              <TableSkeleton rows={5} />
             ) : (
               <>
                 <UnifiedDataTable

@@ -16,7 +16,11 @@ export const getBudgetSpendingByCategoryFn = createServerFn({ method: 'GET' })
     const user = await requireCurrentAppUser()
     const db = await loadDb()
 
-    const [budgetRow] = await db.select().from(budgets).where(eq(budgets.id, budgetId))
+    const [budgetRow] = await db
+      .select({ periodType: budgets.periodType, startDate: budgets.startDate })
+      .from(budgets)
+      .where(eq(budgets.id, budgetId))
+      .limit(1)
     if (!budgetRow) return []
 
     const period = getCurrentPeriodBounds(budgetRow.periodType, budgetRow.startDate)
@@ -91,7 +95,11 @@ export const getBudgetMemberSpendingFn = createServerFn({ method: 'GET' })
     const user = await requireCurrentAppUser()
     const db = await loadDb()
 
-    const [budgetRow] = await db.select().from(budgets).where(eq(budgets.id, budgetId))
+    const [budgetRow] = await db
+      .select({ periodType: budgets.periodType, startDate: budgets.startDate })
+      .from(budgets)
+      .where(eq(budgets.id, budgetId))
+      .limit(1)
     if (!budgetRow) return []
 
     const period = getCurrentPeriodBounds(budgetRow.periodType, budgetRow.startDate)

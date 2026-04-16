@@ -1,8 +1,7 @@
-import { Search, X, UserPlus } from 'lucide-react'
+import { X, UserPlus } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
 import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
 import {
   Select,
@@ -16,7 +15,13 @@ import { useCategories } from '@/modules/categories'
 import { useProjects } from '@/modules/projects'
 import { useTeams } from '@/modules/team'
 import { toast } from '@/shared/lib/toast'
-import { flattenInfinitePages, TableErrorState, TableSkeleton } from '@/shared/ui/tables'
+import {
+  flattenInfinitePages,
+  TableEmptyState,
+  TableErrorState,
+  TableSearchBar,
+  TableSkeleton,
+} from '@/shared/ui/tables'
 import { useCreateUser, useDeleteUser, useInfiniteUsers, useUpdateUser } from '../api/users.queries'
 import type { User } from '../model/types'
 import { UserForm } from './UserForm'
@@ -37,7 +42,7 @@ export function UsersPage() {
   const { data: teams = [] } = useTeams()
   const { data: categories = [] } = useCategories()
 
-  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isError } =
+  const { data, fetchNextPage, hasNextPage, isFetchingNextPage, isLoading, isFetching, isError } =
     useInfiniteUsers(10, deferredSearch, { projectId, teamId, categoryId })
 
   const hasActiveFilters = Boolean(search.trim() || projectId || teamId || categoryId)
@@ -80,43 +85,38 @@ export function UsersPage() {
   }
 
   return (
-    <div className="flex flex-col h-full space-y-8 animate-in fade-in duration-500">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 shrink-0">
+    <div className="flex flex-col h-full space-y-4 animate-in fade-in duration-500">
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
         <div className="space-y-1">
-          <h2 className="bg-linear-to-r from-foreground to-foreground/70 bg-clip-text text-4xl font-bold tracking-tight">
+          <h2 className="text-3xl font-bold tracking-tight">
             {t('users.title')}
+            {totalCount > 0 && (
+              <span className="ml-2 text-muted-foreground font-normal text-2xl">
+                ({totalCount})
+              </span>
+            )}
           </h2>
-          <p className="text-muted-foreground font-medium">
-            {t('users.subtitlePrefix')}
-            <span className="text-foreground">{totalCount}</span>
-            {t('users.subtitleSuffix')}
+          <p className="text-muted-foreground">
+            {t('users.subtitle', 'Manage your team members, roles and permissions.')}
           </p>
         </div>
-        <Button
-          onClick={() => setIsCreateOpen(true)}
-          className="rounded-2xl h-12 px-6 gap-2 bg-primary hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95"
-        >
-          <UserPlus className="w-5 h-5" />
+        <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
+          <UserPlus className="h-4 w-4" />
           {t('users.actions.new')}
         </Button>
       </div>
 
-      <div className="grid gap-3 rounded-3xl border border-border/40 bg-card/60 p-4 md:grid-cols-[minmax(0,1.6fr)_repeat(3,minmax(0,1fr))_auto] md:items-center">
-        <div className="relative">
-          <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-          <Input
-            value={search}
-            onChange={(event) => {
-              const nextValue = event.target.value
-              React.startTransition(() => {
-                setSearch(nextValue)
-              })
-            }}
-            placeholder={t('users.filters.search', { defaultValue: 'Search users...' })}
-            className="h-11 rounded-2xl border-dashed border-border/60 bg-background pl-10"
-          />
-        </div>
+      <TableSearchBar
+        searchInput={search}
+        onSearchChange={(value) => React.startTransition(() => setSearch(value))}
+        onClear={() => React.startTransition(() => setSearch(''))}
+        loadedCount={allUsers.length}
+        totalCount={totalCount}
+        showSpinner={isFetching && !isFetchingNextPage}
+        placeholderKey="users.filters.search"
+      />
 
+      <div className="grid gap-3 rounded-3xl border border-border/40 bg-card/60 p-4 md:grid-cols-[repeat(3,minmax(0,1fr))_auto] md:items-center">
         <Select
           value={projectId ?? emptyFilterValue}
           onValueChange={(value) => {
@@ -204,6 +204,8 @@ export function UsersPage() {
 
       {isLoading ? (
         <TableSkeleton rows={5} />
+      ) : allUsers.length === 0 ? (
+        <TableEmptyState isSearchActive={hasActiveFilters} onClearSearch={clearFilters} />
       ) : (
         <div className="relative group flex-1 min-h-0 flex flex-col">
           <UserTable

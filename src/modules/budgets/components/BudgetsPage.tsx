@@ -8,7 +8,8 @@ import {
   IconEdit,
   IconTrash,
 } from '@tabler/icons-react'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
+import { LayoutGrid, List } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
@@ -19,11 +20,14 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
-import { Skeleton } from '@/components/ui/skeleton'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
+import { TableErrorState, TableSearchBar, TableSkeleton } from '@/shared/ui/tables'
+import { useDebouncedSearch } from '@/shared/ui/tables'
+import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
 import type { BudgetImport } from '../api/budget-import.queries'
 import { useInfiniteBudgets, useDeleteBudget } from '../api/budgets.queries'
+import { useBudgetColumns } from '../hooks/useBudgetColumns'
 import { formatAmount } from '../model/period-utils'
 import type { BudgetHealthStatus, BudgetScope, Budget } from '../model/types'
 import { BudgetImportWizard } from './BudgetImportWizard'
@@ -51,18 +55,22 @@ const HEALTH_PROGRESS_COLOR: Record<BudgetHealthStatus, string> = {
 export function BudgetsPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const [viewMode, setViewMode] = React.useState<'cards' | 'table'>('cards')
   const [createOpen, setCreateOpen] = React.useState(false)
   const [importOpen, setImportOpen] = React.useState(false)
   const [editingBudget, setEditingBudget] = React.useState<Budget | null>(null)
   const [pendingImportId, setPendingImportId] = React.useState<string | null>(null)
   const [pendingOverrides, setPendingOverrides] = React.useState<ImportOverride[]>([])
+  const { searchInput, setSearchInput, activeSearch, clearSearch } = useDebouncedSearch()
   const {
     data: infiniteData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading,
-  } = useInfiniteBudgets(20)
+    isFetching,
+    isError,
+  } = useInfiniteBudgets(20, { search: activeSearch })
   const budgets = React.useMemo(() => {
     if (!infiniteData?.pages) return []
     const seen = new Set<string>()
@@ -125,15 +133,44 @@ export function BudgetsPage() {
     }
   }
 
+  const budgetColumns = useBudgetColumns((budget) => setEditingBudget(budget), handleDeleteBudget)
+  const totalCount = infiniteData?.pages[0]?.totalCount ?? 0
+  const showSearchSpinner = isFetching && !isFetchingNextPage
+
   return (
-    <div className="p-6 space-y-6">
+    <div className="p-6 space-y-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">{t('budgets.title')}</h1>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t('budgets.title')}
+            {totalCount > 0 && (
+              <span className="ml-2 text-muted-foreground font-normal text-2xl">
+                ({totalCount})
+              </span>
+            )}
+          </h2>
           <p className="text-muted-foreground">{t('budgets.description')}</p>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-3">
+          <div className="flex items-center rounded-lg border border-border/60 p-0.5">
+            <Button
+              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('cards')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('table')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
           <Button variant="outline" onClick={() => setImportOpen(true)} className="gap-2">
             <IconUpload className="size-4" />
             {t('budgets.import.actions.import')}
@@ -145,13 +182,23 @@ export function BudgetsPage() {
         </div>
       </div>
 
-      {/* Budget Cards Grid */}
+      <TableSearchBar
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        onClear={clearSearch}
+        loadedCount={budgets.length}
+        totalCount={totalCount}
+        showSpinner={showSearchSpinner}
+      />
+
+      {/* Budget Content */}
       {isLoading ? (
-        <div className="columns-1 md:columns-2 lg:columns-3 gap-x-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-48 rounded-xl mb-4 break-inside-avoid" />
-          ))}
-        </div>
+        <TableSkeleton rows={5} />
+      ) : isError ? (
+        <TableErrorState
+          titleKey="budgets.error.title"
+          descriptionKey="budgets.error.description"
+        />
       ) : !budgets?.length ? (
         <div className="flex flex-col items-center justify-center py-20 text-center space-y-4">
           <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center">
@@ -166,6 +213,36 @@ export function BudgetsPage() {
             {t('budgets.actions.create')}
           </Button>
         </div>
+      ) : viewMode === 'table' ? (
+        <>
+          <UnifiedDataTable
+            columns={budgetColumns}
+            data={budgets}
+            enableGrouping
+            groupableColumns={['scope', 'status', 'periodType', 'currency']}
+            enablePagination
+            pageSizeOptions={[10, 20, 50]}
+            initialPageSize={20}
+            enableExport
+            exportFileName="budgets.csv"
+            enableSelection={false}
+            fullHeight
+          />
+          <div className="h-10 flex items-center justify-center shrink-0">
+            {hasNextPage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage
+                  ? t('common.loading')
+                  : t('common.loadMore', { defaultValue: 'Load more' })}
+              </Button>
+            )}
+          </div>
+        </>
       ) : (
         <>
           <div className="columns-1 md:columns-2 lg:columns-3 gap-x-4">

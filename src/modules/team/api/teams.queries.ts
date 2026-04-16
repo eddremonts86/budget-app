@@ -20,10 +20,10 @@ export const useTeams = () => {
   })
 }
 
-export const useInfiniteTeams = (limit = 20) => {
+export const useInfiniteTeams = (limit = 20, search?: string) => {
   return useTQInfinite(
-    [...teamKeys.infinite(), { limit }],
-    ({ pageParam }) => getTeamsFn({ data: { pageParam, limit } }),
+    [...teamKeys.infinite(), { limit, search }],
+    ({ pageParam }) => getTeamsFn({ data: { pageParam, limit, search } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,

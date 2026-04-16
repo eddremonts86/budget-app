@@ -147,10 +147,15 @@ async function getExpensesSnapshot(db: Awaited<ReturnType<typeof loadDb>>, perio
   }
 }
 
-async function getNetBalanceSnapshot(db: Awaited<ReturnType<typeof loadDb>>, periodStart: Date) {
+async function getNetBalanceSnapshot(
+  db: Awaited<ReturnType<typeof loadDb>>,
+  periodStart: Date,
+  precomputedRevenue?: Awaited<ReturnType<typeof getRevenueSnapshot>>,
+  precomputedExpenses?: Awaited<ReturnType<typeof getExpensesSnapshot>>,
+) {
   const [revenue, expenses] = await Promise.all([
-    getRevenueSnapshot(db, periodStart),
-    getExpensesSnapshot(db, periodStart),
+    precomputedRevenue ?? getRevenueSnapshot(db, periodStart),
+    precomputedExpenses ?? getExpensesSnapshot(db, periodStart),
   ])
 
   const value = revenue.value - expenses.value
@@ -246,11 +251,13 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' })
         db.select({ count: count() }).from(todos).where(eq(todos.status, 'pending')),
       ])
 
-      const [revenue, expenses, netBalance] = await Promise.all([
+      const [revenue, expenses] = await Promise.all([
         getRevenueSnapshot(db, periodStart),
         getExpensesSnapshot(db, periodStart),
-        getNetBalanceSnapshot(db, periodStart),
       ])
+
+      // Pass precomputed revenue/expenses to avoid duplicate DB queries
+      const netBalance = await getNetBalanceSnapshot(db, periodStart, revenue, expenses)
 
       // Check if we should return mock data in E2E mode
       if (isE2E && revenue.value === 0 && expenses.value === 0 && activeProjectsRow.count === 0) {
@@ -296,7 +303,17 @@ export const getRecentTransactionsFn = createServerFn({ method: 'GET' })
 
     try {
       const db = await loadDb()
-      const items = await db.select().from(transactions).limit(5).orderBy(desc(transactions.date))
+      const items = await db
+        .select({
+          id: transactions.id,
+          date: transactions.date,
+          amount: transactions.amount,
+          status: transactions.status,
+          description: transactions.description,
+        })
+        .from(transactions)
+        .limit(5)
+        .orderBy(desc(transactions.date))
 
       if (isE2E && items.length === 0) {
         return Array.from({ length: 5 }).map((_, i) => ({

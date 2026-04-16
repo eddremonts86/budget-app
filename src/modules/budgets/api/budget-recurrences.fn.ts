@@ -144,7 +144,18 @@ export async function processRecurrenceRulesForBudget(budgetId: string) {
   const now = new Date()
 
   const dueRules = await db
-    .select()
+    .select({
+      id: budgetRecurrenceRules.id,
+      budgetId: budgetRecurrenceRules.budgetId,
+      categoryId: budgetRecurrenceRules.categoryId,
+      userId: budgetRecurrenceRules.userId,
+      amount: budgetRecurrenceRules.amount,
+      frequency: budgetRecurrenceRules.frequency,
+      interval: budgetRecurrenceRules.interval,
+      description: budgetRecurrenceRules.description,
+      nextDate: budgetRecurrenceRules.nextDate,
+      status: budgetRecurrenceRules.status,
+    })
     .from(budgetRecurrenceRules)
     .where(
       and(
@@ -154,15 +165,19 @@ export async function processRecurrenceRulesForBudget(budgetId: string) {
       ),
     )
 
+  if (dueRules.length === 0) return { processed: 0 }
+
   let processed = 0
 
-  for (const rule of dueRules) {
-    await db.transaction(async (tx) => {
+  // Process all due rules in a single transaction
+  await db.transaction(async (tx) => {
+    for (const rule of dueRules) {
       let currentDate = rule.nextDate
       let iterations = 0
+      const transactionValues: (typeof transactions.$inferInsert)[] = []
 
       while (currentDate <= now && iterations < MAX_CATCHUP_ITERATIONS) {
-        await tx.insert(transactions).values({
+        transactionValues.push({
           id: crypto.randomUUID(),
           budgetId: rule.budgetId,
           categoryId: rule.categoryId,
@@ -181,6 +196,11 @@ export async function processRecurrenceRulesForBudget(budgetId: string) {
         processed++
       }
 
+      // Batch insert all transactions for this rule
+      if (transactionValues.length > 0) {
+        await tx.insert(transactions).values(transactionValues)
+      }
+
       if (iterations >= MAX_CATCHUP_ITERATIONS && currentDate <= now) {
         console.warn(`[Recurrence] Rule ${rule.id} hit catch-up limit. Pausing.`)
         await tx
@@ -193,8 +213,8 @@ export async function processRecurrenceRulesForBudget(budgetId: string) {
           .set({ nextDate: currentDate, lastRunAt: new Date(), updatedAt: new Date() })
           .where(eq(budgetRecurrenceRules.id, rule.id))
       }
-    })
-  }
+    }
+  })
 
   return { processed }
 }

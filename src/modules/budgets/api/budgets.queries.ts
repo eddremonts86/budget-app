@@ -49,7 +49,10 @@ export function useBudgets(filters?: { scope?: string; status?: string }) {
   )
 }
 
-export function useInfiniteBudgets(limit = 20, filters?: { scope?: string; status?: string }) {
+export function useInfiniteBudgets(
+  limit = 20,
+  filters?: { scope?: string; status?: string; search?: string },
+) {
   return useTQInfinite(
     budgetKeys.infinite(filters),
     ({ pageParam }) =>
@@ -57,6 +60,7 @@ export function useInfiniteBudgets(limit = 20, filters?: { scope?: string; statu
         data: {
           pageParam,
           limit,
+          search: filters?.search,
           scope: filters?.scope as 'personal' | 'project' | 'department' | 'company' | undefined,
           status: filters?.status as 'active' | 'closed' | 'archived' | undefined,
         },

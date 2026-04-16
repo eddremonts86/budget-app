@@ -1,5 +1,5 @@
 import { IconEdit, IconTrash, IconUsers } from '@tabler/icons-react'
-import { Plus, Search } from 'lucide-react'
+import { LayoutGrid, List, Plus, Search } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
@@ -14,13 +14,16 @@ import {
 } from '@/components/ui/crud-sheet'
 import { Input } from '@/components/ui/input'
 import { Sheet } from '@/components/ui/sheet'
-import { Skeleton } from '@/components/ui/skeleton'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useUserDirectory, useUsersByIds } from '@/modules/users'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
+import { TableErrorState, TableSearchBar, TableSkeleton } from '@/shared/ui/tables'
+import { useDebouncedSearch } from '@/shared/ui/tables'
+import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
 import { useCreateTeam, useDeleteTeam, useInfiniteTeams, useUpdateTeam } from '../api/teams.queries'
+import { useTeamColumns } from '../hooks/useTeamColumns'
 import type { TeamWithUsers } from '../model/types'
 
 interface TeamFormState {
@@ -37,13 +40,17 @@ const initialFormState: TeamFormState = {
 
 export function TeamPage() {
   const { t } = useTranslation()
+  const [viewMode, setViewMode] = React.useState<'cards' | 'table'>('cards')
+  const { searchInput, setSearchInput, activeSearch, clearSearch } = useDebouncedSearch()
   const {
     data: infiniteData,
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
     isLoading: isTeamsLoading,
-  } = useInfiniteTeams(20)
+    isFetching,
+    isError,
+  } = useInfiniteTeams(20, activeSearch)
   const rawTeams = React.useMemo(() => {
     if (!infiniteData?.pages) return []
     const seen = new Set<string>()
@@ -210,28 +217,68 @@ export function TeamPage() {
     })
   }
 
+  const teamColumns = useTeamColumns(handleEditOpen, handleDelete)
+  const totalCount = infiniteData?.pages[0]?.totalCount ?? 0
+  const showSearchSpinner = isFetching && !isFetchingNextPage
+
   if (isLoading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-8 w-48" />
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {(['member-1', 'member-2', 'member-3'] as const).map((id) => (
-            <Skeleton key={id} className="h-48 rounded-xl" />
-          ))}
-        </div>
-      </div>
-    )
+    return <TableSkeleton rows={5} />
+  }
+
+  if (isError) {
+    return <TableErrorState titleKey="team.error.title" descriptionKey="team.error.description" />
   }
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <div className="flex items-center justify-between shrink-0">
-        <h2 className="text-3xl font-bold tracking-tight">{t('team.title')}</h2>
-        <Button onClick={handleCreateOpen} className="gap-2">
-          <Plus className="h-4 w-4" />
-          {t('team.actions.new', { defaultValue: 'New Team' })}
-        </Button>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t('team.title')}
+            {totalCount > 0 && (
+              <span className="ml-2 text-muted-foreground font-normal text-2xl">
+                ({totalCount})
+              </span>
+            )}
+          </h2>
+          <p className="text-muted-foreground">
+            {t('team.subtitle', 'Create and manage teams across your organization.')}
+          </p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="flex items-center rounded-lg border border-border/60 p-0.5">
+            <Button
+              variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('cards')}
+            >
+              <LayoutGrid className="h-4 w-4" />
+            </Button>
+            <Button
+              variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+              size="icon"
+              className="h-8 w-8"
+              onClick={() => setViewMode('table')}
+            >
+              <List className="h-4 w-4" />
+            </Button>
+          </div>
+          <Button onClick={handleCreateOpen} className="gap-2">
+            <Plus className="h-4 w-4" />
+            {t('team.actions.new', { defaultValue: 'New Team' })}
+          </Button>
+        </div>
       </div>
+
+      <TableSearchBar
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        onClear={clearSearch}
+        loadedCount={teams.length}
+        totalCount={totalCount}
+        showSpinner={showSearchSpinner}
+      />
       {teams.length === 0 ? (
         <div className="flex flex-col items-center justify-center flex-1 text-center p-8 border-2 border-dashed rounded-lg">
           <IconUsers className="h-12 w-12 text-muted-foreground mb-4 opacity-20" />
@@ -248,6 +295,36 @@ export function TeamPage() {
             {t('team.actions.new', { defaultValue: 'New Team' })}
           </Button>
         </div>
+      ) : viewMode === 'table' ? (
+        <>
+          <UnifiedDataTable
+            columns={teamColumns}
+            data={teams}
+            enableGrouping
+            groupableColumns={['memberCount']}
+            enablePagination
+            pageSizeOptions={[10, 20, 50]}
+            initialPageSize={20}
+            enableExport
+            exportFileName="teams.csv"
+            enableSelection={false}
+            fullHeight
+          />
+          <div className="h-10 flex items-center justify-center shrink-0">
+            {hasNextPage && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => fetchNextPage()}
+                disabled={isFetchingNextPage}
+              >
+                {isFetchingNextPage
+                  ? t('common.loading')
+                  : t('common.loadMore', { defaultValue: 'Load more' })}
+              </Button>
+            )}
+          </div>
+        </>
       ) : (
         <div className="flex-1 min-h-0 overflow-y-auto">
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 content-start">

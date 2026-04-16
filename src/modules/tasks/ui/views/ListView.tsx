@@ -1,12 +1,9 @@
 import { TooltipProvider } from '@/components/ui/tooltip'
-import {
-  TableEmptyState,
-  TableErrorState,
-  TableSearchBar,
-  TableSkeleton,
-  VirtualTable,
-} from '@/shared/ui/tables'
+import { Button } from '@/components/ui/button'
+import { TableEmptyState, TableErrorState, TableSearchBar, TableSkeleton } from '@/shared/ui/tables'
 import { useDebouncedSearch } from '@/shared/ui/tables'
+import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
+import { useTranslation } from 'react-i18next'
 import { useInfiniteTodoList } from '../../hooks/useInfiniteTodoList'
 import { useTodoActions } from '../../hooks/useTodoActions'
 import { useTodoColumns } from '../../hooks/useTodoColumns'
@@ -23,6 +20,7 @@ interface ListViewProps {
 }
 
 export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: ListViewProps) {
+  const { t } = useTranslation()
   const { canModify, handleEdit, handleDelete } = useTodoActions(onEdit)
   const { searchInput, setSearchInput, activeSearch, clearSearch } = useDebouncedSearch()
 
@@ -66,16 +64,35 @@ export function ListView({ onEdit, assignedTo, status, onTotalCountChange }: Lis
         />
 
         {todos.length > 0 ? (
-          <VirtualTable
-            columns={columns}
-            data={todos}
-            hasNextPage={hasNextPage}
-            isFetchingNextPage={isFetchingNextPage}
-            onFetchNextPage={fetchNextPage}
-            scrollResetKey={`${assignedTo}-${status}-${activeSearch}`}
-            rowHeight={64}
-            cellClassName="py-4 px-6 text-sm border-b border-border/40 align-top"
-          />
+          <>
+            <UnifiedDataTable
+              columns={columns}
+              data={todos}
+              enableGrouping
+              groupableColumns={['status', 'priority', 'assignedTo']}
+              enablePagination
+              pageSizeOptions={[10, 20, 50]}
+              initialPageSize={20}
+              enableExport
+              exportFileName="todos.csv"
+              enableSelection={false}
+              fullHeight
+            />
+            <div className="h-10 flex items-center justify-center shrink-0">
+              {hasNextPage && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => fetchNextPage()}
+                  disabled={isFetchingNextPage}
+                >
+                  {isFetchingNextPage
+                    ? t('common.loading')
+                    : t('common.loadMore', { defaultValue: 'Load more' })}
+                </Button>
+              )}
+            </div>
+          </>
         ) : (
           <TableEmptyState
             isSearchActive={activeSearch !== undefined}

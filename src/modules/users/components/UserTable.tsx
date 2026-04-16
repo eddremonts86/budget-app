@@ -1,4 +1,6 @@
-import { VirtualTable } from '@/shared/ui/tables'
+import { useTranslation } from 'react-i18next'
+import { Button } from '@/components/ui/button'
+import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
 import type { User } from '../model/types'
 import { useUserColumns } from '../hooks/useUserColumns'
 
@@ -19,20 +21,39 @@ export function UserTable({
   hasNextPage,
   isFetchingNextPage,
   onFetchNextPage,
-  scrollResetKey,
 }: UserTableProps) {
+  const { t } = useTranslation()
   const columns = useUserColumns(onEdit, onDelete)
 
   return (
-    <VirtualTable
-      columns={columns}
-      data={users}
-      hasNextPage={hasNextPage}
-      isFetchingNextPage={isFetchingNextPage}
-      onFetchNextPage={onFetchNextPage}
-      scrollResetKey={scrollResetKey}
-      rowHeight={64}
-      cellClassName="py-4 px-6 text-sm border-b border-border/40 align-middle"
-    />
+    <>
+      <UnifiedDataTable
+        columns={columns}
+        data={users}
+        enableGrouping
+        groupableColumns={['roleName', 'departmentName', 'jobTitleName']}
+        enablePagination
+        pageSizeOptions={[10, 20, 50]}
+        initialPageSize={20}
+        enableExport
+        exportFileName="users.csv"
+        enableSelection={false}
+        fullHeight
+      />
+      <div className="h-10 flex items-center justify-center shrink-0">
+        {hasNextPage && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onFetchNextPage()}
+            disabled={isFetchingNextPage}
+          >
+            {isFetchingNextPage
+              ? t('common.loading')
+              : t('common.loadMore', { defaultValue: 'Load more' })}
+          </Button>
+        )}
+      </div>
+    </>
   )
 }

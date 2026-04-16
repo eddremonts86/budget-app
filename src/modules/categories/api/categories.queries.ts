@@ -17,10 +17,10 @@ export const categoryKeys = {
   detail: (id: string) => [...categoryKeys.details(), id] as const,
 }
 
-export const useInfiniteCategories = (limit = DEFAULT_PAGE_SIZE) => {
+export const useInfiniteCategories = (limit = DEFAULT_PAGE_SIZE, search?: string) => {
   return useTQInfinite(
-    categoryKeys.infinite(),
-    ({ pageParam }) => getCategoriesFn({ data: { pageParam, limit } }),
+    [...categoryKeys.infinite(), { search }],
+    ({ pageParam }) => getCategoriesFn({ data: { pageParam, limit, search } }),
     {
       initialPageParam: 1,
       getNextPageParam: (lastPage) => lastPage.nextPage,

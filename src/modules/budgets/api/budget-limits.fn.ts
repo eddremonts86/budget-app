@@ -17,7 +17,11 @@ export const getBudgetCategoryLimitsFn = createServerFn({ method: 'GET' })
     await requireCurrentAppUser()
     const db = await loadDb()
 
-    const [budgetRow] = await db.select().from(budgets).where(eq(budgets.id, budgetId))
+    const [budgetRow] = await db
+      .select({ periodType: budgets.periodType, startDate: budgets.startDate })
+      .from(budgets)
+      .where(eq(budgets.id, budgetId))
+      .limit(1)
     if (!budgetRow) return []
 
     const period = getCurrentPeriodBounds(budgetRow.periodType, budgetRow.startDate)
@@ -71,7 +75,11 @@ export const upsertBudgetCategoryLimitFn = createServerFn({ method: 'POST' })
     const db = await loadDb()
 
     // Validate: sum of limits must not exceed budget target
-    const [budgetRow] = await db.select().from(budgets).where(eq(budgets.id, data.budgetId))
+    const [budgetRow] = await db
+      .select({ targetAmount: budgets.targetAmount })
+      .from(budgets)
+      .where(eq(budgets.id, data.budgetId))
+      .limit(1)
     if (budgetRow?.targetAmount !== null && budgetRow?.targetAmount !== undefined) {
       const [{ currentTotal }] = await db
         .select({

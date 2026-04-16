@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { CrudSheetHeader } from '@/components/ui/crud-sheet'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { useCreateTodo } from '../../api/todos.queries'
 import type { Todo } from '../../model/types'
 import { TodoForm } from '../TodoForm'
@@ -25,16 +25,13 @@ export function TodoCreateSheet({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent
-        showCloseButton={false}
-        className="sm:max-w-135 border-l border-border/40 bg-background flex flex-col p-0"
-      >
+      <CrudSheetContent>
         <CrudSheetHeader
           title={t('todos.sheet.createTitle', 'Create Task')}
           description={t('todos.sheet.createDescription', 'Add a new task to your list.')}
           onClose={() => onOpenChange(false)}
         />
-        <div className="flex-1 overflow-y-auto p-6">
+        <CrudSheetBody>
           {open && (
             <TodoForm
               defaultValues={defaultValues}
@@ -50,8 +47,8 @@ export function TodoCreateSheet({
               isLoading={createMutation.isPending}
             />
           )}
-        </div>
-      </SheetContent>
+        </CrudSheetBody>
+      </CrudSheetContent>
     </Sheet>
   )
 }

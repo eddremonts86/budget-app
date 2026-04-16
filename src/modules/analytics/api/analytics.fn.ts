@@ -27,10 +27,8 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' })
       const [
         [totalIncome],
         [totalExpenses],
-        [activeProjects],
-        [completedProjects],
-        [totalTasks],
-        [completedTasks],
+        projectStats,
+        taskStats,
         [activeUsers],
       ] = await Promise.all([
         db
@@ -41,21 +39,37 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' })
           .select({ value: sum(transactions.amount) })
           .from(transactions)
           .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`)),
-        db.select({ count: count() }).from(projects).where(eq(projects.status, 'active')),
-        db.select({ count: count() }).from(projects).where(eq(projects.status, 'completed')),
-        db.select({ count: count() }).from(todos),
-        db.select({ count: count() }).from(todos).where(eq(todos.status, 'completed')),
+        db
+          .select({
+            status: projects.status,
+            count: count(),
+          })
+          .from(projects)
+          .where(sql`${projects.status} IN ('active', 'completed')`)
+          .groupBy(projects.status),
+        db
+          .select({
+            total: count(),
+            completed: sql<number>`COUNT(*) FILTER (WHERE ${todos.status} = 'completed')`,
+          })
+          .from(todos),
         db.select({ count: count() }).from(users),
       ])
 
       const incomeValue = Number(totalIncome?.value ?? 0)
       const expenseValue = Math.abs(Number(totalExpenses?.value ?? 0))
       const netBalance = incomeValue - expenseValue
+
+      const activeProjects = projectStats.find((p) => p.status === 'active')?.count ?? 0
+      const completedProjects = projectStats.find((p) => p.status === 'completed')?.count ?? 0
+      const totalTasks = Number(taskStats[0]?.total ?? 0)
+      const completedTasks = Number(taskStats[0]?.completed ?? 0)
+
       const taskCompletionRate =
-        totalTasks.count > 0 ? Math.round((completedTasks.count / totalTasks.count) * 100) : 0
+        totalTasks > 0 ? Math.round((completedTasks / totalTasks) * 100) : 0
 
       // If E2E and no data in DB, return mock
-      if (isE2E && incomeValue === 0 && expenseValue === 0 && activeProjects.count === 0) {
+      if (isE2E && incomeValue === 0 && expenseValue === 0 && activeProjects === 0) {
         return {
           revenue: 125000,
           expenses: 45000,
@@ -73,10 +87,10 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' })
         revenue: incomeValue,
         expenses: expenseValue,
         netBalance,
-        activeProjects: activeProjects.count,
-        completedProjects: completedProjects.count,
-        totalTasks: totalTasks.count,
-        completedTasks: completedTasks.count,
+        activeProjects,
+        completedProjects,
+        totalTasks,
+        completedTasks,
         taskCompletionRate,
         activeUsers: activeUsers.count,
       }
@@ -247,7 +261,15 @@ export const getProjectPerformanceFn = createServerFn({ method: 'GET' })
     try {
       const db = await loadDb()
 
-      const allProjects = await db.select().from(projects)
+      const allProjects = await db
+        .select({
+          id: projects.id,
+          name: projects.name,
+          status: projects.status,
+          budget: projects.budget,
+        })
+        .from(projects)
+        .limit(200)
 
       if (isE2E && allProjects.length === 0) {
         return [
@@ -294,24 +316,30 @@ export const getProjectPerformanceFn = createServerFn({ method: 'GET' })
         ]
       }
 
-      const allTodos = await db
-        .select({
-          projectId: todos.projectId,
-          status: todos.status,
-          actualTime: todos.actualTime,
-          estimatedTime: todos.estimatedTime,
-        })
-        .from(todos)
+      // Use GROUP BY to aggregate todo stats per project in a single query
+      const projectIds = allProjects.map((p) => p.id)
+      const todoStats =
+        projectIds.length > 0
+          ? await db
+              .select({
+                projectId: todos.projectId,
+                total: count(),
+                completed: sql<number>`COUNT(*) FILTER (WHERE ${todos.status} = 'completed')`,
+                totalHours: sql<number>`COALESCE(SUM(${todos.actualTime}), 0)`,
+              })
+              .from(todos)
+              .where(inArray(todos.projectId, projectIds))
+              .groupBy(todos.projectId)
+          : []
+
+      const statsMap = new Map(todoStats.map((s) => [s.projectId, s]))
 
       return allProjects.map((project) => {
-        const projectTodos = allTodos.filter((t) => t.projectId === project.id)
-        const total = projectTodos.length
-        const completed = projectTodos.filter((t) => t.status === 'completed').length
+        const stats = statsMap.get(project.id)
+        const total = Number(stats?.total ?? 0)
+        const completed = Number(stats?.completed ?? 0)
         const progress = total > 0 ? Math.round((completed / total) * 100) : 0
-
-        // Calculate budget usage if we had cost per hour, for now just use random logic or 0
-        // Assuming actualTime is in hours and rate is $50/hr
-        const totalHours = projectTodos.reduce((sum, t) => sum + (t.actualTime || 0), 0)
+        const totalHours = Number(stats?.totalHours ?? 0)
         const estimatedCost = totalHours * 50
 
         return {
@@ -728,7 +756,15 @@ export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
 
       // Fetch only the users we need
       const userIds = workloadStats.map((s) => s.userId).filter((id): id is string => id !== null)
-      const userRows = await db.select().from(users).where(inArray(users.id, userIds))
+      const userRows = await db
+        .select({
+          id: users.id,
+          name: users.name,
+          email: users.email,
+          createdAt: users.createdAt,
+        })
+        .from(users)
+        .where(inArray(users.id, userIds))
 
       const usersMap = new Map(userRows.map((u) => [u.id, u]))
 

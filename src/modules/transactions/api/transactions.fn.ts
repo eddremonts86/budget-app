@@ -49,7 +49,8 @@ export const getTransactionsFn = createServerFn({ method: 'GET' })
 
     try {
       const db = await loadDb()
-      const { pageParam, limit, status, search } = data
+      const { pageParam, status, search } = data
+      const limit = Math.min(data.limit, 100)
       const page = pageParam
       const offset = (page - 1) * limit
 
@@ -153,7 +154,7 @@ export const getTransactionByIdFn = createServerFn({ method: 'GET' })
     try {
       if (!id) throw new Error('ID is required')
       const db = await loadDb()
-      const result = await db.select().from(transactions).where(eq(transactions.id, id))
+      const result = await db.select().from(transactions).where(eq(transactions.id, id)).limit(1)
       if (!result.length) {
         if (isE2E) {
           return {
@@ -302,7 +303,11 @@ export const updateTransactionFn = createServerFn({ method: 'POST' })
     try {
       const db = await loadDb()
       const [existingTransaction] = await db
-        .select()
+        .select({
+          id: transactions.id,
+          status: transactions.status,
+          assignedAdminId: transactions.assignedAdminId,
+        })
         .from(transactions)
         .where(eq(transactions.id, id))
         .limit(1)

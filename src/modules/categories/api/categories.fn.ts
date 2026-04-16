@@ -1,7 +1,6 @@
 import { createServerFn } from '@tanstack/react-start'
-import { eq } from 'drizzle-orm'
+import { eq, ilike } from 'drizzle-orm'
 import { z } from 'zod'
-// import { db } from '@/shared/lib/db'
 import { categories } from '@/shared/lib/db/schema'
 
 export const categorySchema = z.object({
@@ -15,6 +14,7 @@ const categoryListParamsSchema = z
   .object({
     pageParam: z.number().optional(),
     limit: z.number().optional(),
+    search: z.string().optional(),
   })
   .optional()
 
@@ -41,14 +41,16 @@ export const getCategoriesFn = createServerFn({ method: 'GET' })
     try {
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const { pageParam, limit: limitParam } = data || {}
+      const { pageParam, limit: limitParam, search } = data || {}
       const page = pageParam || 1
-      const limit = limitParam || 10
+      const limit = Math.min(limitParam || 10, 100)
       const offset = (page - 1) * limit
 
+      const whereClause = search ? ilike(categories.name, `%${search}%`) : undefined
+
       const [items, total] = await Promise.all([
-        db.select().from(categories).limit(limit).offset(offset),
-        db.$count(categories),
+        db.select().from(categories).where(whereClause).limit(limit).offset(offset),
+        db.$count(categories, whereClause),
       ])
 
       const totalPages = Math.ceil(total / limit)
@@ -83,7 +85,7 @@ export const getCategoryByIdFn = createServerFn({ method: 'GET' })
       if (!id) throw new Error('ID is required')
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
-      const result = await db.select().from(categories).where(eq(categories.id, id))
+      const result = await db.select().from(categories).where(eq(categories.id, id)).limit(1)
       return result[0] || null
     } catch {
       return null

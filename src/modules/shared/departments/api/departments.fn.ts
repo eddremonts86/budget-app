@@ -32,7 +32,19 @@ export const getDepartmentsFn = createServerFn({ method: 'GET' }).handler(
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
 
-      const items = await db.select().from(departments).orderBy(desc(departments.name))
+      const items = await db
+        .select({
+          id: departments.id,
+          name: departments.name,
+          managerId: departments.managerId,
+          budget: departments.budget,
+          location: departments.location,
+          createdAt: departments.createdAt,
+          updatedAt: departments.updatedAt,
+        })
+        .from(departments)
+        .orderBy(desc(departments.name))
+        .limit(500)
 
       return items.map((item) => ({
         id: item.id,

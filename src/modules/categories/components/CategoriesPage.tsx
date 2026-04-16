@@ -4,6 +4,7 @@ import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
 import { Sheet } from '@/components/ui/sheet'
+import { useInfiniteCategories } from '../api/categories.queries'
 import { useCreateCategory, useUpdateCategory } from '../api/categories.queries'
 import type { Category } from '../model/types'
 import { CategoriesListView } from '../ui/views/CategoriesListView'
@@ -16,15 +17,27 @@ export function CategoriesPage() {
 
   const createMutation = useCreateCategory()
   const updateMutation = useUpdateCategory()
+  const { data: catData } = useInfiniteCategories()
+  const totalCount = catData?.pages[0]?.totalCount ?? 0
 
   return (
     <div className="flex flex-col h-full space-y-4">
-      <div className="flex items-center justify-between shrink-0">
-        <div>
-          <h2 className="text-3xl font-bold tracking-tight">{t('categories.title')}</h2>
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 shrink-0">
+        <div className="space-y-1">
+          <h2 className="text-3xl font-bold tracking-tight">
+            {t('categories.title')}
+            {totalCount > 0 && (
+              <span className="ml-2 text-muted-foreground font-normal text-2xl">
+                ({totalCount})
+              </span>
+            )}
+          </h2>
+          <p className="text-muted-foreground">
+            {t('categories.subtitle', 'Organize and manage your project categories.')}
+          </p>
         </div>
-        <Button onClick={() => setIsCreateOpen(true)}>
-          <Plus className="mr-2 h-4 w-4" />
+        <Button onClick={() => setIsCreateOpen(true)} className="gap-2">
+          <Plus className="h-4 w-4" />
           {t('categories.add')}
         </Button>
       </div>

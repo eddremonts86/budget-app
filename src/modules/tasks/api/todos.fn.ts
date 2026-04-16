@@ -47,7 +47,8 @@ export const getTodosFn = createServerFn({ method: 'GET' })
 
     try {
       const db = await loadDb()
-      const { pageParam, limit, status, assignedTo, search } = data
+      const { pageParam, status, assignedTo, search } = data
+      const limit = Math.min(data.limit, 100)
       const page = pageParam
       const offset = (page - 1) * limit
 
@@ -150,7 +151,7 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
     try {
       if (!id) throw new Error('ID is required')
       const db = await loadDb()
-      const result = await db.select().from(todos).where(eq(todos.id, id))
+      const result = await db.select().from(todos).where(eq(todos.id, id)).limit(1)
       if (!result.length) {
         if (isE2E) {
           return {
@@ -220,7 +221,12 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
     try {
       if (!projectId) throw new Error('Project ID is required')
       const db = await loadDb()
-      const result = await db.select().from(todos).where(eq(todos.projectId, projectId))
+      const result = await db
+        .select()
+        .from(todos)
+        .where(eq(todos.projectId, projectId))
+        .orderBy(desc(todos.createdAt))
+        .limit(500)
 
       if (isE2E && result.length === 0) {
         return Array.from({ length: 5 }).map((_, i) => ({

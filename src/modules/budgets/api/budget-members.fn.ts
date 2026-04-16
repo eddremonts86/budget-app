@@ -47,11 +47,15 @@ export const addBudgetMemberFn = createServerFn({ method: 'POST' })
     const db = await loadDb()
 
     // Verify requester is owner or admin
-    const [budgetRow] = await db.select().from(budgets).where(eq(budgets.id, data.budgetId))
+    const [budgetRow] = await db
+      .select({ ownerId: budgets.ownerId })
+      .from(budgets)
+      .where(eq(budgets.id, data.budgetId))
+      .limit(1)
     const isOwner = budgetRow?.ownerId === user.id
     if (!isOwner) {
       const [adminCheck] = await db
-        .select()
+        .select({ role: budgetMembers.role })
         .from(budgetMembers)
         .where(
           and(
@@ -60,6 +64,7 @@ export const addBudgetMemberFn = createServerFn({ method: 'POST' })
             eq(budgetMembers.role, 'admin'),
           ),
         )
+        .limit(1)
       if (!adminCheck) throw new Error('Only admins or owners can add members')
     }
 
@@ -86,7 +91,7 @@ export const updateBudgetMemberRoleFn = createServerFn({ method: 'POST' })
     const db = await loadDb()
 
     const [adminCheck] = await db
-      .select()
+      .select({ role: budgetMembers.role })
       .from(budgetMembers)
       .where(
         and(
@@ -95,6 +100,7 @@ export const updateBudgetMemberRoleFn = createServerFn({ method: 'POST' })
           eq(budgetMembers.role, 'admin'),
         ),
       )
+      .limit(1)
     if (!adminCheck) throw new Error('Only admins can change member roles')
 
     await db
@@ -112,7 +118,7 @@ export const removeBudgetMemberFn = createServerFn({ method: 'POST' })
     const db = await loadDb()
 
     const [adminCheck] = await db
-      .select()
+      .select({ role: budgetMembers.role })
       .from(budgetMembers)
       .where(
         and(
@@ -121,6 +127,7 @@ export const removeBudgetMemberFn = createServerFn({ method: 'POST' })
           eq(budgetMembers.role, 'admin'),
         ),
       )
+      .limit(1)
     if (!adminCheck) throw new Error('Only admins can remove members')
 
     // Pause that user's recurrence rules in this budget

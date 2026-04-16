@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
-import { CrudSheetHeader } from '@/components/ui/crud-sheet'
-import { Sheet, SheetContent } from '@/components/ui/sheet'
+import { CrudSheetBody, CrudSheetContent, CrudSheetHeader } from '@/components/ui/crud-sheet'
+import { Sheet } from '@/components/ui/sheet'
 import { useUpdateTodo } from '../../api/todos.queries'
 import type { Todo } from '../../model/types'
 import { TodoForm } from '../TodoForm'
@@ -22,16 +22,13 @@ export function TodoEditSheet({ todo, onClose, currentUserId }: TodoEditSheetPro
         if (!open) onClose()
       }}
     >
-      <SheetContent
-        showCloseButton={false}
-        className="sm:max-w-135 border-l border-border/40 bg-background flex flex-col p-0"
-      >
+      <CrudSheetContent>
         <CrudSheetHeader
           title={t('todos.sheet.editTitle', 'Edit Task')}
           description={t('todos.sheet.editDescription', 'Update task details.')}
           onClose={onClose}
         />
-        <div className="flex-1 overflow-y-auto p-6">
+        <CrudSheetBody>
           {todo && (
             <TodoForm
               defaultValues={todo}
@@ -44,8 +41,8 @@ export function TodoEditSheet({ todo, onClose, currentUserId }: TodoEditSheetPro
               isLoading={updateMutation.isPending}
             />
           )}
-        </div>
-      </SheetContent>
+        </CrudSheetBody>
+      </CrudSheetContent>
     </Sheet>
   )
 }
