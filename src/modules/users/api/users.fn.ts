@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq, count, ilike, or, inArray, sql, type SQL } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
+import type { getDb } from '@/shared/lib/db'
 import {
   departments,
   experienceLevels,
@@ -23,7 +24,7 @@ import type { User as UserType } from '../model/types'
  * Uses a single SELECT + batch INSERT instead of N+1 queries.
  */
 async function findOrCreateSkills(
-  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
+  db: ReturnType<typeof getDb>,
   skillNames: string[],
 ): Promise<Map<string, string>> {
   if (skillNames.length === 0) return new Map()
@@ -70,11 +71,7 @@ async function findOrCreateSkills(
 /**
  * Sync user skills: delete existing, batch find-or-create, batch insert.
  */
-async function syncUserSkills(
-  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
-  userId: string,
-  skillNames: string[],
-) {
+async function syncUserSkills(db: ReturnType<typeof getDb>, userId: string, skillNames: string[]) {
   await db.delete(userSkills).where(eq(userSkills.userId, userId))
   if (skillNames.length === 0) return
 

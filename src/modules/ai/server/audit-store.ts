@@ -54,7 +54,7 @@ export async function writeAuditSettings(
   const { fs, resolveAiDataFilePath } = await loadNodeModules()
   const { settingsPath } = resolveAuditPaths(resolveAiDataFilePath)
 
-  let current: Record<string, unknown> = {}
+  let current: Record<string, unknown>
   try {
     const content = await fs.readFile(settingsPath, 'utf-8')
     current = JSON.parse(content)

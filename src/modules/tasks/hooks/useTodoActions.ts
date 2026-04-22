@@ -24,7 +24,7 @@ export function useTodoActions(onEdit: (todo: Todo) => void) {
 
   const handleEdit = React.useCallback(
     (todo: Todo) => {
-      if (!canModifyTodo(todo, syncedUserId, userRole)) {
+      if (!canModify(todo)) {
         toast.warning(t('common.noPermission'), {
           description: t('common.noPermissionEdit'),
         })
@@ -32,12 +32,12 @@ export function useTodoActions(onEdit: (todo: Todo) => void) {
       }
       onEdit(todo)
     },
-    [syncedUserId, userRole, onEdit, t],
+    [canModify, onEdit, t],
   )
 
   const handleDelete = React.useCallback(
     (todo: Todo) => {
-      if (!canModifyTodo(todo, syncedUserId, userRole)) {
+      if (!canModify(todo)) {
         toast.warning(t('common.noPermission'), {
           description: t('common.noPermissionDelete'),
         })
@@ -52,7 +52,7 @@ export function useTodoActions(onEdit: (todo: Todo) => void) {
         duration: 10000,
       })
     },
-    [syncedUserId, userRole, deleteTodo, t],
+    [canModify, deleteTodo, t],
   )
 
   return { canModify, handleEdit, handleDelete, syncedUserId, userRole }

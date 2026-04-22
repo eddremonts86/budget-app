@@ -14,14 +14,14 @@ import {
   useDebouncedSearch,
   DEFAULT_PAGE_SIZE,
 } from '@/shared/ui/tables'
-import { useInfiniteProjectPerformance } from '../api/analytics.queries'
 import type { ProjectPerformanceRow } from '../api/analytics.fn'
+import { useInfiniteProjectPerformance } from '../api/analytics.queries'
 
 export function ProjectPerformance() {
   const { t } = useTranslation()
-  const { search, debouncedSearch, setSearch, isDebouncing } = useDebouncedSearch()
+  const { searchInput, setSearchInput, activeSearch, clearSearch } = useDebouncedSearch()
 
-  const query = useInfiniteProjectPerformance(DEFAULT_PAGE_SIZE, debouncedSearch)
+  const query = useInfiniteProjectPerformance(DEFAULT_PAGE_SIZE, activeSearch)
   const totalCount = query.data?.pages[0]?.totalCount ?? 0
   const projects = React.useMemo(
     () => flattenInfinitePages<ProjectPerformanceRow>(query.data?.pages),
@@ -83,7 +83,7 @@ export function ProjectPerformance() {
   }
 
   if (query.isError) {
-    return <TableErrorState onRetry={() => query.refetch()} />
+    return <TableErrorState />
   }
 
   return (
@@ -105,13 +105,15 @@ export function ProjectPerformance() {
       <CardContent>
         <div className="space-y-4">
           <TableSearchBar
-            value={search}
-            onChange={setSearch}
+            searchInput={searchInput}
+            onSearchChange={setSearchInput}
+            onClear={clearSearch}
+            loadedCount={projects.length}
             totalCount={totalCount}
-            isDebouncing={isDebouncing}
+            showSpinner={query.isFetchingNextPage}
           />
           {projects.length === 0 && !query.isFetching ? (
-            <TableEmptyState />
+            <TableEmptyState isSearchActive={!!activeSearch} onClearSearch={clearSearch} />
           ) : (
             <div className="h-[400px] flex flex-col">
               <VirtualTable
@@ -120,7 +122,7 @@ export function ProjectPerformance() {
                 hasNextPage={query.hasNextPage}
                 isFetchingNextPage={query.isFetchingNextPage}
                 onFetchNextPage={() => query.fetchNextPage()}
-                scrollResetKey={debouncedSearch}
+                scrollResetKey={activeSearch}
               />
             </div>
           )}

@@ -1,8 +1,24 @@
 import { createFileRoute } from '@tanstack/react-router'
+import { logAudit } from '@/modules/ai/audit'
 import type { AiProviderId } from '@/modules/ai/config'
 import { buildChatSystemPrompt, resolveLanguageName } from '@/modules/ai/prompts'
+import {
+  consolidateChatMessages,
+  createAiChatResponse,
+  createJsonErrorResponse,
+  createJsonResponse,
+  findLastUserQuery,
+  getErrorDetails,
+  injectReferenceContext,
+  isDashboardDomainQuery,
+  normalizeIncomingChatMessages,
+  resolveProviderRuntime,
+  streamLmStudioChat,
+  streamOllamaChat,
+} from '@/modules/ai/server'
 import type { ChatMessages } from '@/modules/ai/server'
 import type { IncomingChatMessage } from '@/modules/ai/server/chat-messages'
+import { isE2E } from '@/shared/lib/env'
 
 const DEFAULT_OLLAMA_CHAT_MODEL = process.env.AI_CHAT_OLLAMA_MODEL || 'qwen3.5:0.8b'
 
@@ -20,24 +36,6 @@ type ChatRequestBody = {
 
 export const handleChatPost = async ({ request }: { request: Request }) => {
   try {
-    const {
-      consolidateChatMessages,
-      createAiChatResponse,
-      createJsonErrorResponse,
-      createJsonResponse,
-      findLastUserQuery,
-      injectReferenceContext,
-      isDashboardDomainQuery,
-      normalizeIncomingChatMessages,
-      resolveProviderRuntime,
-      streamLmStudioChat,
-      streamOllamaChat,
-    } = await import('@/modules/ai/server')
-
-    const isE2E = process.env.VITE_E2E === 'true'
-
-    const [{ logAudit }] = await Promise.all([import('@/modules/ai/audit')])
-
     const body = (await request.json()) as ChatRequestBody
     const rawMessages = Array.isArray(body.messages) ? body.messages : []
 
@@ -123,7 +121,6 @@ export const handleChatPost = async ({ request }: { request: Request }) => {
       params: body.params,
     })
   } catch (error) {
-    const { createJsonErrorResponse, getErrorDetails } = await import('@/modules/ai/server')
     const { message, stack } = getErrorDetails(error)
     return createJsonErrorResponse(message, 500, { stack })
   }

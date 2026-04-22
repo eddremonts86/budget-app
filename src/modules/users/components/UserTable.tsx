@@ -1,8 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
 import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
-import type { User } from '../model/types'
 import { useUserColumns } from '../hooks/useUserColumns'
+import type { User } from '../model/types'
 
 interface UserTableProps {
   users: User[]

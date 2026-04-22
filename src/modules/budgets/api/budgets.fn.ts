@@ -2,16 +2,13 @@ import { createServerFn } from '@tanstack/react-start'
 import { eq, and, or, ilike, inArray, sql, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
+import type { getDb } from '@/shared/lib/db'
+import { loadDb } from '@/shared/lib/db/load'
 import { budgets, budgetMembers, transactions } from '@/shared/lib/db/schema'
 import { getCurrentPeriodBounds, computeHealthStatus } from '../model/period-utils'
 import { createBudgetSchema, updateBudgetSchema } from '../model/schema'
 import type { Budget, BudgetHealthSummary } from '../model/types'
 import { processRecurrenceRulesForBudget } from './budget-recurrences.fn'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
 
 function serializeBudget(row: typeof budgets.$inferSelect): Budget {
   return {
@@ -27,7 +24,7 @@ function serializeBudget(row: typeof budgets.$inferSelect): Budget {
 }
 
 async function computeBudgetHealth(
-  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
+  db: ReturnType<typeof getDb>,
   budgetId: string,
   budget: Pick<typeof budgets.$inferSelect, 'periodType' | 'startDate' | 'targetAmount'>,
 ): Promise<BudgetHealthSummary> {
@@ -73,7 +70,7 @@ async function computeBudgetHealth(
  * Groups budgets by (periodType, startDate) to minimize DB round-trips.
  */
 async function computeBudgetHealthBatch(
-  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
+  db: ReturnType<typeof getDb>,
   budgetRows: Pick<
     typeof budgets.$inferSelect,
     'id' | 'periodType' | 'startDate' | 'targetAmount'
@@ -348,6 +345,7 @@ export const updateBudgetFn = createServerFn({ method: 'POST' })
     const db = await loadDb()
 
     const { id, ...updateData } = data
+    if (!id) throw new Error('Budget ID is required')
 
     const [row] = await db
       .select({

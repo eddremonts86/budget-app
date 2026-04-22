@@ -32,7 +32,7 @@ async function signInInBrowser(email: string, password: string) {
           body: JSON.stringify(credentials),
         })
 
-        let payload: unknown = null
+        let payload: unknown
 
         try {
           payload = await response.json()

@@ -26,9 +26,8 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet'
 import { Skeleton } from '@/components/ui/skeleton'
+import { UserForm, type User, type UserFormValues } from '@/modules/users'
 import { useCreateUser, useUserDirectory } from '@/modules/users'
-import { UserForm, type UserFormValues } from '@/modules/users'
-import type { User } from '@/modules/users'
 import { toast } from '@/shared/lib/toast'
 import {
   useProjectMembers,

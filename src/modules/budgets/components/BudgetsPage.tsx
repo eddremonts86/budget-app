@@ -22,14 +22,18 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
-import { TableErrorState, TableSearchBar, TableSkeleton } from '@/shared/ui/tables'
-import { useDebouncedSearch } from '@/shared/ui/tables'
+import {
+  TableErrorState,
+  TableSearchBar,
+  TableSkeleton,
+  useDebouncedSearch,
+} from '@/shared/ui/tables'
 import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
 import type { BudgetImport } from '../api/budget-import.queries'
 import { useInfiniteBudgets, useDeleteBudget } from '../api/budgets.queries'
 import { useBudgetColumns } from '../hooks/useBudgetColumns'
 import { formatAmount } from '../model/period-utils'
-import type { BudgetHealthStatus, BudgetScope, Budget } from '../model/types'
+import type { BudgetHealthStatus, BudgetHealthSummary, BudgetScope, Budget } from '../model/types'
 import { BudgetImportWizard } from './BudgetImportWizard'
 import type { ImportOverride } from './BudgetImportWizard'
 import { BudgetMiniCharts } from './BudgetMiniCharts'
@@ -75,7 +79,7 @@ export function BudgetsPage() {
     if (!infiniteData?.pages) return []
     const seen = new Set<string>()
     const result: (Budget & {
-      health: import('../model/types').BudgetHealthSummary
+      health: BudgetHealthSummary
       memberCount: number
     })[] = []
     for (const page of infiniteData.pages) {
@@ -87,7 +91,7 @@ export function BudgetsPage() {
       }
     }
     return result
-  }, [infiniteData?.pages])
+  }, [infiniteData])
   const deleteBudget = useDeleteBudget()
 
   // Infinite scroll sentinel

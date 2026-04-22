@@ -42,6 +42,7 @@ export function VirtualTodoTable<TData>({
     }
   }, [scrollResetKey])
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data,
     columns,

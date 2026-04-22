@@ -2,13 +2,9 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq, isNull, notLike, or, sql } from 'drizzle-orm'
 import { z } from 'zod'
 import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
+import { loadDb } from '@/shared/lib/db/load'
 import { budgets, categories, transactions, users } from '@/shared/lib/db/schema'
 import { getCurrentPeriodBounds } from '../model/period-utils'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
 
 export const getBudgetSpendingByCategoryFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string())

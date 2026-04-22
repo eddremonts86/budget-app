@@ -1,13 +1,52 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, desc, count, and, gte, inArray, ilike, lt, lte } from 'drizzle-orm'
 import { z } from 'zod'
+import { loadDb } from '@/shared/lib/db/load'
 import { todos } from '@/shared/lib/db/schema'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
+import { isE2E } from '@/shared/lib/env'
 // import { requireAuth } from '@/shared/lib/auth/server'
+
+function buildMockTodo(
+  i: number,
+  overrides?: {
+    id?: string
+    title?: string
+    description?: string
+    status?:
+      | 'pending'
+      | 'in_progress'
+      | 'completed'
+      | 'on_hold'
+      | 'testing'
+      | 'blocked'
+      | 'cancelled'
+    priority?: 'low' | 'medium' | 'high'
+    projectId?: string | null
+    assignedTo?: string
+    categoryId?: string | null
+  },
+) {
+  return {
+    id: overrides?.id ?? i.toString(),
+    title: overrides?.title ?? `Task ${i}`,
+    description: (overrides?.description ?? `Description ${i}`) as string | null,
+    status: overrides?.status ?? 'pending',
+    priority: overrides?.priority ?? 'medium',
+    dueDate: new Date().toISOString(),
+    projectId: overrides?.projectId !== undefined ? overrides.projectId : 'project-1',
+    assignedTo: overrides?.assignedTo ?? 'user-1',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    completedAt: null,
+    complexity: 1,
+    estimatedTime: 0,
+    actualTime: 0,
+    dependencies: [] as string[],
+    acceptanceCriteria: '',
+    createdBy: 'user-1',
+    categoryId: overrides?.categoryId !== undefined ? overrides.categoryId : null,
+  }
+}
 
 export const todoSchema = z.object({
   title: z.string().min(1),
@@ -43,8 +82,6 @@ export const getTodosFn = createServerFn({ method: 'GET' })
     }),
   )
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const { pageParam, status, assignedTo, search } = data
@@ -75,26 +112,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
 
       if (isE2E && items.length === 0) {
         return {
-          data: Array.from({ length: 10 }).map((_, i) => ({
-            id: i.toString(),
-            title: `Task ${i}`,
-            description: `Description ${i}`,
-            status: 'pending' as const,
-            priority: 'medium' as const,
-            dueDate: new Date().toISOString(),
-            projectId: 'project-1',
-            assignedTo: 'user-1',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            completedAt: null,
-            complexity: 1,
-            estimatedTime: 0,
-            actualTime: 0,
-            dependencies: [],
-            acceptanceCriteria: '',
-            createdBy: 'user-1',
-            categoryId: null,
-          })),
+          data: Array.from({ length: 10 }).map((_, i) => buildMockTodo(i)),
           nextPage: undefined,
           totalCount: 10,
         }
@@ -115,26 +133,7 @@ export const getTodosFn = createServerFn({ method: 'GET' })
     } catch (error) {
       if (isE2E) {
         return {
-          data: Array.from({ length: 10 }).map((_, i) => ({
-            id: i.toString(),
-            title: `Task ${i}`,
-            description: `Description ${i}`,
-            status: 'pending' as const,
-            priority: 'medium' as const,
-            dueDate: new Date().toISOString(),
-            projectId: 'project-1',
-            assignedTo: 'user-1',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            completedAt: null,
-            complexity: 1,
-            estimatedTime: 0,
-            actualTime: 0,
-            dependencies: [],
-            acceptanceCriteria: '',
-            createdBy: 'user-1',
-            categoryId: null,
-          })),
+          data: Array.from({ length: 10 }).map((_, i) => buildMockTodo(i)),
           nextPage: undefined,
           totalCount: 10,
         }
@@ -146,34 +145,13 @@ export const getTodosFn = createServerFn({ method: 'GET' })
 export const getTodoByIdFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string().optional())
   .handler(async ({ data: id }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       if (!id) throw new Error('ID is required')
       const db = await loadDb()
       const result = await db.select().from(todos).where(eq(todos.id, id)).limit(1)
       if (!result.length) {
         if (isE2E) {
-          return {
-            id,
-            title: 'Mock Task',
-            description: 'Mock Description',
-            status: 'pending' as const,
-            priority: 'medium' as const,
-            dueDate: new Date().toISOString(),
-            projectId: 'project-1',
-            assignedTo: 'user-1',
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            completedAt: null,
-            complexity: 1,
-            estimatedTime: 0,
-            actualTime: 0,
-            dependencies: [],
-            acceptanceCriteria: '',
-            createdBy: 'user-1',
-            categoryId: null,
-          }
+          return buildMockTodo(0, { id, title: 'Mock Task', description: 'Mock Description' })
         }
         return null
       }
@@ -188,26 +166,7 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
       }
     } catch (error) {
       if (isE2E && id) {
-        return {
-          id,
-          title: 'Mock Task',
-          description: 'Mock Description',
-          status: 'pending' as const,
-          priority: 'medium' as const,
-          dueDate: new Date().toISOString(),
-          projectId: 'project-1',
-          assignedTo: 'user-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          completedAt: null,
-          complexity: 1,
-          estimatedTime: 0,
-          actualTime: 0,
-          dependencies: [],
-          acceptanceCriteria: '',
-          createdBy: 'user-1',
-          categoryId: null,
-        }
+        return buildMockTodo(0, { id, title: 'Mock Task', description: 'Mock Description' })
       }
       throw error
     }
@@ -216,8 +175,6 @@ export const getTodoByIdFn = createServerFn({ method: 'GET' })
 export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
   .handler(async ({ data: projectId }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       if (!projectId) throw new Error('Project ID is required')
       const db = await loadDb()
@@ -229,25 +186,9 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
         .limit(500)
 
       if (isE2E && result.length === 0) {
-        return Array.from({ length: 5 }).map((_, i) => ({
-          id: i.toString(),
-          title: `Project Task ${i}`,
-          description: `Description ${i}`,
-          status: 'pending' as const,
-          priority: 'medium' as const,
-          dueDate: new Date().toISOString(),
-          projectId: projectId,
-          assignedTo: 'user-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          completedAt: null,
-          complexity: 1,
-          estimatedTime: 0,
-          actualTime: 0,
-          dependencies: [],
-          acceptanceCriteria: '',
-          createdBy: 'user-1',
-        }))
+        return Array.from({ length: 5 }).map((_, i) =>
+          buildMockTodo(i, { title: `Project Task ${i}`, projectId }),
+        )
       }
 
       return result.map((item) => ({
@@ -258,25 +199,9 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
       }))
     } catch (error) {
       if (isE2E && projectId) {
-        return Array.from({ length: 5 }).map((_, i) => ({
-          id: i.toString(),
-          title: `Project Task ${i}`,
-          description: `Description ${i}`,
-          status: 'pending' as const,
-          priority: 'medium' as const,
-          dueDate: new Date().toISOString(),
-          projectId: projectId,
-          assignedTo: 'user-1',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-          completedAt: null,
-          complexity: 1,
-          estimatedTime: 0,
-          actualTime: 0,
-          dependencies: [],
-          acceptanceCriteria: '',
-          createdBy: 'user-1',
-        }))
+        return Array.from({ length: 5 }).map((_, i) =>
+          buildMockTodo(i, { title: `Project Task ${i}`, projectId }),
+        )
       }
       throw error
     }
@@ -285,8 +210,6 @@ export const getTodosByProjectIdFn = createServerFn({ method: 'GET' })
 export const createTodoFn = createServerFn({ method: 'POST' })
   .inputValidator(todoSchema)
   .handler(async ({ data: input }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const { syncRagDocument } = await import('@/modules/ai/rag/sync')
@@ -343,7 +266,6 @@ export const createTodoFn = createServerFn({ method: 'POST' })
 export const updateTodoFn = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.string(), data: todoSchema.partial() }))
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
     const { id, data: updateData } = data
 
     try {
@@ -396,8 +318,6 @@ export const updateTodoFn = createServerFn({ method: 'POST' })
 export const deleteTodoFn = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
   .handler(async ({ data: id }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const { deleteRagDocument } = await import('@/modules/ai/rag/sync')
@@ -428,8 +348,6 @@ export const getTodosByDateRangeFn = createServerFn({ method: 'GET' })
     }),
   )
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const start = new Date(data.startDate)
@@ -472,8 +390,6 @@ export const getTodosByDateRangeFn = createServerFn({ method: 'GET' })
 export const getUpcomingTodosFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
   .handler(async ({ data: _data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const now = new Date()
@@ -507,20 +423,15 @@ export const getUpcomingTodosFn = createServerFn({ method: 'GET' })
       const displayMode = upcomingItems.length > 0 ? 'upcoming' : 'overdue_fallback'
 
       if (isE2E && items.length === 0) {
-        return {
-          items: Array.from({ length: 3 }).map((_, i) => ({
-            id: i.toString(),
-            title: `Task ${i}`,
-            description: `Description ${i}`,
-            status: 'pending' as const,
-            priority: ['high', 'medium', 'low'][i % 3] as 'high' | 'medium' | 'low',
+        const mockItems = Array.from({ length: 3 }).map((_, i) =>
+          buildMockTodo(i, {
+            priority: (['high', 'medium', 'low'] as const)[i % 3],
             assignedTo: '1',
-            dueDate: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            completedAt: null,
             projectId: null,
-          })),
+          }),
+        )
+        return {
+          items: mockItems,
           nextWeekCount: 3,
           displayCount: 3,
           displayMode: 'upcoming' as const,
@@ -541,20 +452,15 @@ export const getUpcomingTodosFn = createServerFn({ method: 'GET' })
     } catch (error) {
       console.error('Error in getUpcomingTodosFn:', error)
       if (isE2E) {
-        return {
-          items: Array.from({ length: 3 }).map((_, i) => ({
-            id: i.toString(),
-            title: `Task ${i}`,
-            description: `Description ${i}`,
-            status: 'pending' as const,
-            priority: ['high', 'medium', 'low'][i % 3] as 'high' | 'medium' | 'low',
+        const mockItems = Array.from({ length: 3 }).map((_, i) =>
+          buildMockTodo(i, {
+            priority: (['high', 'medium', 'low'] as const)[i % 3],
             assignedTo: '1',
-            dueDate: new Date().toISOString(),
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-            completedAt: null,
             projectId: null,
-          })),
+          }),
+        )
+        return {
+          items: mockItems,
           nextWeekCount: 3,
           displayCount: 3,
           displayMode: 'upcoming' as const,

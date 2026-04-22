@@ -1,4 +1,9 @@
-import type { BudgetPeriodType, BudgetRecurrenceFrequency, PeriodBounds } from './types'
+import type {
+  BudgetHealthStatus,
+  BudgetPeriodType,
+  BudgetRecurrenceFrequency,
+  PeriodBounds,
+} from './types'
 
 /**
  * Compute the current period bounds for a budget based on its period type and start date.
@@ -117,7 +122,7 @@ export function formatAmount(amountCents: number, currency = 'USD', locale = 'en
 export function computeHealthStatus(
   spent: number,
   target: number | null,
-): { status: import('./types').BudgetHealthStatus; usagePct: number | null; overBy: number } {
+): { status: BudgetHealthStatus; usagePct: number | null; overBy: number } {
   if (target === null || target === 0) {
     return { status: 'no_limit', usagePct: null, overBy: 0 }
   }

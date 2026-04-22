@@ -1,10 +1,7 @@
-'use client'
-
 import { AnimatePresence, m } from 'framer-motion'
 import { MessageSquarePlus, MessagesSquare, Trash2, X, ShieldAlert, Search } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import type { Conversation } from '@/modules/ai/storage/chat-storage'
 import {
   Button,
   Tabs,
@@ -16,6 +13,7 @@ import {
   Avatar,
   AvatarFallback,
 } from '@/components/ui'
+import type { Conversation } from '@/modules/ai/storage/chat-storage'
 import { cn } from '@/shared/utils/index'
 
 // --- Types ---
@@ -215,10 +213,10 @@ export function ConversationPanel({
                   >
                     <TabsList className="w-full">
                       <TabsTrigger value="my-chats" className="flex-1">
-                        My Chats
+                        {t('ai.chat.myChats', 'My Chats')}
                       </TabsTrigger>
                       <TabsTrigger value="all-chats" className="flex-1">
-                        All Chats
+                        {t('ai.chat.allChats', 'All Chats')}
                       </TabsTrigger>
                     </TabsList>
                   </Tabs>
@@ -230,7 +228,7 @@ export function ConversationPanel({
                 <div className="relative">
                   <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
                   <Input
-                    placeholder="Search chats..."
+                    placeholder={t('ai.chat.searchPlaceholder', 'Search chats...')}
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="h-9 pl-9 bg-muted/50 border-transparent focus:bg-background transition-colors"
@@ -244,7 +242,9 @@ export function ConversationPanel({
                   {filteredConversations.length === 0 ? (
                     <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
                       <MessagesSquare className="mb-2 h-10 w-10 opacity-20" />
-                      <p className="text-sm">No conversations found</p>
+                      <p className="text-sm">
+                        {t('ai.chat.noConversations', 'No conversations found')}
+                      </p>
                     </div>
                   ) : (
                     groupOrder.map((group) => {
@@ -269,7 +269,12 @@ export function ConversationPanel({
                                     : 'hover:bg-black/5 dark:hover:bg-white/5',
                                 )}
                                 onClick={() => onSelect(conv.id)}
-                                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onSelect(conv.id) } }}
+                                onKeyDown={(e) => {
+                                  if (e.key === 'Enter' || e.key === ' ') {
+                                    e.preventDefault()
+                                    onSelect(conv.id)
+                                  }
+                                }}
                               >
                                 {/* Chat Icon / Avatar */}
                                 {userRole === 'admin' && activeTab === 'all-chats' ? (

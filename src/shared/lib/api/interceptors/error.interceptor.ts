@@ -65,7 +65,7 @@ export function setupErrorInterceptor(client: AxiosInstance) {
             url: error.config?.url,
             method: error.config?.method?.toUpperCase(),
             response: error.response?.data,
-            requestData: error.config?.data,
+            // requestData intentionally omitted — may contain passwords or PII
           },
         })
       }

@@ -20,7 +20,7 @@ interface ExpenseDistributionChartContentProps {
 }
 
 function truncateLabel(value: string, maxLen = 22): string {
-  return value.length > maxLen ? value.slice(0, maxLen - 1) + '…' : value
+  return value.length > maxLen ? `${value.slice(0, maxLen - 1)  }…` : value
 }
 
 export function ExpenseDistributionChartContent({

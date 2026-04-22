@@ -17,10 +17,15 @@ import { Sheet } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { useUserDirectory, useUsersByIds } from '@/modules/users'
+import type { User } from '@/modules/users/model/types'
 import { toast } from '@/shared/lib/toast'
 import { cn } from '@/shared/lib/utils'
-import { TableErrorState, TableSearchBar, TableSkeleton } from '@/shared/ui/tables'
-import { useDebouncedSearch } from '@/shared/ui/tables'
+import {
+  TableErrorState,
+  TableSearchBar,
+  TableSkeleton,
+  useDebouncedSearch,
+} from '@/shared/ui/tables'
 import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
 import { useCreateTeam, useDeleteTeam, useInfiniteTeams, useUpdateTeam } from '../api/teams.queries'
 import { useTeamColumns } from '../hooks/useTeamColumns'
@@ -71,7 +76,7 @@ export function TeamPage() {
       }
     }
     return result
-  }, [infiniteData?.pages])
+  }, [infiniteData])
 
   const memberIds = React.useMemo(
     () => Array.from(new Set(rawTeams.flatMap((team) => team.members || []))),
@@ -89,7 +94,7 @@ export function TeamPage() {
         ...team,
         members: (team.members || [])
           .map((memberId) => usersById.get(memberId as string))
-          .filter((u): u is import('@/modules/users').User => !!u),
+          .filter((u): u is User => !!u),
       })),
     [rawTeams, usersById],
   )

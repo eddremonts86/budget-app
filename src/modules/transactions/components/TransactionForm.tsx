@@ -11,8 +11,8 @@ import {
   ComboboxItem,
   ComboboxList,
 } from '@/components/ui/combobox'
-import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { DatePicker } from '@/components/ui/date-picker'
+import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
   Select,
@@ -29,8 +29,8 @@ import {
   getAssignableApprovers,
   isAdminRole,
 } from '@/modules/users/model/permissions'
-import type { Transaction } from '../model/types'
 import { getFieldError } from '@/shared/lib/utils'
+import type { Transaction } from '../model/types'
 
 const createTransactionSchema = (t: (key: string) => string) =>
   z.object({
@@ -40,7 +40,7 @@ const createTransactionSchema = (t: (key: string) => string) =>
     }),
     status: z.enum(['Approved', 'Pending', 'Rejected']),
     date: z.string().min(1, t('validation.required')),
-    amount: z.coerce.number().min(0.01, t('validation.minAmount')),
+    amount: z.number().min(0.01, t('validation.minAmount')),
     userId: z.string().min(1, t('validation.required')),
     projectId: z.string().min(1, t('validation.required')),
     assignedAdminId: z.string().min(1, t('validation.required')),

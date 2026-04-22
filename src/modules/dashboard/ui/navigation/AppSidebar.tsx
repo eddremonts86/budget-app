@@ -16,7 +16,6 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import type { AiProviderId } from '@/modules/ai/config'
 import {
   Badge,
   Button,
@@ -39,12 +38,14 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from '@/components/ui/sidebar'
+import { getSidebarNavigation } from '@/modules'
 import { useAiSearch } from '@/modules/ai'
+import type { AiProviderId } from '@/modules/ai/config'
 import { useMyBudgetsDashboard } from '@/modules/budgets/api/budgets.queries'
 import { useTransactions } from '@/modules/transactions'
+import type { Transaction } from '@/modules/transactions/model/types'
 import { useCurrentUser } from '@/modules/users'
 import { getTransactionsPendingApprovalForUser } from '@/modules/users/model/permissions'
-import { getSidebarNavigation } from '@/modules'
 import { cn } from '@/shared/utils'
 import { NavMain } from './NavMain'
 import { NavSecondary } from './NavSecondary'
@@ -72,15 +73,13 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   const { t } = useTranslation()
   const { syncedUserId: currentUserId, roleKey, canApproveTransactions } = useCurrentUser()
   const { data: rawTransactions } = useTransactions({ enabled: canApproveTransactions })
-  const allTransactions = (rawTransactions ??
-    []) as import('@/modules/transactions/model/types').Transaction[]
   const { data: budgetDashboard } = useMyBudgetsDashboard()
 
   const pendingCount = React.useMemo(() => {
     if (!canApproveTransactions) return 0
-
+    const allTransactions = (rawTransactions ?? []) as Transaction[]
     return getTransactionsPendingApprovalForUser(allTransactions, currentUserId, roleKey).length
-  }, [allTransactions, canApproveTransactions, currentUserId, roleKey])
+  }, [rawTransactions, canApproveTransactions, currentUserId, roleKey])
 
   const { isOpen: isSearchOpen, setIsOpen: setIsSearchOpen, isPinned, setIsPinned } = useAiSearch()
   const [searchQuery, setSearchQuery] = React.useState('')

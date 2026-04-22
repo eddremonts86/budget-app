@@ -5,7 +5,6 @@ import { Button } from '@/components/ui/button'
 import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { getFieldError } from '@/shared/lib/utils'
 import {
   Select,
   SelectContent,
@@ -14,6 +13,7 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { useProjects } from '@/modules/projects/api/projects.queries'
+import { getFieldError } from '@/shared/lib/utils'
 import { createBudgetSchema, updateBudgetSchema } from '../model/schema'
 import type { Budget } from '../model/types'
 
@@ -52,11 +52,12 @@ export function BudgetForm({
         : new Date().toISOString().split('T')[0],
       endDate: defaultValues?.endDate ? defaultValues.endDate.split('T')[0] : '',
     },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     validators: { onChange: schema as any },
     onSubmit: async ({ value }) => {
       await onSubmit({
         ...value,
-        targetAmount: value.targetAmount != null ? Number(value.targetAmount) : null,
+        targetAmount: value.targetAmount !== null ? Number(value.targetAmount) : null,
         endDate: value.endDate || null,
         description: value.description || null,
       })
@@ -85,7 +86,7 @@ export function BudgetForm({
               onBlur={field.handleBlur}
               placeholder={t('budgets.fields.namePlaceholder')}
             />
-            {field.state.meta.errors[0] != null && (
+            {field.state.meta.errors[0] !== null && (
               <p className="text-xs text-destructive">
                 {getFieldError(field.state.meta.errors[0])}
               </p>

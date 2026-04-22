@@ -106,10 +106,12 @@ export function SortableWidgetItem({
     onResize(colSpan, null)
   }, [colSpan, onResize])
 
+  /* eslint-disable react-hooks/refs -- intentional: refs track resize state for render-time display calculation */
   const displayRowSpan =
     resizingRef.current && resizeDelta !== 0
       ? Math.max(120, startHeightRef.current + resizeDelta + ROW_GAP)
       : (fixedRowSpan ?? autoRowSpan)
+  /* eslint-enable react-hooks/refs */
 
   const isDropTarget = over?.id === id && !isDragging
 
@@ -138,7 +140,7 @@ export function SortableWidgetItem({
         style={
           fixedRowSpan || resizeDelta !== 0
             ? {
-                height: `${resizeDelta !== 0 ? Math.max(120, startHeightRef.current + resizeDelta) : (fixedRowSpan ?? autoRowSpan) - ROW_GAP}px`,
+                height: `${resizeDelta !== 0 ? Math.max(120, startHeightRef.current + resizeDelta) : (fixedRowSpan ?? autoRowSpan) - ROW_GAP}px`, // eslint-disable-line react-hooks/refs
                 overflow: 'hidden',
               }
             : undefined

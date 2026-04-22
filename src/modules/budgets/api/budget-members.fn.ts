@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, eq } from 'drizzle-orm'
 import { z } from 'zod'
 import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
+import { loadDb } from '@/shared/lib/db/load'
 import { budgetMembers, budgetRecurrenceRules, budgets, users } from '@/shared/lib/db/schema'
 import {
   createBudgetMemberSchema,
@@ -9,11 +10,6 @@ import {
   removeBudgetMemberSchema,
 } from '../model/schema'
 import type { BudgetMember } from '../model/types'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
 
 export const getBudgetMembersFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string())

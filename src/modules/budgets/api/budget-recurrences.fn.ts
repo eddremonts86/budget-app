@@ -2,17 +2,13 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, eq, sql, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
+import { loadDb } from '@/shared/lib/db/load'
 import { budgetRecurrenceRules, transactions, budgets, categories } from '@/shared/lib/db/schema'
 import { computeNextDate } from '../model/period-utils'
 import { createRecurrenceRuleSchema, updateRecurrenceRuleSchema } from '../model/schema'
 import type { BudgetRecurrenceRule } from '../model/types'
 
 const MAX_CATCHUP_ITERATIONS = 24
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
 
 function serializeRule(
   row: typeof budgetRecurrenceRules.$inferSelect & {

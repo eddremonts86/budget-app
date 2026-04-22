@@ -2,6 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { eq, desc } from 'drizzle-orm'
 import { z } from 'zod'
 import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
+import { loadDb } from '@/shared/lib/db/load'
 import {
   budgetImports,
   budgetRecurrenceRules,
@@ -12,13 +13,9 @@ import {
   analyzeTransactions,
   type AiSuggestion,
   type ImportAnalysis,
+  type RecurrenceFrequency,
 } from './budget-import.analyzer'
 import { parseFile, type SupportedFileType, type RawTransaction } from './budget-import.parser'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
 
 // ─────────────────────────────────────────────────────────────────────────────
 // AI Categorization helper
@@ -212,7 +209,8 @@ async function reviewAnalysisWithAI(analysis: ImportAnalysis): Promise<AiSuggest
         currentClassification: s.currentClassification as 'recurring' | 'direct',
         suggestedClassification: s.suggestedClassification as 'recurring' | 'direct',
         reason: s.reason,
-        suggestedFrequency: s.suggestedFrequency as AiSuggestion['suggestedFrequency'] | null,
+        suggestedFrequency: (s.suggestedFrequency ??
+          undefined) as AiSuggestion['suggestedFrequency'],
       }))
   } catch {
     return []
@@ -295,7 +293,9 @@ export const uploadAndAnalyzeImportFn = createServerFn({ method: 'POST' })
     try {
       parsed = await parseFile(data.fileContent, data.fileType as SupportedFileType)
     } catch (e) {
-      throw new Error(`Failed to parse file: ${e instanceof Error ? e.message : String(e)}`)
+      throw new Error(`Failed to parse file: ${e instanceof Error ? e.message : String(e)}`, {
+        cause: e,
+      })
     }
 
     if (parsed.transactions.length === 0) {
@@ -560,9 +560,7 @@ export const applyImportTransactionsFn = createServerFn({ method: 'POST' })
           effectiveRecurrences.push({
             description: desc,
             normalizedKey: desc.toLowerCase(),
-            frequency:
-              (override?.frequency as import('./budget-import.analyzer').RecurrenceFrequency) ??
-              'monthly',
+            frequency: (override?.frequency as RecurrenceFrequency) ?? 'monthly',
             intervalDays: 30,
             averageAmount: avgAmount,
             amounts: txList.map((t) => t.amount),

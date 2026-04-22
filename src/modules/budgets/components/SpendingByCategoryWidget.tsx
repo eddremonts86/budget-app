@@ -18,9 +18,8 @@ interface CategorySpend {
 export function SpendingByCategoryWidget() {
   const { t } = useTranslation()
   const { data: transactionData, isLoading, isFetching, refetch } = useTransactions()
-  const transactions = (transactionData ?? []) as Transaction[]
-
   const topCategories = React.useMemo<CategorySpend[]>(() => {
+    const transactions = (transactionData ?? []) as Transaction[]
     const now = new Date()
     const monthStart = new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), 1))
 
@@ -48,7 +47,7 @@ export function SpendingByCategoryWidget() {
       })
 
     return [...map.values()].sort((a, b) => b.spent - a.spent).slice(0, 6)
-  }, [transactions, t])
+  }, [transactionData, t])
 
   const maxSpent = topCategories[0]?.spent ?? 1
 

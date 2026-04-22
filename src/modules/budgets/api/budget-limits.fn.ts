@@ -1,15 +1,11 @@
 import { createServerFn } from '@tanstack/react-start'
 import { and, eq, sql } from 'drizzle-orm'
 import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
+import { loadDb } from '@/shared/lib/db/load'
 import { budgetCategoryLimits, budgets, categories, transactions } from '@/shared/lib/db/schema'
 import { getCurrentPeriodBounds } from '../model/period-utils'
 import { upsertBudgetCategoryLimitSchema, deleteBudgetCategoryLimitSchema } from '../model/schema'
 import type { BudgetCategoryLimit } from '../model/types'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
 
 export const getBudgetCategoryLimitsFn = createServerFn({ method: 'GET' })
   .inputValidator(String)

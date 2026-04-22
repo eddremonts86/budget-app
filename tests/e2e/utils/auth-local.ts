@@ -30,7 +30,7 @@ export async function signUpInBrowser(page: Page, credentials: AuthCredentials) 
       body: JSON.stringify(activeCredentials),
     })
 
-    let payload: unknown = null
+    let payload: unknown
 
     try {
       payload = await response.json()
@@ -59,7 +59,7 @@ export async function signInInBrowser(page: Page, credentials: AuthCredentials) 
       body: JSON.stringify(activeCredentials),
     })
 
-    let payload: unknown = null
+    let payload: unknown
 
     try {
       payload = await response.json()
@@ -79,7 +79,7 @@ export async function signInInBrowser(page: Page, credentials: AuthCredentials) 
   const session = await page.evaluate(async () => {
     const response = await fetch('/api/auth/get-session')
 
-    let payload: unknown = null
+    let payload: unknown
 
     try {
       payload = await response.json()
@@ -101,7 +101,7 @@ export async function getSessionInBrowser(page: Page) {
   return await page.evaluate(async () => {
     const response = await fetch('/api/auth/get-session')
 
-    let payload: unknown = null
+    let payload: unknown
 
     try {
       payload = await response.json()

@@ -1,30 +1,8 @@
 import { render, screen, fireEvent } from '@testing-library/react'
 import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { useUpcomingTodos } from '@/modules/tasks/api/todos.queries'
+// eslint-disable-next-line import-x/order
 import { UpcomingTodosList } from '@/modules/tasks/ui/widgets/UpcomingTodosWidget'
-
-const mockTodos = [
-  {
-    id: '1',
-    title: 'Task 1',
-    status: 'pending',
-    priority: 'high',
-    dueDate: '2023-02-20',
-    assignedTo: 'user1',
-  },
-  {
-    id: '2',
-    title: 'Task 2',
-    status: 'completed',
-    priority: 'medium',
-    dueDate: '2023-02-21',
-    assignedTo: 'user2',
-  },
-]
-
-const mockUsers = [
-  { id: 'user1', name: 'John Doe', avatar: 'avatar1.png' },
-  { id: 'user2', name: 'Jane Smith', avatar: 'avatar2.png' },
-]
 
 // Mock translations
 vi.mock('react-i18next', () => ({
@@ -71,7 +49,6 @@ vi.mock('@/modules/core/widget', () => ({
 }))
 
 // Import mocked modules to configure return values
-import { useUpcomingTodos } from '@/modules/tasks/api/todos.queries'
 import { useUsersByIds } from '@/modules/users'
 
 describe('UpcomingTodosList', () => {

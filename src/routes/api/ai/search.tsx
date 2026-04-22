@@ -1,24 +1,23 @@
 import { createFileRoute } from '@tanstack/react-router'
+import type { SearchRequestBody } from '@/modules/ai'
 import { buildSearchSystemPrompt, normalizeSearchMessages } from '@/modules/ai/prompts'
 import { retrieveContext } from '@/modules/ai/rag/retrieval'
+import {
+  createAiChatResponse,
+  createJsonErrorResponse,
+  createJsonResponse,
+  getErrorMessage,
+  resolveProviderRuntime,
+  streamLmStudioChat,
+  streamOllamaChat,
+} from '@/modules/ai/server'
 import type { ChatMessages } from '@/modules/ai/server'
-import type { SearchRequestBody } from '@/modules/ai'
+import { isE2E } from '@/shared/lib/env'
 
 const DEFAULT_OLLAMA_SEARCH_MODEL = process.env.AI_SEARCH_OLLAMA_MODEL || 'qwen3.5:0.8b'
 
 export const handleSearchPost = async ({ request }: { request: Request }) => {
   try {
-    const {
-      createAiChatResponse,
-      createJsonErrorResponse,
-      createJsonResponse,
-      resolveProviderRuntime,
-      streamLmStudioChat,
-      streamOllamaChat,
-    } = await import('@/modules/ai/server')
-
-    const isE2E = process.env.VITE_E2E === 'true'
-
     const body = (await request.json()) as SearchRequestBody
     const query = body.query
 
@@ -86,7 +85,6 @@ export const handleSearchPost = async ({ request }: { request: Request }) => {
       params: body.params,
     })
   } catch (error) {
-    const { createJsonErrorResponse, getErrorMessage } = await import('@/modules/ai/server')
     return createJsonErrorResponse(getErrorMessage(error), 500)
   }
 }

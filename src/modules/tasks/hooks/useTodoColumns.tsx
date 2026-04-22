@@ -2,9 +2,9 @@ import { type ColumnDef } from '@tanstack/react-table'
 import { Calendar, Clock } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import type { UserInfo } from './useUserMap'
 import type { Todo } from '../model/types'
 import { TodoActionsMenu, TodoAssignee, TodoPriorityBadge, TodoStatusBadge } from '../ui/components'
+import type { UserInfo } from './useUserMap'
 
 export function useTodoColumns(
   userMap: Map<string, UserInfo>,

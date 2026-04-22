@@ -1,9 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import {
-  createProjectFn,
-  deleteProjectFn,
-  updateProjectFn,
-} from '@/modules/projects'
+import { createProjectFn, deleteProjectFn, updateProjectFn } from '@/modules/projects'
 import { getDb } from '@/shared/lib/db'
 
 vi.mock('@tanstack/react-start', () => ({
@@ -56,6 +52,7 @@ describe('Projects CRUD server functions', () => {
       delete: vi.fn(),
       update: vi.fn(),
       select: vi.fn(),
+      transaction: vi.fn((fn: (tx: unknown) => unknown) => fn(dbMock)),
     }
 
     vi.mocked(getDb).mockReturnValue(dbMock as never)
@@ -111,6 +108,7 @@ describe('Projects CRUD server functions', () => {
       delete: vi.fn(),
       insert: vi.fn(),
       select: vi.fn(),
+      transaction: vi.fn((fn: (tx: unknown) => unknown) => fn(dbMock)),
     }
 
     vi.mocked(getDb).mockReturnValue(dbMock as never)
@@ -134,20 +132,30 @@ describe('Projects CRUD server functions', () => {
   })
 
   it('deletes a project', async () => {
-    const dbMock = {
+    const dbMock: {
+      delete: ReturnType<typeof vi.fn>
+      insert: ReturnType<typeof vi.fn>
+      update: ReturnType<typeof vi.fn>
+      select: ReturnType<typeof vi.fn>
+      transaction: ReturnType<typeof vi.fn>
+    } = {
       delete: vi.fn(() => ({
         where: vi.fn().mockResolvedValue(undefined),
       })),
       insert: vi.fn(),
       update: vi.fn(),
       select: vi.fn(),
+      transaction: vi.fn(),
     }
+    dbMock.transaction.mockImplementation(async (fn: (tx: typeof dbMock) => Promise<unknown>) =>
+      fn(dbMock),
+    )
 
     vi.mocked(getDb).mockReturnValue(dbMock as never)
 
     const result = await deleteProjectFn({ data: 'project-1' })
 
-    expect(dbMock.delete).toHaveBeenCalledTimes(2)
+    expect(dbMock.delete).toHaveBeenCalledTimes(3)
     expect(result).toEqual({ success: true })
   })
 })

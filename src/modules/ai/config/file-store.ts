@@ -14,7 +14,7 @@ const getConfigDir = (configPath: string) => {
 }
 
 export const readAiConfig = async (): Promise<AiConfigStore> => {
-  let userConfig: Partial<AiConfigStore> = {}
+  let userConfig: Partial<AiConfigStore>
 
   try {
     const configPath = getConfigPath()

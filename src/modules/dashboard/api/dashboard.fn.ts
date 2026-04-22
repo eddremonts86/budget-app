@@ -1,12 +1,9 @@
 import { createServerFn } from '@tanstack/react-start'
 import { and, count, desc, eq, gte, sql } from 'drizzle-orm'
 import { z } from 'zod'
+import { loadDb } from '@/shared/lib/db/load'
 import { projects, todos, transactions } from '@/shared/lib/db/schema'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
+import { isE2E } from '@/shared/lib/env'
 
 const DASHBOARD_METRIC_KEYS = ['netBalance', 'revenue', 'expenses', 'activeProjects'] as const
 
@@ -191,8 +188,6 @@ async function getActiveProjectsSnapshot(db: Awaited<ReturnType<typeof loadDb>>)
 export const getDashboardMetricFn = createServerFn({ method: 'GET' })
   .inputValidator(dashboardMetricSchema)
   .handler(async ({ data: metric }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const periodStart = getDashboardPeriodStart()
@@ -239,8 +234,6 @@ export const getDashboardMetricFn = createServerFn({ method: 'GET' })
 export const getDashboardStatsFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
   .handler(async ({ data: _data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const periodStart = getDashboardPeriodStart()
@@ -299,8 +292,6 @@ export const getDashboardStatsFn = createServerFn({ method: 'GET' })
 export const getRecentTransactionsFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
   .handler(async ({ data: _data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const items = await db

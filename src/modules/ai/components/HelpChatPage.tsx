@@ -26,6 +26,21 @@ import ReactMarkdown from 'react-markdown'
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter'
 import vscDarkPlus from 'react-syntax-highlighter/dist/esm/styles/prism/vsc-dark-plus.js'
 import remarkGfm from 'remark-gfm'
+import {
+  Button,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupButton,
+  InputGroupTextarea,
+} from '@/components/ui'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 import type { AiProviderId } from '@/modules/ai/config'
 import {
   createConversationObject,
@@ -42,23 +57,7 @@ import type {
   PersistedActionState,
   StoredMessage,
 } from '@/modules/ai/storage/chat-storage'
-import {
-  Button,
-  InputGroup,
-  InputGroupAddon,
-  InputGroupButton,
-  InputGroupTextarea,
-} from '@/components/ui'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
-import { aiConfigApi } from '@/modules/settings'
-import { useAiConfigStore } from '@/modules/settings'
+import { aiConfigApi, useAiConfigStore  } from '@/modules/settings'
 import { useCurrentUser } from '@/modules/users'
 import { useAppAuth } from '@/shared/lib/auth/app-auth'
 import { useTQuery } from '@/shared/lib/query'

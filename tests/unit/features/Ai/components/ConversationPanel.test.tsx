@@ -1,8 +1,8 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import React from 'react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { Conversation } from '@/modules/ai/storage/chat-storage'
 import { ConversationPanel } from '@/modules/ai/components/ConversationPanel'
+import type { Conversation } from '@/modules/ai/storage/chat-storage'
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -89,7 +89,7 @@ describe('ConversationPanel', () => {
   it('shows panel header and empty state when opened with no conversations', () => {
     render(<ConversationPanel {...defaultProps} isOpen={true} />)
     expect(screen.getByText('ai.chat.conversations')).toBeDefined()
-    expect(screen.getByText('No conversations found')).toBeDefined()
+    expect(screen.getByText('ai.chat.noConversations')).toBeDefined()
   })
 
   it('renders conversations and calls onSelect when clicking one', () => {

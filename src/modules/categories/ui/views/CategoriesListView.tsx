@@ -1,7 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui/button'
-import { TableEmptyState, TableErrorState, TableSearchBar, TableSkeleton } from '@/shared/ui/tables'
-import { useDebouncedSearch } from '@/shared/ui/tables'
+import { TableEmptyState, TableErrorState, TableSearchBar, TableSkeleton, useDebouncedSearch  } from '@/shared/ui/tables'
 import { UnifiedDataTable } from '@/shared/ui/tables/DataTable'
 import { useCategoryActions } from '../../hooks/useCategoryActions'
 import { useCategoryColumns } from '../../hooks/useCategoryColumns'

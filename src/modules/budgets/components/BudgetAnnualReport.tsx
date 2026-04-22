@@ -8,7 +8,6 @@ import { Skeleton } from '@/components/ui/skeleton'
 import { cn } from '@/shared/lib/utils'
 import { useBudgetAnnualReport } from '../api/budget-analytics.queries'
 import { useBudgetRecurrenceRules } from '../api/budget-recurrences.queries'
-import { formatAmount } from '../model/period-utils'
 import type { BudgetRecurrenceFrequency } from '../model/types'
 import { BudgetAnnualReportPdf } from './BudgetAnnualReportPdf'
 

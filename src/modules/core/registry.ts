@@ -1,7 +1,7 @@
-import { analyticsModule } from '@/modules/analytics/manifest'
 import { aiModule } from '@/modules/ai/manifest'
-import { budgetsModule } from '@/modules/budgets/manifest'
+import { analyticsModule } from '@/modules/analytics/manifest'
 import { authModule } from '@/modules/auth/manifest'
+import { budgetsModule } from '@/modules/budgets/manifest'
 import { categoriesModule } from '@/modules/categories/manifest'
 import { dashboardModule } from '@/modules/dashboard/manifest'
 import { helpModule } from '@/modules/help/manifest'
@@ -11,9 +11,9 @@ import { settingsModule } from '@/modules/settings/manifest'
 import { tasksModule } from '@/modules/tasks/manifest'
 import { teamModule } from '@/modules/team/manifest'
 import { transactionsModule } from '@/modules/transactions/manifest'
-import type { AppModuleManifest } from './types'
-import { getExplicitlyDisabledModuleIds, getExplicitlyEnabledModuleIds } from './config'
 import { usersModule } from '@/modules/users/manifest'
+import { getExplicitlyDisabledModuleIds, getExplicitlyEnabledModuleIds } from './config'
+import type { AppModuleManifest } from './types'
 
 export const moduleRegistry: AppModuleManifest[] = [
   landingModule,

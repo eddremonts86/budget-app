@@ -8,6 +8,7 @@ import {
   CardTitle,
   Skeleton,
 } from '@/components/ui'
+import type { ChartConfig } from '@/components/ui/chart'
 import {
   Select,
   SelectContent,
@@ -15,11 +16,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import type { ChartConfig } from '@/components/ui/chart'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 import { useProjects } from '@/modules/projects'
 import { useTeams } from '@/modules/team'
 import { useUsersWorkload } from '../api/analytics.queries'
-import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 
 const LazyWorkloadChartContent = React.lazy(() =>
   import('./WorkloadWidgetContent').then((module) => ({

@@ -1,6 +1,7 @@
 import { and, eq } from 'drizzle-orm'
-import { externalIdentities, roles, users } from '@/shared/lib/db/schema'
 import { requireAuthUser } from '@/shared/lib/auth/server'
+import { loadDb } from '@/shared/lib/db/load'
+import { externalIdentities, roles, users } from '@/shared/lib/db/schema'
 import { getAppRoleKey, type AppRoleKey } from '../model/permissions'
 
 export interface CurrentAppUser {
@@ -10,11 +11,6 @@ export interface CurrentAppUser {
   roleId: string | null
   roleName: string | null
   roleKey: AppRoleKey
-}
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
 }
 
 export async function getCurrentAppUser(): Promise<CurrentAppUser | null> {

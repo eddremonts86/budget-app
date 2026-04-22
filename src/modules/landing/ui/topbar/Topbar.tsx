@@ -5,6 +5,8 @@ import { LazyMotion, domAnimation, m } from 'framer-motion'
 import { Rocket, LogIn, Menu } from 'lucide-react'
 import { memo, useCallback, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { LanguageSelector } from '@/components/composite/LanguageSelector'
+import { ThemeToggle } from '@/components/composite/ThemeToggle'
 import {
   Avatar,
   AvatarFallback,
@@ -23,8 +25,6 @@ import {
   isBetterAuthEnabled,
   isClerkEnabled,
 } from '@/shared/lib/auth/config'
-import { LanguageSelector } from '@/components/composite/LanguageSelector'
-import { ThemeToggle } from '@/components/composite/ThemeToggle'
 import { TOPBAR_HEIGHT } from './constants'
 import { getDashboardItem, getNavItems } from './nav-config'
 import { NavLink } from './NavLink'

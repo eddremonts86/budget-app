@@ -1,6 +1,6 @@
 import { Outlet } from '@tanstack/react-router'
-import { Topbar } from './topbar/Topbar'
 import { FooterBlock } from '@/modules/landing'
+import { Topbar } from './topbar/Topbar'
 
 export function LandingLayout() {
   return (

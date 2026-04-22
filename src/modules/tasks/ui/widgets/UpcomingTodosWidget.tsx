@@ -1,3 +1,7 @@
+import { format } from 'date-fns'
+import { Filter, Search } from 'lucide-react'
+import { useMemo, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import {
   Avatar,
   AvatarFallback,
@@ -17,14 +21,10 @@ import {
   Separator,
   Skeleton,
 } from '@/components/ui'
+import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 import { useUsersByIds } from '@/modules/users'
 import { cn } from '@/shared/utils'
-import { format } from 'date-fns'
-import { Filter, Search } from 'lucide-react'
-import { useMemo, useState } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useUpcomingTodos } from '../../api/todos.queries'
-import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 
 interface UserFilterProps {
   users: Array<{ id: string; name: string; avatar?: string | null }>

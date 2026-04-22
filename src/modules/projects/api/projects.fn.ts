@@ -1,6 +1,8 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq, and, inArray, count, ilike } from 'drizzle-orm'
+import type { SQL } from 'drizzle-orm'
 import { z } from 'zod'
+import type { getDb } from '@/shared/lib/db'
 import {
   projects,
   departments,
@@ -14,7 +16,7 @@ import {
  * Batch find-or-create skills by name. Returns a Map<skillName, skillId>.
  */
 async function findOrCreateProjectSkills(
-  db: ReturnType<typeof import('@/shared/lib/db').getDb>,
+  db: ReturnType<typeof getDb>,
   skillNames: string[],
 ): Promise<Map<string, string>> {
   if (skillNames.length === 0) return new Map()
@@ -139,9 +141,15 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
       const { getDb } = await import('@/shared/lib/db')
       const db = getDb()
 
-      const conditions: ReturnType<typeof ilike>[] = []
+      const conditions: SQL<unknown>[] = []
       if (search) conditions.push(ilike(projects.name, `%${search}%`))
-      if (status) conditions.push(eq(projects.status, status))
+      if (status)
+        conditions.push(
+          eq(
+            projects.status,
+            status as 'completed' | 'cancelled' | 'on_hold' | 'planning' | 'active',
+          ),
+        )
       const whereClause = conditions.length > 0 ? and(...conditions) : undefined
 
       const [items, totalResult] = await Promise.all([
@@ -372,11 +380,13 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
           .returning()
 
         if (skillMap.size > 0 && input.skills) {
-          await tx.insert(projectSkills).values(
-            input.skills
-              .filter((name) => skillMap.has(name))
-              .map((name) => ({ projectId, skillId: skillMap.get(name)! })),
-          )
+          await tx
+            .insert(projectSkills)
+            .values(
+              input.skills
+                .filter((name) => skillMap.has(name))
+                .map((name) => ({ projectId, skillId: skillMap.get(name)! })),
+            )
         }
 
         if (input.team && input.team.length > 0) {
@@ -454,11 +464,13 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
         if (updateData.skills) {
           await tx.delete(projectSkills).where(eq(projectSkills.projectId, id))
           if (skillMap && skillMap.size > 0) {
-            await tx.insert(projectSkills).values(
-              updateData.skills
-                .filter((name) => skillMap.has(name))
-                .map((name) => ({ projectId: id, skillId: skillMap.get(name)! })),
-            )
+            await tx
+              .insert(projectSkills)
+              .values(
+                updateData.skills
+                  .filter((name) => skillMap.has(name))
+                  .map((name) => ({ projectId: id, skillId: skillMap.get(name)! })),
+              )
           }
         }
 

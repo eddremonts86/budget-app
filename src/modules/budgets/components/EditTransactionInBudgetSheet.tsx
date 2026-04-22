@@ -9,9 +9,9 @@ import {
   CrudSheetHeader,
   CrudSheetSection,
 } from '@/components/ui/crud-sheet'
+import { DatePicker } from '@/components/ui/date-picker'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { DatePicker } from '@/components/ui/date-picker'
 import {
   Select,
   SelectContent,
@@ -69,7 +69,7 @@ export function EditTransactionInBudgetSheet({
   // Reset form when tx changes
   React.useEffect(() => {
     form.reset()
-  }, [tx.id])
+  }, [tx.id, form])
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>

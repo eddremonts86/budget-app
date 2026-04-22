@@ -4,8 +4,8 @@ import { Button } from '@/components/ui/button'
 import { cn } from '@/shared/lib/utils'
 import { InfiniteSelect } from '@/shared/ui/selectores/InfiniteSelect'
 import type { TodoStatus } from '../api/todos.queries'
-import { ALL_STATUSES, STATUS_DOT_COLORS } from '../model/constants'
 import type { useUserFilterOptions } from '../hooks/useUserFilterOptions'
+import { ALL_STATUSES, STATUS_DOT_COLORS } from '../model/constants'
 
 interface TodosFilterBarProps {
   assigneeFilter: string | undefined

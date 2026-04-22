@@ -1,14 +1,11 @@
 import { createServerFn } from '@tanstack/react-start'
 import { desc, eq } from 'drizzle-orm'
 import { z } from 'zod'
-import { transactions } from '@/shared/lib/db/schema'
 import { requireCurrentAppUser } from '@/modules/users/api/current-user.server'
 import { canApproveTransaction } from '@/modules/users/model/permissions'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
+import { loadDb } from '@/shared/lib/db/load'
+import { transactions } from '@/shared/lib/db/schema'
+import { isE2E } from '@/shared/lib/env'
 
 function isApprovalStatus(status: string | undefined): status is 'Approved' | 'Rejected' {
   return status === 'Approved' || status === 'Rejected'
@@ -45,8 +42,6 @@ export const getTransactionsFn = createServerFn({ method: 'GET' })
     }),
   )
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const { pageParam, status, search } = data
@@ -149,8 +144,6 @@ export const getTransactionsFn = createServerFn({ method: 'GET' })
 export const getTransactionByIdFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string().optional())
   .handler(async ({ data: id }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       if (!id) throw new Error('ID is required')
       const db = await loadDb()
@@ -217,8 +210,6 @@ export const getTransactionByIdFn = createServerFn({ method: 'GET' })
 export const createTransactionFn = createServerFn({ method: 'POST' })
   .inputValidator(transactionSchema)
   .handler(async ({ data: input }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const requestedStatus = input.status ?? 'Pending'
@@ -297,7 +288,6 @@ export const createTransactionFn = createServerFn({ method: 'POST' })
 export const updateTransactionFn = createServerFn({ method: 'POST' })
   .inputValidator(z.object({ id: z.string(), data: transactionSchema.partial() }))
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
     const { id, data: updateData } = data
 
     try {
@@ -371,8 +361,6 @@ export const updateTransactionFn = createServerFn({ method: 'POST' })
 export const deleteTransactionFn = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
   .handler(async ({ data: id }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       await db.delete(transactions).where(eq(transactions.id, id))

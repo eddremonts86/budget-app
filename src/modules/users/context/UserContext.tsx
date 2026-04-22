@@ -1,6 +1,6 @@
 import * as React from 'react'
-import type { User } from '../model/types'
 import type { AppRoleKey } from '../model/permissions'
+import type { User } from '../model/types'
 
 export interface UserContextValue {
   syncedUserId: string | null

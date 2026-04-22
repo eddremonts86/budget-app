@@ -305,7 +305,7 @@ export function TransactionsPage() {
       }
     }
     return result
-  }, [infiniteData?.pages])
+  }, [infiniteData])
 
   // Separate query for pending transactions (small dataset)
   const { data: pendingData } = useInfiniteTransactions(50, 'Pending')
@@ -322,7 +322,7 @@ export function TransactionsPage() {
       }
     }
     return result
-  }, [pendingData?.pages])
+  }, [pendingData])
 
   const { data: projects = [] } = useProjects()
   const transactionUserIds = React.useMemo(

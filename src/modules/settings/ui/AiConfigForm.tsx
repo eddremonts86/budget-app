@@ -14,7 +14,6 @@ import { useStore } from '@tanstack/react-store'
 import { useQueryState, parseAsStringLiteral } from 'nuqs'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import type { AiConfigFormData, AiProvider } from '@/modules/ai/config'
 import { Button } from '@/components/ui/button'
 import { Field, FieldError, FieldLabel } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
@@ -27,6 +26,7 @@ import {
 } from '@/components/ui/select'
 import { Separator } from '@/components/ui/separator'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import type { AiConfigFormData, AiProvider } from '@/modules/ai/config'
 import { toast } from '@/shared/lib/toast'
 import {
   useAiConfig,

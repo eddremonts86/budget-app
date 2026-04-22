@@ -1,7 +1,7 @@
 import { i18n } from '@/shared/lib/i18n'
 import { useTQuery, useTQMutation } from '@/shared/lib/query'
-import type { BudgetCategoryLimit } from '../model/types'
 import type { UpsertBudgetCategoryLimitInput } from '../model/schema'
+import type { BudgetCategoryLimit } from '../model/types'
 import {
   getBudgetCategoryLimitsFn,
   upsertBudgetCategoryLimitFn,

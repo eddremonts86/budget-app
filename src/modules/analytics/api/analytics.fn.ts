@@ -1,6 +1,7 @@
 import { createServerFn } from '@tanstack/react-start'
 import { eq, and, gte, count, sum, sql, inArray, ilike, desc } from 'drizzle-orm'
 import { z } from 'zod'
+import { loadDb } from '@/shared/lib/db/load'
 import {
   todos,
   users,
@@ -10,51 +11,40 @@ import {
   projectMembers,
   teamMembers,
 } from '@/shared/lib/db/schema'
-
-async function loadDb() {
-  const { getDb } = await import('@/shared/lib/db')
-  return getDb()
-}
+import { isE2E } from '@/shared/lib/env'
 
 export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
   .handler(async ({ data: _data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
 
-      const [
-        [totalIncome],
-        [totalExpenses],
-        projectStats,
-        taskStats,
-        [activeUsers],
-      ] = await Promise.all([
-        db
-          .select({ value: sum(transactions.amount) })
-          .from(transactions)
-          .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} > 0`)),
-        db
-          .select({ value: sum(transactions.amount) })
-          .from(transactions)
-          .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`)),
-        db
-          .select({
-            status: projects.status,
-            count: count(),
-          })
-          .from(projects)
-          .where(sql`${projects.status} IN ('active', 'completed')`)
-          .groupBy(projects.status),
-        db
-          .select({
-            total: count(),
-            completed: sql<number>`COUNT(*) FILTER (WHERE ${todos.status} = 'completed')`,
-          })
-          .from(todos),
-        db.select({ count: count() }).from(users),
-      ])
+      const [[totalIncome], [totalExpenses], projectStats, taskStats, [activeUsers]] =
+        await Promise.all([
+          db
+            .select({ value: sum(transactions.amount) })
+            .from(transactions)
+            .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} > 0`)),
+          db
+            .select({ value: sum(transactions.amount) })
+            .from(transactions)
+            .where(and(eq(transactions.status, 'Approved'), sql`${transactions.amount} < 0`)),
+          db
+            .select({
+              status: projects.status,
+              count: count(),
+            })
+            .from(projects)
+            .where(sql`${projects.status} IN ('active', 'completed')`)
+            .groupBy(projects.status),
+          db
+            .select({
+              total: count(),
+              completed: sql<number>`COUNT(*) FILTER (WHERE ${todos.status} = 'completed')`,
+            })
+            .from(todos),
+          db.select({ count: count() }).from(users),
+        ])
 
       const incomeValue = Number(totalIncome?.value ?? 0)
       const expenseValue = Math.abs(Number(totalExpenses?.value ?? 0))
@@ -116,7 +106,6 @@ export const getAnalyticsKPIsFn = createServerFn({ method: 'GET' })
 export const getRevenueTrendFn = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ days: z.number().optional().default(30) }))
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
     const days = data.days
 
     try {
@@ -168,8 +157,8 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' })
           date.setDate(date.getDate() - i)
           mockData.push({
             date: date.toISOString().split('T')[0],
-            income: Math.floor(Math.random() * 5000) + 1000,
-            expenses: Math.floor(Math.random() * 2000) + 500,
+            income: ((i * 1234) % 4001) + 1000,
+            expenses: ((i * 567) % 1501) + 500,
           })
         }
         return mockData
@@ -186,8 +175,8 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' })
           date.setDate(date.getDate() - i)
           mockData.push({
             date: date.toISOString().split('T')[0],
-            income: Math.floor(Math.random() * 5000) + 1000,
-            expenses: Math.floor(Math.random() * 2000) + 500,
+            income: ((i * 1234) % 4001) + 1000,
+            expenses: ((i * 567) % 1501) + 500,
           })
         }
         return mockData
@@ -199,7 +188,6 @@ export const getRevenueTrendFn = createServerFn({ method: 'GET' })
 export const getTaskCompletionTrendFn = createServerFn({ method: 'GET' })
   .inputValidator(z.object({ days: z.number().optional().default(30) }))
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
     const days = data.days
 
     try {
@@ -227,7 +215,7 @@ export const getTaskCompletionTrendFn = createServerFn({ method: 'GET' })
           date.setDate(date.getDate() - i)
           mockData.push({
             date: date.toISOString().split('T')[0],
-            count: Math.floor(Math.random() * 10),
+            count: (i * 3) % 10,
           })
         }
         return mockData
@@ -244,7 +232,7 @@ export const getTaskCompletionTrendFn = createServerFn({ method: 'GET' })
           date.setDate(date.getDate() - i)
           mockData.push({
             date: date.toISOString().split('T')[0],
-            count: Math.floor(Math.random() * 10),
+            count: (i * 3) % 10,
           })
         }
         return mockData
@@ -256,8 +244,6 @@ export const getTaskCompletionTrendFn = createServerFn({ method: 'GET' })
 export const getProjectPerformanceFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
   .handler(async ({ data: _data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
 
@@ -431,8 +417,6 @@ export const getProjectPerformancePaginatedFn = createServerFn({ method: 'GET' }
       .optional(),
   )
   .handler(async ({ data }): Promise<ProjectPerformanceResponse> => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const { pageParam, limit: limitParam, search } = data || {}
@@ -553,8 +537,6 @@ export const getProjectPerformancePaginatedFn = createServerFn({ method: 'GET' }
 export const getTaskDistributionFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
   .handler(async ({ data: _data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
 
@@ -622,8 +604,6 @@ export const getTaskDistributionFn = createServerFn({ method: 'GET' })
 export const getExpenseDistributionFn = createServerFn({ method: 'GET' })
   .inputValidator(z.void().optional())
   .handler(async ({ data: _data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
 
@@ -681,8 +661,6 @@ export type UsersWorkloadFilters = z.infer<typeof usersWorkloadFiltersSchema>
 export const getUsersWorkloadFn = createServerFn({ method: 'GET' })
   .inputValidator(usersWorkloadFiltersSchema)
   .handler(async ({ data }) => {
-    const isE2E = process.env.VITE_E2E === 'true'
-
     try {
       const db = await loadDb()
       const projectId = data?.projectId

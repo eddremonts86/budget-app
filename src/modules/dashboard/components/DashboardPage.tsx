@@ -15,11 +15,10 @@ import {
   WidgetConfigurator,
   WidgetGrid,
   WidgetEditModeProvider,
-  useWidgetEditMode,
+  useWidgetEditMode, WidgetRefreshButton, WidgetRefreshingIndicator 
 } from '@/modules/core/widget'
 import { cn } from '@/shared/lib/utils'
 import { useDashboardMetric } from '../api/dashboard.queries'
-import { WidgetRefreshButton, WidgetRefreshingIndicator } from '@/modules/core/widget'
 
 function StatsCardSkeleton() {
   return (

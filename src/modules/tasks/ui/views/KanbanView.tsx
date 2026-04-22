@@ -50,11 +50,11 @@ export function KanbanView({ onEdit, assignedTo, status }: KanbanViewProps) {
 
   const columns = React.useMemo(() => {
     return {
-      pending: (pendingQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
-      in_progress: (inProgressQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
-      testing: (testingQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
-      on_hold: (onHoldQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
-      completed: (completedQuery.data?.pages.flatMap((p) => p.data) ?? []) as Todo[],
+      pending: pendingQuery.data?.pages.flatMap((p) => p.data as unknown as Todo[]) ?? [],
+      in_progress: inProgressQuery.data?.pages.flatMap((p) => p.data as unknown as Todo[]) ?? [],
+      testing: testingQuery.data?.pages.flatMap((p) => p.data as unknown as Todo[]) ?? [],
+      on_hold: onHoldQuery.data?.pages.flatMap((p) => p.data as unknown as Todo[]) ?? [],
+      completed: completedQuery.data?.pages.flatMap((p) => p.data as unknown as Todo[]) ?? [],
     }
   }, [
     pendingQuery.data,

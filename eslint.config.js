@@ -14,6 +14,7 @@ export default tseslint.config(
       '.tanstack/**',
       '.netlify/**',
       '.agents/**',
+      '.github/**',
       'src/routeTree.gen.ts',
       'playwright-report/**',
       'test-results/**',
@@ -83,7 +84,7 @@ export default tseslint.config(
     },
   },
   {
-    files: ['scripts/**/*.{ts,js}', 'ia-config/**/*.js', '**/*.cjs'],
+    files: ['scripts/**/*.{ts,js,mjs,cjs}', 'ia-config/**/*.js', '**/*.cjs'],
     languageOptions: {
       globals: {
         Buffer: 'readonly',

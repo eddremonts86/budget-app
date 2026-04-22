@@ -167,7 +167,7 @@ export function TodoForm({
   )
 
   const depsTodos = React.useMemo(() => {
-    const all = (infiniteDeps?.pages.flatMap((page) => page.data) as Todo[]) ?? []
+    const all = infiniteDeps?.pages.flatMap((page) => page.data as unknown as Todo[]) ?? []
     const seen = new Set<string>()
     return all.filter((t) => {
       if (seen.has(t.id)) return false

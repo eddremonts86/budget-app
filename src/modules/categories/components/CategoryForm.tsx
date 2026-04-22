@@ -5,8 +5,8 @@ import { z } from 'zod'
 import { Button } from '@/components/ui/button'
 import { Field, FieldLabel, FieldError } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
-import type { Category } from '../model/types'
 import { getFieldError } from '@/shared/lib/utils'
+import type { Category } from '../model/types'
 
 const createCategorySchema = (t: (key: string) => string) =>
   z.object({

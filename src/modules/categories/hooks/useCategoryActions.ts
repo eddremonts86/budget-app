@@ -1,7 +1,7 @@
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
-import { DELETE_TOAST_DURATION } from '@/shared/ui/tables'
 import { toast } from '@/shared/lib/toast'
+import { DELETE_TOAST_DURATION } from '@/shared/ui/tables'
 import { useDeleteCategory } from '../api/categories.queries'
 import type { Category } from '../model/types'
 

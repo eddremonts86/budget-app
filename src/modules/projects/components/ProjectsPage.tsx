@@ -1,6 +1,6 @@
 import { IconFolder } from '@tabler/icons-react'
 import { useQueryClient } from '@tanstack/react-query'
-import { Plus, Loader2, AlertCircle } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Button } from '@/components/ui'
@@ -111,7 +111,14 @@ export function ProjectsPage() {
           {t('projects.actions.create')}
         </Button>
       </div>
-      <TableSearchBar value={searchInput} onChange={setSearchInput} />
+      <TableSearchBar
+        searchInput={searchInput}
+        onSearchChange={setSearchInput}
+        onClear={() => setSearchInput('')}
+        loadedCount={projects.length}
+        totalCount={data?.pages[0]?.totalCount ?? 0}
+        showSpinner={isFetchingNextPage}
+      />
       {isLoading ? (
         <TableSkeleton />
       ) : !projects || projects.length === 0 ? (

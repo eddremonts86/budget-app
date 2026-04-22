@@ -28,6 +28,7 @@ export function WidgetRenderer({ widgetId, fallback }: WidgetRendererProps) {
 
   return (
     <Suspense fallback={fallback ?? defaultFallback}>
+      {/* eslint-disable-next-line react-hooks/static-components */}
       <LazyComponent />
     </Suspense>
   )

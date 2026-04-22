@@ -69,7 +69,7 @@ const NOISE_PATTERNS = [
   // Remove amounts embedded in descriptions (e.g. "1.234,56" or "1234.56")
   /\b\d{1,3}(?:[.,]\d{3})*(?:[.,]\d{2})?\b/g,
   // Remove date patterns: DD-MM-YYYY, YYYY-MM-DD, DD/MM, etc.
-  /\b\d{1,2}[.\-\/]\d{1,2}([.\-\/]\d{2,4})?\b/g,
+  /\b\d{1,2}[.\-/]\d{1,2}([.\-/]\d{2,4})?\b/g,
   /\b(jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b/gi,
   /\b(\d{4,})\b/g, // remaining long numbers (account numbers in description)
   /\b(dkk|eur|usd|gbp|kr)\b/gi, // currency codes

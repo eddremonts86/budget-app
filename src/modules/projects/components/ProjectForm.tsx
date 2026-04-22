@@ -4,7 +4,6 @@ import * as React from 'react'
 import { useTranslation } from 'react-i18next'
 import { z } from 'zod'
 import { Button } from '@/components/ui/button'
-import { DatePicker } from '@/components/ui/date-picker'
 import {
   Combobox,
   ComboboxChip,
@@ -15,6 +14,7 @@ import {
   ComboboxItem,
   ComboboxList,
 } from '@/components/ui/combobox'
+import { DatePicker } from '@/components/ui/date-picker'
 import { FieldLabel, FieldError, FieldGroup } from '@/components/ui/field'
 import { Input } from '@/components/ui/input'
 import {
@@ -27,9 +27,7 @@ import {
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Textarea } from '@/components/ui/textarea'
 import { useDepartments, useSkills } from '@/modules/projects'
-import { useCreateUser, useUserDirectory, useUsersByIds } from '@/modules/users'
-import { UserForm } from '@/modules/users'
-import { cn } from '@/shared/lib/utils'
+import { useCreateUser, useUserDirectory, useUsersByIds, UserForm } from '@/modules/users'
 import type { Project, ProjectMemberRole } from '../model/types'
 import { PROJECT_MEMBER_ROLES } from '../model/types'
 
