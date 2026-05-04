@@ -10,6 +10,16 @@ import {
   type AnyPgColumn,
 } from 'drizzle-orm/pg-core'
 
+// --- Symphony Pipeline Tracker Enums ---
+export const trackerTaskStatusEnum = pgEnum('tracker_task_status', [
+  'todo',
+  'in_progress',
+  'done',
+  'cancelled',
+])
+
+export const trackerAssigneeEnum = pgEnum('tracker_assignee', ['openCode', 'openClaw', 'human'])
+
 // --- Enums ---
 export const todoStatusEnum = pgEnum('todo_status', [
   'pending',
@@ -571,6 +581,37 @@ export const projectMembers = pgTable(
     ),
   }),
 )
+
+// --- Symphony Pipeline Tracker Tables ---
+
+export const trackerProjects = pgTable('tracker_projects', {
+  id: text('id').primaryKey(),
+  slug: text('slug').notNull().unique(),
+  title: text('title').notNull(),
+  description: text('description'),
+  status: text('status').$type<'active' | 'archived'>().default('active').notNull(),
+  priority: integer('priority').default(3).notNull(),
+  repo: text('repo'),
+  domain: text('domain'),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
+export const trackerTasks = pgTable('tracker_tasks', {
+  id: text('id').primaryKey(), // e.g. 'T-01'
+  projectId: text('project_id')
+    .notNull()
+    .references(() => trackerProjects.id, { onDelete: 'cascade', onUpdate: 'cascade' }),
+  title: text('title').notNull(),
+  description: text('description'),
+  status: trackerTaskStatusEnum('status').default('todo').notNull(),
+  assignee: trackerAssigneeEnum('assignee').default('openCode').notNull(),
+  priority: integer('priority').default(3).notNull(),
+  phase: text('phase'),
+  dependsOn: text('depends_on').array(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
 
 // --- Budget Import Tables ---
 

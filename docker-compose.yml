@@ -4,7 +4,7 @@ services:
       context: .
       dockerfile: Dockerfile
       target: dev
-    container_name: tanstack-template-app
+    container_name: budget-app-app
     env_file:
       - .env.development
       - .env.docker
@@ -40,7 +40,7 @@ services:
   lmstudio:
     image: lmstudio/llmster-preview:cpu
     platform: linux/amd64
-    container_name: tanstack-template-lmstudio
+    container_name: budget-app-lmstudio
     ports:
       - '1234:1234'
     volumes:
@@ -54,7 +54,7 @@ services:
 
   chromadb:
     image: chromadb/chroma:latest
-    container_name: tanstack-template-chromadb
+    container_name: budget-app-chromadb
     ports:
       - '8000:8000'
     volumes:
@@ -66,9 +66,9 @@ services:
 
   db:
     image: postgres:15-alpine
-    container_name: tanstack-template-db
+    container_name: budget-app-db
     ports:
-      - '5433:5432'
+      - '5435:5432'
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
@@ -83,7 +83,7 @@ services:
 
   ollama:
     image: ollama/ollama:latest
-    container_name: tanstack-template-ollama
+    container_name: budget-app-ollama
     ports:
       - '11434:11434'
     volumes:
@@ -102,7 +102,7 @@ services:
   llama-cpp:
     image: ghcr.io/ggml-org/llama.cpp:server
     platform: linux/amd64
-    container_name: tanstack-template-llama-cpp
+    container_name: budget-app-llama-cpp
     entrypoint: ['/bin/sh', '-lc']
     ports:
       - '8080:8080'
