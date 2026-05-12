@@ -1,4 +1,21 @@
 services:
+  migrator:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: prod
+    container_name: ${COMPOSE_PROJECT_NAME:-app}-migrator
+    restart: "no"
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+    command:
+      - sh
+      - -lc
+      - "pnpm db:migrate && (pnpm db:seed:admin || true) && (pnpm db:seed:portfolio || true)"
+
   app:
     build:
       context: .
@@ -13,6 +30,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      migrator:
+        condition: service_completed_successfully
     healthcheck:
       test:
         [
