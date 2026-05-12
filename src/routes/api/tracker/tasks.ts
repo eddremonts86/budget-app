@@ -1,6 +1,6 @@
 import { createFileRoute } from '@tanstack/react-router'
 import { eq, and } from 'drizzle-orm'
-import { loadDb } from '@/shared/lib/db/index'
+import { loadDb } from '@/shared/lib/db/load'
 import { trackerTasks } from '@/shared/lib/db/schema'
 
 export const Route = createFileRoute('/api/tracker/tasks')({
