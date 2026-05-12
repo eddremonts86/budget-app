@@ -48,6 +48,12 @@ RUN pnpm prune --prod
 COPY --from=builder /app/dist ./dist
 COPY server.prod.mjs ./server.prod.mjs
 
+# Runtime files for drizzle-kit migrate + tsx seeds (executed at container start)
+COPY drizzle ./drizzle
+COPY drizzle.config.ts ./drizzle.config.ts
+COPY tsconfig.json ./tsconfig.json
+COPY scripts ./scripts
+
 EXPOSE 3000
 
 CMD ["node", "server.prod.mjs"]

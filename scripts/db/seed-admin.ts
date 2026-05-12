@@ -16,8 +16,23 @@ import postgres from 'postgres'
 import { hashPassword } from 'better-auth/crypto'
 
 const DATABASE_URL = process.env.DATABASE_URL
-const email = process.env.DEFAULT_ADMIN_EMAIL ?? 'edd_admin@local.com'
-const password = process.env.DEFAULT_ADMIN_PASSWORD ?? 'Passw0rd!234'
+const NODE_ENV = process.env.NODE_ENV
+const adminEmailEnv = process.env.DEFAULT_ADMIN_EMAIL
+const adminPasswordEnv = process.env.DEFAULT_ADMIN_PASSWORD
+
+// In production, refuse to fall back to hardcoded dev credentials.
+// This prevents an unconfigured Coolify deploy from ending up with a
+// well-known admin account on the public internet.
+if (NODE_ENV === 'production' && (!adminEmailEnv || !adminPasswordEnv)) {
+  console.error(
+    '❌  Refusing to seed admin in production: DEFAULT_ADMIN_EMAIL and ' +
+      'DEFAULT_ADMIN_PASSWORD must be set explicitly in the Coolify env panel.',
+  )
+  process.exit(1)
+}
+
+const email = adminEmailEnv ?? 'edd_admin@local.com'
+const password = adminPasswordEnv ?? 'Passw0rd!234'
 const name = 'Admin'
 
 if (!DATABASE_URL) {
