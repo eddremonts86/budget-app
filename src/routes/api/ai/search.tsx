@@ -14,7 +14,7 @@ import {
 import type { ChatMessages } from '@/modules/ai/server'
 import { isE2E } from '@/shared/lib/env'
 
-const DEFAULT_OLLAMA_SEARCH_MODEL = process.env.AI_SEARCH_OLLAMA_MODEL || 'qwen3.5:0.8b'
+const DEFAULT_OLLAMA_SEARCH_MODEL = process.env.AI_OLLAMA_MODEL || 'qwen3.5:0.8b'
 
 export const handleSearchPost = async ({ request }: { request: Request }) => {
   try {

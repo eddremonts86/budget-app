@@ -17,6 +17,8 @@ import { Route as AuthSignUpRouteImport } from './routes/auth/sign-up'
 import { Route as AuthSignInRouteImport } from './routes/auth/sign-in'
 import { Route as DashboardDashboardRouteRouteImport } from './routes/_dashboard/dashboard/route'
 import { Route as DashboardDashboardIndexRouteImport } from './routes/_dashboard/dashboard/index'
+import { Route as ApiTrackerTasksRouteImport } from './routes/api/tracker/tasks'
+import { Route as ApiTrackerProjectsRouteImport } from './routes/api/tracker/projects'
 import { Route as ApiBudgetsProcessRecurrencesRouteImport } from './routes/api/budgets/process-recurrences'
 import { Route as ApiAuthSplatRouteImport } from './routes/api/auth/$'
 import { Route as ApiAiTestConnectionRouteImport } from './routes/api/ai/test-connection'
@@ -42,6 +44,7 @@ import { Route as ApiAiChatCompletionsRouteImport } from './routes/api/ai/chat/c
 import { Route as DashboardDashboardSettingsSystemRouteImport } from './routes/_dashboard/dashboard/settings/system'
 import { Route as DashboardDashboardSettingsIa_configRouteImport } from './routes/_dashboard/dashboard/settings/ia_config'
 import { Route as DashboardDashboardBudgetsBudgetIdRouteImport } from './routes/_dashboard/dashboard/budgets.$budgetId'
+import { Route as ApiTrackerTasksTaskIdStatusRouteImport } from './routes/api/tracker/tasks/$taskId/status'
 
 const AuthRouteRoute = AuthRouteRouteImport.update({
   id: '/auth',
@@ -80,6 +83,16 @@ const DashboardDashboardIndexRoute = DashboardDashboardIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => DashboardDashboardRouteRoute,
+} as any)
+const ApiTrackerTasksRoute = ApiTrackerTasksRouteImport.update({
+  id: '/api/tracker/tasks',
+  path: '/api/tracker/tasks',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiTrackerProjectsRoute = ApiTrackerProjectsRouteImport.update({
+  id: '/api/tracker/projects',
+  path: '/api/tracker/projects',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ApiBudgetsProcessRecurrencesRoute =
   ApiBudgetsProcessRecurrencesRouteImport.update({
@@ -218,6 +231,12 @@ const DashboardDashboardBudgetsBudgetIdRoute =
     path: '/$budgetId',
     getParentRoute: () => DashboardDashboardBudgetsRoute,
   } as any)
+const ApiTrackerTasksTaskIdStatusRoute =
+  ApiTrackerTasksTaskIdStatusRouteImport.update({
+    id: '/$taskId/status',
+    path: '/$taskId/status',
+    getParentRoute: () => ApiTrackerTasksRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof LandingIndexRoute
@@ -244,6 +263,8 @@ export interface FileRoutesByFullPath {
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/budgets/process-recurrences': typeof ApiBudgetsProcessRecurrencesRoute
+  '/api/tracker/projects': typeof ApiTrackerProjectsRoute
+  '/api/tracker/tasks': typeof ApiTrackerTasksRouteWithChildren
   '/dashboard/': typeof DashboardDashboardIndexRoute
   '/dashboard/budgets/$budgetId': typeof DashboardDashboardBudgetsBudgetIdRoute
   '/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
@@ -251,6 +272,7 @@ export interface FileRoutesByFullPath {
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
   '/dashboard/budgets/': typeof DashboardDashboardBudgetsIndexRoute
   '/dashboard/settings/': typeof DashboardDashboardSettingsIndexRoute
+  '/api/tracker/tasks/$taskId/status': typeof ApiTrackerTasksTaskIdStatusRoute
 }
 export interface FileRoutesByTo {
   '/': typeof LandingIndexRoute
@@ -274,6 +296,8 @@ export interface FileRoutesByTo {
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/budgets/process-recurrences': typeof ApiBudgetsProcessRecurrencesRoute
+  '/api/tracker/projects': typeof ApiTrackerProjectsRoute
+  '/api/tracker/tasks': typeof ApiTrackerTasksRouteWithChildren
   '/dashboard': typeof DashboardDashboardIndexRoute
   '/dashboard/budgets/$budgetId': typeof DashboardDashboardBudgetsBudgetIdRoute
   '/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
@@ -281,6 +305,7 @@ export interface FileRoutesByTo {
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
   '/dashboard/budgets': typeof DashboardDashboardBudgetsIndexRoute
   '/dashboard/settings': typeof DashboardDashboardSettingsIndexRoute
+  '/api/tracker/tasks/$taskId/status': typeof ApiTrackerTasksTaskIdStatusRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -310,6 +335,8 @@ export interface FileRoutesById {
   '/api/ai/test-connection': typeof ApiAiTestConnectionRoute
   '/api/auth/$': typeof ApiAuthSplatRoute
   '/api/budgets/process-recurrences': typeof ApiBudgetsProcessRecurrencesRoute
+  '/api/tracker/projects': typeof ApiTrackerProjectsRoute
+  '/api/tracker/tasks': typeof ApiTrackerTasksRouteWithChildren
   '/_dashboard/dashboard/': typeof DashboardDashboardIndexRoute
   '/_dashboard/dashboard/budgets/$budgetId': typeof DashboardDashboardBudgetsBudgetIdRoute
   '/_dashboard/dashboard/settings/ia_config': typeof DashboardDashboardSettingsIa_configRoute
@@ -317,6 +344,7 @@ export interface FileRoutesById {
   '/api/ai/chat/completions': typeof ApiAiChatCompletionsRoute
   '/_dashboard/dashboard/budgets/': typeof DashboardDashboardBudgetsIndexRoute
   '/_dashboard/dashboard/settings/': typeof DashboardDashboardSettingsIndexRoute
+  '/api/tracker/tasks/$taskId/status': typeof ApiTrackerTasksTaskIdStatusRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -345,6 +373,8 @@ export interface FileRouteTypes {
     | '/api/ai/test-connection'
     | '/api/auth/$'
     | '/api/budgets/process-recurrences'
+    | '/api/tracker/projects'
+    | '/api/tracker/tasks'
     | '/dashboard/'
     | '/dashboard/budgets/$budgetId'
     | '/dashboard/settings/ia_config'
@@ -352,6 +382,7 @@ export interface FileRouteTypes {
     | '/api/ai/chat/completions'
     | '/dashboard/budgets/'
     | '/dashboard/settings/'
+    | '/api/tracker/tasks/$taskId/status'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -375,6 +406,8 @@ export interface FileRouteTypes {
     | '/api/ai/test-connection'
     | '/api/auth/$'
     | '/api/budgets/process-recurrences'
+    | '/api/tracker/projects'
+    | '/api/tracker/tasks'
     | '/dashboard'
     | '/dashboard/budgets/$budgetId'
     | '/dashboard/settings/ia_config'
@@ -382,6 +415,7 @@ export interface FileRouteTypes {
     | '/api/ai/chat/completions'
     | '/dashboard/budgets'
     | '/dashboard/settings'
+    | '/api/tracker/tasks/$taskId/status'
   id:
     | '__root__'
     | '/_dashboard'
@@ -410,6 +444,8 @@ export interface FileRouteTypes {
     | '/api/ai/test-connection'
     | '/api/auth/$'
     | '/api/budgets/process-recurrences'
+    | '/api/tracker/projects'
+    | '/api/tracker/tasks'
     | '/_dashboard/dashboard/'
     | '/_dashboard/dashboard/budgets/$budgetId'
     | '/_dashboard/dashboard/settings/ia_config'
@@ -417,6 +453,7 @@ export interface FileRouteTypes {
     | '/api/ai/chat/completions'
     | '/_dashboard/dashboard/budgets/'
     | '/_dashboard/dashboard/settings/'
+    | '/api/tracker/tasks/$taskId/status'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -432,6 +469,8 @@ export interface RootRouteChildren {
   ApiAiTestConnectionRoute: typeof ApiAiTestConnectionRoute
   ApiAuthSplatRoute: typeof ApiAuthSplatRoute
   ApiBudgetsProcessRecurrencesRoute: typeof ApiBudgetsProcessRecurrencesRoute
+  ApiTrackerProjectsRoute: typeof ApiTrackerProjectsRoute
+  ApiTrackerTasksRoute: typeof ApiTrackerTasksRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -491,6 +530,20 @@ declare module '@tanstack/react-router' {
       fullPath: '/dashboard/'
       preLoaderRoute: typeof DashboardDashboardIndexRouteImport
       parentRoute: typeof DashboardDashboardRouteRoute
+    }
+    '/api/tracker/tasks': {
+      id: '/api/tracker/tasks'
+      path: '/api/tracker/tasks'
+      fullPath: '/api/tracker/tasks'
+      preLoaderRoute: typeof ApiTrackerTasksRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/tracker/projects': {
+      id: '/api/tracker/projects'
+      path: '/api/tracker/projects'
+      fullPath: '/api/tracker/projects'
+      preLoaderRoute: typeof ApiTrackerProjectsRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/api/budgets/process-recurrences': {
       id: '/api/budgets/process-recurrences'
@@ -667,6 +720,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof DashboardDashboardBudgetsBudgetIdRouteImport
       parentRoute: typeof DashboardDashboardBudgetsRoute
     }
+    '/api/tracker/tasks/$taskId/status': {
+      id: '/api/tracker/tasks/$taskId/status'
+      path: '/$taskId/status'
+      fullPath: '/api/tracker/tasks/$taskId/status'
+      preLoaderRoute: typeof ApiTrackerTasksTaskIdStatusRouteImport
+      parentRoute: typeof ApiTrackerTasksRoute
+    }
   }
 }
 
@@ -792,6 +852,18 @@ const ApiAiChatRouteRouteWithChildren = ApiAiChatRouteRoute._addFileChildren(
   ApiAiChatRouteRouteChildren,
 )
 
+interface ApiTrackerTasksRouteChildren {
+  ApiTrackerTasksTaskIdStatusRoute: typeof ApiTrackerTasksTaskIdStatusRoute
+}
+
+const ApiTrackerTasksRouteChildren: ApiTrackerTasksRouteChildren = {
+  ApiTrackerTasksTaskIdStatusRoute: ApiTrackerTasksTaskIdStatusRoute,
+}
+
+const ApiTrackerTasksRouteWithChildren = ApiTrackerTasksRoute._addFileChildren(
+  ApiTrackerTasksRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   DashboardRouteRoute: DashboardRouteRouteWithChildren,
   LandingRouteRoute: LandingRouteRouteWithChildren,
@@ -805,6 +877,8 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAiTestConnectionRoute: ApiAiTestConnectionRoute,
   ApiAuthSplatRoute: ApiAuthSplatRoute,
   ApiBudgetsProcessRecurrencesRoute: ApiBudgetsProcessRecurrencesRoute,
+  ApiTrackerProjectsRoute: ApiTrackerProjectsRoute,
+  ApiTrackerTasksRoute: ApiTrackerTasksRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

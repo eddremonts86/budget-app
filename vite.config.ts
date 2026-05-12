@@ -5,7 +5,6 @@ import { devtools } from '@tanstack/devtools-vite'
 import { tanstackStart } from '@tanstack/react-start/plugin/vite'
 import viteReact from '@vitejs/plugin-react'
 import { defineConfig } from 'vite'
-import viteTsConfigPaths from 'vite-tsconfig-paths'
 
 const isTest = process.env.NODE_ENV === 'test' || !!process.env.VITEST
 const isViteDevtoolsDisabled = process.env.DISABLE_TANSTACK_VITE_DEVTOOLS === 'true'
@@ -42,6 +41,7 @@ const config = defineConfig((configEnv) => {
       },
     },
     resolve: {
+      tsconfigPaths: true,
       dedupe: ['react', 'react-dom'],
       alias: [
         ...(shouldStubDbForClientBuild
@@ -98,9 +98,6 @@ const config = defineConfig((configEnv) => {
     plugins: [
       !isViteDevtoolsDisabled && devtools(),
       tailwindcss(),
-      viteTsConfigPaths({
-        projects: ['./tsconfig.json'],
-      }),
       !isTest &&
         tanstackStart({
           srcDirectory: './src',

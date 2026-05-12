@@ -20,7 +20,7 @@ import type { ChatMessages } from '@/modules/ai/server'
 import type { IncomingChatMessage } from '@/modules/ai/server/chat-messages'
 import { isE2E } from '@/shared/lib/env'
 
-const DEFAULT_OLLAMA_CHAT_MODEL = process.env.AI_CHAT_OLLAMA_MODEL || 'qwen3.5:0.8b'
+const DEFAULT_OLLAMA_CHAT_MODEL = process.env.AI_OLLAMA_MODEL || 'qwen3.5:0.8b'
 
 type ChatRequestBody = {
   messages: IncomingChatMessage[]
