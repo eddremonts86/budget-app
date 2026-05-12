@@ -7,7 +7,7 @@ RUN corepack enable
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
 RUN pnpm install --frozen-lockfile
 
@@ -39,9 +39,11 @@ RUN corepack enable
 
 WORKDIR /app
 
-COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc ./
 
-RUN pnpm install --frozen-lockfile --prod
+# Reuse compiled node_modules from base — avoids re-running native binary builds
+COPY --from=base /app/node_modules ./node_modules
+RUN pnpm prune --prod
 
 COPY --from=builder /app/dist ./dist
 COPY server.prod.mjs ./server.prod.mjs

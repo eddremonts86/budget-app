@@ -31,12 +31,13 @@
     "auth:generate": "pnpm dlx auth@latest generate",
     "test:visual": "percy exec -- playwright test",
     "rag:ingest": "tsx scripts/ai/ingest-rag.ts",
-    "db:up": "docker compose up -d",
+    "db:up": "docker inspect workspace-postgres --format '{{.State.Running}}' 2>/dev/null | grep -q true || docker compose --profile standalone up -d db",
     "db:down": "docker compose down",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "tsx --env-file=.env scripts/db/create-db.ts && drizzle-kit migrate",
     "db:push": "drizzle-kit push",
     "db:seed": "tsx scripts/db/seed-db.ts",
+    "db:seed:admin": "tsx --env-file=.env scripts/db/seed-admin.ts",
     "db:seed:generate": "tsx scripts/db/seed-complex.ts",
     "db:seed:import": "tsx scripts/db/seed-db.ts",
     "db:seed:realistic": "pnpm db:seed:generate && pnpm db:seed:import",
@@ -175,5 +176,17 @@
     "vite-plugin-node-polyfills": "^0.26.0",
     "vitest": "^4.1.4",
     "web-vitals": "^5.2.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@clerk/shared",
+      "@parcel/watcher",
+      "@percy/core",
+      "esbuild",
+      "onnxruntime-node",
+      "protobufjs",
+      "sharp",
+      "unrs-resolver"
+    ]
   }
 }
