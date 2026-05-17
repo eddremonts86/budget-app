@@ -39,7 +39,7 @@ export const getCategoriesFn = createServerFn({ method: 'GET' })
     }
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const { pageParam, limit: limitParam, search } = data || {}
       const page = pageParam || 1
@@ -83,7 +83,7 @@ export const getCategoryByIdFn = createServerFn({ method: 'GET' })
 
     try {
       if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const result = await db.select().from(categories).where(eq(categories.id, id)).limit(1)
       return result[0] || null
@@ -103,7 +103,7 @@ export const createCategoryFn = createServerFn({ method: 'POST' })
       }
     }
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     const [newItem] = await db
@@ -128,7 +128,7 @@ export const updateCategoryFn = createServerFn({ method: 'POST' })
       }
     }
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
     const [updatedItem] = await db
       .update(categories)
@@ -146,7 +146,7 @@ export const deleteCategoryFn = createServerFn({ method: 'POST' })
     }
 
     if (!id) throw new Error('ID is required')
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
     await db.delete(categories).where(eq(categories.id, id))
     return { success: true }

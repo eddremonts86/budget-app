@@ -43,7 +43,7 @@ export const getTeamsFn = createServerFn({ method: 'GET' })
     }
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const { pageParam, limit: limitParam, search } = data || {}
       const page = pageParam || 1
@@ -122,7 +122,7 @@ export const getTeamByIdFn = createServerFn({ method: 'GET' })
 
     try {
       if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const result = await db.select().from(teams).where(eq(teams.id, id)).limit(1)
       if (!result.length) return null
@@ -159,7 +159,7 @@ export const createTeamFn = createServerFn({ method: 'POST' })
     }
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const normalizedName = data.name.trim()
 
@@ -243,7 +243,7 @@ export const updateTeamFn = createServerFn({ method: 'POST' })
     }
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const { id, data: updateData } = data
 
@@ -337,7 +337,7 @@ export const deleteTeamFn = createServerFn({ method: 'POST' })
 
     try {
       if (!id) throw new Error('ID is required')
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       await db.transaction(async (tx) => {
         await tx.delete(teamMembers).where(eq(teamMembers.teamId, id))

@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { desc, eq, and, inArray, count, ilike } from 'drizzle-orm'
 import type { SQL } from 'drizzle-orm'
 import { z } from 'zod'
-import type { getDb } from '@/shared/lib/db'
+import type { getDb } from '@/shared/lib/db/index'
 import {
   projects,
   departments,
@@ -138,7 +138,7 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
       const limit = limitParam || 25
       const offset = (page - 1) * limit
 
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
 
       const conditions: SQL<unknown>[] = []
@@ -262,7 +262,7 @@ export const getProjectsFn = createServerFn({ method: 'GET' })
 export const getProjectByIdFn = createServerFn({ method: 'GET' }).handler(
   async ({ data: id }: { data: unknown }): Promise<Project | null> => {
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const [item] = await db
         .select({
@@ -333,7 +333,7 @@ export const getDepartmentsFn = createServerFn({ method: 'GET' }).handler(async 
   }
 
   try {
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
     return await db.select().from(departments).orderBy(departments.name)
   } catch (error) {
@@ -351,7 +351,7 @@ export const createProjectFn = createServerFn({ method: 'POST' }).handler(
     const input = parsed.data
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
 
       // Pre-fetch or create all needed skills in batch (avoids N+1)
@@ -430,7 +430,7 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
   async ({ data }: { data: unknown }): Promise<Project> => {
     const { id, data: updateData } = data as { id: string; data: Partial<ProjectInput> }
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
 
       // Pre-fetch or create all needed skills in batch (avoids N+1)
@@ -517,7 +517,7 @@ export const updateProjectFn = createServerFn({ method: 'POST' }).handler(
 export const deleteProjectFn = createServerFn({ method: 'POST' }).handler(
   async ({ data: id }: { data: unknown }): Promise<{ success: boolean }> => {
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       await db.transaction(async (tx) => {
         await tx.delete(projectMembers).where(eq(projectMembers.projectId, id as string))
@@ -549,7 +549,7 @@ export const getProjectMembersFn = createServerFn({ method: 'GET' }).handler(
       ]
     }
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     const members = await db
@@ -594,7 +594,7 @@ export const addProjectMemberFn = createServerFn({ method: 'POST' }).handler(
       }
     }
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     const [newMember] = await db
@@ -630,7 +630,7 @@ export const updateProjectMemberFn = createServerFn({ method: 'POST' }).handler(
       return { success: true }
     }
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     await db
@@ -659,7 +659,7 @@ export const removeProjectMemberFn = createServerFn({ method: 'POST' }).handler(
       return { success: true }
     }
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     await db

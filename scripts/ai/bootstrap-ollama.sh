@@ -1,4 +1,10 @@
 #!/usr/bin/env sh
+# Pull Ollama models into the shared workspace-ollama container.
+# Prerequisite: docker compose --profile ai up -d ollama  (from workspace root)
+#
+# Usage:
+#   sh scripts/ai/bootstrap-ollama.sh
+#   OLLAMA_MODEL=qwen3.5:4b sh scripts/ai/bootstrap-ollama.sh
 
 set -eu
 
@@ -7,6 +13,9 @@ DRAFT_MODEL="${2:-${OLLAMA_DRAFT_MODEL:-qwen3.5:0.8b}}"
 MAIN_CANDIDATES="${OLLAMA_MAIN_CANDIDATES:-$MODEL,qwen3.5:2b,qwen3.5:4b}"
 MAX_RETRIES="${OLLAMA_HEALTH_RETRIES:-60}"
 SLEEP_SECONDS="${OLLAMA_HEALTH_SLEEP_SECONDS:-2}"
+
+# Use the shared workspace container — never the app-local compose service.
+OLLAMA_CONTAINER="${OLLAMA_CONTAINER:-workspace-ollama}"
 
 pull_first_available() {
 	candidates_csv="$1"
@@ -19,14 +28,14 @@ pull_first_available() {
 		candidate_trimmed="$(printf '%s' "$candidate" | sed 's/^ *//; s/ *$//')"
 		[ -n "$candidate_trimmed" ] || continue
 
-		if docker compose exec -T ollama ollama list | grep -Fq "$candidate_trimmed"; then
+		if docker exec "$OLLAMA_CONTAINER" ollama list | grep -Fq "$candidate_trimmed"; then
 			echo "[ollama] main model already exists: $candidate_trimmed"
 			resolved_model="$candidate_trimmed"
 			break
 		fi
 
 		echo "[ollama] trying to download main model: $candidate_trimmed"
-		if docker compose exec -T ollama ollama pull "$candidate_trimmed"; then
+		if docker exec "$OLLAMA_CONTAINER" ollama pull "$candidate_trimmed"; then
 			resolved_model="$candidate_trimmed"
 			break
 		fi
@@ -43,20 +52,15 @@ pull_first_available() {
 	printf '%s\n' "$resolved_model"
 }
 
-echo "[ollama] ensuring container is running..."
-docker compose up -d ollama
-
-echo "[ollama] waiting for healthy status..."
+echo "[ollama] waiting for $OLLAMA_CONTAINER to be healthy..."
 retries=0
-while ! docker compose ps ollama | grep -q "healthy"; do
+until docker exec "$OLLAMA_CONTAINER" ollama list > /dev/null 2>&1; do
 	retries=$((retries + 1))
-
 	if [ "$retries" -ge "$MAX_RETRIES" ]; then
-		echo "[ollama] timed out waiting for healthy status"
-		docker compose ps
+		echo "[ollama] timed out waiting for $OLLAMA_CONTAINER"
+		echo "[ollama] start it with: docker compose --profile ai up -d ollama"
 		exit 1
 	fi
-
 	sleep "$SLEEP_SECONDS"
 done
 
@@ -69,11 +73,11 @@ MODEL="$(pull_first_available "$MAIN_CANDIDATES")" || {
 }
 
 echo "[ollama] pulling draft model: $DRAFT_MODEL"
-if docker compose exec -T ollama ollama list | grep -q "$DRAFT_MODEL"; then
+if docker exec "$OLLAMA_CONTAINER" ollama list | grep -q "$DRAFT_MODEL"; then
 	echo "[ollama] draft model already exists: $DRAFT_MODEL"
 else
 	echo "[ollama] downloading draft model $DRAFT_MODEL..."
-	docker compose exec -T ollama ollama pull "$DRAFT_MODEL"
+	docker exec "$OLLAMA_CONTAINER" ollama pull "$DRAFT_MODEL"
 fi
 
-echo "[ollama] ready at http://localhost:11434"
+echo "[ollama] ready at http://localhost:11435/v1  (workspace-ollama container)"

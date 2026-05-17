@@ -1,175 +1,92 @@
 #!/usr/bin/env sh
+# Bootstrap / verify LM Studio local server (host application, no Docker).
+#
+# LM Studio does NOT have an official Docker image — it runs as a native
+# desktop application on macOS / Windows / Linux and exposes an
+# OpenAI-compatible REST API on port 1234.
+#
+# This script:
+#   1. Checks if the LM Studio server is already reachable at localhost:1234
+#   2. If not, tries to start it via the `lms` CLI (installed with LM Studio)
+#   3. Optionally loads a model if `lms` CLI is available
+#
+# Usage:
+#   sh scripts/ai/bootstrap-lmstudio.sh
+#   sh scripts/ai/bootstrap-lmstudio.sh qwen3.5-2b
 
 set -eu
 
-MODEL="${1:-${LMSTUDIO_MODEL:-llama-3.2-1b}}"
+MODEL="${1:-${LMSTUDIO_MODEL:-qwen3.5-2b}}"
 IDENTIFIER="${2:-${LMSTUDIO_IDENTIFIER:-lmstudio:compat}}"
-DRAFT_MODEL="${3:-${LMSTUDIO_DRAFT_MODEL:-}}"
-DRAFT_IDENTIFIER="${4:-${LMSTUDIO_DRAFT_IDENTIFIER:-}}"
-MAIN_CANDIDATES="${LMSTUDIO_MAIN_CANDIDATES:-$MODEL,llama-3.2-1b,llama-3.2-3b,qwen3.5-2b,qwen3.5-4b}"
-DRAFT_CANDIDATES="${LMSTUDIO_DRAFT_CANDIDATES:-$DRAFT_MODEL,qwen3.5-0.8b}"
-COMPAT_FALLBACK_CANDIDATES="${LMSTUDIO_COMPAT_FALLBACK_CANDIDATES:-llama-3.2-1b,llama-3.2-3b}"
-MAX_RETRIES="${LMSTUDIO_HEALTH_RETRIES:-60}"
+MAX_RETRIES="${LMSTUDIO_HEALTH_RETRIES:-30}"
 SLEEP_SECONDS="${LMSTUDIO_HEALTH_SLEEP_SECONDS:-2}"
+LMS_PORT="${LMSTUDIO_PORT:-1234}"
+LMS_URL="http://localhost:${LMS_PORT}/v1"
 
-is_supported_main() {
-	value="$1"
-	lower_value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
-
-	case "$lower_value" in
-		*qwen3.5*2b*|*qwen3.5*4b*|*llama-3.2*1b*|*llama-3.2*3b*)
-			return 0
-			;;
-		*)
-			return 1
-			;;
-	esac
+# ── Check if server is already up ────────────────────────────────────────────
+server_ready() {
+	curl -fsS "${LMS_URL}/models" > /dev/null 2>&1
 }
 
-is_supported_draft() {
-	value="$1"
-	lower_value="$(printf '%s' "$value" | tr '[:upper:]' '[:lower:]')"
+if server_ready; then
+	echo "[lmstudio] server already running at ${LMS_URL}"
+else
+	echo "[lmstudio] server not detected at ${LMS_URL}"
 
-	case "$lower_value" in
-		*qwen3.5*0.8b*)
-			return 0
-			;;
-		*)
-			return 1
-			;;
-	esac
-}
+	# Try to start via lms CLI if available
+	if command -v lms > /dev/null 2>&1; then
+		echo "[lmstudio] starting server via: lms server start --port ${LMS_PORT} --cors"
+		lms server start --host 0.0.0.0 --port "${LMS_PORT}" --cors || true
 
-download_first_available() {
-	candidates_csv="$1"
-	mode="$2"
-	downloaded_model=""
-
-	OLD_IFS="$IFS"
-	IFS=','
-	for candidate in $candidates_csv; do
-		IFS="$OLD_IFS"
-		candidate_trimmed="$(printf '%s' "$candidate" | sed 's/^ *//; s/ *$//')"
-		[ -n "$candidate_trimmed" ] || continue
-
-		if [ "$mode" = "main" ] && ! is_supported_main "$candidate_trimmed"; then
-			echo "[lmstudio] skipping unsupported main candidate: $candidate_trimmed" >&2
-			continue
-		fi
-
-		if [ "$mode" = "draft" ] && ! is_supported_draft "$candidate_trimmed"; then
-			echo "[lmstudio] skipping unsupported draft candidate: $candidate_trimmed" >&2
-			continue
-		fi
-
-		if docker compose exec -T lmstudio lms ls | grep -Fq "$candidate_trimmed"; then
-			echo "[lmstudio] $mode model already downloaded: $candidate_trimmed" >&2
-			downloaded_model="$candidate_trimmed"
-			break
-		fi
-
-		echo "[lmstudio] trying to download $mode model: $candidate_trimmed" >&2
-		if printf '%s' "$candidate_trimmed" | grep -q '/'; then
-			if docker compose exec -T lmstudio lms get "$candidate_trimmed" --yes; then
-				downloaded_model="$candidate_trimmed"
-				break
+		echo "[lmstudio] waiting for server to be ready..."
+		retries=0
+		until server_ready; do
+			retries=$((retries + 1))
+			if [ "$retries" -ge "$MAX_RETRIES" ]; then
+				echo "[lmstudio] ERROR: timed out waiting for LM Studio server"
+				echo ""
+				echo "  To start LM Studio manually:"
+				echo "    1. Open LM Studio application"
+				echo "    2. Go to the Developer tab"
+				echo "    3. Click 'Start Server' (or run: lms server start --port ${LMS_PORT} --cors)"
+				echo ""
+				exit 1
 			fi
-		elif docker compose exec -T lmstudio lms get "$candidate_trimmed" --gguf --yes; then
-			downloaded_model="$candidate_trimmed"
-			break
-		fi
-
-		echo "[lmstudio] candidate failed: $candidate_trimmed" >&2
-		IFS=','
-	done
-	IFS="$OLD_IFS"
-
-	if [ -z "$downloaded_model" ]; then
-		return 1
-	fi
-
-	printf '%s\n' "$downloaded_model"
-}
-
-echo "[lmstudio] ensuring container is running..."
-docker compose up -d lmstudio
-
-echo "[lmstudio] waiting for healthy status..."
-retries=0
-while ! docker compose ps lmstudio | grep -q "healthy"; do
-	retries=$((retries + 1))
-
-	if [ "$retries" -ge "$MAX_RETRIES" ]; then
-		echo "[lmstudio] timed out waiting for healthy status"
-		docker compose ps
+			sleep "$SLEEP_SECONDS"
+		done
+	else
+		echo ""
+		echo "[lmstudio] ERROR: LM Studio is not running and 'lms' CLI not found."
+		echo ""
+		echo "  LM Studio is a native desktop application — no Docker container is needed."
+		echo "  To set it up:"
+		echo "    1. Download from https://lmstudio.ai"
+		echo "    2. Open LM Studio → Developer tab → Start Server"
+		echo "       (or run: lms server start --host 0.0.0.0 --port ${LMS_PORT} --cors)"
+		echo ""
+		echo "  Apps connect via: AI_LMSTUDIO_BASE_URL=${LMS_URL}"
+		echo ""
 		exit 1
 	fi
-
-	sleep "$SLEEP_SECONDS"
-done
-
-echo "[lmstudio] container is healthy"
-
-echo "[lmstudio] enforcing server-side CORS"
-docker compose exec -T lmstudio lms server stop || true
-docker compose exec -T lmstudio lms server start --port 1234 --cors
-
-if ! is_supported_main "$MODEL"; then
-	echo "[lmstudio] unsupported LMSTUDIO_MODEL: $MODEL"
-	exit 1
 fi
 
-MAIN_MODEL_RESOLVED="$(download_first_available "$MAIN_CANDIDATES" "main")" || {
-	echo "[lmstudio] failed to download/find a supported main model."
-	exit 1
-}
-MODEL="$MAIN_MODEL_RESOLVED"
+# ── Load model if lms CLI is available ───────────────────────────────────────
+if command -v lms > /dev/null 2>&1; then
+	if lms ps 2>/dev/null | grep -Fq "$MODEL"; then
+		echo "[lmstudio] model already loaded: $MODEL"
+	else
+		echo "[lmstudio] loading model: $MODEL (identifier: $IDENTIFIER)"
+		lms load "$MODEL" --identifier "$IDENTIFIER" || {
+			echo "[lmstudio] WARNING: could not load model $MODEL"
+			echo "  Load it manually in the LM Studio Developer tab."
+		}
+	fi
 
-if docker compose exec -T lmstudio lms ps | grep -Fq "$IDENTIFIER"; then
-	echo "[lmstudio] main model already loaded with identifier: $IDENTIFIER"
+	echo "[lmstudio] loaded models:"
+	lms ps 2>/dev/null || true
 else
-	echo "[lmstudio] loading main model with identifier: $IDENTIFIER"
-	if ! docker compose exec -T lmstudio lms load "$MODEL" --identifier "$IDENTIFIER"; then
-		echo "[lmstudio] load with identifier failed, retrying without identifier"
-		if ! docker compose exec -T lmstudio lms load "$MODEL"; then
-			echo "[lmstudio] main model failed to load, trying compatibility fallback candidates"
-			FALLBACK_MODEL_RESOLVED="$(download_first_available "$COMPAT_FALLBACK_CANDIDATES" "main")" || {
-				echo "[lmstudio] no compatible fallback model could be downloaded"
-				exit 1
-			}
-			MODEL="$FALLBACK_MODEL_RESOLVED"
-			docker compose exec -T lmstudio lms load "$MODEL" --identifier "$IDENTIFIER"
-		fi
-	fi
+	echo "[lmstudio] 'lms' CLI not in PATH — skipping model load."
+	echo "  Load a model manually in the LM Studio Developer tab."
 fi
 
-if [ -z "$DRAFT_MODEL" ]; then
-	echo "[lmstudio] draft model disabled"
-	DRAFT_MODEL=""
-elif ! is_supported_draft "$DRAFT_MODEL"; then
-	echo "[lmstudio] unsupported LMSTUDIO_DRAFT_MODEL: $DRAFT_MODEL (skipping draft)"
-	DRAFT_MODEL=""
-fi
-
-if [ -n "$DRAFT_MODEL" ]; then
-	if DRAFT_MODEL_RESOLVED="$(download_first_available "$DRAFT_CANDIDATES" "draft")"; then
-		DRAFT_MODEL="$DRAFT_MODEL_RESOLVED"
-	else
-		echo "[lmstudio] draft model unavailable; continuing without draft loaded"
-		DRAFT_MODEL=""
-	fi
-fi
-
-if [ -n "$DRAFT_MODEL" ] && [ -n "$DRAFT_IDENTIFIER" ]; then
-	if docker compose exec -T lmstudio lms ps | grep -Fq "$DRAFT_IDENTIFIER"; then
-		echo "[lmstudio] draft model already loaded with identifier: $DRAFT_IDENTIFIER"
-	else
-		echo "[lmstudio] loading draft model with identifier: $DRAFT_IDENTIFIER"
-		docker compose exec -T lmstudio lms load "$DRAFT_MODEL" --identifier "$DRAFT_IDENTIFIER" || true
-	fi
-fi
-
-echo "[lmstudio] loaded models:"
-docker compose exec -T lmstudio lms ps || true
-
-echo "[lmstudio] ready at http://localhost:1234/v1"
+echo "[lmstudio] ready at ${LMS_URL}"

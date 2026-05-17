@@ -46,6 +46,7 @@ export const resolveAiConfig = (
     'llama-cpp': process.env.AI_LLAMA_CPP_BASE_URL || process.env.VITE_AI_LLAMA_CPP_BASE_URL,
     ollama: process.env.AI_OLLAMA_BASE_URL || process.env.VITE_AI_OLLAMA_BASE_URL,
     'lm-studio':
+      process.env.AI_LMSTUDIO_BASE_URL ||
       process.env.AI_BASE_URL_INTERNAL ||
       process.env.VITE_AI_LMSTUDIO_BASE_URL ||
       process.env.VITE_AI_BASE_URL,

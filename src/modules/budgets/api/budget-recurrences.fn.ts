@@ -134,7 +134,7 @@ export const deleteRecurrenceRuleFn = createServerFn({ method: 'POST' })
  * Uses catch-up limit to prevent explosion.
  */
 export async function processRecurrenceRulesForBudget(budgetId: string) {
-  const { getDb } = await import('@/shared/lib/db')
+  const { getDb } = await import('@/shared/lib/db/index')
   const db = getDb()
 
   const now = new Date()
@@ -219,7 +219,7 @@ export async function processRecurrenceRulesForBudget(budgetId: string) {
  * Process ALL due recurrence rules across all budgets (for external cron).
  */
 export const processAllRecurrencesFn = createServerFn({ method: 'POST' }).handler(async () => {
-  const { getDb } = await import('@/shared/lib/db')
+  const { getDb } = await import('@/shared/lib/db/index')
   const db = getDb()
 
   const activeBudgets = await db

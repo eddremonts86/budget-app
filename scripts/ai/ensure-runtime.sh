@@ -1,4 +1,14 @@
 #!/usr/bin/env sh
+# Ensure all workspace AI services are up and models are loaded.
+# AI containers are shared at WORKSPACE level — this script does NOT
+# start them; it relies on them already running.
+#
+# To start AI services:
+#   cd <workspace-root>
+#   docker compose --profile ai up -d
+#
+# Usage (from app directory):
+#   sh scripts/ai/ensure-runtime.sh
 
 set -eu
 
@@ -8,18 +18,10 @@ if ! docker info >/dev/null 2>&1; then
 	exit 1
 fi
 
-echo "[ai-ensure] loading environment defaults..."
-set -a
-. ./.env.docker
-set +a
-
-echo "[ai-ensure] starting services..."
-docker compose up -d db chromadb ollama lmstudio llama-cpp app
-
-echo "[ai-ensure] ensuring Ollama models..."
+echo "[ai-ensure] ensuring Ollama models in workspace-ollama..."
 sh scripts/ai/bootstrap-ollama.sh
 
-echo "[ai-ensure] ensuring LM Studio compatible model is loaded..."
+echo "[ai-ensure] ensuring LM Studio model loaded in LM Studio (native host)..."
 sh scripts/ai/bootstrap-lmstudio.sh
 
 wait_http() {
@@ -45,7 +47,7 @@ wait_http() {
 echo "[ai-ensure] waiting for endpoints..."
 wait_http "app" "http://localhost:3000"
 wait_http "llama-cpp" "http://localhost:8080/health"
-wait_http "ollama" "http://localhost:11434/v1/models"
+wait_http "ollama" "http://localhost:11435/v1/models"
 wait_http "lmstudio" "http://localhost:1234/v1/models"
 
 json_first_model() {
@@ -62,9 +64,9 @@ json_first_model() {
 	' "$url"
 }
 
-OLLAMA_MODEL="$(json_first_model "http://localhost:11434/api/ps")"
+OLLAMA_MODEL="$(json_first_model "http://localhost:11435/api/ps")"
 if [ -z "$OLLAMA_MODEL" ]; then
-	OLLAMA_MODEL="$(json_first_model "http://localhost:11434/api/tags")"
+	OLLAMA_MODEL="$(json_first_model "http://localhost:11435/api/tags")"
 fi
 
 LLAMA_CPP_MODEL="$(json_first_model "http://localhost:8080/v1/models")"
@@ -78,7 +80,7 @@ if [ -n "$LLAMA_CPP_MODEL" ]; then
 fi
 
 if [ -n "$OLLAMA_MODEL" ]; then
-	curl --max-time 30 -fsS -X POST http://localhost:11434/api/chat \
+	curl --max-time 30 -fsS -X POST http://localhost:11435/api/chat \
 		-H 'Content-Type: application/json' \
 		-d "{\"model\":\"$OLLAMA_MODEL\",\"messages\":[{\"role\":\"user\",\"content\":\"ok\"}],\"think\":false,\"stream\":false}" >/dev/null
 fi

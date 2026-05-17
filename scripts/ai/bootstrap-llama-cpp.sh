@@ -1,7 +1,15 @@
 #!/usr/bin/env sh
+# Download GGUF models for workspace-llama-cpp.
+# Models are stored in the CENTRALIZED docker/models/llama/ directory
+# (workspace root), not in app-local .docker_data/.
+#
+# Usage — run from the APP directory:
+#   sh scripts/ai/bootstrap-llama-cpp.sh
+
 set -eu
 
-MODEL_DIR=".docker_data/llm-models/llama-cpp"
+WORKSPACE_ROOT="${WORKSPACE_ROOT:-$(cd "$(dirname "$0")/../../../.." && pwd)}"
+MODEL_DIR="${LLAMA_CPP_MODEL_DIR:-$WORKSPACE_ROOT/docker/models/llama}"
 MAIN_MODEL_FILE="${LLAMA_CPP_MAIN_FILE:-qwen3.5-9b-instruct-q4_k_m.gguf}"
 DRAFT_MODEL_FILE="${LLAMA_CPP_DRAFT_FILE:-qwen3.5-0.8b-instruct-q8_0.gguf}"
 MAIN_MODEL_PATH="$MODEL_DIR/$MAIN_MODEL_FILE"
@@ -13,7 +21,7 @@ MAIN_MODEL_URL_FALLBACK="${LLAMA_CPP_MAIN_URL_FALLBACK:-https://huggingface.co/Q
 DRAFT_MODEL_URL_FALLBACK="${LLAMA_CPP_DRAFT_URL_FALLBACK:-https://huggingface.co/Qwen/Qwen3.5-0.8B-Instruct-GGUF/resolve/main/Qwen3.5-0.8B-Instruct-Q8_0.gguf}"
 HF_TOKEN="${HUGGINGFACE_TOKEN:-${HF_TOKEN:-}}"
 
-LEGACY_MODEL_FILE=".docker_data/models/llama-3.2-1b-instruct-q4_k_m.gguf"
+LEGACY_MODEL_FILE="$WORKSPACE_ROOT/apps/budget-app/.docker_data/models/llama-3.2-1b-instruct-q4_k_m.gguf"
 
 download_file() {
 	output="$1"

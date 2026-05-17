@@ -43,7 +43,7 @@ export const OLLAMA_CONFIG = {
    * Connection parameters for the Ollama API.
    */
   connection: {
-    baseUrl: process.env.OLLAMA_BASE_URL || 'http://localhost:11434/v1',
+    baseUrl: process.env.AI_OLLAMA_BASE_URL || process.env.OLLAMA_BASE_URL || 'http://localhost:11435/v1',
     timeout: 60000, // 60s default
     headers: {
       'Content-Type': 'application/json',

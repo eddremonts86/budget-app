@@ -34,7 +34,7 @@ export const LM_STUDIO_CONFIG = {
     host: 'localhost', // Or host.docker.internal if running in Docker container connecting to host
     port: 1234,
     api_version: 'v1',
-    base_url: 'http://localhost:1234/v1',
+    base_url: process.env.AI_LMSTUDIO_BASE_URL || 'http://localhost:1234/v1',
   },
 
   /**

@@ -29,7 +29,7 @@ export const getDepartmentsFn = createServerFn({ method: 'GET' }).handler(
     }
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
 
       const items = await db

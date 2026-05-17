@@ -2,7 +2,7 @@ import { createServerFn } from '@tanstack/react-start'
 import { and, desc, eq, count, ilike, or, inArray, sql, type SQL } from 'drizzle-orm'
 import { alias } from 'drizzle-orm/pg-core'
 import { z } from 'zod'
-import type { getDb } from '@/shared/lib/db'
+import type { getDb } from '@/shared/lib/db/index'
 import {
   departments,
   experienceLevels,
@@ -146,7 +146,7 @@ export const getUsersFn = createServerFn({ method: 'GET' })
     }
 
     try {
-      const { getDb } = await import('@/shared/lib/db')
+      const { getDb } = await import('@/shared/lib/db/index')
       const db = getDb()
       const { pageParam, limit: limitParam, search, projectId, teamId, categoryId } = data || {}
       const page = pageParam || 1
@@ -290,7 +290,7 @@ export const getUserByIdFn = createServerFn({ method: 'GET' })
   .handler(async ({ data: id }) => {
     if (!id) return null
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     const result = await db
@@ -369,7 +369,7 @@ export const getUsersByIdsFn = createServerFn({ method: 'POST' })
       return []
     }
 
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
     const managers = alias(users, 'managers')
 
@@ -450,7 +450,7 @@ export const getUsersByIdsFn = createServerFn({ method: 'POST' })
 export const getUserByEmailFn = createServerFn({ method: 'GET' })
   .inputValidator(z.string())
   .handler(async ({ data: email }) => {
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
     const result = await db.select().from(users).where(eq(users.email, email)).limit(1)
     if (!result.length) return null
@@ -465,7 +465,7 @@ export const getUserByEmailFn = createServerFn({ method: 'GET' })
 export const createUserFn = createServerFn({ method: 'POST' })
   .inputValidator(userSchema)
   .handler(async ({ data: input }) => {
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     const userId = input.id || crypto.randomUUID()
@@ -512,7 +512,7 @@ export const updateUserFn = createServerFn({ method: 'POST' })
   )
   .handler(async ({ data }) => {
     const { id, data: updateData } = data
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     const [updatedItem] = await db
@@ -549,7 +549,7 @@ export const updateUserFn = createServerFn({ method: 'POST' })
 export const deleteUserFn = createServerFn({ method: 'POST' })
   .inputValidator(z.string())
   .handler(async ({ data: id }) => {
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
     await db.delete(users).where(eq(users.id, id))
     return { success: true }
@@ -558,7 +558,7 @@ export const deleteUserFn = createServerFn({ method: 'POST' })
 export const upsertUserFn = createServerFn({ method: 'POST' })
   .inputValidator(userSchema.extend({ id: z.string() }))
   .handler(async ({ data: input }) => {
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
 
     try {
@@ -622,7 +622,7 @@ const syncedAuthUserSchema = z.object({
 export const syncAuthenticatedUserFn = createServerFn({ method: 'POST' })
   .inputValidator(syncedAuthUserSchema)
   .handler(async ({ data: input }) => {
-    const { getDb } = await import('@/shared/lib/db')
+    const { getDb } = await import('@/shared/lib/db/index')
     const db = getDb()
     const now = new Date()
     const defaultRoleId = 'role_user'
