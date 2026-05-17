@@ -40,19 +40,27 @@ const parsePort = (baseUrl: string, fallback: number) => {
 export const AI_PROVIDER_PRIORITY = [...AI_PROVIDER_IDS]
 export const AI_PROVIDER_SET = new Set<AiProvider>(AI_PROVIDER_IDS)
 
+// AI_API_BASE_URL is the unified dev variable — provider-specific vars take priority.
+export const AI_API_BASE_URL = getEnv('AI_API_BASE_URL') || getEnv('VITE_AI_BASE_URL') || ''
+
 export const LMSTUDIO_BASE_URL =
+  getEnv('AI_LMSTUDIO_BASE_URL') ||
   getEnv('AI_BASE_URL_INTERNAL') ||
   getEnv('VITE_AI_LMSTUDIO_BASE_URL') ||
-  getEnv('VITE_AI_BASE_URL') ||
+  AI_API_BASE_URL ||
   'http://localhost:1234/v1'
 
 export const LLAMA_CPP_BASE_URL =
   getEnv('AI_LLAMA_CPP_BASE_URL') ||
   getEnv('VITE_AI_LLAMA_CPP_BASE_URL') ||
+  AI_API_BASE_URL ||
   'http://localhost:8080/v1'
 
 export const OLLAMA_BASE_URL =
-  getEnv('AI_OLLAMA_BASE_URL') || getEnv('VITE_AI_OLLAMA_BASE_URL') || 'http://localhost:11434/v1'
+  getEnv('AI_OLLAMA_BASE_URL') ||
+  getEnv('VITE_AI_OLLAMA_BASE_URL') ||
+  AI_API_BASE_URL ||
+  'http://localhost:11435/v1'
 
 export const OPENAI_BASE_URL =
   getEnv('OPENAI_BASE_URL') || getEnv('VITE_AI_OPENAI_BASE_URL') || 'https://api.openai.com/v1'

@@ -37,7 +37,7 @@ export const LLAMA_CPP_CONFIG = {
    * Host port 8080 is bound by docker-compose at workspace level.
    */
   connection: {
-    baseUrl: process.env.AI_LLAMA_CPP_BASE_URL || 'http://localhost:8080/v1',
+    baseUrl: process.env.AI_LLAMA_CPP_BASE_URL || process.env.AI_API_BASE_URL || 'http://localhost:8080/v1',
     timeout: 60000,
   },
 
